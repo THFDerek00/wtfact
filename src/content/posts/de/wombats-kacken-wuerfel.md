@@ -3,7 +3,7 @@ title: "Wombats kacken Würfel. Kein Witz."
 teaser: "Ein Beuteltier aus Australien schafft, was keine Fabrik der Welt hinbekommt: würfelförmige Kacke. Und Forschende haben herausgefunden, wie."
 date: 2026-10-01
 category: nature
-emoji: "🟫"
+emoji: "🎲"
 translationKey: wombat-cubes
 hook: "Wombats produzieren als einzige bekannte Tiere würfelförmigen Kot, rund 80 bis 100 Würfel pro Nacht."
 products:
@@ -16,7 +16,7 @@ products:
 sources:
   - label: "Wikipedia: Wombats"
     url: "https://de.wikipedia.org/wiki/Wombats"
-  - label: "Yang et al. (2021), Soft Matter: Intestine-like mechanism of cubic feces"
+  - label: "Yang et al. (2021), Soft Matter: Intestines of non-uniform stiffness mold the corners of wombat feces"
     url: "https://pubs.rsc.org/en/content/articlelanding/2021/sm/d0sm01230k"
 ---
 
@@ -40,4 +40,4 @@ Ein Wombat schafft übrigens **80 bis 100 Würfel pro Nacht**. Die Natur ist man
 
 Würfel herzustellen ist in der Industrie aufwendig: Man braucht Formen, Pressen oder Schneidwerkzeuge. Der Wombat macht es mit einem weichen Schlauch. Die Forschenden halten es für möglich, dass dieses Prinzip eines Tages bei der Herstellung von weichen Materialien hilft.
 
-Also: Wenn dich das nächste Mal jemand fragt, was du heute gelernt hast, weißt du, was du sagst.
+Damit ist auch geklärt, was du heute Abend auf die Frage „Was hast du heute gelernt?“ antwortest.

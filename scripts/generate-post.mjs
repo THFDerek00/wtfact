@@ -5,13 +5,16 @@
 // 1. Recherche: Claude sucht per Websuche einen überraschenden, belegbaren Fakt
 //    und schreibt einen Entwurf mit echten Quellen.
 // 2. Formatierung: Claude gibt den Beitrag als validiertes JSON in beiden Sprachen zurück.
-// 3. Das Skript prüft die Ergebnisse und legt zwei Markdown-Dateien an.
+// 3. Das Skript prüft die Regeln aus docs/styleguide.md (scripts/post-rules.mjs).
+// 4. Faktencheck: Ein zweiter Claude-Durchgang öffnet jede Quelle und prüft jede Aussage.
+//    Nur wenn alles belegt ist, werden zwei Markdown-Dateien angelegt.
 
 import fs from 'node:fs';
 import path from 'node:path';
 import Anthropic from '@anthropic-ai/sdk';
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod';
 import { z } from 'zod';
+import { checkPost, checkPair } from './post-rules.mjs';
 
 const MODEL = 'claude-opus-5-5';
 const POSTS_DIR = 'src/content/posts';
@@ -51,21 +54,8 @@ const recentTitles = existing.slice(0, 200).map((p) => `- ${p.title}`).join('\n'
 
 // ---------- Schritt 1: Recherche und Entwurf ----------
 
-const STYLE = `
-You write for WTFact, a website for people aged 16 to 34 that publishes one surprising fact per day.
-Every post must make readers think "WTF?!" and then feel smarter.
-
-Hard rules:
-- The core fact must be TRUE and verifiable. Use web search to confirm it in at least two independent, reputable sources
-  (encyclopedias, universities, museums, science journals, quality newspapers). If you cannot confirm it, pick another fact.
-- Never invent numbers, quotes, studies or names. When exact numbers vary between sources, say "about" or give a range.
-- Headlines spark curiosity but never lie or overpromise.
-- No health, legal or financial advice. No politics, tragedies, violence, or content unsuitable for 16-year-olds.
-- Tone: casual, witty, direct ("you"), short paragraphs, no corporate language, no emoji in the body text.
-- 350 to 500 words, 2 or 3 "##" subheadings, exactly one short "> " blockquote with a bonus fact, a punchy last line.
-- Suggest exactly 2 Amazon products that genuinely fit the topic (a book, a toy, a gadget, a decoration).
-  Describe them generically so an Amazon search finds them. Never invent product numbers or prices.
-`.trim();
+// Der Styleguide ist die einzige Quelle für Stilregeln. Kommentare darin sind nur für Menschen.
+const STYLE = fs.readFileSync('docs/styleguide.md', 'utf8').replace(/<!--[\s\S]*?-->/g, '').trim();
 
 const research = await client.beta.messages.create({
   model: MODEL,
@@ -137,7 +127,6 @@ const formatted = await client.messages.parse({
   output_config: { effort: 'medium', format: zodOutputFormat(PostSchema) },
   system: `${STYLE}
 
-German version: write it as a native German speaker would for a young audience (use "du"), not as a literal translation.
 Adapt idioms and product search queries for amazon.de. Use German typographic quotes („…") and decimal commas.
 Keep facts, numbers and sources identical between the two languages.`,
   messages: [
@@ -157,21 +146,76 @@ if (!post) {
 // ---------- Schritt 3: Prüfen und speichern ----------
 
 const problems = [];
-const words = (s) => s.split(/\s+/).filter(Boolean).length;
-for (const lang of ['en', 'de']) {
-  const v = post[lang];
-  if (words(v.body) < 250) problems.push(`${lang}: Text zu kurz (${words(v.body)} Wörter)`);
-  if (v.products.length < 1) problems.push(`${lang}: keine Produkte`);
-}
 // Nur Quellen behalten, die wirklich in der Websuche vorkamen.
-const sources = post.sources.filter((s) => /^https?:\/\//.test(s.url) && (searchedUrls.size === 0 || searchedUrls.has(normUrl(s.url))));
-if (sources.length < 1) problems.push('keine überprüfbare Quelle');
+const sources = post.sources.filter((s) => /^https:\/\//.test(s.url) && (searchedUrls.size === 0 || searchedUrls.has(normUrl(s.url))));
+const versions = Object.fromEntries(['de', 'en'].map((lang) => [lang, { ...post[lang], sources, category }]));
+for (const lang of ['de', 'en']) for (const p of checkPost(versions[lang])) problems.push(`${lang}: ${p}`);
+problems.push(...checkPair(versions.de, versions.en));
 if (existing.some((p) => p.key === post.translationKey)) problems.push(`translationKey "${post.translationKey}" existiert schon`);
 
 if (problems.length) {
   console.error('Beitrag verworfen:\n- ' + problems.join('\n- '));
   process.exit(1);
 }
+
+// ---------- Schritt 4: Faktencheck ----------
+
+const CHECK = `You are WTFact's fact-checker. Be strict: a wrong fact, a headline that overpromises
+or an invented source title is worse than no post at all.
+
+Open EVERY source URL with web_fetch. Then check both language versions:
+1. Every factual claim and every number in title, teaser, hook and body is supported by at least one source.
+   Hedged claims ("reportedly", "soll") only need a source that reports them.
+2. The headline states what the body actually shows and does not overpromise.
+3. Each source label matches the real title of that page (publisher prefix allowed). Flag invented or paraphrased titles.
+4. Nothing is attributed to researchers or experts unless a source does so.
+5. German and English say the same thing; German uses correct terms (e.g. Kalmar vs. Krake vs. Tintenfisch).
+6. The post follows the style guide below.
+
+Style guide:
+${STYLE}`;
+
+const review = await client.beta.messages.create({
+  model: MODEL,
+  max_tokens: 16000,
+  betas: ['server-side-fallback-2026-07-01'],
+  fallbacks: 'default',
+  output_config: { effort: 'high' },
+  tools: [
+    { type: 'web_fetch_20260209', name: 'web_fetch', max_uses: 10 },
+    { type: 'web_search_20260209', name: 'web_search', max_uses: 4 },
+  ],
+  system: CHECK,
+  messages: [
+    {
+      role: 'user',
+      content: `Check this post.
+
+Sources:
+${sources.map((s) => `- ${s.label}: ${s.url}`).join('\n')}
+
+${['en', 'de'].map((lang) => `### ${lang}\nTitle: ${post[lang].title}\nTeaser: ${post[lang].teaser}\nHook: ${post[lang].hook}\n\n${post[lang].body}`).join('\n\n')}
+
+End your answer with one JSON code block and nothing after it:
+{"pass": true or false, "issues": ["each problem in one sentence"]}
+"pass" is true only if "issues" is empty.`,
+    },
+  ],
+});
+
+const verdictText = review.content.filter((b) => b.type === 'text').map((b) => b.text).join('\n');
+const Verdict = z.object({ pass: z.boolean(), issues: z.array(z.string()) });
+let verdict;
+try {
+  verdict = Verdict.parse(JSON.parse([...verdictText.matchAll(/```(?:json)?\s*([\s\S]*?)```/g)].at(-1)[1]));
+} catch {
+  verdict = { pass: false, issues: [`Faktencheck lieferte kein lesbares Ergebnis (${review.stop_reason})`] };
+}
+if (!verdict.pass || verdict.issues.length) {
+  console.error('Beitrag beim Faktencheck verworfen:\n- ' + (verdict.issues.join('\n- ') || 'ohne Begründung'));
+  process.exit(1);
+}
+console.log('Faktencheck bestanden.');
 
 const slugify = (s) =>
   s.toLowerCase().normalize('NFKD').replace(/ß/g, 'ss').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
