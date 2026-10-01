@@ -1,6 +1,6 @@
 ---
-title: "Dieser Honig ist 3.000 Jahre alt. Und du könntest ihn essen."
-teaser: "In ägyptischen Gräbern fanden Archäologen Honig, der immer noch genießbar war. Warum verdirbt ausgerechnet Honig nicht?"
+title: "Dieser Honig ist 3.000 Jahre alt. Und er soll noch essbar sein."
+teaser: "In ägyptischen Gräbern fanden Archäologen Honig, der noch genießbar gewesen sein soll. Warum verdirbt ausgerechnet Honig nicht?"
 date: 2026-09-30
 category: science
 emoji: "🍯"
@@ -9,20 +9,24 @@ hook: "Honig kann Jahrtausende überdauern, weil Bakterien darin buchstäblich v
 products:
   - name: "Honigspender aus Glas"
     query: "Honigspender Glas tropffrei"
-    why: "Kein klebriger Löffel mehr. Und du hast jeden Morgen einen Fakt auf dem Frühstückstisch."
+    why: "Kein klebriger Löffel mehr. Dein fast unsterblicher Honig verdient ein besseres Zuhause."
   - name: "Honig-Probierset"
     query: "Honig Probierset Geschenk"
     why: "Akazie, Wald, Manuka: Teste selbst, wie unterschiedlich das 'ewige Lebensmittel' schmeckt."
 sources:
   - label: "Wikipedia: Honig"
     url: "https://de.wikipedia.org/wiki/Honig"
+  - label: "Smithsonian Magazine: The Science Behind Honey’s Eternal Shelf Life"
+    url: "https://www.smithsonianmag.com/science-nature/the-science-behind-honeys-eternal-shelf-life-1218690/"
 ---
 
-Archäologen, die altägyptische Gräber untersuchten, stießen immer wieder auf Tongefäße mit Honig. Das Verrückte: **Der Honig war nach rund 3.000 Jahren noch essbar.** Fast jedes andere Lebensmittel wäre längst zu Staub zerfallen oder hätte sich in etwas verwandelt, das man nicht mal anfassen möchte.
+Archäologen, die altägyptische Gräber untersuchten, stießen immer wieder auf Tongefäße mit Honig. Das Absurde: **Der Honig soll nach rund 3.000 Jahren noch essbar gewesen sein.** Fast jedes andere Lebensmittel wäre längst zu Staub zerfallen oder hätte sich in etwas verwandelt, das man nicht mal anfassen möchte.
 
 ## Der Trick: Bakterien verdursten
 
 Honig besteht zu etwa 80 Prozent aus Zucker und enthält nur rund 17 Prozent Wasser. Das klingt harmlos, ist für Mikroorganismen aber eine Todeszone. Zucker zieht Wasser an. Landet ein Bakterium im Honig, wird ihm das Wasser regelrecht aus den Zellen gesaugt. **Es vertrocknet, bevor es sich vermehren kann.**
+
+Dass so wenig Wasser drin ist, haben die Bienen selbst erledigt. Frischer Nektar ist ziemlich flüssig. Im Stock fächeln die Bienen mit ihren Flügeln so lange Luft darüber, bis ein großer Teil des Wassers verdunstet ist. Erst dann verschließen sie die Wabe mit Wachs.
 
 ## Plan B: Säure und ein eingebautes Desinfektionsmittel
 
@@ -34,4 +38,4 @@ Damit nicht genug. Honig ist ziemlich sauer, sein pH-Wert liegt etwa zwischen 3,
 
 Ganz ewig hält Honig nur, wenn er gut verschlossen ist. Offen gelassen zieht er Wasser aus der Luft, und dann kann er doch gären. Kristallisiert er, ist das übrigens kein Zeichen von Verderb: Ein warmes Wasserbad, und er ist wieder flüssig.
 
-Dein Honig im Küchenschrank? Der wird dich vermutlich überleben.
+Der Honig in deinem Küchenschrank wird dich also vermutlich überleben.

@@ -6,7 +6,8 @@ import ShareBar from '../../components/ShareBar.astro';
 import PostCard from '../../components/PostCard.astro';
 import { LANGS } from '../../config';
 import { t, dateFmt } from '../../i18n/ui';
-import { postsFor, langOf, slugOf, postUrl, translationOf, readingMinutes, type Post } from '../../lib';
+import { postsFor, langOf, slugOf, postUrl, translationOf, readingMinutes, factNumber, type Post } from '../../lib';
+import { ogPath } from '../../og';
 
 export async function getStaticPaths() {
   const all = (await Promise.all(LANGS.map(postsFor))).flat();
@@ -18,29 +19,39 @@ const ui = t(lang);
 const d = post.data;
 const { Content } = await render(post);
 const alt = await translationOf(post);
-const others = (await postsFor(lang)).filter((p) => p.id !== post.id);
-const next = others.find((p) => p.data.category !== d.category) ?? others[0];
+const all = await postsFor(lang);
+const i = all.findIndex((p) => p.id === post.id);
+// Nächster Fakt = der davor veröffentlichte (beim ältesten wieder der neueste), so entsteht eine Kette.
+const next = all.length > 1 ? all[(i + 1) % all.length] : undefined;
+const related = all.filter((p) => p.id !== post.id && p.id !== next?.id && p.data.category === d.category).slice(0, 2);
+const no = String(factNumber(post, all)).padStart(3, '0');
 ---
-<Base lang={lang} title={d.title} description={d.teaser} altUrl={alt ? postUrl(alt) : undefined}>
-  <article class="narrow">
-    <header>
+<Base lang={lang} title={d.title} description={d.teaser} altUrl={alt ? postUrl(alt) : undefined} image={ogPath(post)}>
+  <div class="progress" aria-hidden="true"><span></span></div>
+  <section class:list={['banner', `cat-${d.category}`]}>
+    <div class="narrow banner-inner">
       <div class="meta">
-        <span class:list={['chip', `cat-${d.category}`]}>{ui.categories[d.category]}</span>
-        <span>{dateFmt(lang, d.date)} · {ui.readingTime(readingMinutes(post.body))}</span>
+        <span class="chip">{ui.categories[d.category]}</span>
+        <span class="no">{ui.factNo} #{no}</span>
       </div>
       <h1>{d.title}</h1>
-      <p class="hook card"><span>{d.emoji}</span>{d.hook}</p>
-    </header>
+      <p class="info">{dateFmt(lang, d.date)} · {ui.readingTime(readingMinutes(post.body))} · <a href="#sources">✓ {ui.sourcesCount(d.sources.length)}</a></p>
+      <span class="big-emoji" aria-hidden="true">{d.emoji}</span>
+    </div>
+  </section>
+
+  <article class="narrow">
+    <p class="hook card"><span class="hook-label">WTF?!</span>{d.hook}</p>
 
     <div class="content"><Content /></div>
 
     <ProductBox lang={lang} products={d.products} />
 
     {d.sources.length > 0 && (
-      <details class="sources">
-        <summary>{ui.sources}</summary>
-        <ul>{d.sources.map((s) => <li><a href={s.url} rel="noopener" target="_blank">{s.label}</a></li>)}</ul>
-      </details>
+      <section class="sources" id="sources">
+        <h2>{ui.sources}</h2>
+        <ol>{d.sources.map((s) => <li><a href={s.url} rel="noopener" target="_blank">{s.label}</a></li>)}</ol>
+      </section>
     )}
 
     <ShareBar lang={lang} title={d.title} />
@@ -48,23 +59,91 @@ const next = others.find((p) => p.data.category !== d.category) ?? others[0];
 
   {next && (
     <section class="narrow nextup">
-      <h2>{ui.next} 👇</h2>
-      <PostCard post={next} />
+      <a class="next card" href={postUrl(next)}>
+        <span class="next-label">{ui.next} <span aria-hidden="true">→</span></span>
+        <span class="next-title"><span aria-hidden="true">{next.data.emoji}</span> {next.data.title}</span>
+      </a>
+    </section>
+  )}
+
+  {related.length > 0 && (
+    <section class="narrow related">
+      <h2>{ui.categories[d.category]}</h2>
+      <div class="related-grid">{related.map((p) => <PostCard post={p} no={factNumber(p, all)} />)}</div>
     </section>
   )}
 </Base>
 
+<script>
+  const bar = document.querySelector<HTMLElement>('.progress span');
+  const update = () => {
+    const max = document.documentElement.scrollHeight - innerHeight;
+    if (bar) bar.style.transform = `scaleX(${max > 0 ? Math.min(1, scrollY / max) : 0})`;
+  };
+  addEventListener('scroll', update, { passive: true });
+  update();
+</script>
+
 <style>
-  header { margin-top: 12px; }
-  .meta { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; font-size: 14px; color: var(--muted); }
-  h1 { font-size: clamp(32px, 6vw, 52px); margin: 16px 0 22px; }
-  .hook { display: flex; gap: 14px; align-items: center; padding: 18px 20px; margin: 0 0 28px; background: var(--yellow); color: #141414; font: 600 19px/1.45 var(--display); }
-  .hook span { font-size: 36px; }
-  .content :global(h2) { font-size: 26px; margin-top: 36px; }
-  .content :global(blockquote) { margin: 24px 0; padding: 4px 20px; border-left: 6px solid var(--pink); font-style: italic; }
+  .progress { position: fixed; top: 0; left: 0; right: 0; height: 5px; z-index: 6; pointer-events: none; }
+  .progress span { display: block; height: 100%; background: var(--pink); transform-origin: left; transform: scaleX(0); }
+
+  .banner { position: relative; overflow: hidden; border-bottom: var(--bw) solid var(--line); padding: var(--space-10) 0 var(--space-12); }
+  .banner-inner { position: relative; }
+  .meta { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
+  .no { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); }
+  h1 { position: relative; z-index: 1; font-size: var(--fs-display-lg); margin: var(--space-4) 0 var(--space-4); max-width: 17ch; }
+  .info { position: relative; z-index: 1; margin: 0; font-size: var(--fs-sm); font-weight: 600; }
+  .big-emoji {
+    position: absolute; right: calc(-2 * var(--space-12)); bottom: calc(-1 * var(--space-12));
+    font-size: var(--fs-emoji-2xl); transform: rotate(12deg); filter: var(--emoji-shadow); opacity: 0.9;
+  }
+
+  .hook {
+    position: relative; margin: calc(-1 * var(--space-9)) 0 var(--space-8); padding: var(--space-6) var(--space-5) var(--space-5);
+    font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 600; line-height: 1.4;
+    box-shadow: var(--shadow-lg);
+  }
+  .hook-label {
+    position: absolute; top: calc(-1 * var(--space-4)); left: var(--space-5);
+    padding: 0 var(--space-2); border: var(--bw-sm) solid var(--line); border-radius: var(--radius-sm);
+    background: var(--yellow); color: var(--on-accent); font-size: var(--fs-sm); font-weight: 800; transform: rotate(-3deg);
+  }
+
+  .content :global(h2) { font-size: var(--fs-2xl); margin-top: var(--space-9); }
+  .content :global(blockquote) {
+    position: relative; margin: var(--space-9) 0; padding: var(--space-6) var(--space-5) var(--space-5);
+    border: var(--bw) solid var(--line); border-radius: var(--radius-md); box-shadow: var(--shadow-md);
+    background: var(--cyan); color: var(--on-accent); font-family: var(--font-display); font-weight: 600;
+  }
+  .content :global(blockquote p) { margin: 0; }
+  .content :global(blockquote)::before {
+    content: 'Bonus fact'; position: absolute; top: calc(-1 * var(--space-4)); left: var(--space-5);
+    padding: 0 var(--space-2); border: var(--bw-sm) solid var(--line); border-radius: var(--radius-sm);
+    background: var(--surface); color: var(--ink); font-size: var(--fs-sm); font-weight: 800;
+  }
+  .content :global(blockquote:lang(de))::before { content: 'Bonus-Fakt'; }
   .content :global(strong) { background: linear-gradient(transparent 60%, color-mix(in srgb, var(--pink) 35%, transparent) 0); }
-  .sources { font-size: 14px; color: var(--muted); }
-  .sources summary { cursor: pointer; font-weight: 600; }
-  .nextup { margin-top: 48px; }
-  .nextup h2 { font-size: 24px; }
+
+  .sources { margin: var(--space-9) 0; font-size: var(--fs-sm); color: var(--muted); scroll-margin-top: var(--space-12); }
+  .sources h2 { font-size: var(--fs-lg); color: var(--ink); margin: 0 0 var(--space-2); }
+  .sources ol { margin: 0; padding-left: var(--space-5); }
+
+  .nextup { margin-top: var(--space-10); }
+  .next {
+    display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-6);
+    background: var(--night); color: var(--on-night); text-decoration: none; --focus: var(--yellow);
+    transition: transform var(--dur) var(--ease-pop), box-shadow var(--dur) var(--ease);
+  }
+  .next:hover { transform: translate(-3px, -3px) rotate(-0.6deg); box-shadow: var(--shadow-xl); }
+  .next-label { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--yellow); }
+  .next-title { font-family: var(--font-display); font-size: var(--fs-display-sm); font-weight: 700; line-height: 1.1; }
+
+  .related { margin-top: var(--space-10); }
+  .related h2 { font-size: var(--fs-2xl); }
+  .related-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--space-6); }
+
+  @media (max-width: 560px) {
+    .big-emoji { font-size: var(--fs-emoji-sm); top: 0; bottom: auto; right: 0; }
+  }
 </style>

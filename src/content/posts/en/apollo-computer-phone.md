@@ -1,5 +1,5 @@
 ---
-title: "Your phone could run 100,000 moon landings at once"
+title: "One photo on your phone is bigger than the computer that flew to the Moon"
 teaser: "The computer that took humans to the Moon had less memory than a single photo on your phone. And it was woven by hand."
 date: 2026-09-28
 category: tech
@@ -16,6 +16,8 @@ products:
 sources:
   - label: "Wikipedia: Apollo Guidance Computer"
     url: "https://en.wikipedia.org/wiki/Apollo_Guidance_Computer"
+  - label: "Science News: Core memory weavers and Navajo women made the Apollo missions possible"
+    url: "https://www.sciencenews.org/article/core-memory-weavers-navajo-apollo-raytheon-computer-nasa"
 ---
 
 In 1969, humans landed on the Moon. The spacecraft was steered by the **Apollo Guidance Computer**, and by today's standards its specs are almost laughable.
@@ -38,6 +40,6 @@ The work was done mostly by women at a factory in Massachusetts, many of whom ha
 
 ## And it worked
 
-Moments before the landing, the computer threw several overload alarms. Because Hamilton's team had built it to drop low-priority tasks, the landing carried on. Neil Armstrong set the lander down safely.
+Moments before the landing, the computer threw several overload alarms with the codes 1201 and 1202. Mission Control in Houston had seconds to decide: abort or keep going? They said go. Because Hamilton's team had built it to drop low-priority tasks, the landing carried on. Neil Armstrong set the lander down safely.
 
-Next time your phone nags you about a 2 GB update: humanity flew to the Moon with a tiny fraction of that.
+Your phone wants 2 GB for an update? Humanity flew to the Moon with a tiny fraction of that.

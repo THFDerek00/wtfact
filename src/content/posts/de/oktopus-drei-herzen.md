@@ -16,9 +16,11 @@ products:
 sources:
   - label: "Wikipedia: Kraken"
     url: "https://de.wikipedia.org/wiki/Kraken"
+  - label: "Smithsonian Magazine: Ten Wild Facts About Octopuses: They Have Three Hearts, Big Brains and Blue Blood"
+    url: "https://www.smithsonianmag.com/science-nature/ten-wild-facts-about-octopuses-they-have-three-hearts-big-brains-and-blue-blood-7625828/"
 ---
 
-Wenn Außerirdische auf der Erde leben, dann vermutlich im Meer und mit acht Armen. Der Oktopus bricht so ziemlich jede Regel, die wir von Tieren kennen.
+Wenn Außerirdische auf der Erde leben, dann vermutlich im Meer und mit acht Armen. Der Oktopus bricht so ziemlich jede Regel, die wir von Tieren kennen. Er gehört zu den Kopffüßern, einer Gruppe von Weichtieren. Seine nächsten Verwandten sind also eher Schnecken und Muscheln als Fische.
 
 ## Drei Herzen statt einem
 
@@ -30,12 +32,10 @@ Unser Blut ist rot, weil es Eisen enthält. Oktopus-Blut transportiert Sauerstof
 
 ## Die Arme denken mit
 
-Ein Oktopus hat rund 500 Millionen Nervenzellen, ungefähr so viele wie ein Hund. Aber **etwa zwei Drittel davon sitzen in den Armen**, nicht im Kopf. Jeder Arm kann tasten, schmecken und teilweise selbstständig entscheiden, was er greift. Forschende vergleichen das mit acht Mitbewohnern, die sich grob absprechen.
+Ein Oktopus hat rund 500 Millionen Nervenzellen, ungefähr so viele wie ein Hund. Aber **etwa zwei Drittel davon sitzen in den Armen**, nicht im Kopf. Jeder Arm kann tasten, schmecken und teilweise selbstständig entscheiden, was er greift. Man kann sich das vorstellen wie acht Mitbewohner, die sich nur grob absprechen.
 
 > Ein Oktopus-Arm, der abgetrennt wurde, kann noch eine Zeit lang auf Berührungen reagieren und nach Futter greifen.
 
-## Und dann wäre da noch …
+Als wäre das nicht genug: Oktopusse können ihre Farbe und sogar die Struktur ihrer Haut in Sekundenbruchteilen ändern, obwohl sie vermutlich farbenblind sind. Wie sie das genau schaffen, ist bis heute nicht vollständig geklärt.
 
-Oktopusse können ihre Farbe und sogar die Struktur ihrer Haut in Sekundenbruchteilen ändern, obwohl sie vermutlich farbenblind sind. Wie sie das genau schaffen, ist bis heute nicht vollständig geklärt.
-
-Nächstes Mal, wenn du Calamari bestellst: Das ist zwar Tintenfisch, kein Oktopus. Aber der ist auch ziemlich verrückt.
+Calamari sind übrigens Kalmare, keine Oktopusse. Schräge Tiere sind sie trotzdem.

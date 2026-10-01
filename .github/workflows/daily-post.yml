@@ -1,0 +1,61 @@
+name: Täglicher Beitrag
+
+on:
+  schedule:
+    - cron: '0 4 * * *' # 06:00 Uhr deutscher Sommerzeit, 05:00 Uhr Winterzeit
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: daily-post
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: Beitrag schreiben
+        id: gen
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::error::Das Secret ANTHROPIC_API_KEY fehlt (Settings > Secrets and variables > Actions)."
+            exit 1
+          fi
+          # Ein zweiter Versuch, falls die Qualitätsprüfung den ersten Entwurf verwirft.
+          node scripts/generate-post.mjs || node scripts/generate-post.mjs
+
+      - name: Seite testweise bauen
+        run: npm run build
+
+      # Der Beitrag kommt als Pull Request. publish-posts.yml veröffentlicht ihn ein paar
+      # Stunden später, falls niemand den PR vorher schließt.
+      - name: Als Pull Request vorschlagen
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TITLE: ${{ steps.gen.outputs.title }}
+        run: |
+          if [ -z "$(git status --porcelain src/content)" ]; then
+            echo "Kein neuer Beitrag."
+            exit 0
+          fi
+          branch="beitrag/$(date -u +%F)"
+          git config user.name "WTFact Bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git add src/content
+          git commit -m "Neuer Beitrag: $TITLE"
+          git push -u origin "$branch"
+          gh pr create --base main --head "$branch" --title "Neuer Beitrag: $TITLE" --body "Wird automatisch veröffentlicht, wenn **Beiträge veröffentlichen** das nächste Mal läuft (täglich 10 Uhr). Nicht veröffentlichen: diesen PR schließen."

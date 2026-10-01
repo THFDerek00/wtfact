@@ -3,7 +3,7 @@ title: "Wombats poop cubes. Seriously."
 teaser: "An Australian marsupial pulls off something no factory can: cube-shaped poop. And scientists finally figured out how."
 date: 2026-10-01
 category: nature
-emoji: "🟫"
+emoji: "🎲"
 translationKey: wombat-cubes
 hook: "Wombats are the only known animals that produce cube-shaped poop, around 80 to 100 cubes a night."
 products:
@@ -16,7 +16,7 @@ products:
 sources:
   - label: "Wikipedia: Wombat"
     url: "https://en.wikipedia.org/wiki/Wombat"
-  - label: "Yang et al. (2021), Soft Matter: Intestine-like mechanism of cubic feces"
+  - label: "Yang et al. (2021), Soft Matter: Intestines of non-uniform stiffness mold the corners of wombat feces"
     url: "https://pubs.rsc.org/en/content/articlelanding/2021/sm/d0sm01230k"
 ---
 
@@ -40,4 +40,4 @@ A single wombat drops **80 to 100 cubes a night**. Sometimes nature is just more
 
 Making cubes in industry takes molds, presses or cutting tools. The wombat does it with a soft tube. The researchers think this principle might one day help manufacture soft materials.
 
-So next time someone asks what you learned today, you know what to say.
+So if anyone asks what you learned today, you have your answer.
