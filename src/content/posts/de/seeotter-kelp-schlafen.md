@@ -18,6 +18,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Sea_otter"
   - label: "National Geographic: Sea Otter"
     url: "https://www.nationalgeographic.com/animals/mammals/facts/sea-otter"
+  - label: "Aquarium of the Pacific: Southern Sea Otter"
+    url: "https://www.aquariumofpacific.org/onlinelearningcenter/species/southern_sea_otter"
 ---
 
 Stell dir vor, du schläfst auf einer Luftmatratze im Meer ein und wachst ein paar Kilometer weiter wieder auf. Für Seeotter wäre das ein echtes Problem, denn sie verbringen fast ihr ganzes Leben im Wasser. **Ihre Lösung: Sie binden sich fest, und zwar mit Seetang.**

@@ -18,6 +18,8 @@ sources:
     url: "https://de.wikipedia.org/wiki/Fingerabdruck"
   - label: "BBC Science Focus: Why do identical twins have different fingerprints?"
     url: "https://www.sciencefocus.com/the-human-body/why-do-identical-twins-have-different-fingerprints-2"
+  - label: "ABC Science: Fingerprints Of Twins"
+    url: "https://www.abc.net.au/science/articles/2004/11/04/1234875.htm"
 ---
 
 Eineiige Zwillinge sind so etwas wie eine natürliche Kopie. Sie entstehen aus derselben befruchteten Eizelle und haben deshalb praktisch dieselbe DNA. Manche sehen sich so ähnlich, dass selbst Freunde sie verwechseln. Aber ein Fingerabdruck-Scanner würde das nie tun.

@@ -18,6 +18,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Sea_otter"
   - label: "National Geographic: Sea Otter"
     url: "https://www.nationalgeographic.com/animals/mammals/facts/sea-otter"
+  - label: "Aquarium of the Pacific: Southern Sea Otter"
+    url: "https://www.aquariumofpacific.org/onlinelearningcenter/species/southern_sea_otter"
 ---
 
 Imagine falling asleep on an air mattress in the ocean and waking up a few miles down the coast. For sea otters, that would be a real problem, since they spend almost their entire lives in the water. **Their solution: they tie themselves down, using seaweed.**

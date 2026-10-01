@@ -18,6 +18,8 @@ sources:
     url: "https://de.wikipedia.org/wiki/Apollo_Guidance_Computer"
   - label: "Science News: Core memory weavers and Navajo women made the Apollo missions possible"
     url: "https://www.sciencenews.org/article/core-memory-weavers-navajo-apollo-raytheon-computer-nasa"
+  - label: "American Scientist: Moonshot Computing"
+    url: "https://www.americanscientist.org/article/moonshot-computing"
 ---
 
 1969 landeten Menschen auf dem Mond. Gesteuert wurde das Raumschiff vom **Apollo Guidance Computer**, und dessen technische Daten sind aus heutiger Sicht fast lächerlich.

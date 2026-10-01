@@ -18,6 +18,8 @@ sources:
     url: "https://de.wikipedia.org/wiki/Skelett_des_Menschen"
   - label: "Healthline: How Many Bones Are Babies Born With and Why Do They Have More Than Adults?"
     url: "https://www.healthline.com/health/how-many-bones-does-a-baby-have"
+  - label: "Cleveland Clinic: Here's How Many Bones Babies Have"
+    url: "https://health.clevelandclinic.org/how-many-bones-does-a-baby-have"
 ---
 
 Hier eine Rechenaufgabe, die dein Biologiebuch vermutlich ausgelassen hat: Ein Neugeborenes hat **rund 300 Knochen**. Ein erwachsener Mensch hat **206**. Wo bleibt der Rest?

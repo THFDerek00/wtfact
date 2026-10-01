@@ -18,6 +18,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Wombat"
   - label: "Yang et al. (2021), Soft Matter: Intestines of non-uniform stiffness mold the corners of wombat feces"
     url: "https://pubs.rsc.org/en/content/articlelanding/2021/sm/d0sm01230k"
+  - label: "The Conversation: Why do wombats do cube-shaped poo?"
+    url: "https://theconversation.com/why-do-wombats-do-cube-shaped-poo-55975"
 ---
 
 Picture yourself walking through the Australian bush at night and tripping over small, perfectly edged cubes. Not rocks. Not toys. **Wombat poop.**

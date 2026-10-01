@@ -18,6 +18,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Turritopsis_dohrnii"
   - label: "American Museum of Natural History: The \"Immortal\" Jellyfish That Resets When Damaged"
     url: "https://www.amnh.org/explore/news-blogs/immortal-jellyfish"
+  - label: "Texas A&M University: This Jellyfish Can Defy Death And Turn Back Time"
+    url: "https://stories.tamu.edu/news/2021/03/12/this-jellyfish-can-defy-death-and-turn-back-time/"
 ---
 
 Imagine getting old or sick, and instead of dying, you just turn back into a kid. For us, that's science fiction. For one tiny jellyfish, it's just Tuesday. Its name is Turritopsis dohrnii, and its nickname is **the "immortal jellyfish."**

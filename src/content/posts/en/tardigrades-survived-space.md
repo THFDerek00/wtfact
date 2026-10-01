@@ -18,6 +18,8 @@ sources:
     url: "https://www.esa.int/Science_Exploration/Human_and_Robotic_Exploration/Research/Tiny_animals_survive_exposure_to_space"
   - label: "Wikipedia: Tardigrade"
     url: "https://en.wikipedia.org/wiki/Tardigrade"
+  - label: "National Geographic: Tardigrades become first animals to survive vacuum of space"
+    url: "https://www.nationalgeographic.com/science/article/tardigrades-become-first-animals-to-survive-vacuum-of-space"
 ---
 
 No air, brutal cold, relentless radiation: space is about as hostile to life as it gets. A human without a spacesuit wouldn't last long out there. **Tardigrades, on the other hand, made it.**

@@ -18,6 +18,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Turritopsis_dohrnii"
   - label: "American Museum of Natural History: The \"Immortal\" Jellyfish That Resets When Damaged"
     url: "https://www.amnh.org/explore/news-blogs/immortal-jellyfish"
+  - label: "Texas A&M University: This Jellyfish Can Defy Death And Turn Back Time"
+    url: "https://stories.tamu.edu/news/2021/03/12/this-jellyfish-can-defy-death-and-turn-back-time/"
 ---
 
 Stell dir vor, du wirst alt oder krank, und statt zu sterben, wirst du einfach wieder Kind. Für uns ist das Science-Fiction, für eine winzige Qualle im Meer ganz normal. Sie heißt Turritopsis dohrnii und trägt den Spitznamen **„unsterbliche Qualle“**.

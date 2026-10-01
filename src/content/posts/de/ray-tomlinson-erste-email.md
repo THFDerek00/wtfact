@@ -18,6 +18,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Ray_Tomlinson"
   - label: "NPR: In Memoriam: Ray Tomlinson, Who Put The @ Sign In Your Email"
     url: "https://www.npr.org/sections/alltechconsidered/2016/03/07/469492182/in-memoriam-ray-tomlinson-who-put-the-sign-in-your-email"
+  - label: "Al Jazeera: Ray Tomlinson, creator of modern email, dies"
+    url: "https://www.aljazeera.com/news/2016/3/8/ray-tomlinson-creator-of-modern-email-dies"
 ---
 
 Du tippst es wahrscheinlich jeden Tag, ohne darüber nachzudenken: das @ in jeder E-Mail-Adresse. Dass es dort steht, verdanken wir einem Ingenieur namens Ray Tomlinson. **1971 schickte er die erste E-Mail von einem Computer zu einem anderen.**

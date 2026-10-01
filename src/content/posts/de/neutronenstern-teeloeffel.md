@@ -18,6 +18,8 @@ sources:
     url: "https://de.wikipedia.org/wiki/Neutronenstern"
   - label: "NASA: New NASA Mission to Study Mysterious Neutron Stars, Aid in Deep Space Navigation"
     url: "https://www.nasa.gov/centers-and-facilities/goddard/new-nasa-mission-to-study-mysterious-neutron-stars-aid-in-deep-space-navigation/"
+  - label: "Chandra X-ray Observatory: Cosmic X-rays Reveal Evidence For New Form Of Matter"
+    url: "https://chandra.si.edu/press/02_releases/press_041002.html"
 ---
 
 Nimm einen Teelöffel, füll ihn mit Material aus einem Neutronenstern und stell ihn auf eine Waage. Die Waage würde das nicht überleben. Laut NASA würde **ein einziger Teelöffel davon auf der Erde etwa 1 Milliarde Tonnen wiegen**.

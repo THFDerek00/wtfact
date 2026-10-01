@@ -18,6 +18,8 @@ sources:
     url: "https://de.wikipedia.org/wiki/Flamingos"
   - label: "Smithsonian's National Zoo: Why Are Flamingos Pink? And Other Flamingo Facts"
     url: "https://nationalzoo.si.edu/animals/news/why-are-flamingos-pink-and-other-flamingo-facts"
+  - label: "National Geographic Kids: Flamingo"
+    url: "https://kids.nationalgeographic.com/animals/birds/facts/flamingo"
 ---
 
 Kaum ein Tier ist so sehr mit einer Farbe verbunden wie der Flamingo. Pink ist quasi sein Markenzeichen. Umso überraschender: **Flamingos kommen gar nicht pink zur Welt.** Die Farbe müssen sie sich erst anfuttern.

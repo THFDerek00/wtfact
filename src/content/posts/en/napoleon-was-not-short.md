@@ -5,7 +5,7 @@ date: 2026-09-02
 category: history
 emoji: "🎩"
 translationKey: napoleon-height
-hook: "Napoleon stood about 5 feet 6 or 7, totally normal for his time. The tiny-tyrant myth comes from a measurement mix-up and propaganda."
+hook: "Napoleon stood about 5 feet 6, totally normal for his time. The tiny-tyrant myth comes from a measurement mix-up and propaganda."
 products:
   - name: "Napoleon: A Life by Andrew Roberts"
     query: "Napoleon A Life Andrew Roberts"
@@ -18,6 +18,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Napoleon_complex"
   - label: "Britannica: Napoleon as Pop Culture Icon"
     url: "https://www.britannica.com/topic/Napoleon-as-Pop-Culture-Icon"
+  - label: "History.com: Was Napoleon Short? Origins of the 'Napoleon Complex'"
+    url: "https://www.history.com/articles/napoleon-complex-short"
 ---
 
 Small man, big ego: hardly any historical figure is as tied to his height as Napoleon Bonaparte. There's even a "Napoleon complex" named after him. The problem: **Napoleon wasn't actually short.**
@@ -26,7 +28,7 @@ Small man, big ego: hardly any historical figure is as tied to his height as Nap
 
 On Napoleon's death certificate, his doctor recorded his height as "5 pieds, 2 pouces, 4 lignes," or 5 feet, 2 inches and 4 lines. Read that in English units and you picture someone barely over 5 foot 2. But: **the old French inch was noticeably longer than the English one.**
 
-Convert it properly and, according to Britannica, you get roughly 5 feet 6 or 7 inches, about 1.68 to 1.70 meters. That made Napoleon pretty average for a man of his time. His great rival, the Duke of Wellington, was about 5 feet 8 inches (1.73 meters), so only an inch or two taller. Nobody made fun of him.
+Convert it properly and, according to Britannica and History.com, you get roughly 5 feet 6 inches, about 1.67 to 1.70 meters. That made Napoleon pretty average for a man of his time. His great rival, the Duke of Wellington, was about 5 feet 8 inches (1.73 meters), so only an inch or two taller. Nobody made fun of him.
 
 ## Propaganda with a pencil
 

@@ -20,6 +20,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Neil_Papworth"
   - label: "NPR: The First Text Message Celebrates 25 Years"
     url: "https://www.npr.org/2017/12/04/568393428/the-first-text-messages-celebrates-25-years"
+  - label: "Fox News: On this day in history, December 3, 1992, the first text message is sent"
+    url: "https://www.foxnews.com/lifestyle/day-history-dec-3-1992-first-text-message-sent"
 ---
 
 Kein „hdl“, kein „bin gleich da“, kein Emoji. Die allererste SMS der Geschichte bestand aus zwei Wörtern: **„Merry Christmas“**. Und sie wurde nicht einmal von einem Handy getippt.

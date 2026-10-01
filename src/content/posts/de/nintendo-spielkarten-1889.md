@@ -18,9 +18,11 @@ sources:
     url: "https://en.wikipedia.org/wiki/Nintendo"
   - label: "Britannica Money: Nintendo"
     url: "https://www.britannica.com/topic/Nintendo-Company-Ltd"
+  - label: "The Boston Globe: Hiroshi Yamauchi, 85; helped Nintendo gain gaming dominance"
+    url: "https://www.bostonglobe.com/metro/obituaries/2013/09/20/hiroshi-yamauchi-who-helped-nintendo-gain-video-game-dominance-dies/qA9RrGg8AlO8MZuDKSwcjL/story.html"
 ---
 
-Bei Nintendo denkst du wahrscheinlich an Mario, Pokémon und die Switch. Aber die Firma ist viel älter als jede Spielkonsole. **Nintendo wurde am 23. September 1889 in Kyoto gegründet**, und zwar als Hersteller von Spielkarten.
+Bei Nintendo denkst du wahrscheinlich an Mario, Pokémon und die Switch. Aber die Firma ist viel älter als jede Spielkonsole. **Nintendo wurde 1889 in Kyoto gegründet**, und zwar als Hersteller von Spielkarten.
 
 ## Blumenkarten aus Kyoto
 
