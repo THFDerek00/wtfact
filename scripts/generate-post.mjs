@@ -32,7 +32,7 @@ function readPosts(lang) {
     .map((f) => {
       const src = fs.readFileSync(path.join(dir, f), 'utf8');
       const get = (k) => src.match(new RegExp(`^${k}:\\s*"?(.*?)"?$`, 'm'))?.[1] ?? '';
-      return { file: f, title: get('title'), category: get('category'), date: get('date'), key: get('translationKey') };
+      return { file: f, title: get('title'), category: get('category'), date: get('date'), key: get('translationKey'), hook: get('hook') };
     })
     .sort((a, b) => b.date.localeCompare(a.date));
 }
@@ -50,7 +50,9 @@ const lastUsed = Object.fromEntries(CATEGORIES.map((c) => [c, '0000']));
 for (const p of existing) if (p.date > (lastUsed[p.category] ?? '')) lastUsed[p.category] = p.date;
 const category = CATEGORIES.sort((a, b) => lastUsed[a].localeCompare(lastUsed[b]))[0];
 
-const recentTitles = existing.slice(0, 200).map((p) => `- ${p.title}`).join('\n') || '(noch keine)';
+// Alle Beiträge gegen Dopplungen mitgeben, die neuesten 200 zusätzlich mit ihrem Kernsatz.
+const recentTitles =
+  existing.map((p, i) => `- ${p.title} (${p.key})${i < 200 && p.hook ? `: ${p.hook}` : ''}`).join('\n') || '(noch keine)';
 
 // ---------- Schritt 1: Recherche und Entwurf ----------
 
@@ -164,13 +166,16 @@ const CHECK = `You are WTFact's fact-checker. Be strict: a wrong fact, a headlin
 or an invented source title is worse than no post at all.
 
 Open EVERY source URL with web_fetch. Then check both language versions:
-1. Every factual claim and every number in title, teaser, hook and body is supported by at least one source.
+1. The hook (the core fact) is confirmed by at least one source, literally or in substance. If not, the post fails.
+   Every other factual claim and every number in title, teaser and body is supported by at least one source.
    Hedged claims ("reportedly", "soll") only need a source that reports them.
 2. The headline states what the body actually shows and does not overpromise.
 3. Each source label matches the real title of that page (publisher prefix allowed). Flag invented or paraphrased titles.
 4. Nothing is attributed to researchers or experts unless a source does so.
 5. German and English say the same thing; German uses correct terms (e.g. Kalmar vs. Krake vs. Tintenfisch).
 6. The post follows the style guide below.
+7. The fact is not a repeat or close variant of an existing post:
+${recentTitles}
 
 Style guide:
 ${STYLE}`;
