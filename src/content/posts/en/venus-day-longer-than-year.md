@@ -18,6 +18,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Venus"
   - label: "NASA Science: Venus: Facts"
     url: "https://science.nasa.gov/venus/venus-facts/"
+  - label: "Royal Museums Greenwich: Interesting facts about Venus"
+    url: "https://www.rmg.co.uk/stories/space-astronomy/interesting-facts-about-venus"
 ---
 
 Imagine it's your birthday, and the Sun hasn't even finished one trip across the sky since your last one. On Venus, that would be totally normal. **There, one spin on its axis takes longer than a full orbit around the Sun.**

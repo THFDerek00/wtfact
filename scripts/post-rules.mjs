@@ -1,7 +1,7 @@
 // Prüfregeln für Beiträge. Gelten für neue Beiträge aus generate-post.mjs und für alle
 // vorhandenen Beiträge bei jedem Build (check-posts.mjs). Siehe docs/styleguide.md.
 
-export const LIMITS = { minWords: 250, maxWords: 450, minHeadings: 2, maxHeadings: 3, products: 2, minSources: 2 };
+export const LIMITS = { minWords: 250, maxWords: 450, minHeadings: 2, maxHeadings: 3, products: 2, minSources: 2, sourcesBesideWikipedia: 2 };
 
 const FILLER = /\b(verrückt\w*|crazy|wild)\b/gi;
 const NEXT_TIME = /\b(next time|nächste[ns]? mal)\b/i;
@@ -9,13 +9,17 @@ const EMOJI = /\p{Extended_Pictographic}/u;
 
 export const countWords = (s) => s.split(/\s+/).filter(Boolean).length;
 const numbers = (s) => (s.match(/\d[\d.,]*\d|\d/g) ?? []).map((n) => n.replace(/[.,]/g, ''));
+// Website einer URL, z. B. science.nasa.gov -> nasa.gov, cl.cam.ac.uk -> cam.ac.uk.
 export const host = (u) => {
   try {
-    return new URL(u).hostname.replace(/^www\./, '').split('.').slice(-2).join('.');
+    const parts = new URL(u).hostname.replace(/^www\./, '').split('.');
+    const twoLevel = parts.at(-1).length === 2 && ['co', 'ac', 'org', 'gov', 'com', 'net', 'edu'].includes(parts.at(-2));
+    return parts.slice(twoLevel ? -3 : -2).join('.');
   } catch {
     return null;
   }
 };
+const WIKIPEDIA = 'wikipedia.org';
 
 /** @param {{title:string, teaser:string, hook:string, body:string, products:{name:string,query:string,why:string}[], sources:{label:string,url:string}[]}} p */
 export function checkPost(p) {
@@ -52,6 +56,12 @@ export function checkPost(p) {
   const hosts = new Set(https.map((s) => host(s.url)).filter(Boolean));
   if (https.length < LIMITS.minSources || hosts.size < LIMITS.minSources)
     problems.push(`${hosts.size} unabhängige Quellen, nötig sind mindestens ${LIMITS.minSources}`);
+  // Wikipedia zählt nur zusätzlich: Wer sie zitiert, braucht zwei weitere unabhängige Websites.
+  if (hosts.has(WIKIPEDIA)) {
+    const others = [...hosts].filter((h) => h !== WIKIPEDIA).length;
+    if (others < LIMITS.sourcesBesideWikipedia)
+      problems.push(`Wikipedia zitiert, aber nur ${others} weitere unabhängige Quelle(n), nötig sind ${LIMITS.sourcesBesideWikipedia}`);
+  }
 
   for (const field of ['title', 'teaser', 'hook']) if (!p[field]?.trim()) problems.push(`${field} fehlt`);
 

@@ -18,6 +18,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Mantis_shrimp"
   - label: "Phys.org: Study finds mantis shrimp process vision differently than other organisms"
     url: "https://phys.org/news/2014-01-mantis-shrimp-vision-differently-video.html"
+  - label: "UC Berkeley News: Mantis shrimp may have swiftest kick in the animal kingdom"
+    url: "https://newsarchive.berkeley.edu/news/media/releases/2004/04/21_shrimp.shtml"
 ---
 
 It looks like a rainbow lobster from a video game, and it probably has the most dangerous fist in the ocean. Mantis shrimp are small predators from warm seas, and pretty much everything about them is extreme. Even their greatest talent comes with a surprising catch.

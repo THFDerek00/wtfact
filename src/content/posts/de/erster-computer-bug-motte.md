@@ -20,6 +20,8 @@ sources:
     url: "https://de.wikipedia.org/wiki/Programmfehler"
   - label: "Wikipedia: Grace Hopper"
     url: "https://de.wikipedia.org/wiki/Grace_Hopper"
+  - label: "JSTOR Daily: The Bug in the Computer Bug Story"
+    url: "https://daily.jstor.org/the-bug-in-the-computer-bug-story/"
 ---
 
 Wenn deine App abstürzt, heißt es: „Da ist ein Bug drin.“ Das klingt nach Fachjargon, aber einmal war der Bug ganz wörtlich gemeint. **1947 steckte in einem Computer der Harvard University eine echte Motte.**

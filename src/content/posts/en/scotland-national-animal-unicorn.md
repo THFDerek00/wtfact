@@ -18,6 +18,8 @@ sources:
     url: "https://www.rct.uk/resources/unicorns"
   - label: "Wikipedia: National symbols of Scotland"
     url: "https://en.wikipedia.org/wiki/National_symbols_of_Scotland"
+  - label: "National Trust for Scotland: The unicorn – Scotland's national animal"
+    url: "https://www.nts.org.uk/stories/the-unicorn-scotlands-national-animal"
 ---
 
 The US has the bald eagle, Australia has the kangaroo. And Scotland? **Scotland's national animal is the unicorn.** Yes, the mythical creature with a horn on its forehead. Not a joke, and not something souvenir shops made up.

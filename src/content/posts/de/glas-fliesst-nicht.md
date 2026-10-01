@@ -18,6 +18,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Glass"
   - label: "Scientific American: Fact or Fiction?: Glass Is a (Supercooled) Liquid"
     url: "https://www.scientificamerican.com/article/fact-fiction-glass-liquid/"
+  - label: "DoITPoMS, University of Cambridge: Do Cathedral Glasses Flow?"
+    url: "https://www.doitpoms.ac.uk/tlplib/glass-transition/myth.php"
 ---
 
 Vielleicht hast du es auch schon mal gehört, vielleicht sogar in der Schule: Glas sei eigentlich eine extrem zähe Flüssigkeit. Der Beweis? Uralte Kirchenfenster sind unten dicker als oben, weil das Glas über Jahrhunderte nach unten gesackt ist. Klingt logisch. **Ist aber falsch.**

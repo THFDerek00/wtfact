@@ -20,6 +20,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Carl_Emil_Doepler"
   - label: "HISTORY: Did Vikings really wear horned helmets?"
     url: "https://www.history.com/news/did-vikings-really-wear-horned-helmets"
+  - label: "World-Tree Project (University College Cork): The horned helmet"
+    url: "https://www.worldtreeproject.org/exhibits/show/miscon/hornvikes"
 ---
 
 Fasching, Fußballstadion, Comic: Ein Wikinger ohne Hörner am Helm ist für die meisten kaum vorstellbar. Das Problem: **Es gibt keinen einzigen Beleg, dass echte Wikinger so etwas getragen haben.** Das Bild ist eine Erfindung der Neuzeit.

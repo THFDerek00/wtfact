@@ -18,6 +18,8 @@ sources:
     url: "https://de.wikipedia.org/wiki/Trojan_Room_Coffee_Pot"
   - label: "University of Cambridge Computer Laboratory: The Trojan Room Coffee Pot: A (non-technical) biography"
     url: "https://www.cl.cam.ac.uk/coffee/qsf/coffee.html"
+  - label: "HistoryofInformation.com: The First Webcam Points at the Trojan Room Coffee Pot"
+    url: "https://www.historyofinformation.com/detail.php?id=1507"
 ---
 
 Es gibt Erfindungen, die aus großen Visionen entstehen. Und es gibt Erfindungen, die aus Faulheit entstehen. **Die erste Webcam der Welt gehört zur zweiten Sorte.** Sie hatte genau eine Aufgabe: zu zeigen, ob noch Kaffee da ist.

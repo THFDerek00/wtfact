@@ -18,6 +18,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Honey"
   - label: "Smithsonian Magazine: The Science Behind Honey’s Eternal Shelf Life"
     url: "https://www.smithsonianmag.com/science-nature/the-science-behind-honeys-eternal-shelf-life-1218690/"
+  - label: "Healthline: Does Honey Ever Go Bad? What You Should Know"
+    url: "https://www.healthline.com/nutrition/does-honey-go-bad"
 ---
 
 Archaeologists excavating ancient Egyptian tombs kept finding clay pots filled with honey. The absurd part: **the honey was reportedly still edible after around 3,000 years.** Almost any other food would have turned to dust long ago, or into something you wouldn't want to touch.
@@ -30,7 +32,7 @@ That low water content is the bees' own work. Fresh nectar is pretty runny. Back
 
 ## Plan B: acid and a built-in disinfectant
 
-That's not all. Honey is pretty acidic, with a pH of roughly 3.5 to 4.5, similar to orange juice. And bees add an enzyme called glucose oxidase. When a little moisture gets in, it produces **hydrogen peroxide**, the same stuff found in some disinfectants.
+That's not all. Honey is pretty acidic, with a pH typically around 3.5 to 4.5, similar to orange juice. And bees add an enzyme called glucose oxidase. When a little moisture gets in, it produces **hydrogen peroxide**, the same stuff found in some disinfectants.
 
 > Sugar, acid and hydrogen peroxide: bees basically invented a triple-locked preservation system.
 

@@ -18,6 +18,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Greenland_shark"
   - label: "Science News: Study ranks Greenland shark as longest-lived vertebrate"
     url: "https://www.sciencenews.org/article/study-ranks-greenland-shark-longest-lived-vertebrate"
+  - label: "University of Copenhagen Research Portal: Eye lens radiocarbon reveals centuries of longevity in the Greenland shark (Somniosus microcephalus)"
+    url: "https://researchprofiles.ku.dk/en/publications/eye-lens-radiocarbon-reveals-centuries-of-longevity-in-the-greenl/"
 ---
 
 Tortoises, whales, parrots: when you think of the senior citizens of the animal kingdom, a shark probably isn't the first thing that comes to mind. But **the Greenland shark holds the record as the longest-lived known vertebrate.** These animals can apparently live for around 400 years.
@@ -26,7 +28,7 @@ Tortoises, whales, parrots: when you think of the senior citizens of the animal 
 
 For many sharks, you can count growth rings in their calcified vertebrae to figure out their age. But the Greenland shark is a "soft" shark without those vertebrae. A team led by marine biologist Julius Nielsen found another way and published it in the journal Science in 2016.
 
-The researchers studied the eye lenses of 28 sharks and dated them using radiocarbon. Nobody had ever tried that on fish before. Traces of nuclear bomb tests from the 1950s even helped: they showed up in only 3 of the 28 sharks and served as a time marker.
+The researchers studied the eye lenses of 28 sharks and dated them using radiocarbon. Nobody had ever tried that on fish before. Traces of nuclear bomb tests from the 1950s and 1960s even helped: they showed up in only 3 of the 28 sharks and served as a time marker.
 
 The result: one large female was **about 392 years old, give or take 120 years.** That puts the range between 272 and 512 years. Even at the low end, the shark beats the previous record holder, a bowhead whale estimated at 211 years.
 

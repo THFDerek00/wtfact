@@ -18,6 +18,8 @@ sources:
     url: "https://de.wikipedia.org/wiki/Fangschreckenkrebse"
   - label: "Phys.org: Study finds mantis shrimp process vision differently than other organisms"
     url: "https://phys.org/news/2014-01-mantis-shrimp-vision-differently-video.html"
+  - label: "UC Berkeley News: Mantis shrimp may have swiftest kick in the animal kingdom"
+    url: "https://newsarchive.berkeley.edu/news/media/releases/2004/04/21_shrimp.shtml"
 ---
 
 Er sieht aus wie ein bunter Hummer aus einem Videospiel und hat vermutlich die gefährlichste Faust im Meer. Fangschreckenkrebse sind kleine Räuber aus warmen Meeren, und an ihnen ist so ziemlich alles extrem. Selbst ihr größtes Talent hat einen überraschenden Haken.

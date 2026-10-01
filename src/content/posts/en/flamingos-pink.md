@@ -18,6 +18,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Flamingo"
   - label: "Smithsonian's National Zoo: Why Are Flamingos Pink? And Other Flamingo Facts"
     url: "https://nationalzoo.si.edu/animals/news/why-are-flamingos-pink-and-other-flamingo-facts"
+  - label: "National Geographic Kids: Flamingo"
+    url: "https://kids.nationalgeographic.com/animals/birds/facts/flamingo"
 ---
 
 Hardly any animal is as tied to one color as the flamingo. Pink is basically its brand. Which makes this surprising: **flamingos aren't born pink.** They have to eat their way there.

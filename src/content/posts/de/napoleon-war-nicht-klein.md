@@ -5,7 +5,7 @@ date: 2026-09-02
 category: history
 emoji: "🎩"
 translationKey: napoleon-height
-hook: "Napoleon war etwa 1,68 bis 1,70 Meter groß und damit für seine Zeit ganz normal. Der Mythos vom Zwerg kommt aus Umrechnung und Propaganda."
+hook: "Napoleon war etwa 1,67 bis 1,70 Meter groß und damit für seine Zeit ganz normal. Der Mythos vom Zwerg kommt aus Umrechnung und Propaganda."
 products:
   - name: "Napoleon-Biografie als Buch"
     query: "Napoleon Biografie Buch"
@@ -18,6 +18,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Napoleon_complex"
   - label: "Britannica: Napoleon as Pop Culture Icon"
     url: "https://www.britannica.com/topic/Napoleon-as-Pop-Culture-Icon"
+  - label: "History.com: Was Napoleon Short? Origins of the 'Napoleon Complex'"
+    url: "https://www.history.com/articles/napoleon-complex-short"
 ---
 
 Kleiner Mann, großes Ego: Kaum eine historische Figur ist so sehr mit ihrer Körpergröße verbunden wie Napoleon Bonaparte. Es gibt sogar einen nach ihm benannten „Napoleon-Komplex“. Das Problem: **Napoleon war gar nicht klein.**
@@ -26,7 +28,7 @@ Kleiner Mann, großes Ego: Kaum eine historische Figur ist so sehr mit ihrer Kö
 
 Auf Napoleons Totenschein notierte sein Arzt eine Größe von „5 pieds, 2 pouces, 4 lignes“, also 5 Fuß, 2 Zoll und 4 Linien. Wer das in englischen Maßen liest, stellt sich einen ziemlich kleinen Mann vor. Nur: **Der alte französische Zoll war deutlich länger als der englische.**
 
-Rechnet man korrekt um, kommt man laut Britannica auf etwa 1,68 bis 1,70 Meter. Damit war Napoleon für einen Mann seiner Zeit ziemlich durchschnittlich groß. Sein großer Gegenspieler, der Herzog von Wellington, maß rund 1,73 Meter, war also nur ein paar Zentimeter größer. Über ihn hat sich niemand lustig gemacht.
+Rechnet man korrekt um, kommt man laut Britannica und History.com auf etwa 1,67 bis 1,70 Meter. Damit war Napoleon für einen Mann seiner Zeit ziemlich durchschnittlich groß. Sein großer Gegenspieler, der Herzog von Wellington, maß rund 1,73 Meter, war also nur ein paar Zentimeter größer. Über ihn hat sich niemand lustig gemacht.
 
 ## Propaganda mit dem Zeichenstift
 

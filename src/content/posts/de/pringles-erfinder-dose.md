@@ -20,6 +20,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Pringles"
   - label: "NPR: Inventor's Ashes Buried in His Creation: Pringles Can"
     url: "https://www.npr.org/2008/06/03/91098067/inventors-ashes-buried-in-his-creation-pringles-can"
+  - label: "Snopes: Was the Pringles Creator Cremated and Sold to Customers?"
+    url: "https://www.snopes.com/fact-check/pringles-urn/"
 ---
 
 Manche Menschen lassen sich mit ihrem Lieblingsbuch beisetzen, andere mit einem Familienfoto. Fredric Baur wählte etwas Knusprigeres. **Ein Teil seiner Asche liegt in einer Pringles-Dose.** Der Grund: Er hat sie erfunden.

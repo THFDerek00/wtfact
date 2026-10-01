@@ -20,6 +20,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Fullonica"
   - label: "National Geographic Education Blog: Urine Trouble: Taxes in Ancient Rome"
     url: "https://blog.education.nationalgeographic.org/2016/04/15/urine-trouble-taxes-in-ancient-rome/"
+  - label: "Mental Floss: 6 Practical Ways Romans Used Human Urine and Feces in Daily Life"
+    url: "https://www.mentalfloss.com/article/76994/6-practical-ways-romans-used-human-urine-and-feces-daily-life"
 ---
 
 Ancient Rome had no laundry detergent aisle. If you wanted your toga clean and bright again, you relied on something every human produces daily: **urine.** Sounds gross, but it was chemistry with a plan.

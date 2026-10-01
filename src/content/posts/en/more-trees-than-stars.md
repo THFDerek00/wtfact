@@ -18,6 +18,8 @@ sources:
     url: "https://news.yale.edu/2015/09/02/seeing-forest-and-trees-all-3-trillion-them"
   - label: "Wikipedia: Milky Way"
     url: "https://en.wikipedia.org/wiki/Milky_Way"
+  - label: "NASA Science: Our Milky Way Galaxy: How Big is Space?"
+    url: "https://science.nasa.gov/universe/exoplanets/our-milky-way-galaxy-how-big-is-space/"
 ---
 
 Look up at a really dark night sky and it feels like the stars never end. Still, there's something on our little planet that outnumbers them. **Earth has more trees than our galaxy has stars.**
@@ -30,7 +32,7 @@ That was a genuine surprise. Earlier estimates had put the number at around 400 
 
 ## And the stars?
 
-The Milky Way is enormous, about 87,400 light-years across. Even so, it's estimated to contain **100 to 400 billion stars**. Take the highest estimate and there are still more than seven times as many trees on Earth as stars in the Milky Way.
+The Milky Way is enormous, roughly 87,000 to 100,000 light-years across, depending on the measurement. Even so, it's estimated to contain **100 to 400 billion stars**. Take the highest estimate and there are still more than seven times as many trees on Earth as stars in the Milky Way.
 
 Small catch: with the naked eye you only ever see a tiny portion of those stars anyway. Trees, on the other hand, are almost everywhere you look. Knowing they outnumber the stars still feels wrong somehow.
 

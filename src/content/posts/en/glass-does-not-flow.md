@@ -18,6 +18,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Glass"
   - label: "Scientific American: Fact or Fiction?: Glass Is a (Supercooled) Liquid"
     url: "https://www.scientificamerican.com/article/fact-fiction-glass-liquid/"
+  - label: "DoITPoMS, University of Cambridge: Do Cathedral Glasses Flow?"
+    url: "https://www.doitpoms.ac.uk/tlplib/glass-transition/myth.php"
 ---
 
 Maybe you've heard it too, maybe even in school: glass is secretly an extremely thick liquid. The proof? Ancient church windows are thicker at the bottom than at the top, because the glass has been sagging for centuries. Sounds logical. **It's also wrong.**

@@ -18,6 +18,8 @@ sources:
     url: "https://de.wikipedia.org/wiki/Venus_(Planet)"
   - label: "NASA Science: Venus: Facts"
     url: "https://science.nasa.gov/venus/venus-facts/"
+  - label: "Royal Museums Greenwich: Interesting facts about Venus"
+    url: "https://www.rmg.co.uk/stories/space-astronomy/interesting-facts-about-venus"
 ---
 
 Stell dir vor, du hast Geburtstag, und die Sonne ist seit deinem letzten Geburtstag noch nicht einmal einmal um den Himmel gewandert. Auf der Venus wäre das ganz normal. **Dort dauert eine Drehung um die eigene Achse länger als eine komplette Runde um die Sonne.**

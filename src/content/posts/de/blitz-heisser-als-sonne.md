@@ -18,6 +18,8 @@ sources:
     url: "https://de.wikipedia.org/wiki/Blitz"
   - label: "National Weather Service: How Hot Is Lightning?"
     url: "https://www.weather.gov/safety/lightning-temperature"
+  - label: "BBC Science Focus: 5 times hotter than the Sun: Here's why lightning is so powerful"
+    url: "https://www.sciencefocus.com/planet-earth/why-lightning-is-so-powerful"
 ---
 
 Die Sonne gilt als Inbegriff von Hitze. Doch ein ganz normales Sommergewitter schlägt sie locker, zumindest für einen Wimpernschlag. **Im Blitzkanal wird die Luft schlagartig auf bis zu 30.000 °C erhitzt.** Die Oberfläche der Sonne bringt es auf rund 5.500 °C. Ein Blitz ist damit grob fünfmal so heiß.

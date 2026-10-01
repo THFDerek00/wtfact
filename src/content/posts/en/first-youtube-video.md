@@ -18,6 +18,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Me_at_the_zoo"
   - label: "TIME: The First YouTube Video Was Uploaded 9 Years Ago Today"
     url: "https://time.com/72892/the-first-youtube-video-was-uploaded-9-years-ago-today/"
+  - label: "Smithsonian Magazine: Watch the First-Ever Video Uploaded to YouTube, a Grainy 19-Second Clip Called 'Me at the Zoo'"
+    url: "https://www.smithsonianmag.com/smart-news/watch-the-first-ever-video-uploaded-to-youtube-a-grainy-19-second-clip-called-me-at-the-zoo-180988225/"
 ---
 
 Today YouTube is full of music videos, tutorials, livestreams and video essays longer than feature films. But it all started with a clip shorter than most commercials.

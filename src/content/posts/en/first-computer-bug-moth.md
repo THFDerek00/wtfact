@@ -20,6 +20,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Software_bug"
   - label: "Wikipedia: Grace Hopper"
     url: "https://en.wikipedia.org/wiki/Grace_Hopper"
+  - label: "JSTOR Daily: The Bug in the Computer Bug Story"
+    url: "https://daily.jstor.org/the-bug-in-the-computer-bug-story/"
 ---
 
 When your app crashes, people say: "There's a bug in it." Sounds like tech jargon, but once, the bug was totally literal. **In 1947, a real moth got stuck inside a computer at Harvard University.**

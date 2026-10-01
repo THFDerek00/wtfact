@@ -18,6 +18,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Trojan_Room_coffee_pot"
   - label: "University of Cambridge Computer Laboratory: The Trojan Room Coffee Pot: A (non-technical) biography"
     url: "https://www.cl.cam.ac.uk/coffee/qsf/coffee.html"
+  - label: "HistoryofInformation.com: The First Webcam Points at the Trojan Room Coffee Pot"
+    url: "https://www.historyofinformation.com/detail.php?id=1507"
 ---
 
 Some inventions come from grand visions. Others come from laziness. **The world's first webcam belongs in the second group.** It had exactly one job: showing whether there was any coffee left.
