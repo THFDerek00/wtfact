@@ -13,6 +13,9 @@ Build automatisch. Wer hier eine Zahl ändert, ändert sie auch dort.
   reputable sources (encyclopedias, universities, museums, science journals, quality newspapers).
   If you cannot confirm it, pick another fact.
 - At least 2 sources from at least 2 different websites, all https. [geprüft]
+- Wikipedia is allowed, but never as the only backing: a post that cites Wikipedia needs at least 2 more
+  independent, non-Wikipedia sources from 2 different websites, so 3 sources in total. The core fact (hook)
+  must be confirmed by a non-Wikipedia source. [geprüft]
 - Each source label is "Publisher: exact page or article title" as it appears on that page. Never paraphrase
   or invent a study title.
 - Never invent numbers, quotes, studies or names. Never attribute a comparison or image to "researchers"
