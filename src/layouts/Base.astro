@@ -1,0 +1,76 @@
+---
+import '../styles/global.css';
+import { SITE, type Lang } from '../config';
+import { t } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  title?: string;
+  description?: string;
+  altUrl?: string;
+  image?: string;
+}
+const { lang, title, description, altUrl, image } = Astro.props;
+const ui = t(lang);
+const fullTitle = title ? `${title} | ${SITE.name}` : `${SITE.name}: ${ui.tagline}`;
+const desc = description ?? ui.tagline;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const other: Lang = lang === 'de' ? 'en' : 'de';
+const otherUrl = altUrl ?? `/${other}/`;
+---
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={desc} />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang={other} href={new URL(otherUrl, Astro.site)} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="alternate" type="application/rss+xml" title={SITE.name} href={`/${lang}/rss.xml`} />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:title" content={title ?? SITE.name} />
+    <meta property="og:description" content={desc} />
+    <meta property="og:type" content={title ? 'article' : 'website'} />
+    <meta property="og:url" content={canonical} />
+    {image && <meta property="og:image" content={new URL(image, Astro.site)} />}
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+  <body>
+    <header class="top wrap">
+      <a href={`/${lang}/`} class="logo" aria-label={SITE.name}>
+        WTF<span>act</span><b>?!</b>
+      </a>
+      <a class="lang chip" href={otherUrl} hreflang={other} lang={other}>
+        {other === 'de' ? '🇩🇪 Deutsch' : '🇬🇧 English'}
+      </a>
+    </header>
+    <main><slot /></main>
+    <footer class="wrap foot">
+      <p class="note">{ui.affiliateFooter} {ui.madeWith}</p>
+      <nav>
+        <a href={`/${lang}/about/`}>{ui.about}</a>
+        <a href={`/${lang}/impressum/`}>{ui.imprint}</a>
+        <a href={`/${lang}/datenschutz/`}>{ui.privacy}</a>
+      </nav>
+      <p class="copy">© {new Date().getFullYear()} {SITE.name}</p>
+    </footer>
+  </body>
+</html>
+
+<style>
+  .top { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; }
+  .logo {
+    font: 800 30px/1 var(--display); letter-spacing: -0.04em; text-decoration: none;
+  }
+  .logo span { color: var(--pink); }
+  .logo b { display: inline-block; margin-left: 2px; padding: 0 6px; border-radius: 8px; background: var(--yellow); color: #141414; transform: rotate(-6deg); }
+  .lang { background: var(--surface); color: var(--ink); }
+  .foot { margin-top: 80px; padding: 28px 0 40px; border-top: 2.5px solid var(--line); font-size: 14px; color: var(--muted); }
+  .foot nav { display: flex; flex-wrap: wrap; gap: 18px; margin: 10px 0; }
+  .foot nav a { color: var(--ink); font-weight: 600; }
+  .note { margin: 0; max-width: 60ch; }
+  .copy { margin: 0; }
+</style>

@@ -1,0 +1,29 @@
+---
+import type { Lang } from '../config';
+import { t } from '../i18n/ui';
+interface Props { lang: Lang; title: string }
+const { lang, title } = Astro.props;
+const ui = t(lang);
+---
+<div class="share" data-title={title} data-copied={ui.copied}>
+  <button class="btn" type="button">📤 {ui.share}</button>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.share').forEach((el) => {
+    const btn = el.querySelector('button')!;
+    btn.addEventListener('click', async () => {
+      const data = { title: el.dataset.title, url: location.href };
+      if (navigator.share) {
+        try { await navigator.share(data); } catch {}
+      } else {
+        await navigator.clipboard.writeText(location.href);
+        btn.textContent = el.dataset.copied ?? 'OK';
+      }
+    });
+  });
+</script>
+<style>
+  .share { margin: 28px 0; }
+  .btn { background: var(--cyan); }
+</style>

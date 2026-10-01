@@ -1,0 +1,86 @@
+@import '@fontsource-variable/space-grotesk';
+@import '@fontsource-variable/inter';
+
+:root {
+  --bg: #fffaf0;
+  --surface: #ffffff;
+  --ink: #141414;
+  --muted: #5b5b5b;
+  --line: #141414;
+  --pink: #ff3d7f;
+  --yellow: #ffd23f;
+  --cyan: #3ddcff;
+  --lime: #b6f23a;
+  --violet: #9b6bff;
+  --orange: #ff8a3d;
+  --shadow: 4px 4px 0 var(--line);
+  --radius: 14px;
+  --display: 'Space Grotesk Variable', system-ui, sans-serif;
+  --text: 'Inter Variable', system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111014;
+    --surface: #1c1a21;
+    --ink: #f4f1ea;
+    --muted: #a9a5b0;
+    --line: #f4f1ea;
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 17px/1.65 var(--text);
+}
+a { color: inherit; }
+img { max-width: 100%; height: auto; }
+h1, h2, h3 { font-family: var(--display); line-height: 1.15; letter-spacing: -0.02em; }
+
+.wrap { width: min(1100px, 100% - 32px); margin-inline: auto; }
+.narrow { width: min(720px, 100% - 32px); margin-inline: auto; }
+
+.card {
+  background: var(--surface);
+  border: 2.5px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 12px;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  font: 600 13px/1.6 var(--display);
+  text-decoration: none;
+  color: #141414;
+}
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 10px 18px;
+  border: 2.5px solid var(--line);
+  border-radius: 999px;
+  background: var(--yellow);
+  color: #141414;
+  font: 700 15px/1.2 var(--display);
+  text-decoration: none;
+  box-shadow: 3px 3px 0 var(--line);
+  cursor: pointer;
+  transition: transform .12s, box-shadow .12s;
+}
+.btn:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--line); }
+.btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--line); }
+
+.cat-science { background: var(--cyan); }
+.cat-history { background: var(--orange); }
+.cat-tech { background: var(--violet); }
+.cat-nature { background: var(--lime); }
+.cat-body { background: var(--pink); }
+.cat-weird { background: var(--yellow); }
+
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }

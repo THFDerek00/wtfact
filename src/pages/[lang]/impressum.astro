@@ -1,0 +1,19 @@
+---
+import Page from '../../layouts/Page.astro';
+import { LANGS, SITE, type Lang } from '../../config';
+export function getStaticPaths() { return LANGS.map((lang) => ({ params: { lang } })); }
+const lang = Astro.params.lang as Lang;
+const o = SITE.owner;
+---
+<Page lang={lang} title={lang === 'de' ? 'Impressum' : 'Imprint'}>
+  <h2>Angaben gemäß § 5 DDG</h2>
+  <p>{o.name}<br />{o.street}<br />{o.city}<br />Deutschland</p>
+  <h2>Kontakt</h2>
+  <p>E-Mail: {o.email}</p>
+  <h2>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV</h2>
+  <p>{o.name}, Anschrift wie oben</p>
+  <h2>Hinweis zu KI-Inhalten</h2>
+  <p>Die Beiträge auf {SITE.name} werden mit Unterstützung von KI erstellt und vor bzw. nach der Veröffentlichung redaktionell geprüft. Hinweise auf Fehler nehmen wir gern per E-Mail entgegen.</p>
+  <h2>Amazon-Partnerprogramm</h2>
+  <p>{SITE.name} ist Teilnehmer des Partnerprogramms von Amazon Europe S.à r.l. und des Amazon Associates Program, Partnerwerbeprogramme, die für Websites konzipiert wurden, mittels derer durch die Platzierung von Werbeanzeigen und Links zu amazon.de bzw. amazon.com Werbekostenerstattung verdient werden kann. Als Amazon-Partner verdienen wir an qualifizierten Verkäufen.</p>
+</Page>

@@ -1,0 +1,19 @@
+---
+// Startseite: leitet je nach Browsersprache auf /de/ oder /en/ weiter.
+---
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <title>WTFact</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="alternate" hreflang="de" href="/de/" />
+    <link rel="alternate" hreflang="en" href="/en/" />
+    <link rel="alternate" hreflang="x-default" href="/de/" />
+    <script is:inline>
+      location.replace((navigator.language || 'de').toLowerCase().startsWith('de') ? '/de/' : '/en/');
+    </script>
+    <noscript><meta http-equiv="refresh" content="0; url=/de/" /></noscript>
+  </head>
+  <body><a href="/de/">Deutsch</a> · <a href="/en/">English</a></body>
+</html>

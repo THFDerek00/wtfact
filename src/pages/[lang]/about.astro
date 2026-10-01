@@ -1,0 +1,21 @@
+---
+import Page from '../../layouts/Page.astro';
+import { LANGS, SITE, type Lang } from '../../config';
+export function getStaticPaths() { return LANGS.map((lang) => ({ params: { lang } })); }
+const lang = Astro.params.lang as Lang;
+---
+<Page lang={lang} title={lang === 'de' ? `Über ${SITE.name}` : `About ${SITE.name}`}>
+  {lang === 'de' ? (
+    <>
+      <p>Wusstest du, dass Honig nach 3.000 Jahren noch essbar sein kann? Genau für solche Momente gibt es {SITE.name}: jeden Tag ein neuer Fakt aus Wissenschaft, Geschichte, Technik, Natur und dem ganz normalen Wahnsinn.</p>
+      <p>Die Texte entstehen mit Hilfe von KI und werden mit Quellen belegt. Wenn dir trotzdem ein Fehler auffällt, schreib uns, wir korrigieren ihn.</p>
+      <p>Finanziert wird die Seite über Amazon-Partnerlinks. Wenn du über einen Link etwas kaufst, bekommen wir eine kleine Provision, für dich bleibt der Preis gleich.</p>
+    </>
+  ) : (
+    <>
+      <p>Did you know honey can still be edible after 3,000 years? That is what {SITE.name} is for: a new fact every day from science, history, tech, nature and everyday madness.</p>
+      <p>Our posts are written with the help of AI and backed by sources. If you still spot a mistake, let us know and we will fix it.</p>
+      <p>The site is funded by Amazon affiliate links. If you buy something through one, we earn a small commission at no extra cost to you.</p>
+    </>
+  )}
+</Page>

@@ -1,0 +1,43 @@
+---
+import type { Post } from '../lib';
+import { langOf, postUrl } from '../lib';
+import { t } from '../i18n/ui';
+interface Props { post: Post; big?: boolean }
+const { post, big = false } = Astro.props;
+const lang = langOf(post);
+const ui = t(lang);
+const d = post.data;
+---
+<a href={postUrl(post)} class:list={['card', 'post', { big }]} data-cat={d.category}>
+  <div class:list={['art', `cat-${d.category}`]} aria-hidden="true"><span>{d.emoji}</span></div>
+  <div class="body">
+    <span class:list={['chip', `cat-${d.category}`]}>{big ? `⚡ ${ui.todaysFact}` : ui.categories[d.category]}</span>
+    <h2>{d.title}</h2>
+    <p>{d.teaser}</p>
+    <span class="more">{ui.readMore} →</span>
+  </div>
+</a>
+
+<style>
+  .post { display: flex; flex-direction: column; overflow: hidden; text-decoration: none; transition: transform .15s, box-shadow .15s; }
+  .post:hover { transform: translate(-3px, -3px) rotate(-.4deg); box-shadow: 7px 7px 0 var(--line); }
+  .art { display: grid; place-items: center; aspect-ratio: 16 / 9; border-bottom: 2.5px solid var(--line); }
+  .art span { font-size: 64px; transform: rotate(-8deg); filter: drop-shadow(3px 3px 0 rgba(0,0,0,.25)); }
+  .body { padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  h2 { margin: 4px 0 0; font-size: 21px; }
+  p { margin: 0; color: var(--muted); font-size: 15px; }
+  .more { margin-top: auto; padding-top: 6px; font: 700 14px var(--display); color: var(--pink); }
+  .chip { align-self: flex-start; }
+  .big { display: grid; grid-template-columns: 1fr 1.2fr; }
+  .big .art { aspect-ratio: auto; border-bottom: 0; border-right: 2.5px solid var(--line); min-height: 280px; }
+  .big .art span { font-size: 120px; }
+  .big h2 { font-size: clamp(26px, 4vw, 38px); }
+  .big p { font-size: 17px; }
+  .big .body { padding: 28px; justify-content: center; }
+  @media (max-width: 720px) {
+    .big { grid-template-columns: 1fr; }
+    .big .art { border-right: 0; border-bottom: 2.5px solid var(--line); min-height: 180px; }
+    .big .art span { font-size: 88px; }
+    .big .body { padding: 20px; }
+  }
+</style>
