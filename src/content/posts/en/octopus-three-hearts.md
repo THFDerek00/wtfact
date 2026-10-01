@@ -16,9 +16,11 @@ products:
 sources:
   - label: "Wikipedia: Octopus"
     url: "https://en.wikipedia.org/wiki/Octopus"
+  - label: "Smithsonian Magazine: Ten Wild Facts About Octopuses: They Have Three Hearts, Big Brains and Blue Blood"
+    url: "https://www.smithsonianmag.com/science-nature/ten-wild-facts-about-octopuses-they-have-three-hearts-big-brains-and-blue-blood-7625828/"
 ---
 
-If aliens live on Earth, they're probably in the ocean and have eight arms. The octopus breaks pretty much every rule we know about animals.
+If aliens live on Earth, they're probably in the ocean and have eight arms. The octopus breaks pretty much every rule we know about animals. It is a cephalopod, a kind of mollusk, so its closest relatives are snails and clams rather than fish.
 
 ## Three hearts instead of one
 
@@ -30,12 +32,10 @@ Our blood is red because it contains iron. Octopus blood carries oxygen with a m
 
 ## The arms think for themselves
 
-An octopus has around 500 million neurons, roughly as many as a dog. But **about two thirds of them are in the arms**, not the head. Each arm can touch, taste and partly decide on its own what to grab. Researchers compare it to eight roommates who loosely coordinate.
+An octopus has around 500 million neurons, roughly as many as a dog. But **about two thirds of them are in the arms**, not the head. Each arm can touch, taste and partly decide on its own what to grab. Think of it as eight roommates who only loosely coordinate.
 
 > A severed octopus arm can keep reacting to touch and reaching for food for a while.
 
-## And then there's this…
+As if that weren't enough: octopuses can change their color and even the texture of their skin in a split second, even though they're probably colorblind. How exactly they pull that off still isn't fully understood.
 
-Octopuses can change their color and even the texture of their skin in a split second, even though they're probably colorblind. How exactly they pull that off still isn't fully understood.
-
-Next time you order calamari: that's squid, not octopus. But squid are pretty wild too.
+By the way, calamari is squid, not octopus. Squid are strange animals too.

@@ -5,6 +5,8 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
+    "check": "node scripts/check-posts.mjs",
+    "prebuild": "node scripts/check-posts.mjs",
     "build": "astro build",
     "preview": "astro preview",
     "post": "node scripts/generate-post.mjs"
