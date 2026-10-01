@@ -18,6 +18,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Octopus"
   - label: "Smithsonian Magazine: Ten Wild Facts About Octopuses: They Have Three Hearts, Big Brains and Blue Blood"
     url: "https://www.smithsonianmag.com/science-nature/ten-wild-facts-about-octopuses-they-have-three-hearts-big-brains-and-blue-blood-7625828/"
+  - label: "Shedd Aquarium: Eight Strange and Wonderful Facts About Octopuses"
+    url: "https://www.sheddaquarium.org/stories/eight-strange-and-wonderful-facts-about-octopuses"
 ---
 
 If aliens live on Earth, they're probably in the ocean and have eight arms. The octopus breaks pretty much every rule we know about animals. It is a cephalopod, a kind of mollusk, so its closest relatives are snails and clams rather than fish.

@@ -18,6 +18,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Lightning"
   - label: "National Weather Service: How Hot Is Lightning?"
     url: "https://www.weather.gov/safety/lightning-temperature"
+  - label: "BBC Science Focus: 5 times hotter than the Sun: Here's why lightning is so powerful"
+    url: "https://www.sciencefocus.com/planet-earth/why-lightning-is-so-powerful"
 ---
 
 The sun is basically the definition of hot. But an ordinary summer thunderstorm beats it, at least for the blink of an eye. **Inside a lightning channel, the air is heated to around 30,000 °C almost instantly.** The surface of the sun? Roughly 5,500 °C. That makes lightning about five times hotter.

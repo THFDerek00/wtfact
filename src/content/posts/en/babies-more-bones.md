@@ -18,6 +18,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Human_skeleton"
   - label: "Healthline: How Many Bones Are Babies Born With and Why Do They Have More Than Adults?"
     url: "https://www.healthline.com/health/how-many-bones-does-a-baby-have"
+  - label: "Cleveland Clinic: Here's How Many Bones Babies Have"
+    url: "https://health.clevelandclinic.org/how-many-bones-does-a-baby-have"
 ---
 
 Here's some math your biology book probably skipped: a newborn has **about 300 bones**. An adult has **206**. So where did the rest go?

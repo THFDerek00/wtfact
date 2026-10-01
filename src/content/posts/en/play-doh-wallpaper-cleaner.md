@@ -18,6 +18,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Play-Doh"
   - label: "Smithsonian Magazine: The Accidental Invention of Play-Doh"
     url: "https://www.smithsonianmag.com/innovation/accidental-invention-play-doh-180973527/"
+  - label: "The Strong National Museum of Play: The History of Play-Doh: Good, Clean Fun!"
+    url: "https://www.museumofplay.org/blog/the-history-of-play-doh-good-clean-fun/"
 ---
 
 The little cans, that signature smell, the blobs that all eventually turn brownish gray: almost everyone knows Play-Doh from preschool. But the dough had a past life. **It was a cleaning product for wallpaper.**
@@ -36,7 +38,7 @@ Zufall and her husband Robert suggested selling the stuff as a toy. They came up
 
 ## From cleaner to cult toy
 
-Play-Doh hit the market as a toy in 1956, at first only in white. Colors came later. According to Smithsonian Magazine, **more than 3 billion cans** have been sold since then. In 1998, it was inducted into the National Toy Hall of Fame. Today the brand belongs to toy giant Hasbro, and the main ingredients are still simple: water, salt and flour.
+Play-Doh hit the market as a toy in 1956. According to Smithsonian Magazine, **more than 3 billion cans** have been sold since then. In 1998, it was inducted into the National Toy Hall of Fame. Today the brand belongs to toy giant Hasbro, and the main ingredients are still simple: water, salt and flour.
 
 > In 2018, Hasbro even trademarked the smell of Play-Doh. It's described as a sweet, slightly musky, vanilla-like fragrance with slight overtones of cherry.
 

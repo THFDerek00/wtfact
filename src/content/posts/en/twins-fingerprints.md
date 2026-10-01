@@ -18,6 +18,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Fingerprint"
   - label: "BBC Science Focus: Why do identical twins have different fingerprints?"
     url: "https://www.sciencefocus.com/the-human-body/why-do-identical-twins-have-different-fingerprints-2"
+  - label: "ABC Science: Fingerprints Of Twins"
+    url: "https://www.abc.net.au/science/articles/2004/11/04/1234875.htm"
 ---
 
 Identical twins are basically nature's copy-paste. They come from the same fertilized egg, so they have practically the same DNA. Some look so alike that even their friends mix them up. A fingerprint scanner never would, though.

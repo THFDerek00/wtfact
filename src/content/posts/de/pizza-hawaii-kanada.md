@@ -20,6 +20,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Sam_Panopoulos"
   - label: "ABC News: Hawaiian pizza inventor Sam Panopoulos dies aged 83"
     url: "https://www.abc.net.au/news/2017-06-10/hawaiian-pizza-investor-sam-panopoulos-dies/8607108"
+  - label: "TIME: The Man Who Invented Hawaiian Pizza Has Died"
+    url: "https://time.com/4814056/hawaiian-pizza-pineapple-sam-panopoulos-death/"
 ---
 
 Ananas auf Pizza: Kaum ein Belag spaltet Freundeskreise so zuverlässig. Aber egal, auf welcher Seite du stehst, eine Sache stimmt beim Namen nicht. **Die Pizza Hawaii hat mit Hawaii praktisch nichts zu tun.** Erfunden wurde sie in Kanada.

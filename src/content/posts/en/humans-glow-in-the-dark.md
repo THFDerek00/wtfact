@@ -18,6 +18,8 @@ sources:
     url: "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0006256"
   - label: "Wikipedia: Biophoton"
     url: "https://en.wikipedia.org/wiki/Biophoton"
+  - label: "NBC News: Humans glow in visible light"
+    url: "https://www.nbcnews.com/id/wbna32090918"
 ---
 
 Fireflies, deep-sea fish, glowing mushrooms: when you hear "bioluminescence," you think of exotic creatures. But you glow too. Right now. Just so faintly that your own eyes don't stand a chance.

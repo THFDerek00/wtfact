@@ -18,6 +18,8 @@ sources:
     url: "https://de.wikipedia.org/wiki/Honig"
   - label: "Smithsonian Magazine: The Science Behind Honey’s Eternal Shelf Life"
     url: "https://www.smithsonianmag.com/science-nature/the-science-behind-honeys-eternal-shelf-life-1218690/"
+  - label: "Healthline: Does Honey Ever Go Bad? What You Should Know"
+    url: "https://www.healthline.com/nutrition/does-honey-go-bad"
 ---
 
 Archäologen, die altägyptische Gräber untersuchten, stießen immer wieder auf Tongefäße mit Honig. Das Absurde: **Der Honig soll nach rund 3.000 Jahren noch essbar gewesen sein.** Fast jedes andere Lebensmittel wäre längst zu Staub zerfallen oder hätte sich in etwas verwandelt, das man nicht mal anfassen möchte.
@@ -30,7 +32,7 @@ Dass so wenig Wasser drin ist, haben die Bienen selbst erledigt. Frischer Nektar
 
 ## Plan B: Säure und ein eingebautes Desinfektionsmittel
 
-Damit nicht genug. Honig ist ziemlich sauer, sein pH-Wert liegt etwa zwischen 3,5 und 4,5, ähnlich wie bei Orangensaft. Und Bienen geben ein Enzym namens Glucoseoxidase dazu. Kommt ein bisschen Feuchtigkeit an den Honig, entsteht daraus **Wasserstoffperoxid**, dasselbe Zeug, das in manchen Desinfektionsmitteln steckt.
+Damit nicht genug. Honig ist ziemlich sauer, sein pH-Wert liegt meist etwa zwischen 3,5 und 4,5, ähnlich wie bei Orangensaft. Und Bienen geben ein Enzym namens Glucoseoxidase dazu. Kommt ein bisschen Feuchtigkeit an den Honig, entsteht daraus **Wasserstoffperoxid**, dasselbe Zeug, das in manchen Desinfektionsmitteln steckt.
 
 > Zucker, Säure und Wasserstoffperoxid: Bienen haben im Grunde ein dreifach gesichertes Konservierungssystem erfunden.
 

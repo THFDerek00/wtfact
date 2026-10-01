@@ -18,6 +18,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Greenland_shark"
   - label: "Science News: Study ranks Greenland shark as longest-lived vertebrate"
     url: "https://www.sciencenews.org/article/study-ranks-greenland-shark-longest-lived-vertebrate"
+  - label: "University of Copenhagen Research Portal: Eye lens radiocarbon reveals centuries of longevity in the Greenland shark (Somniosus microcephalus)"
+    url: "https://researchprofiles.ku.dk/en/publications/eye-lens-radiocarbon-reveals-centuries-of-longevity-in-the-greenl/"
 ---
 
 Schildkröten, Wale, Papageien: Wenn es um die Methusalems im Tierreich geht, denkst du vermutlich nicht zuerst an einen Hai. Dabei hält **der Grönlandhai den Rekord als langlebigstes bekanntes Wirbeltier.** Rund 400 Jahre können diese Tiere wohl alt werden.
@@ -26,7 +28,7 @@ Schildkröten, Wale, Papageien: Wenn es um die Methusalems im Tierreich geht, de
 
 Bei vielen Haien liest man das Alter an Wachstumsringen in den verkalkten Wirbeln ab. Der Grönlandhai ist aber ein „weicher“ Hai, dem solche Wirbel fehlen. Ein Team um den Meeresbiologen Julius Nielsen fand einen anderen Weg und veröffentlichte ihn 2016 im Fachjournal Science.
 
-Die Forschenden untersuchten die Augenlinsen von 28 Haien und datierten sie mit der Radiokarbonmethode. Bei Fischen hatte das vorher noch niemand versucht. Geholfen haben sogar Spuren der Atombombentests aus den 1950er-Jahren: Sie tauchten nur bei 3 der 28 Tiere auf und dienten als zeitliche Markierung.
+Die Forschenden untersuchten die Augenlinsen von 28 Haien und datierten sie mit der Radiokarbonmethode. Bei Fischen hatte das vorher noch niemand versucht. Geholfen haben sogar Spuren der Atombombentests aus den 1950er- und 1960er-Jahren: Sie tauchten nur bei 3 der 28 Tiere auf und dienten als zeitliche Markierung.
 
 Das Ergebnis: Ein großes Weibchen war **etwa 392 Jahre alt, mit einer Unsicherheit von plus/minus 120 Jahren.** Die Spanne reicht also von 272 bis 512 Jahren. Selbst am unteren Ende übertrumpft der Hai den bisherigen Rekordhalter, einen Grönlandwal mit geschätzten 211 Jahren.
 

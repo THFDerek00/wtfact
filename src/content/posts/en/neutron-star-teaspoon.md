@@ -18,6 +18,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Neutron_star"
   - label: "NASA: New NASA Mission to Study Mysterious Neutron Stars, Aid in Deep Space Navigation"
     url: "https://www.nasa.gov/centers-and-facilities/goddard/new-nasa-mission-to-study-mysterious-neutron-stars-aid-in-deep-space-navigation/"
+  - label: "Chandra X-ray Observatory: Cosmic X-rays Reveal Evidence For New Form Of Matter"
+    url: "https://chandra.si.edu/press/02_releases/press_041002.html"
 ---
 
 Take a teaspoon, fill it with material from a neutron star and put it on a scale. The scale would not survive. According to NASA, **a single teaspoon of the stuff would weigh about a billion tons on Earth**.

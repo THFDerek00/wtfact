@@ -18,6 +18,8 @@ sources:
     url: "https://news.yale.edu/2015/09/02/seeing-forest-and-trees-all-3-trillion-them"
   - label: "Wikipedia: Milky Way"
     url: "https://en.wikipedia.org/wiki/Milky_Way"
+  - label: "NASA Science: Our Milky Way Galaxy: How Big is Space?"
+    url: "https://science.nasa.gov/universe/exoplanets/our-milky-way-galaxy-how-big-is-space/"
 ---
 
 Schau nachts in einen richtig dunklen Himmel und du hast das Gefühl, die Sterne nehmen kein Ende. Trotzdem gibt es etwas, das auf unserem kleinen Planeten zahlreicher ist. **Auf der Erde stehen mehr Bäume, als es Sterne in unserer Galaxie gibt.**
@@ -30,7 +32,7 @@ Das war eine echte Überraschung. Frühere Schätzungen lagen bei etwa 400 Milli
 
 ## Und die Sterne?
 
-Die Milchstraße ist riesig, etwa 87.400 Lichtjahre im Durchmesser. Trotzdem schätzt man ihre Sterne auf **100 bis 400 Milliarden**. Selbst wenn du die höchste Schätzung nimmst, gibt es also mehr als siebenmal so viele Bäume auf der Erde wie Sterne in der Milchstraße.
+Die Milchstraße ist riesig, je nach Messung etwa 87.000 bis 100.000 Lichtjahre im Durchmesser. Trotzdem schätzt man ihre Sterne auf **100 bis 400 Milliarden**. Selbst wenn du die höchste Schätzung nimmst, gibt es also mehr als siebenmal so viele Bäume auf der Erde wie Sterne in der Milchstraße.
 
 Kleiner Haken: Mit bloßem Auge siehst du ohnehin nur einen winzigen Teil dieser Sterne. Bäume siehst du dagegen fast überall, wo du hinschaust. Dass sie die Sterne zahlenmäßig schlagen, fühlt sich trotzdem falsch an.
 

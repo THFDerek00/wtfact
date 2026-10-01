@@ -18,6 +18,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Goose_bumps"
   - label: "Harvard Gazette: Getting to the bottom of goosebumps"
     url: "https://news.harvard.edu/gazette/story/2020/07/the-hair-raising-reason-for-goosebumps-is-revealed/"
+  - label: "Scientific American: Why do humans get “goosebumps” when they are cold, or under other circumstances?"
+    url: "https://www.scientificamerican.com/article/why-do-humans-get-goosebu/"
 ---
 
 A cold gust of wind, a sudden scare, nails scraping on a chalkboard: suddenly the hairs on your arms stand up. Your body is doing something that was really designed for fur. **And you don't have any.**

@@ -18,6 +18,8 @@ sources:
     url: "https://www.esa.int/Science_Exploration/Human_and_Robotic_Exploration/Research/Tiny_animals_survive_exposure_to_space"
   - label: "Wikipedia: Tardigrade"
     url: "https://en.wikipedia.org/wiki/Tardigrade"
+  - label: "National Geographic: Tardigrades become first animals to survive vacuum of space"
+    url: "https://www.nationalgeographic.com/science/article/tardigrades-become-first-animals-to-survive-vacuum-of-space"
 ---
 
 Keine Luft, eisige Kälte, gnadenlose Strahlung: Das Weltall ist so ziemlich der lebensfeindlichste Ort, den es gibt. Ein Mensch ohne Raumanzug wäre dort in kürzester Zeit verloren. **Bärtierchen dagegen haben es überlebt.**

@@ -18,6 +18,8 @@ sources:
     url: "https://de.wikipedia.org/wiki/Luftpolsterfolie"
   - label: "Smithsonian Magazine: The Accidental Invention of Bubble Wrap"
     url: "https://www.smithsonianmag.com/innovation/accidental-invention-bubble-wrap-180971325/"
+  - label: "Invention & Technology: Bubble Wrap: From Wallpaper To Stress Reliever"
+    url: "https://www.inventionandtech.com/content/bubble-wrap-wallpaper-stress-reliever"
 ---
 
 Stell dir vor, dein Wohnzimmer wäre mit Luftpolsterfolie tapeziert. Klingt nach einem schlechten Witz, war aber 1957 ein ernst gemeinter Plan. Und genau aus diesem Fehlschlag ist eines der beliebtesten Verpackungsmaterialien der Welt entstanden.

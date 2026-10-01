@@ -18,6 +18,8 @@ sources:
     url: "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0006256"
   - label: "Wikipedia: Biophoton"
     url: "https://en.wikipedia.org/wiki/Biophoton"
+  - label: "NBC News: Humans glow in visible light"
+    url: "https://www.nbcnews.com/id/wbna32090918"
 ---
 
 Glühwürmchen, Tiefseefische, leuchtende Pilze: Wir denken bei Biolumineszenz an exotische Lebewesen. Dabei leuchtest du selbst. Gerade jetzt. Nur eben so schwach, dass dein eigenes Auge keine Chance hat.

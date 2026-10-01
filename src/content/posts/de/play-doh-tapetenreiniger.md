@@ -18,6 +18,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Play-Doh"
   - label: "Smithsonian Magazine: The Accidental Invention of Play-Doh"
     url: "https://www.smithsonianmag.com/innovation/accidental-invention-play-doh-180973527/"
+  - label: "The Strong National Museum of Play: The History of Play-Doh: Good, Clean Fun!"
+    url: "https://www.museumofplay.org/blog/the-history-of-play-doh-good-clean-fun/"
 ---
 
 Die kleinen Dosen, der typische Geruch, die Klumpen, die irgendwann alle braun-grau werden: Play-Doh kennt fast jeder aus dem Kindergarten. Aber die Knete hatte ein Vorleben. **Sie war ein Putzmittel für Tapeten.**
@@ -36,7 +38,7 @@ Zufall und ihr Mann Robert schlugen vor, die Masse als Spielzeug zu verkaufen. S
 
 ## Vom Putzmittel zum Kultspielzeug
 
-1956 kam Play-Doh als Spielzeug auf den Markt, zuerst nur in Weiß. Bunte Farben folgten später. Laut Smithsonian Magazine wurden seitdem **mehr als 3 Milliarden Dosen** verkauft. 1998 wurde die Knete in die National Toy Hall of Fame in den USA aufgenommen. Heute gehört die Marke zum Spielzeugkonzern Hasbro, und die Hauptzutaten sind immer noch schlicht: Wasser, Salz und Mehl.
+1956 kam Play-Doh als Spielzeug auf den Markt. Laut Smithsonian Magazine wurden seitdem **mehr als 3 Milliarden Dosen** verkauft. 1998 wurde die Knete in die National Toy Hall of Fame in den USA aufgenommen. Heute gehört die Marke zum Spielzeugkonzern Hasbro, und die Hauptzutaten sind immer noch schlicht: Wasser, Salz und Mehl.
 
 > 2018 ließ Hasbro sogar den Geruch von Play-Doh als Marke schützen. Beschrieben wird er als süßlich, leicht moschusartig und vanilleähnlich, mit einem Hauch Kirsche.
 

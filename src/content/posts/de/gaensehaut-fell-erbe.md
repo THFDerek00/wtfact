@@ -18,6 +18,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Goose_bumps"
   - label: "Harvard Gazette: Getting to the bottom of goosebumps"
     url: "https://news.harvard.edu/gazette/story/2020/07/the-hair-raising-reason-for-goosebumps-is-revealed/"
+  - label: "Scientific American: Why do humans get “goosebumps” when they are cold, or under other circumstances?"
+    url: "https://www.scientificamerican.com/article/why-do-humans-get-goosebu/"
 ---
 
 Ein kalter Windstoß, ein Schreckmoment, Fingernägel, die über eine Tafel kratzen: Plötzlich stehen dir die Härchen auf den Armen zu Berge. Dein Körper tut dabei etwas, das eigentlich für ein Fell gedacht ist. **Und Fell hast du keins.**

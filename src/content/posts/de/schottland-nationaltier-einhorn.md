@@ -18,6 +18,8 @@ sources:
     url: "https://www.rct.uk/resources/unicorns"
   - label: "Wikipedia: Einhorn"
     url: "https://de.wikipedia.org/wiki/Einhorn"
+  - label: "National Trust for Scotland: The unicorn – Scotland's national animal"
+    url: "https://www.nts.org.uk/stories/the-unicorn-scotlands-national-animal"
 ---
 
 Die USA haben den Weißkopfseeadler, Australien das Känguru. Und Schottland? **Schottlands Nationaltier ist das Einhorn.** Ja, das Fabelwesen mit dem Horn auf der Stirn. Kein Witz und auch keine Erfindung von Souvenirläden.

@@ -18,6 +18,8 @@ sources:
     url: "https://en.wikipedia.org/wiki/Bubble_wrap"
   - label: "Smithsonian Magazine: The Accidental Invention of Bubble Wrap"
     url: "https://www.smithsonianmag.com/innovation/accidental-invention-bubble-wrap-180971325/"
+  - label: "Invention & Technology: Bubble Wrap: From Wallpaper To Stress Reliever"
+    url: "https://www.inventionandtech.com/content/bubble-wrap-wallpaper-stress-reliever"
 ---
 
 Picture your living room covered wall to wall in bubble wrap. Sounds like a bad joke, but in 1957 it was a serious plan. And that failed plan gave us one of the most popular packing materials on the planet.
