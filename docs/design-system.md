@@ -15,19 +15,22 @@ Stil: Neo-Brutalismus. Dicke Ränder, harte Schatten ohne Weichzeichner, knallig
 | Fokus | `--focus`, `--bw-focus` | Globaler `:focus-visible`-Ring |
 | Akzente | `--pink`, `--yellow`, `--cyan`, `--lime`, `--violet`, `--orange` | Nur als Fläche |
 | Kategorien | `--cat-science` … `--cat-weird` | Kategorie umfärben = nur dieses Token ändern |
+| Bühne | `--night`, `--on-night`, `--on-night-muted` | Dunkle Fläche für Hero, Footer, „Nächster Fakt“; in beiden Modi dunkel |
 | Schrift | `--font-display`, `--font-body`, `--fs-xs` (13) bis `--fs-3xl` (30), `--fs-display-sm/md/lg`, `--fs-emoji-sm…xl` | |
 | Abstände | `--space-1` (4px) bis `--space-12` (80px) | 4er-Raster |
 | Ränder | `--bw-xs` 1, `--bw-sm` 2, `--bw` 2.5, `--bw-accent` 6 | |
 | Radien | `--radius-sm` 8, `--radius-md` 14, `--radius-pill` | |
-| Schatten | `--shadow-xs/sm/md/lg`, `--emoji-shadow` | |
-| Bewegung | `--dur`, `--ease` | Bei „Bewegung reduzieren“ global abgeschaltet |
+| Schatten | `--shadow-xs/sm/md/lg/xl`, `--shadow-night-sm/lg`, `--shadow-on-night`, `--emoji-shadow` | |
+| Bewegung | `--dur`, `--ease`, `--ease-pop`, `--dur-marquee` | Bei „Bewegung reduzieren“ global abgeschaltet, der Ticker wird dann scrollbar |
 
 ## Bausteine
 
 | Klasse | Zweck | Varianten / Zustände |
 |---|---|---|
 | `.card` | Kasten mit Rand und Schatten | – |
-| `.btn` | Aktion (Link oder Button) | `.btn--cyan`, `.btn--orange`; hover, active, `:disabled`, Fokus |
+| `.btn` | Aktion (Link oder Button) | `.btn--cyan`, `.btn--orange`, `.btn--pink`, `.btn--ghost`; hover, active, `:disabled`, Fokus |
+| `.sticker` | Schräger gelber Aufkleber („?!“ im Logo, „WTF?!“ in der Headline) | – |
+| `.stage` | Dunkle Bühne; Buttons darin bekommen hellen Rand und Schatten | – |
 | `.chip` | Kategorie-Etikett oder Filter | neutral; mit `.cat-*` farbig; als Filter `aria-pressed="true"` (zeigt ✓) |
 | `.cat-*` / `.accent` | Akzentfläche | setzt Hintergrund **und** `--on-accent` als Schrift |
 | `.sr-only` | Nur für Screenreader | – |

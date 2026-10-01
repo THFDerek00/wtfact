@@ -2,42 +2,57 @@
 import type { Post } from '../lib';
 import { langOf, postUrl } from '../lib';
 import { t } from '../i18n/ui';
-interface Props { post: Post; big?: boolean }
-const { post, big = false } = Astro.props;
+interface Props { post: Post; no?: number; hidden?: boolean }
+const { post, no, hidden = false } = Astro.props;
 const lang = langOf(post);
 const ui = t(lang);
 const d = post.data;
 ---
-<a href={postUrl(post)} class:list={['card', 'post', { big }]} data-cat={d.category}>
-  <div class:list={['art', `cat-${d.category}`]} aria-hidden="true"><span>{d.emoji}</span></div>
+<a href={postUrl(post)} class="card post" data-cat={d.category} data-page={hidden ? 'later' : undefined} hidden={hidden}>
+  <div class:list={['art', `cat-${d.category}`]} aria-hidden="true">
+    {no && <span class="no">#{String(no).padStart(3, '0')}</span>}
+    <span class="emoji">{d.emoji}</span>
+  </div>
   <div class="body">
-    <span class:list={['chip', `cat-${d.category}`]}>{big ? `⚡ ${ui.todaysFact}` : ui.categories[d.category]}</span>
-    <h2>{d.title}</h2>
+    <span class:list={['chip', `cat-${d.category}`]}>{ui.categories[d.category]}</span>
+    <h3>{d.title}</h3>
     <p>{d.teaser}</p>
-    <span class="more">{ui.readMore} →</span>
+    <span class="more">{ui.readMore} <span aria-hidden="true">→</span></span>
   </div>
 </a>
 
 <style>
-  .post { display: flex; flex-direction: column; overflow: hidden; text-decoration: none; transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
-  .post:hover { transform: translate(-3px, -3px) rotate(-.4deg); box-shadow: var(--shadow-lg); }
-  .art { display: grid; place-items: center; aspect-ratio: 16 / 9; border-bottom: var(--bw) solid var(--line); }
-  .art span { font-size: var(--fs-emoji-md); transform: rotate(-8deg); filter: var(--emoji-shadow); }
-  .body { padding: var(--space-4) var(--space-5) var(--space-5); display: flex; flex-direction: column; gap: var(--space-2); flex: 1; }
-  h2 { margin: var(--space-1) 0 0; font-size: var(--fs-xl); }
-  p { margin: 0; color: var(--muted); font-size: var(--fs-md); }
-  .more { margin-top: auto; padding-top: var(--space-2); font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; color: var(--pink-text); }
-  .chip { align-self: flex-start; }
-  .big { display: grid; grid-template-columns: 1fr 1.2fr; }
-  .big .art { aspect-ratio: auto; border-bottom: 0; border-right: var(--bw) solid var(--line); min-height: 280px; }
-  .big .art span { font-size: var(--fs-emoji-xl); }
-  .big h2 { font-size: var(--fs-display-sm); }
-  .big p { font-size: var(--fs-base); }
-  .big .body { padding: var(--space-7); justify-content: center; }
-  @media (max-width: 720px) {
-    .big { grid-template-columns: 1fr; }
-    .big .art { border-right: 0; border-bottom: var(--bw) solid var(--line); min-height: 180px; }
-    .big .art span { font-size: var(--fs-emoji-lg); }
-    .big .body { padding: var(--space-5); }
+  .post {
+    display: flex; flex-direction: column; overflow: hidden; text-decoration: none;
+    transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
   }
+  .post:hover { transform: translate(-3px, -3px) rotate(-0.5deg); box-shadow: var(--shadow-xl); }
+  .art {
+    position: relative; display: grid; place-items: center; aspect-ratio: 16 / 9;
+    border-bottom: var(--bw) solid var(--line);
+    background-image: radial-gradient(color-mix(in srgb, var(--on-accent) 14%, transparent) 18%, transparent 20%);
+    background-size: 16px 16px;
+  }
+  .emoji { font-size: var(--fs-emoji-md); transform: rotate(-8deg); filter: var(--emoji-shadow); transition: transform var(--dur) var(--ease-pop); }
+  .post:hover .emoji { transform: rotate(8deg) scale(1.15); }
+  .no {
+    position: absolute; top: var(--space-3); left: var(--space-3);
+    padding: 0 var(--space-2); border-radius: var(--radius-sm);
+    background: var(--night); color: var(--on-night);
+    font-family: var(--font-display); font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.04em;
+  }
+  .body { padding: var(--space-4) var(--space-5) var(--space-5); display: flex; flex-direction: column; gap: var(--space-2); flex: 1; }
+  .chip { align-self: flex-start; }
+  h3 { margin: var(--space-1) 0 0; font-size: var(--fs-xl); }
+  p { margin: 0; color: var(--muted); font-size: var(--fs-md); }
+  @media (max-width: 560px) {
+    .post { flex-direction: row; }
+    .art { flex: 0 0 104px; aspect-ratio: auto; border-bottom: 0; border-right: var(--bw) solid var(--line); }
+    .emoji { font-size: var(--fs-emoji-sm); }
+    .no { top: var(--space-2); left: var(--space-2); }
+    .body { padding: var(--space-3) var(--space-4) var(--space-4); }
+    h3 { font-size: var(--fs-lg); }
+    p { font-size: var(--fs-sm); }
+  }
+  .more { margin-top: auto; padding-top: var(--space-2); font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; color: var(--pink-text); }
 </style>

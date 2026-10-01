@@ -25,3 +25,8 @@ export const amazonUrl = (lang: Lang, query: string) => {
 };
 
 export const readingMinutes = (body = '') => Math.max(1, Math.round(body.split(/\s+/).length / 200));
+
+/** Laufende Nummer eines Beitrags innerhalb seiner Sprache, ältester = 1. `all` ist postsFor(lang). */
+export const factNumber = (p: Post, all: Post[]) => all.length - all.findIndex((o) => o.id === p.id);
+
+export const categoryIcon = (c: string) => `/brand/icons/${c}.svg`;
