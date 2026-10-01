@@ -1,0 +1,52 @@
+name: Täglicher Beitrag
+
+on:
+  schedule:
+    - cron: '0 4 * * *' # 06:00 Uhr deutscher Sommerzeit, 05:00 Uhr Winterzeit
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-post
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: Beitrag schreiben
+        id: gen
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::error::Das Secret ANTHROPIC_API_KEY fehlt (Settings > Secrets and variables > Actions)."
+            exit 1
+          fi
+          # Ein zweiter Versuch, falls die Qualitätsprüfung den ersten Entwurf verwirft.
+          node scripts/generate-post.mjs || node scripts/generate-post.mjs
+
+      - name: Seite testweise bauen
+        run: npm run build
+
+      - name: Veröffentlichen
+        run: |
+          if [ -z "$(git status --porcelain src/content)" ]; then
+            echo "Kein neuer Beitrag."
+            exit 0
+          fi
+          git config user.name "WTFact Bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/content
+          git commit -m "Neuer Beitrag: ${{ steps.gen.outputs.title }}"
+          git push
