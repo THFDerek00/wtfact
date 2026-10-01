@@ -13,8 +13,8 @@ Stil: Neo-Brutalismus. Dicke Ränder, harte Schatten ohne Weichzeichner, knallig
 | Text auf Akzent | `--on-accent` | Immer dunkel, auch im Dark Mode |
 | Pink als Schrift | `--pink-text` | Für Links/Hervorhebung. `--pink` selbst nie als Schriftfarbe |
 | Fokus | `--focus`, `--bw-focus` | Globaler `:focus-visible`-Ring |
-| Akzente | `--pink`, `--yellow`, `--cyan`, `--lime`, `--violet`, `--orange` | Nur als Fläche |
-| Kategorien | `--cat-science` … `--cat-weird` | Kategorie umfärben = nur dieses Token ändern |
+| Akzente | `--pink`, `--yellow`, `--cyan`, `--lime`, `--violet`, `--orange`, `--teal` | Nur als Fläche |
+| Kategorien | `--cat-science` … `--cat-survival` | Kategorie umfärben = nur dieses Token ändern |
 | Bühne | `--night`, `--on-night`, `--on-night-muted` | Dunkle Fläche für Hero, Footer, „Nächster Fakt“; in beiden Modi dunkel |
 | Schrift | `--font-display`, `--font-body`, `--fs-xs` (13) bis `--fs-3xl` (30), `--fs-display-sm/md/lg`, `--fs-emoji-sm…xl` | |
 | Abstände | `--space-1` (4px) bis `--space-12` (80px) | 4er-Raster |

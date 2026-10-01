@@ -134,10 +134,11 @@ const ICONS = {
   nature: '<path d="M4.5 20C4 11 9 4.5 20.5 3.5 20.5 14 15 20 6.5 19.5"/><path d="M4.5 20 13 11.5"/>',
   body: '<path d="M12 20.5S3 15 3 8.8C3 5.9 5.2 3.8 7.8 3.8c1.8 0 3.3 1 4.2 2.4.9-1.4 2.4-2.4 4.2-2.4C18.8 3.8 21 5.9 21 8.8c0 6.2-9 11.7-9 11.7z"/><path d="M6.5 11h3l1.5-2.5 2 5 1.5-2.5h3"/>',
   weird: '<path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r="1" fill="currentColor"/>',
+  survival: '<path d="M12 22c4 0 7-2.7 7-6.6 0-3.4-2.3-5.6-4-7.4-.4 2-1.4 3.2-2.6 3.6C12.8 8 11.5 4.5 9 2c.3 3.6-1.8 5.6-3.4 7.8C4.6 11.2 5 13 5 15.4 5 19.3 8 22 12 22z"/><path d="M12 22c-1.7 0-3-1.2-3-2.9 0-1.6 1.2-2.6 2-3.6.4 1 1 1.4 1.6 1.5.4-.8.4-1.8 0-2.8 1.6.9 2.4 2.6 2.4 4.1 0 2.1-1.3 3.7-3 3.7z"/>',
   new: '<path d="M12 2.5l2.4 6.1 6.1 2.4-6.1 2.4-2.4 6.1-2.4-6.1-6.1-2.4 6.1-2.4z"/><path d="M19 17v4M17 19h4"/>',
   quiz: '<path d="M8.5 8.5a3.5 3.5 0 1 1 5.2 3c-1.1.7-1.7 1.4-1.7 2.7v.6"/><circle cx="12" cy="19" r="1.1" fill="currentColor"/>',
 };
-const CAT_COLOR = { science: C.cyan, history: C.orange, tech: C.violet, nature: C.lime, body: C.pink, weird: C.yellow, new: C.yellow, quiz: C.pink };
+const CAT_COLOR = { science: C.cyan, history: C.orange, tech: C.violet, nature: C.lime, body: C.pink, weird: C.yellow, survival: '#3de0b0', new: C.yellow, quiz: C.pink };
 const iconG = (name, x, y, size, color = C.ink, sw = 2) =>
   `<g transform="translate(${r2(x)} ${r2(y)}) scale(${r2(size / 24)})" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" color="${color}">${ICONS[name]}</g>`;
 
@@ -173,9 +174,9 @@ const dots = (w, h, fill = '#14141414') =>
 // ---------- Texte ----------
 const L = {
   de: { tagline: ['Jeden Tag ein Fakt,', 'der dich „WTF?!" sagen lässt.'], short: 'Jeden Tag ein Fakt.', sources: 'mit Quellen belegt', cta: 'Ganzer Fakt + Quellen: Link in Bio', swipe: 'Wusstest du das?', daily: 'Täglich neu',
-    cats: { science: 'Wissenschaft', history: 'Geschichte', tech: 'Technik', nature: 'Natur', body: 'Körper', weird: 'Kurioses', new: 'Neu', quiz: 'Quiz' } },
+    cats: { science: 'Wissenschaft', history: 'Geschichte', tech: 'Technik', nature: 'Natur', body: 'Körper', weird: 'Kurioses', survival: 'Survival', new: 'Neu', quiz: 'Quiz' } },
   en: { tagline: ['One fact a day that', 'makes you go "WTF?!"'], short: 'One fact a day.', sources: 'backed by sources', cta: 'Full fact + sources: link in bio', swipe: 'Did you know?', daily: 'New every day',
-    cats: { science: 'Science', history: 'History', tech: 'Tech', nature: 'Nature', body: 'Body', weird: 'Weird', new: 'New', quiz: 'Quiz' } },
+    cats: { science: 'Science', history: 'History', tech: 'Tech', nature: 'Nature', body: 'Body', weird: 'Weird', survival: 'Survival', new: 'New', quiz: 'Quiz' } },
 };
 const EXAMPLE = {
   de: { cat: 'nature', title: 'Wombats kacken Würfel. Kein Witz.', hook: 'Rund 80 bis 100 kleine Würfel pro Nacht. Kein anderes bekanntes Tier schafft das.' },

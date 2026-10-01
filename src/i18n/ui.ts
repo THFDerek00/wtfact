@@ -24,7 +24,7 @@ export const ui = {
     readingTime: (m: number) => `${m} Min. Lesezeit`,
     categories: {
       science: 'Wissenschaft', history: 'Geschichte', tech: 'Technik',
-      nature: 'Natur', body: 'Körper', weird: 'Kurioses',
+      nature: 'Natur', body: 'Körper', weird: 'Kurioses', survival: 'Survival',
     } satisfies Record<Category, string>,
     notFound: 'Dieser Fakt existiert nicht. Noch nicht.',
     hero: ['Jeden Tag ein Fakt, der dich', '„WTF?!“', 'sagen lässt.'],
@@ -62,7 +62,7 @@ export const ui = {
     readingTime: (m: number) => `${m} min read`,
     categories: {
       science: 'Science', history: 'History', tech: 'Tech',
-      nature: 'Nature', body: 'Body', weird: 'Weird',
+      nature: 'Nature', body: 'Body', weird: 'Weird', survival: 'Survival',
     } satisfies Record<Category, string>,
     notFound: 'This fact does not exist. Yet.',
     hero: ['One fact a day that makes you go', '“WTF?!”', ''],
