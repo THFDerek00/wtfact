@@ -8,6 +8,6 @@ const { lang, title } = Astro.props;
   <article class="narrow page"><h1>{title}</h1><slot /></article>
 </Base>
 <style>
-  .page h1 { font-size: clamp(30px, 5vw, 44px); }
-  .page :global(h2) { font-size: 22px; margin-top: 32px; }
+  .page h1 { font-size: var(--fs-display-md); }
+  .page :global(h2) { font-size: var(--fs-xl); margin-top: var(--space-8); }
 </style>

@@ -6,24 +6,29 @@ const { lang, title } = Astro.props;
 const ui = t(lang);
 ---
 <div class="share" data-title={title} data-copied={ui.copied}>
-  <button class="btn" type="button">📤 {ui.share}</button>
+  <button class="btn btn--cyan" type="button"><span aria-hidden="true">📤</span> {ui.share}</button>
+  <span class="status" role="status" aria-live="polite"></span>
 </div>
 
 <script>
   document.querySelectorAll<HTMLElement>('.share').forEach((el) => {
     const btn = el.querySelector('button')!;
+    const status = el.querySelector<HTMLElement>('.status')!;
     btn.addEventListener('click', async () => {
       const data = { title: el.dataset.title, url: location.href };
       if (navigator.share) {
         try { await navigator.share(data); } catch {}
-      } else {
-        await navigator.clipboard.writeText(location.href);
-        btn.textContent = el.dataset.copied ?? 'OK';
+        return;
       }
+      try {
+        await navigator.clipboard.writeText(location.href);
+        status.textContent = el.dataset.copied ?? 'OK';
+        setTimeout(() => (status.textContent = ''), 3000);
+      } catch {}
     });
   });
 </script>
 <style>
-  .share { margin: 28px 0; }
-  .btn { background: var(--cyan); }
+  .share { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); margin: var(--space-7) 0; }
+  .status { font-size: var(--fs-sm); color: var(--muted); }
 </style>

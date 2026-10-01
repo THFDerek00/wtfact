@@ -28,3 +28,7 @@ Ein Beitrag, der die Regeln verletzt, lässt also auch den Build auf Cloudflare 
 
 Voraussetzung: Repository-Secret `ANTHROPIC_API_KEY`. Manuell starten: Actions > Täglicher Beitrag > Run workflow,
 oder lokal `npm run post`.
+
+## Design
+
+Farben, Schrift, Abstände und Bausteine sind in `docs/design-system.md` beschrieben. `npm run check:design` prüft sie (auch automatisch vor jedem Build): keine festen Farben oder Größen außerhalb der Tokens, Fokus-Stil, Barrierefreiheit und Kontraste.

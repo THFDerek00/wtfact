@@ -5,11 +5,12 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "check": "node scripts/check-posts.mjs",
-    "prebuild": "node scripts/check-posts.mjs",
+    "check": "node scripts/check-posts.mjs && node scripts/check-design.mjs",
+    "prebuild": "node scripts/check-posts.mjs && node scripts/check-design.mjs",
     "build": "astro build",
     "preview": "astro preview",
-    "post": "node scripts/generate-post.mjs"
+    "post": "node scripts/generate-post.mjs",
+    "check:design": "node scripts/check-design.mjs"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",

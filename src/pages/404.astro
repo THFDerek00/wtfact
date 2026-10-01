@@ -3,9 +3,14 @@ import Base from '../layouts/Base.astro';
 import { t } from '../i18n/ui';
 ---
 <Base lang="de" title="404">
-  <section class="narrow" style="text-align:center;padding:60px 0">
-    <h1 style="font-size:72px;margin:0">🤯 404</h1>
+  <section class="narrow notfound">
+    <h1>🤯 404</h1>
     <p>{t('de').notFound} / {t('en').notFound}</p>
     <a class="btn" href="/">WTFact</a>
   </section>
 </Base>
+
+<style>
+  .notfound { text-align: center; padding: var(--space-11) 0; }
+  h1 { font-size: var(--fs-emoji-lg); margin: 0; }
+</style>

@@ -29,7 +29,7 @@ const next = others.find((p) => p.data.category !== d.category) ?? others[0];
         <span>{dateFmt(lang, d.date)} · {ui.readingTime(readingMinutes(post.body))}</span>
       </div>
       <h1>{d.title}</h1>
-      <p class="hook card"><span>{d.emoji}</span>{d.hook}</p>
+      <p class="hook card accent"><span aria-hidden="true">{d.emoji}</span>{d.hook}</p>
     </header>
 
     <div class="content"><Content /></div>
@@ -55,16 +55,16 @@ const next = others.find((p) => p.data.category !== d.category) ?? others[0];
 </Base>
 
 <style>
-  header { margin-top: 12px; }
-  .meta { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; font-size: 14px; color: var(--muted); }
-  h1 { font-size: clamp(32px, 6vw, 52px); margin: 16px 0 22px; }
-  .hook { display: flex; gap: 14px; align-items: center; padding: 18px 20px; margin: 0 0 28px; background: var(--yellow); color: #141414; font: 600 19px/1.45 var(--display); }
-  .hook span { font-size: 36px; }
-  .content :global(h2) { font-size: 26px; margin-top: 36px; }
-  .content :global(blockquote) { margin: 24px 0; padding: 4px 20px; border-left: 6px solid var(--pink); font-style: italic; }
+  header { margin-top: var(--space-3); }
+  .meta { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; font-size: var(--fs-sm); color: var(--muted); }
+  h1 { font-size: var(--fs-display-lg); margin: var(--space-4) 0 var(--space-6); }
+  .hook { display: flex; gap: var(--space-4); align-items: center; padding: var(--space-5); margin: 0 0 var(--space-7); font-family: var(--font-display); font-size: var(--fs-lg); font-weight: 600; line-height: 1.45; }
+  .hook span { font-size: var(--fs-emoji-sm); }
+  .content :global(h2) { font-size: var(--fs-2xl); margin-top: var(--space-9); }
+  .content :global(blockquote) { margin: var(--space-6) 0; padding: var(--space-1) var(--space-5); border-left: var(--bw-accent) solid var(--pink); font-style: italic; }
   .content :global(strong) { background: linear-gradient(transparent 60%, color-mix(in srgb, var(--pink) 35%, transparent) 0); }
-  .sources { font-size: 14px; color: var(--muted); }
+  .sources { font-size: var(--fs-sm); color: var(--muted); }
   .sources summary { cursor: pointer; font-weight: 600; }
-  .nextup { margin-top: 48px; }
-  .nextup h2 { font-size: 24px; }
+  .nextup { margin-top: var(--space-10); }
+  .nextup h2 { font-size: var(--fs-2xl); }
 </style>

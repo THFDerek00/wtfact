@@ -24,10 +24,10 @@ const used = new Set(posts.map((p) => p.data.category));
   <section class="wrap list">
     <div class="head">
       <h2>{ui.latest}</h2>
-      <div class="filters" role="group">
-        <button class="chip on" data-filter="all" type="button">{ui.allCategories}</button>
+      <div class="filters" role="group" aria-label={ui.filterLabel}>
+        <button class="chip" data-filter="all" type="button" aria-pressed="true">{ui.allCategories}</button>
         {CATEGORIES.filter((c) => used.has(c)).map((c) => (
-          <button class:list={['chip', `cat-${c}`]} data-filter={c} type="button">{ui.categories[c]}</button>
+          <button class:list={['chip', `cat-${c}`]} data-filter={c} type="button" aria-pressed="false">{ui.categories[c]}</button>
         ))}
       </div>
     </div>
@@ -41,7 +41,7 @@ const used = new Set(posts.map((p) => p.data.category));
   const buttons = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
   buttons.forEach((b) =>
     b.addEventListener('click', () => {
-      buttons.forEach((x) => x.classList.toggle('on', x === b));
+      buttons.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
       const f = b.dataset.filter;
       document.querySelectorAll<HTMLElement>('.grid [data-cat]').forEach((card) => {
         card.hidden = f !== 'all' && card.dataset.cat !== f;
@@ -51,15 +51,10 @@ const used = new Set(posts.map((p) => p.data.category));
 </script>
 
 <style>
-  .intro h1 { font-size: clamp(30px, 6vw, 56px); margin: 12px 0 28px; max-width: 18ch; }
-  .list { margin-top: 56px; }
-  .head { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-  .head h2 { margin: 0; font-size: 28px; }
-  .filters { display: flex; flex-wrap: wrap; gap: 8px; }
-  .filters .chip { cursor: pointer; background: var(--surface); color: var(--ink); }
-  .filters .chip[class*='cat-'] { color: #141414; }
-  .filters .chip.on { box-shadow: 2px 2px 0 var(--line); transform: translate(-1px, -1px); outline: 2px solid var(--line); }
-  .filters .chip:not(.on) { opacity: .75; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
-  [hidden] { display: none !important; }
+  .intro h1 { font-size: var(--fs-display-lg); margin: var(--space-3) 0 var(--space-7); max-width: 18ch; }
+  .list { margin-top: var(--space-11); }
+  .head { display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: center; justify-content: space-between; margin-bottom: var(--space-5); }
+  .head h2 { margin: 0; font-size: var(--fs-2xl); }
+  .filters { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-6); }
 </style>
