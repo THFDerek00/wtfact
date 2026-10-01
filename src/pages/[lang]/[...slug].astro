@@ -7,6 +7,7 @@ import PostCard from '../../components/PostCard.astro';
 import { LANGS } from '../../config';
 import { t, dateFmt } from '../../i18n/ui';
 import { postsFor, langOf, slugOf, postUrl, translationOf, readingMinutes, type Post } from '../../lib';
+import { ogPath } from '../../og';
 
 export async function getStaticPaths() {
   const all = (await Promise.all(LANGS.map(postsFor))).flat();
@@ -21,7 +22,7 @@ const alt = await translationOf(post);
 const others = (await postsFor(lang)).filter((p) => p.id !== post.id);
 const next = others.find((p) => p.data.category !== d.category) ?? others[0];
 ---
-<Base lang={lang} title={d.title} description={d.teaser} altUrl={alt ? postUrl(alt) : undefined}>
+<Base lang={lang} title={d.title} description={d.teaser} altUrl={alt ? postUrl(alt) : undefined} image={ogPath(post)}>
   <article class="narrow">
     <header>
       <div class="meta">
