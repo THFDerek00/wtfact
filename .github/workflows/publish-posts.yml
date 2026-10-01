@@ -1,0 +1,32 @@
+name: Beiträge veröffentlichen
+
+# Führt die Beitrags-PRs von "Täglicher Beitrag" nach main zusammen, sobald sie
+# mindestens 3 Stunden offen waren. Wer einen Beitrag stoppen will, schließt den PR.
+on:
+  schedule:
+    - cron: '0 8 * * *' # 10:00 Uhr deutscher Sommerzeit, 09:00 Uhr Winterzeit
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wartende Beiträge zusammenführen
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          cutoff=$(date -u -d '3 hours ago' +%s)
+          gh pr list --state open --base main --json number,headRefName,createdAt \
+            --jq '.[] | select(.headRefName | startswith("beitrag/")) | "\(.number) \(.createdAt)"' |
+          while read -r number created; do
+            if [ "$(date -u -d "$created" +%s)" -gt "$cutoff" ]; then
+              echo "PR #$number ist jünger als 3 Stunden, bleibt bis morgen offen."
+              continue
+            fi
+            gh pr merge "$number" --squash --delete-branch
+          done

@@ -7,6 +7,7 @@ import PostCard from '../../components/PostCard.astro';
 import { LANGS } from '../../config';
 import { t, dateFmt } from '../../i18n/ui';
 import { postsFor, langOf, slugOf, postUrl, translationOf, readingMinutes, factNumber, type Post } from '../../lib';
+import { ogPath } from '../../og';
 
 export async function getStaticPaths() {
   const all = (await Promise.all(LANGS.map(postsFor))).flat();
@@ -25,7 +26,7 @@ const next = all.length > 1 ? all[(i + 1) % all.length] : undefined;
 const related = all.filter((p) => p.id !== post.id && p.id !== next?.id && p.data.category === d.category).slice(0, 2);
 const no = String(factNumber(post, all)).padStart(3, '0');
 ---
-<Base lang={lang} title={d.title} description={d.teaser} altUrl={alt ? postUrl(alt) : undefined}>
+<Base lang={lang} title={d.title} description={d.teaser} altUrl={alt ? postUrl(alt) : undefined} image={ogPath(post)}>
   <div class="progress" aria-hidden="true"><span></span></div>
   <section class:list={['banner', `cat-${d.category}`]}>
     <div class="narrow banner-inner">

@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 concurrency:
   group: daily-post
@@ -39,14 +40,22 @@ jobs:
       - name: Seite testweise bauen
         run: npm run build
 
-      - name: Veröffentlichen
+      # Der Beitrag kommt als Pull Request. publish-posts.yml veröffentlicht ihn ein paar
+      # Stunden später, falls niemand den PR vorher schließt.
+      - name: Als Pull Request vorschlagen
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TITLE: ${{ steps.gen.outputs.title }}
         run: |
           if [ -z "$(git status --porcelain src/content)" ]; then
             echo "Kein neuer Beitrag."
             exit 0
           fi
+          branch="beitrag/$(date -u +%F)"
           git config user.name "WTFact Bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
           git add src/content
-          git commit -m "Neuer Beitrag: ${{ steps.gen.outputs.title }}"
-          git push
+          git commit -m "Neuer Beitrag: $TITLE"
+          git push -u origin "$branch"
+          gh pr create --base main --head "$branch" --title "Neuer Beitrag: $TITLE" --body "Wird automatisch veröffentlicht, wenn **Beiträge veröffentlichen** das nächste Mal läuft (täglich 10 Uhr). Nicht veröffentlichen: diesen PR schließen."
