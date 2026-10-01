@@ -8,6 +8,8 @@ const posts = defineCollection({
     title: z.string(),
     teaser: z.string(),
     date: z.coerce.date(),
+    // true nimmt einen Beitrag von der Seite, ohne ihn zu löschen.
+    draft: z.boolean().default(false),
     category: z.enum(CATEGORIES),
     emoji: z.string(),
     // Gleicher Wert in DE und EN verbindet die beiden Sprachversionen.

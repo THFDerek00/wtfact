@@ -9,7 +9,7 @@ export const postUrl = (p: Post) => `/${langOf(p)}/${slugOf(p)}/`;
 
 export async function postsFor(lang: Lang) {
   const now = new Date();
-  return (await getCollection('posts', (p) => langOf(p) === lang && p.data.date <= now)).sort(
+  return (await getCollection('posts', (p) => langOf(p) === lang && !p.data.draft && p.data.date <= now)).sort(
     (a, b) => b.data.date.getTime() - a.data.date.getTime(),
   );
 }
