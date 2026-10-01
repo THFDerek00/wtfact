@@ -10,7 +10,7 @@ interface Props {
   altUrl?: string;
   image?: string;
 }
-const { lang, title, description, altUrl, image } = Astro.props;
+const { lang, title, description, altUrl, image = `/og-default-${Astro.props.lang}.png` } = Astro.props;
 const ui = t(lang);
 const fullTitle = title ? `${title} | ${SITE.name}` : `${SITE.name}: ${ui.tagline}`;
 const desc = description ?? ui.tagline;
@@ -27,7 +27,11 @@ const otherUrl = altUrl ?? `/${other}/`;
     <meta name="description" content={desc} />
     <link rel="canonical" href={canonical} />
     <link rel="alternate" hreflang={other} href={new URL(otherUrl, Astro.site)} />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#ffd23f" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <link rel="alternate" type="application/rss+xml" title={SITE.name} href={`/${lang}/rss.xml`} />
     <meta property="og:site_name" content={SITE.name} />
