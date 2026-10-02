@@ -63,7 +63,7 @@ Wunsch von Eric (2026-10-02). Abläufe und Einrichtung: `README.md`.
 6. Platzierung auf der Seite: Kopfzeile neben dem Logo (ab 761px Breite), Footer unter dem großen Logo, Über-Seite als Überschrift. Einen grafischen Stempel „Stimmt wirklich.“ gibt es vorerst nicht (Entscheidung 2. Oktober 2026).
 ## Punktmuster auf Kategorie-Flächen
 
-Wunsch von Eric (2026-10-02): Überall, wo eine Kategoriefarbe als Fläche auftaucht, liegt das Punktmuster der Faktenkarten darüber. Das gilt für alles, was es heute gibt (Kartenbild, Kacheln, Filter- und Etikett-Chips, Beitrags-Banner, „Fakt des Tages“, Sterne der Gold-Fakten, Teilen-Vorschaubild, Social-Grafiken) und für jede künftige Kategorie und Funktion.
+Wunsch von Eric (2026-10-02): Überall, wo eine Kategoriefarbe als Fläche auftaucht, liegt das Punktmuster der Faktenkarten darüber. Das gilt für alles, was es heute gibt (Kartenbild, Kacheln, Filter- und Etikett-Chips, Beitrags-Banner, Begrüßungskarte, Sterne der Gold-Fakten, Teilen-Vorschaubild, Social-Grafiken) und für jede künftige Kategorie und Funktion.
 
 - So geht's: Element bekommt die Klasse `.cat-<kategorie>`. Das Muster kommt dann automatisch mit. Kategoriefarben nie direkt als `background` setzen.
 - Rastergröße pro Ort über `--dots-size` umstellen (z. B. `--dots-size: var(--dots-size-lg)` im Banner). `.chip` stellt selbst auf `sm`.

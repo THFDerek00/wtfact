@@ -7,7 +7,7 @@ const lang = Astro.params.lang as Lang;
 <Page lang={lang} title={lang === 'de' ? `Über ${SITE.name}` : `About ${SITE.name}`}>
   {lang === 'de' ? (
     <>
-      <p>Wusstest du, dass Honig nach 3.000 Jahren noch essbar sein kann? Genau für solche Momente gibt es {SITE.name}: jeden Tag ein neuer Fakt aus Wissenschaft, Geschichte, Technik, Natur und dem ganz normalen Wahnsinn.</p>
+      <p>Wusstest du, dass Honig nach 3.000 Jahren noch essbar sein kann? Genau für solche Momente gibt es {SITE.name}: jeden Tag drei neue Fakten aus Wissenschaft, Geschichte, Technik, Natur und dem ganz normalen Wahnsinn.</p>
       <h2>Und ja, das stimmt wirklich.</h2>
       <p>Das ist unser Versprechen. Die Texte entstehen mit Hilfe von KI, aber jeder Fakt braucht mindestens zwei unabhängige Quellen und muss vor dem Erscheinen einen Faktencheck bestehen. Lässt sich etwas nicht sauber belegen, erscheint an dem Tag lieber kein Beitrag als ein falscher.</p>
       <p>Wenn dir trotzdem ein Fehler auffällt, schreib uns an die Adresse im <a href={`/${lang}/impressum/`}>Impressum</a>. Wir korrigieren ihn offen und listen ihn unter <a href={`/${lang}/korrekturen/`}>Stimmt doch nicht</a>.</p>
@@ -15,7 +15,7 @@ const lang = Astro.params.lang as Lang;
     </>
   ) : (
     <>
-      <p>Did you know honey can still be edible after 3,000 years? That is what {SITE.name} is for: a new fact every day from science, history, tech, nature and everyday madness.</p>
+      <p>Did you know honey can still be edible after 3,000 years? That is what {SITE.name} is for: three new facts every day from science, history, tech, nature and everyday madness.</p>
       <h2>And yes, it's actually true.</h2>
       <p>That's our promise. Posts are written with the help of AI, but every fact needs at least two independent sources and has to pass a fact check before it goes live. If something can't be backed up properly, we'd rather skip a day than publish something wrong.</p>
       <p>If you still spot a mistake, email us at the address in our <a href={`/${lang}/impressum/`}>imprint</a>. We fix it in the open and list it under <a href={`/${lang}/korrekturen/`}>Corrections</a>.</p>
