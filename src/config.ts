@@ -1,10 +1,11 @@
 export const SITE = {
   name: 'WTFact',
-  // Amazon-PartnerNet-Tags. Nach der Anmeldung hier eintragen.
+  // Amazon-Partner-Tags. de = Erics PartnerNet-Konto (amazon.de).
+  // en: noch kein eigenes Amazon-Associates-Konto (US). Leer = Links ohne Partner-Tag.
   amazon: {
     de: { host: 'www.amazon.de', tag: 'wtfact-21' },
-    en: { host: 'www.amazon.com', tag: 'wtfact-20' },
-  },
+    en: { host: 'www.amazon.com', tag: '' },
+  } as Record<'de' | 'en', { host: string; tag: string }>,
   // Angaben für das Impressum (Pflicht in Deutschland, § 5 DDG).
   owner: {
     name: 'Eric Steingröver',

@@ -22,7 +22,7 @@ export async function translationOf(p: Post) {
 
 export const amazonUrl = (lang: Lang, query: string) => {
   const a = SITE.amazon[lang];
-  return `https://${a.host}/s?k=${encodeURIComponent(query)}&tag=${a.tag}`;
+  return `https://${a.host}/s?k=${encodeURIComponent(query)}${a.tag ? `&tag=${encodeURIComponent(a.tag)}` : ''}`;
 };
 
 export const readingMinutes = (body = '') => Math.max(1, Math.round(body.split(/\s+/).length / 200));
