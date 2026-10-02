@@ -85,8 +85,30 @@ for (const file of files) {
 const tokensSrc = readFileSync(join(ROOT, TOKENS), 'utf8');
 if (!/:focus-visible\s*\{/.test(tokensSrc)) errors.push(`${TOKENS}: globaler :focus-visible-Stil fehlt.`);
 if (!/prefers-reduced-motion:\s*reduce/.test(tokensSrc)) errors.push(`${TOKENS}: Regel für prefers-reduced-motion fehlt.`);
-for (const m of tokensSrc.matchAll(/^\.cat-[\w-]+\s*\{([^}]*)\}/gm)) {
-  if (!/color:\s*var\(--on-accent\)/.test(m[1])) errors.push(`${TOKENS}: ${m[0].split('{')[0].trim()} setzt keine Schriftfarbe var(--on-accent).`);
+const catRules = new Set();
+for (const m of tokensSrc.matchAll(/^\.cat-([\w-]+)\s*\{([^}]*)\}/gm)) {
+  const [, key, body] = m;
+  catRules.add(key);
+  if (!/color:\s*var\(--on-accent\)/.test(body)) errors.push(`${TOKENS}: .cat-${key} setzt keine Schriftfarbe var(--on-accent).`);
+  // Punktmuster auf jeder Kategorie-Fläche (Wunsch von Eric, 2026-10-02)
+  if (!new RegExp(`background:\\s*var\\(--dots\\),\\s*var\\(--cat-${key}\\)`).test(body) || !/background-size:\s*var\(--dots-size\)/.test(body)) {
+    errors.push(`${TOKENS}: .cat-${key} hat kein Punktmuster. Muster: background: var(--dots), var(--cat-${key}); background-size: var(--dots-size) var(--dots-size);`);
+  }
+}
+// Jede Kategorie aus src/config.ts braucht ihre .cat-*-Klasse (und damit das Punktmuster).
+const cats = readFileSync(join(ROOT, 'src/config.ts'), 'utf8').match(/CATEGORIES\s*=\s*\[([^\]]*)\]/)[1].match(/[\w-]+/g);
+for (const c of cats) if (!catRules.has(c)) errors.push(`${TOKENS}: Klasse .cat-${c} fehlt (Kategorie aus src/config.ts).`);
+// Kategoriefarben nur über die .cat-*-Klasse, nie direkt als Fläche. Sonst fehlt das Punktmuster.
+for (const file of files) {
+  const rel = relative(ROOT, file);
+  const src = readFileSync(file, 'utf8');
+  for (const { css, offset } of styleBlocks(file, src)) {
+    const clean = (rel === TOKENS ? css.replace(/^\.cat-[\w-]+\s*\{[^}]*\}/gm, (x) => x.replace(/[^\n]/g, ' ')) : css)
+      .replace(/\/\*[\s\S]*?\*\//g, (x) => x.replace(/[^\n]/g, ' '));
+    for (const m of clean.matchAll(/(?<![-\w])(background(?:-color|-image)?|fill)\s*:\s*([^;{}]*var\(--cat-[^;{}]*)/g)) {
+      errors.push(`${rel}:${lineAt(src, offset + m.index)} Kategoriefarbe direkt als Fläche. Nutze die Klasse .cat-*, dann kommt das Punktmuster automatisch mit.`);
+    }
+  }
 }
 
 // --- 3. Kontraste (WCAG AA) --------------------------------------------------
@@ -139,6 +161,20 @@ for (const [mode, t] of [['hell', light], ['dunkel', dark]]) {
     }
     const r = ratio(a, b);
     if (r < min) errors.push(`${TOKENS}: Kontrast ${fg} auf ${bg} (${mode}) ist ${r.toFixed(2)}:1, nötig ${min}:1.`);
+  }
+}
+
+// Schrift muss auch dort lesbar bleiben, wo sie auf einem Punkt liegt (Kategorie + Punktfarbe gemischt).
+const dotShare = Number((light['--dots-ink'] ?? '').match(/(\d+)%/)?.[1] ?? NaN) / 100;
+if (!(dotShare > 0 && dotShare <= 0.2)) errors.push(`${TOKENS}: --dots-ink muss color-mix(… var(--on-accent) N%, transparent) mit N ≤ 20 sein.`);
+const mix = (a, b, w) => '#' + [0, 2, 4].map((i) => Math.round(parseInt(a.slice(1 + i, 3 + i), 16) * (1 - w) + parseInt(b.slice(1 + i, 3 + i), 16) * w).toString(16).padStart(2, '0')).join('');
+for (const [mode, t] of [['hell', light], ['dunkel', dark]]) {
+  const ink = resolve(t, '--on-accent');
+  for (const cat of Object.keys(light).filter((k) => k.startsWith('--cat-'))) {
+    const bg = resolve(t, cat);
+    if (!/^#[0-9a-f]{6}$/i.test(bg ?? '') || !/^#[0-9a-f]{6}$/i.test(ink ?? '') || !(dotShare > 0)) continue;
+    const r = ratio(ink, mix(bg, ink, dotShare));
+    if (r < 4.5) errors.push(`${TOKENS}: Kontrast --on-accent auf ${cat} mit Punkt (${mode}) ist ${r.toFixed(2)}:1, nötig 4.5:1. --dots-ink heller machen.`);
   }
 }
 
