@@ -71,6 +71,20 @@
   /* Spiel (Science Jumper): Flüssigkeit in den Reagenzgläsern */
   --flask: #2f7bff;
   --flask-glow: #8ec5ff;
+  /* Spiel: Buch, Holz, Haus */
+  --book-cover: #ff3d7f;
+  --book-spine: #b3124a;
+  --book-page: #fff6e0;
+  --book-page-line: #cbbf9f;
+  --wood: #b9763a;
+  --wood-light: #d39457;
+  --wood-dark: #6e4220;
+  --metal: #9aa3ad;
+  --brick: #b84a37;
+  --brick-dark: #7d2c20;
+  --roof: #3a3550;
+  --roof-light: #5a5377;
+  --smoke: #8a8496;
 
   /* Schrift */
   --font-display: 'Space Grotesk Variable', system-ui, sans-serif;

@@ -83,4 +83,5 @@ scripts/check-golden.mjs prüft sie bei jedem Build. -->
 - Same truth and source rules as posts: at least 2 sources from 2 different websites, Wikipedia only with 2 more. [geprüft]
 - 50 to 130 words per language, no emoji, numbers in the title must appear in the text. [geprüft]
 - Unlock thresholds are round numbers: steps of 5 up to 20, then multiples of 25 (50, 75, 100, never 66). [geprüft]
-- The last golden fact unlocks at exactly 1000 points, with at least 10 golden facts before it. [geprüft]
+- A golden fact unlocks when the player's high score in a single run reaches its threshold (points are not added up across runs).
+- The last golden fact unlocks at a high score of exactly 1000, with at least 10 golden facts before it. [geprüft]

@@ -127,7 +127,8 @@ const STARS = 9;
   import { createJumper } from '../../scripts/jumper';
 
   type Fact = { id: string; points: number; category: string; categoryName: string; emoji: string; title: string; text: string; sources: { label: string; url: string }[] };
-  type Store = { total: number; best: number; seen: number };
+  // Freigeschaltet wird nach dem Highscore EINES Laufs, nicht nach gesammelten Punkten.
+  type Store = { best: number; seen: number };
   const KEY = 'wtfact-jumper-v1';
 
   const sec = document.querySelector<HTMLElement>('[data-gold]')!;
@@ -139,9 +140,9 @@ const STARS = 9;
   // Texte mit Zahlen (die Funktionen aus ui.ts) hier im Browser nachgebaut.
   const fmt = {
     progress: (have: number, all: number) => (de ? `${have} von ${all} freigeschaltet` : `${have} of ${all} unlocked`),
-    nextAt: (pts: number, missing: number) => (de ? `Nächster Gold-Fakt bei ${pts} Punkten. Noch ${missing}.` : `Next golden fact at ${pts} points. ${missing} to go.`),
-    runResult: (n: number, total: number) =>
-      de ? `Lauf vorbei: ${n} ${n === 1 ? 'Reagenzglas' : 'Reagenzgläser'}. Du hast jetzt ${total} Punkte.` : `Run over: ${n} test ${n === 1 ? 'tube' : 'tubes'}. You now have ${total} points.`,
+    nextAt: (pts: number, missing: number) => (de ? `Nächster Gold-Fakt ab Highscore ${pts}. Dir fehlen noch ${missing}.` : `Next golden fact at a high score of ${pts}. ${missing} to go.`),
+    runResult: (n: number, best: number) =>
+      de ? `Lauf vorbei: ${n} ${n === 1 ? 'Reagenzglas' : 'Reagenzgläser'}. Dein Highscore: ${best}.` : `Run over: ${n} test ${n === 1 ? 'tube' : 'tubes'}. Your high score: ${best}.`,
     unlocked: (n: number) => (de ? (n === 1 ? 'Neuer Gold-Fakt freigeschaltet!' : `${n} neue Gold-Fakten freigeschaltet!`) : n === 1 ? 'New golden fact unlocked!' : `${n} new golden facts unlocked!`),
     badge: (pts: number) => `${T.goldBadge} · ${pts}`,
   };
@@ -149,16 +150,16 @@ const STARS = 9;
   function load(): Store {
     try {
       const s = JSON.parse(localStorage.getItem(KEY) ?? '{}');
-      return { total: Math.max(0, Number(s.total) || 0), best: Math.max(0, Number(s.best) || 0), seen: Math.max(0, Number(s.seen) || 0) };
+      return { best: Math.max(0, Number(s.best) || 0), seen: Math.min(Math.max(0, Number(s.seen) || 0), Math.max(0, Number(s.best) || 0)) };
     } catch {
-      return { total: 0, best: 0, seen: 0 };
+      return { best: 0, seen: 0 };
     }
   }
   function save() {
     try { localStorage.setItem(KEY, JSON.stringify(store)); } catch { /* privates Fenster: nur für diese Sitzung */ }
   }
   const store = load();
-  // Punkte, die beim letzten Besuch schon „gesehen“ waren: alles darüber bekommt das Neu-Etikett.
+  // Highscore beim letzten Besuch: alles darüber bekommt das Neu-Etikett.
   const seenAtLoad = store.seen;
 
   const stat = (k: string) => document.querySelector<HTMLElement>(`[data-stat="${k}"]`)!;
@@ -195,73 +196,75 @@ const STARS = 9;
 
   function render() {
     stat('best').textContent = String(store.best);
-    stat('total').textContent = String(store.total);
     let have = 0;
     for (const f of facts) {
       const slot = document.querySelector<HTMLElement>(`[data-slot="${f.id}"]`);
       if (!slot) continue;
-      const open = store.total >= f.points;
+      const open = store.best >= f.points;
       if (open) have++;
       if (open && !slot.dataset.open) {
         slot.dataset.open = 'true';
         slot.replaceChildren(card(f, f.points > seenAtLoad));
       }
     }
-    const next = facts.find((f) => f.points > store.total);
+    const next = facts.find((f) => f.points > store.best);
+    stat('total').textContent = `${have}/${facts.length}`;
     document.querySelector('[data-progress-label]')!.textContent = fmt.progress(have, facts.length);
-    document.querySelector('[data-next]')!.textContent = next ? fmt.nextAt(next.points, next.points - store.total) : T.allDone;
+    document.querySelector('[data-next]')!.textContent = next ? fmt.nextAt(next.points, next.points - store.best) : T.allDone;
     const meter = document.querySelector<HTMLElement>('[data-meter]')!;
     meter.setAttribute('aria-valuenow', String(have));
     const max = facts.at(-1)?.points ?? 1;
-    document.querySelector<HTMLElement>('[data-meter-fill]')!.style.setProperty('--fill', String(Math.min(1, store.total / max)));
+    document.querySelector<HTMLElement>('[data-meter-fill]')!.style.setProperty('--fill', String(Math.min(1, store.best / max)));
   }
 
   const startBtn = document.querySelector<HTMLButtonElement>('[data-start]')!;
-  let runStart = store.total;
+  // Highscore vor diesem Lauf: daran misst sich, was neu freigeschaltet wurde.
+  let bestBefore = store.best;
   const game = createJumper({
     canvas: document.querySelector<HTMLCanvasElement>('[data-jumper]')!,
-    text: { tapToStart: T.tapToStart, paused: T.paused, gameOver: T.gameOver, again: T.again },
+    text: { tapToStart: T.tapToStart, paused: T.paused, gameOver: T.gameOver, again: T.again, best: T.best },
+    best: () => store.best,
     onCollect(run) {
-      if (run === 1) { runStart = store.total; toast.hidden = true; }
-      store.total++;
+      if (run === 1) { bestBefore = store.best; toast.hidden = true; }
       stat('run').textContent = String(run);
-      save();
-      render();
+      // Gold-Fakten öffnen sich schon während des Laufs, sobald der Highscore steigt.
+      if (run > store.best) {
+        store.best = run;
+        save();
+        render();
+      }
     },
     onGameOver(run) {
-      if (run === 0) runStart = store.total;
       stat('run').textContent = String(run);
-      store.best = Math.max(store.best, run);
-      save();
-      render();
-      const fresh = facts.filter((f) => f.points > runStart && f.points <= store.total).length;
-      live.textContent = fmt.runResult(run, store.total) + (fresh ? ` ${fmt.unlocked(fresh)}` : '');
-      startBtn.lastChild!.textContent = ` ${T.again}`;
+      const fresh = facts.filter((f) => f.points > bestBefore && f.points <= store.best).length;
+      const record = run > bestBefore;
+      live.textContent = fmt.runResult(run, store.best) + (record ? ` ${T.newBest}` : '') + (fresh ? ` ${fmt.unlocked(fresh)}` : '');
       if (fresh) {
         toastText.textContent = fmt.unlocked(fresh);
         toast.hidden = false;
       }
-      runStart = store.total;
+      startBtn.lastChild!.textContent = ` ${T.again}`;
+      bestBefore = store.best;
     },
   });
 
   startBtn.addEventListener('click', () => {
     toast.hidden = true;
     stat('run').textContent = '0';
-    runStart = store.total;
+    bestBefore = store.best;
     game.start();
   });
 
   document.querySelector('[data-reset]')!.addEventListener('click', () => {
     if (!confirm(T.resetConfirm)) return;
-    Object.assign(store, { total: 0, best: 0, seen: 0 });
+    Object.assign(store, { best: 0, seen: 0 });
     save();
     location.reload();
   });
 
   // Neu-Etiketten gelten bis zum nächsten Besuch: sobald die Sammlung zu sehen war, merken wir uns den Stand.
   new IntersectionObserver((entries) => {
-    if (entries.some((e) => e.isIntersecting)) { store.seen = store.total; save(); }
+    if (entries.some((e) => e.isIntersecting)) { store.seen = store.best; save(); }
   }).observe(sec);
 
   render();
