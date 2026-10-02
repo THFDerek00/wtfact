@@ -1,12 +1,12 @@
 ---
-// Strich-Icons aus Lucide (lucide.dev, ISC-Lizenz), direkt als SVG ins HTML geschrieben.
+// Strich-Icons aus Lucide (lucide.dev, ISC-Lizenz), direkt als SVG ins HTML geschrieben. Die Pfade stehen in icons.ts.
 // Größe und Strichstärke kommen aus den Tokens (--icon-size, --icon-stroke), die Farbe ist currentColor.
 // Für Pfeile immer Chevrons nehmen (chevron-right/-left/-down/-up), für Gefällt mir / weniger thumbs-up/-down.
-import nodes from 'lucide-static/icon-nodes.json';
+import { ICONS } from './icons';
 interface Props { name: string; class?: string }
 const { name, class: cls } = Astro.props;
-const node = (nodes as Record<string, [string, Record<string, string>][]>)[name];
-if (!node) throw new Error(`Lucide-Icon "${name}" gibt es nicht. Namen: https://lucide.dev/icons`);
+const node = ICONS[name];
+if (!node) throw new Error(`Lucide-Icon "${name}" fehlt in src/components/icons.ts. Pfade von https://lucide.dev/icons dort ergänzen.`);
 const esc = (v: string) => v.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 const inner = node.map(([tag, attrs]) => `<${tag} ${Object.entries(attrs).map(([k, v]) => `${k}="${esc(String(v))}"`).join(' ')}/>`).join('');
 ---
