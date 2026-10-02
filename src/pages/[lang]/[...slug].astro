@@ -4,6 +4,7 @@ import Base from '../../layouts/Base.astro';
 import ProductBox from '../../components/ProductBox.astro';
 import ShareBar from '../../components/ShareBar.astro';
 import PostCard from '../../components/PostCard.astro';
+import NewBadge from '../../components/NewBadge.astro';
 import { LANGS } from '../../config';
 import { t, dateFmt } from '../../i18n/ui';
 import { postsFor, langOf, slugOf, postUrl, translationOf, readingMinutes, factNumber, type Post } from '../../lib';
@@ -33,6 +34,7 @@ const no = String(factNumber(post, all)).padStart(3, '0');
       <div class="meta">
         <span class="chip">{ui.categories[d.category]}</span>
         <span class="no">{ui.factNo} #{no}</span>
+        <NewBadge lang={lang} date={d.date} />
       </div>
       <h1>{d.title}</h1>
       <p class="info">{dateFmt(lang, d.date)} · {ui.readingTime(readingMinutes(post.body))} · <a href="#sources">✓ {ui.sourcesCount(d.sources.length)}</a></p>

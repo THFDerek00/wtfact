@@ -1,0 +1,188 @@
+---
+// Montags-Abstimmung und Fakt der Woche (Startseite).
+// Montags stimmen alle ab, welcher Fakt der letzten 7 Tage der beste war; der Gewinner ist ab
+// Dienstag eine Woche lang Fakt der Woche. Kalender: src/week.ts, Speichern: src/scripts/community.ts.
+// Die letzten Fakten werden hier vorab gerendert und im Browser nur ein- oder ausgeblendet.
+import type { Lang } from '../config';
+import type { Post } from '../lib';
+import { postUrl } from '../lib';
+import { t } from '../i18n/ui';
+import { postDay } from '../week';
+interface Props { lang: Lang; posts: Post[] }
+const { lang, posts } = Astro.props;
+const ui = t(lang);
+const w = ui.weekly;
+// Ein Gewinner ist höchstens 15 Tage alt (Fakt vom Montag davor, gezeigt bis zum nächsten Montag).
+const recent = posts.slice(0, 24);
+// Texte für das Skript. Zahlen sind Platzhalter (9001 …), die im Browser ersetzt werden.
+const texts = {
+  chosen: w.chosen(9001, 9002), chosenOne: w.chosen(9001, 1), chosenLocal: w.chosenLocal, nextVote: w.nextVote,
+  thanks: w.thanks, totalOne: w.total(1), totalMany: w.total(9003), localNote: w.localNote, closed: w.closed,
+  pct: lang === 'de' ? '9004 %' : '9004%',
+};
+---
+<section class="wrap weekly" data-weekly>
+  <script type="application/json" data-weekly-texts set:html={JSON.stringify(texts)} />
+  <div class="vote card" data-vote hidden>
+    <p class="kicker"><span class="chip accent">🗳️ {w.voteKicker}</span></p>
+    <h2>{w.voteTitle}</h2>
+    <p class="intro">{w.voteIntro}</p>
+    <ul class="options" aria-label={w.voteLabel}>
+      {recent.map((p) => (
+        <li data-key={p.data.translationKey} data-date={postDay(p.data.date)} hidden>
+          <button class="option" type="button" aria-pressed="false" data-option={p.data.translationKey}>
+            <span class:list={['opt-emoji', `cat-${p.data.category}`]} aria-hidden="true">{p.data.emoji}</span>
+            <span class="opt-text">
+              <span class="sr-only">{w.voteFor}: </span>
+              <span class="opt-title">{p.data.title}</span>
+              <span class="opt-bar" aria-hidden="true"><span class:list={['opt-fill', `cat-${p.data.category}`]}></span></span>
+            </span>
+            <span class="opt-pct" data-pct></span>
+          </button>
+          <a class="opt-read" href={postUrl(p)} aria-label={`${ui.readMore}: ${p.data.title}`}><span aria-hidden="true">→</span></a>
+        </li>
+      ))}
+    </ul>
+    <p class="vote-status" data-vote-status aria-live="polite"></p>
+  </div>
+
+  <div class="fotw" data-fotw hidden>
+    <h2><span aria-hidden="true">🏆</span> {w.title}</h2>
+    {recent.map((p) => (
+      <a class="card fotw-card" href={postUrl(p)} data-key={p.data.translationKey} hidden>
+        <span class:list={['fotw-art', `cat-${p.data.category}`]} aria-hidden="true">
+          <span class="fotw-emoji">{p.data.emoji}</span>
+        </span>
+        <span class="fotw-body">
+          <span class="chip chip--week">🏆 {w.badge}</span>
+          <span class="fotw-title">{p.data.title}</span>
+          <span class="fotw-hook">{p.data.hook}</span>
+          <span class="more">{ui.readMore} <span aria-hidden="true">→</span></span>
+        </span>
+      </a>
+    ))}
+    <p class="fotw-meta" data-fotw-meta></p>
+  </div>
+
+  <p class="teaser card" data-teaser hidden><span aria-hidden="true">🏆</span> <strong>{w.title}:</strong> {w.voteTitle} {w.nextVote}</p>
+</section>
+
+<script>
+  import { week, vote, myVote, type Counts } from '../scripts/community';
+  import { inPoll } from '../week';
+
+  const root = document.querySelector<HTMLElement>('[data-weekly]');
+  const texts: Record<string, string> = JSON.parse(root?.querySelector('[data-weekly-texts]')?.textContent ?? '{}');
+  const fill = (tpl: string, v: Record<string, number>) => tpl.replace(/900\d/g, (m) => String(v[m] ?? m));
+
+  async function init() {
+    if (!root) return;
+    const state = await week();
+    const voteBox = root.querySelector<HTMLElement>('[data-vote]')!;
+    const fotw = root.querySelector<HTMLElement>('[data-fotw]')!;
+    const teaser = root.querySelector<HTMLElement>('[data-teaser]')!;
+
+    // Fakt der Woche
+    const f = state.featured;
+    const card = f && root.querySelector<HTMLElement>(`.fotw-card[data-key="${CSS.escape(f.key)}"]`);
+    if (f && card) {
+      card.hidden = false;
+      fotw.hidden = false;
+      const chosen = state.shared ? fill(f.total === 1 ? texts.chosenOne : texts.chosen, { 9001: f.votes, 9002: f.total }) : texts.chosenLocal;
+      root.querySelector<HTMLElement>('[data-fotw-meta]')!.textContent = state.openPoll ? chosen : `${chosen} ${texts.nextVote}`;
+    }
+
+    // Abstimmung (nur montags)
+    const poll = state.openPoll;
+    if (poll && state.poll) {
+      const items = [...root.querySelectorAll<HTMLElement>('.options li')].filter((li) => inPoll(li.dataset.date!, poll));
+      items.forEach((li) => (li.hidden = false));
+      voteBox.hidden = items.length === 0;
+      const status = root.querySelector<HTMLElement>('[data-vote-status]')!;
+      const showResults = (c: Counts) => {
+        const mine = myVote(poll);
+        items.forEach((li) => {
+          const key = li.dataset.key!;
+          const pct = c.total ? Math.round(((c.counts[key] ?? 0) / c.total) * 100) : 0;
+          li.style.setProperty('--pct', String(pct));
+          li.toggleAttribute('data-results', true);
+          li.querySelector<HTMLElement>('[data-pct]')!.textContent = fill(texts.pct, { 9004: pct });
+          li.querySelector('button')!.setAttribute('aria-pressed', String(key === mine));
+        });
+        const total = c.total === 1 ? texts.totalOne : fill(texts.totalMany, { 9003: c.total });
+        status.textContent = `${texts.thanks} ${total}.${state.shared ? '' : ` ${texts.localNote}`}`;
+      };
+      if (myVote(poll)) showResults(state.poll);
+      items.forEach((li) =>
+        li.querySelector('button')!.addEventListener('click', async () => {
+          const res = await vote(poll, li.dataset.key!);
+          if (res === 'closed') status.textContent = texts.closed;
+          else showResults(res);
+        }),
+      );
+    }
+    teaser.hidden = !fotw.hidden || !voteBox.hidden;
+  }
+  init();
+</script>
+
+<style>
+  .weekly { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-8); margin-top: var(--space-11); }
+  .option, .opt-text { min-width: 0; }
+  .weekly h2 { margin: 0 0 var(--space-5); font-size: var(--fs-display-sm); }
+
+  /* Abstimmung */
+  .vote { padding: var(--space-8); }
+  .kicker { margin: 0 0 var(--space-3); }
+  .vote h2 { margin-bottom: var(--space-2); }
+  .intro { margin: 0 0 var(--space-6); color: var(--muted); max-width: 60ch; }
+  .options { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+  .options li { display: flex; gap: var(--space-2); align-items: stretch; }
+  .option {
+    flex: 1; display: flex; align-items: center; gap: var(--space-4); padding: var(--space-3) var(--space-4);
+    border: var(--bw) solid var(--line); border-radius: var(--radius-md); background: var(--surface); color: var(--ink);
+    font: inherit; text-align: left; cursor: pointer; box-shadow: var(--shadow-sm);
+    transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  }
+  .option:hover { transform: translate(-2px, -2px); box-shadow: var(--shadow-lg); }
+  .option[aria-pressed='true'] { outline: var(--bw-focus) solid var(--line); outline-offset: calc(-1 * var(--bw-focus)); }
+  .opt-emoji {
+    flex: 0 0 auto; display: grid; place-items: center; width: var(--space-11); aspect-ratio: 1;
+    border: var(--bw-sm) solid var(--line); border-radius: var(--radius-sm); font-size: var(--fs-2xl);
+  }
+  .opt-text { flex: 1; display: flex; flex-direction: column; gap: var(--space-2); }
+  .opt-title { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-base); line-height: 1.25; }
+  .opt-bar { display: none; height: var(--space-3); border: var(--bw-sm) solid var(--line); border-radius: var(--radius-pill); overflow: hidden; background: var(--bg); }
+  .opt-fill { display: block; height: 100%; width: calc(var(--pct, 0) * 1%); --dots-size: var(--dots-size-sm); transition: width var(--dur-swipe) var(--ease); }
+  .opt-pct { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lg); min-width: 4ch; text-align: right; }
+  li[data-results] .opt-bar { display: block; }
+  .opt-read {
+    display: grid; place-items: center; width: var(--space-10); border: var(--bw) solid var(--line); border-radius: var(--radius-md);
+    background: var(--surface); text-decoration: none; font-weight: 700; font-size: var(--fs-lg); box-shadow: var(--shadow-sm);
+  }
+  .vote-status { margin: var(--space-5) 0 0; font-weight: 600; min-height: 1.65em; }
+
+  /* Fakt der Woche */
+  .fotw-card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); overflow: hidden; text-decoration: none; transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
+  .fotw-card:hover { transform: translate(-3px, -3px) rotate(-0.4deg); box-shadow: var(--shadow-xl); }
+  .fotw-art { display: grid; place-items: center; border-right: var(--bw) solid var(--line); --dots-size: var(--dots-size-lg); }
+  .fotw-emoji { font-size: var(--fs-emoji-xl); transform: rotate(-8deg); filter: var(--emoji-shadow); }
+  .fotw-body { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-7); }
+  .chip--week { align-self: flex-start; }
+  .fotw-title { font-family: var(--font-display); font-size: var(--fs-3xl); font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; }
+  .fotw-hook { color: var(--muted); }
+  .more { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; color: var(--pink-text); }
+  .fotw-meta { margin: var(--space-4) 0 0; color: var(--muted); font-size: var(--fs-sm); font-weight: 600; }
+
+  .teaser { margin: 0; padding: var(--space-4) var(--space-5); font-size: var(--fs-md); }
+
+  @media (max-width: 640px) {
+    .vote { padding: var(--space-5); }
+    .option { gap: var(--space-3); padding: var(--space-3); }
+    .opt-emoji { width: var(--space-10); font-size: var(--fs-xl); }
+    .fotw-card { grid-template-columns: 1fr; }
+    .fotw-art { aspect-ratio: 2 / 1; border-right: 0; border-bottom: var(--bw) solid var(--line); }
+    .fotw-body { padding: var(--space-5); }
+    .fotw-title { font-size: var(--fs-2xl); }
+  }
+</style>

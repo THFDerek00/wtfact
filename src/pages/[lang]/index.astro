@@ -1,6 +1,8 @@
 ---
 import Base from '../../layouts/Base.astro';
 import PostCard from '../../components/PostCard.astro';
+import SwipeDeck from '../../components/SwipeDeck.astro';
+import Weekly from '../../components/Weekly.astro';
 import { LANGS, CATEGORIES, type Lang } from '../../config';
 import { t } from '../../i18n/ui';
 import { postsFor, postUrl, factNumber, categoryIcon } from '../../lib';
@@ -32,22 +34,7 @@ const ticker = rest.slice(0, 12);
         </div>
       </div>
 
-      {hero && (
-        <a class="deck" href={postUrl(hero)}>
-          <span class="plate plate-a" aria-hidden="true"></span>
-          <span class="plate plate-b" aria-hidden="true"></span>
-          <span class="card today">
-            <span class="today-head">
-              <span class="chip accent">⚡ {ui.todaysFact}</span>
-              <span class="no">#{String(factNumber(hero, posts)).padStart(3, '0')}</span>
-            </span>
-            <span class:list={['today-art', `cat-${hero.data.category}`]} aria-hidden="true"><span>{hero.data.emoji}</span></span>
-            <span class="today-title">{hero.data.title}</span>
-            <span class="today-hook">{hero.data.hook}</span>
-            <span class="more">{ui.readMore} <span aria-hidden="true">→</span></span>
-          </span>
-        </a>
-      )}
+      {hero && <SwipeDeck lang={lang} posts={posts} />}
     </div>
   </section>
 
@@ -68,6 +55,8 @@ const ticker = rest.slice(0, 12);
       </div>
     </section>
   )}
+
+  <Weekly lang={lang} posts={posts} />
 
   <section class="wrap holes">
     <h2>{ui.rabbitHole}</h2>
@@ -141,24 +130,6 @@ const ticker = rest.slice(0, 12);
   .sub { font-size: var(--fs-lg); color: var(--on-night-muted); max-width: 46ch; margin: var(--space-6) 0 var(--space-8); }
   .ctas { display: flex; flex-wrap: wrap; gap: var(--space-4); }
 
-  .deck { position: relative; display: block; text-decoration: none; color: var(--ink); max-width: 460px; justify-self: center; width: 100%; }
-  .plate { position: absolute; inset: 0; border: var(--bw) solid var(--on-night); border-radius: var(--radius-lg); }
-  .plate-a { background: var(--cyan); transform: rotate(6deg) translate(var(--space-3), var(--space-2)); }
-  .plate-b { background: var(--pink); transform: rotate(-4deg) translate(calc(-1 * var(--space-3)), var(--space-1)); }
-  .today {
-    position: relative; display: flex; flex-direction: column; gap: var(--space-3);
-    padding: var(--space-5); border-radius: var(--radius-lg); border-color: var(--on-night);
-    box-shadow: var(--shadow-on-night);
-    transition: transform var(--dur) var(--ease-pop);
-  }
-  .deck:hover .today { transform: rotate(-1.5deg) translateY(calc(-1 * var(--space-2))); }
-  .today-head { display: flex; justify-content: space-between; align-items: center; }
-  .no { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); color: var(--muted); }
-  .today-art { display: grid; place-items: center; aspect-ratio: 2 / 1; border: var(--bw) solid var(--line); border-radius: var(--radius-md); }
-  .today-art span { font-size: var(--fs-emoji-xl); transform: rotate(-8deg); filter: var(--emoji-shadow); }
-  .today-title { font-family: var(--font-display); font-size: var(--fs-3xl); font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; }
-  .today-hook { color: var(--muted); font-size: var(--fs-md); }
-  .more { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; color: var(--pink-text); }
 
   /* Ticker */
   .ticker { background: var(--yellow); color: var(--on-accent); border-block: var(--bw) solid var(--line); overflow: hidden; }
@@ -212,7 +183,5 @@ const ticker = rest.slice(0, 12);
     .tiles { grid-template-columns: repeat(2, 1fr); gap: var(--space-3); }
     .tile { padding: var(--space-4); }
     .tile:last-child:nth-child(odd) { grid-column: 1 / -1; }
-    .today-title { font-size: var(--fs-2xl); }
-    .today-art span { font-size: var(--fs-emoji-lg); }
   }
 </style>

@@ -1,0 +1,11 @@
+---
+// „Neu“-Etikett für Fakten aus den letzten 7 Tagen. Beim Bauen gesetzt und im Browser
+// nachgeprüft (Base.astro), damit es auch ohne neuen Build nach 7 Tagen verschwindet.
+import type { Lang } from '../config';
+import { t } from '../i18n/ui';
+import { isNew, postDay } from '../week';
+interface Props { lang: Lang; date: Date; class?: string }
+const { lang, date, class: cls } = Astro.props;
+const day = postDay(date);
+---
+<span class:list={['chip', 'chip--new', cls]} data-new-date={day} hidden={!isNew(day)}>{t(lang).newBadge}</span>

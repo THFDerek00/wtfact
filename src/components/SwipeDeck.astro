@@ -1,0 +1,242 @@
+---
+// Begrüßungskarte auf der Startseite: Fakt des Tages, danach die nächsten neuen Fakten als Stapel.
+// Karte nach oben links ziehen = „Gefällt mir weniger“, nach oben rechts = „Gefällt mir“.
+// Dasselbe geht mit den beiden Knöpfen darunter und mit den Pfeiltasten links/rechts.
+// Speichern: src/scripts/community.ts (Server, ohne Server nur im Browser).
+import type { Lang } from '../config';
+import type { Post } from '../lib';
+import { postUrl, factNumber } from '../lib';
+import { t } from '../i18n/ui';
+import NewBadge from './NewBadge.astro';
+interface Props { lang: Lang; posts: Post[] }
+const { lang, posts } = Astro.props;
+const ui = t(lang);
+const DECK = 10;
+const deck = posts.slice(0, DECK);
+const rest = Math.max(0, posts.length - 1);
+---
+<div class="swipe" data-swipe>
+  <div class="deck">
+    <span class="plate plate-a" aria-hidden="true"></span>
+    <span class="plate plate-b" aria-hidden="true"></span>
+    {deck.map((p, i) => (
+      <article class="card today" data-key={p.data.translationKey} hidden={i > 0}>
+        <a class="today-link" href={postUrl(p)} draggable="false">
+          <span class="today-head">
+            {i === 0
+              ? <span class="chip accent">⚡ {ui.todaysFact}</span>
+              : <span class:list={['chip', `cat-${p.data.category}`]}>{ui.categories[p.data.category]}</span>}
+            <NewBadge lang={lang} date={p.data.date} />
+            <span class="no">#{String(factNumber(p, posts)).padStart(3, '0')}</span>
+          </span>
+          <span class:list={['today-art', `cat-${p.data.category}`]} aria-hidden="true"><span>{p.data.emoji}</span></span>
+          <span class="today-title">{p.data.title}</span>
+          <span class="today-hook">{p.data.hook}</span>
+          <span class="more">{ui.readMore} <span aria-hidden="true">→</span></span>
+        </a>
+        <span class="verdict verdict--meh" aria-hidden="true">{ui.swipe.meh}</span>
+        <span class="verdict verdict--like" aria-hidden="true">{ui.swipe.like}</span>
+      </article>
+    ))}
+    <div class="card today done" data-done hidden>
+      <span class="done-emoji" aria-hidden="true">🎉</span>
+      <span class="today-title">{ui.swipe.doneTitle}</span>
+      <span class="today-hook">{ui.swipe.doneText(rest)}</span>
+      <span class="done-actions">
+        <a class="btn" href="#facts">{ui.swipe.toList}</a>
+        <button class="btn btn--ghost" type="button" data-restart>{ui.swipe.restart}</button>
+      </span>
+    </div>
+  </div>
+
+  <div class="rate" role="group" aria-label={ui.swipe.label}>
+    <button class="btn btn--pink" type="button" data-rate="meh"><span aria-hidden="true">↖</span> {ui.swipe.meh}</button>
+    <button class="btn btn--lime" type="button" data-rate="like">{ui.swipe.like} <span aria-hidden="true">↗</span></button>
+  </div>
+  <p class="hint">{ui.swipe.hint}</p>
+  <p class="status" data-status aria-live="polite" data-like={ui.swipe.savedLike} data-meh={ui.swipe.savedMeh} data-share={ui.swipe.share(0)}></p>
+</div>
+
+<script>
+  import { rate, myRating, forgetRatings } from '../scripts/community';
+  import type { Verdict } from '../week';
+
+  const root = document.querySelector<HTMLElement>('[data-swipe]');
+  if (root) {
+    const cards = [...root.querySelectorAll<HTMLElement>('article[data-key]')];
+    const done = root.querySelector<HTMLElement>('[data-done]')!;
+    const buttons = [...root.querySelectorAll<HTMLButtonElement>('[data-rate]')];
+    const status = root.querySelector<HTMLElement>('[data-status]')!;
+    let queue = cards.filter((c) => !myRating(c.dataset.key!));
+    let current: HTMLElement | undefined;
+
+    const show = () => {
+      current = queue[0];
+      cards.forEach((c) => (c.hidden = c !== current));
+      done.hidden = !!current;
+      buttons.forEach((b) => (b.disabled = !current));
+      if (current) {
+        current.removeAttribute('data-fly');
+        current.removeAttribute('data-lean');
+        current.style.removeProperty('--dx');
+        current.style.removeProperty('--dy');
+        current.style.removeProperty('--rot');
+        current.style.removeProperty('--lean');
+      }
+    };
+
+    async function commit(verdict: Verdict) {
+      const card = current;
+      if (!card) return;
+      const key = card.dataset.key!;
+      card.dataset.fly = verdict;
+      queue = queue.slice(1);
+      // Animation abwarten (bei „Bewegung reduzieren“ dauert sie 0 s)
+      const next = () => { card.removeEventListener('transitionend', next); if (card.dataset.fly) show(); };
+      card.addEventListener('transitionend', next);
+      setTimeout(next, 400);
+      status.textContent = verdict === 'like' ? status.dataset.like! : status.dataset.meh!;
+      const counts = await rate(key, verdict);
+      if (counts && counts.like + counts.meh > 0) {
+        const pct = Math.round((counts.like / (counts.like + counts.meh)) * 100);
+        status.textContent += ' ' + status.dataset.share!.replace(/\d+/, String(pct));
+      }
+    }
+
+    buttons.forEach((b) => b.addEventListener('click', () => commit(b.dataset.rate as Verdict)));
+    root.querySelector('[data-restart]')?.addEventListener('click', () => {
+      forgetRatings(cards.map((c) => c.dataset.key!));
+      queue = [...cards];
+      status.textContent = '';
+      show();
+      current?.querySelector('a')?.focus();
+    });
+    root.addEventListener('keydown', (e) => {
+      if (!current || !current.contains(document.activeElement)) return;
+      if (e.key === 'ArrowLeft') commit('meh');
+      if (e.key === 'ArrowRight') commit('like');
+    });
+
+    // Ziehen mit Maus, Finger oder Stift. Schräg nach oben = bewerten, senkrecht = Seite scrollen.
+    let start: { x: number; y: number; lastY: number; id: number } | null = null;
+    let mode: 'swipe' | 'scroll' | null = null;
+    let moved = false;
+    const LIMIT = 0.28; // Anteil der Kartenbreite, ab dem die Karte wegfliegt
+
+    cards.forEach((card) => {
+      card.addEventListener('pointerdown', (e) => {
+        if (card !== current || (e.pointerType === 'mouse' && e.button !== 0)) return;
+        start = { x: e.clientX, y: e.clientY, lastY: e.clientY, id: e.pointerId };
+        mode = null;
+        moved = false;
+      });
+      card.addEventListener('pointermove', (e) => {
+        if (!start || e.pointerId !== start.id) return;
+        const dx = e.clientX - start.x;
+        const dy = e.clientY - start.y;
+        if (!mode && Math.hypot(dx, dy) > 10) {
+          moved = true;
+          mode = Math.abs(dx) >= Math.abs(dy) * 0.5 ? 'swipe' : 'scroll';
+          if (mode === 'swipe') {
+            card.setPointerCapture(e.pointerId);
+            card.dataset.dragging = '';
+          }
+        }
+        if (mode === 'swipe') {
+          card.style.setProperty('--dx', `${dx}px`);
+          card.style.setProperty('--dy', `${Math.min(dy, 40)}px`);
+          card.style.setProperty('--rot', String(dx / 14));
+          const lean = Math.min(1, Math.abs(dx) / (card.offsetWidth * LIMIT));
+          card.dataset.lean = dx < 0 ? 'meh' : 'like';
+          card.style.setProperty('--lean', String(lean));
+        } else if (mode === 'scroll' && e.pointerType !== 'mouse') {
+          window.scrollBy({ top: start.lastY - e.clientY, behavior: 'instant' });
+          start.lastY = e.clientY;
+        }
+      });
+      const end = (e: PointerEvent) => {
+        if (!start || e.pointerId !== start.id) return;
+        const dx = e.clientX - start.x;
+        const dy = e.clientY - start.y;
+        delete card.dataset.dragging;
+        if (mode === 'swipe' && Math.abs(dx) > card.offsetWidth * LIMIT && dy < card.offsetHeight * 0.3) {
+          commit(dx < 0 ? 'meh' : 'like');
+        } else if (mode === 'swipe') {
+          card.style.setProperty('--dx', '0px');
+          card.style.setProperty('--dy', '0px');
+          card.style.setProperty('--rot', '0');
+          card.style.setProperty('--lean', '0');
+          delete card.dataset.lean;
+        }
+        start = null;
+        mode = null;
+      };
+      card.addEventListener('pointerup', end);
+      card.addEventListener('pointercancel', end);
+      // Nach dem Ziehen nicht aus Versehen den Fakt öffnen
+      card.addEventListener('click', (e) => { if (moved) { e.preventDefault(); moved = false; } }, true);
+    });
+
+    show();
+  }
+</script>
+
+<style>
+  .swipe { display: flex; flex-direction: column; align-items: center; gap: var(--space-5); justify-self: center; width: 100%; max-width: 460px; }
+  .deck { position: relative; width: 100%; color: var(--ink); }
+  .plate { position: absolute; inset: 0; border: var(--bw) solid var(--on-night); border-radius: var(--radius-lg); }
+  .plate-a { background: var(--cyan); transform: rotate(6deg) translate(var(--space-3), var(--space-2)); }
+  .plate-b { background: var(--pink); transform: rotate(-4deg) translate(calc(-1 * var(--space-3)), var(--space-1)); }
+
+  .today {
+    --dx: 0px; --dy: 0px; --rot: 0; --lean: 0;
+    position: relative; display: block;
+    border-radius: var(--radius-lg); border-color: var(--on-night);
+    box-shadow: var(--shadow-on-night);
+    touch-action: none; user-select: none; cursor: grab;
+    transform: translate(var(--dx), var(--dy)) rotate(calc(var(--rot) * 1deg));
+    transition: transform var(--dur-swipe) var(--ease), opacity var(--dur-swipe) var(--ease);
+  }
+  .today[data-dragging] { transition: none; cursor: grabbing; }
+  .today[data-fly='like'] { transform: translate(120%, -70%) rotate(24deg); opacity: 0; }
+  .today[data-fly='meh'] { transform: translate(-120%, -70%) rotate(-24deg); opacity: 0; }
+  .today-link {
+    display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-5);
+    color: inherit; text-decoration: none; -webkit-user-drag: none;
+  }
+  .today-head { display: flex; gap: var(--space-2); align-items: center; }
+  .no { margin-left: auto; font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); color: var(--muted); }
+  .today-art { display: grid; place-items: center; aspect-ratio: 2 / 1; border: var(--bw) solid var(--line); border-radius: var(--radius-md); }
+  .today-art span { font-size: var(--fs-emoji-xl); transform: rotate(-8deg); filter: var(--emoji-shadow); }
+  .today-title { font-family: var(--font-display); font-size: var(--fs-3xl); font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; }
+  .today-hook { color: var(--muted); font-size: var(--fs-md); }
+  .more { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; color: var(--pink-text); }
+
+  /* Schild, das beim Ziehen in der Ecke auftaucht */
+  .verdict {
+    position: absolute; top: var(--space-12); z-index: 1; pointer-events: none;
+    padding: var(--space-2) var(--space-4); border: var(--bw) solid var(--on-accent); border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-new); color: var(--on-accent);
+    font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em;
+    opacity: 0;
+  }
+  .verdict--like { left: var(--space-5); background: var(--lime); transform: rotate(-10deg); }
+  .verdict--meh { right: var(--space-5); background: var(--pink); transform: rotate(10deg); }
+  .today[data-lean='like'] .verdict--like, .today[data-fly='like'] .verdict--like { opacity: var(--lean); }
+  .today[data-lean='meh'] .verdict--meh, .today[data-fly='meh'] .verdict--meh { opacity: var(--lean); }
+  .today[data-fly] { --lean: 1; }
+
+  .done { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-8) var(--space-5); text-align: center; align-items: center; cursor: default; }
+  .done-emoji { font-size: var(--fs-emoji-lg); }
+  .done-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-3); margin-top: var(--space-2); }
+
+  .rate { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-4); margin-top: var(--space-4); }
+  .hint, .status { margin: 0; text-align: center; font-size: var(--fs-sm); color: var(--on-night-muted); }
+  .status { min-height: 1.65em; font-weight: 600; color: var(--on-night); }
+
+  @media (max-width: 520px) {
+    .today-title { font-size: var(--fs-2xl); }
+    .today-art span { font-size: var(--fs-emoji-lg); }
+    .rate .btn { padding: var(--space-3) var(--space-4); font-size: var(--fs-sm); }
+  }
+</style>

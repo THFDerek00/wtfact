@@ -2,6 +2,7 @@
 import type { Post } from '../lib';
 import { langOf, postUrl } from '../lib';
 import { t } from '../i18n/ui';
+import NewBadge from './NewBadge.astro';
 interface Props { post: Post; no?: number; hidden?: boolean }
 const { post, no, hidden = false } = Astro.props;
 const lang = langOf(post);
@@ -13,6 +14,7 @@ const d = post.data;
     {no && <span class="no">#{String(no).padStart(3, '0')}</span>}
     <span class="emoji">{d.emoji}</span>
   </div>
+  <NewBadge lang={lang} date={d.date} class="new" />
   <div class="body">
     <span class:list={['chip', `cat-${d.category}`]}>{ui.categories[d.category]}</span>
     <h3>{d.title}</h3>
@@ -23,7 +25,7 @@ const d = post.data;
 
 <style>
   .post {
-    display: flex; flex-direction: column; overflow: hidden; text-decoration: none;
+    position: relative; display: flex; flex-direction: column; overflow: hidden; text-decoration: none;
     transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
   }
   .post:hover { transform: translate(-3px, -3px) rotate(-0.5deg); box-shadow: var(--shadow-xl); }
@@ -39,6 +41,7 @@ const d = post.data;
     background: var(--night); color: var(--on-night);
     font-family: var(--font-display); font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.04em;
   }
+  .new { position: absolute; top: var(--space-3); right: var(--space-3); }
   .body { padding: var(--space-4) var(--space-5) var(--space-5); display: flex; flex-direction: column; gap: var(--space-2); flex: 1; }
   .chip { align-self: flex-start; }
   h3 { margin: var(--space-1) 0 0; font-size: var(--fs-xl); }
@@ -48,7 +51,9 @@ const d = post.data;
     .art { flex: 0 0 104px; aspect-ratio: auto; border-bottom: 0; border-right: var(--bw) solid var(--line); }
     .emoji { font-size: var(--fs-emoji-sm); }
     .no { top: var(--space-2); left: var(--space-2); }
-    .body { padding: var(--space-3) var(--space-4) var(--space-4); }
+    .new { top: auto; bottom: var(--space-2); left: var(--space-2); right: auto; padding: 0 var(--space-2); }
+    .new { position: absolute; top: var(--space-3); right: var(--space-3); }
+  .body { padding: var(--space-3) var(--space-4) var(--space-4); }
     h3 { font-size: var(--fs-lg); }
     p { font-size: var(--fs-sm); }
   }
