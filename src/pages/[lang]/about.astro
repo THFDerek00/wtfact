@@ -8,13 +8,17 @@ const lang = Astro.params.lang as Lang;
   {lang === 'de' ? (
     <>
       <p>Wusstest du, dass Honig nach 3.000 Jahren noch essbar sein kann? Genau für solche Momente gibt es {SITE.name}: jeden Tag ein neuer Fakt aus Wissenschaft, Geschichte, Technik, Natur und dem ganz normalen Wahnsinn.</p>
-      <p>Die Texte entstehen mit Hilfe von KI und werden mit Quellen belegt. Wenn dir trotzdem ein Fehler auffällt, schreib uns an die Adresse im <a href={`/${lang}/impressum/`}>Impressum</a>, wir korrigieren ihn.</p>
+      <h2>Und ja, das stimmt wirklich.</h2>
+      <p>Das ist unser Versprechen. Die Texte entstehen mit Hilfe von KI, aber jeder Fakt braucht mindestens zwei unabhängige Quellen und muss vor dem Erscheinen einen Faktencheck bestehen. Lässt sich etwas nicht sauber belegen, erscheint an dem Tag lieber kein Beitrag als ein falscher.</p>
+      <p>Wenn dir trotzdem ein Fehler auffällt, schreib uns an die Adresse im <a href={`/${lang}/impressum/`}>Impressum</a>. Wir korrigieren ihn offen und listen ihn unter <a href={`/${lang}/korrekturen/`}>Stimmt doch nicht</a>.</p>
       <p>Finanziert wird die Seite über Amazon-Partnerlinks. Wenn du über einen Link etwas kaufst, bekommen wir eine kleine Provision, für dich bleibt der Preis gleich.</p>
     </>
   ) : (
     <>
       <p>Did you know honey can still be edible after 3,000 years? That is what {SITE.name} is for: a new fact every day from science, history, tech, nature and everyday madness.</p>
-      <p>Our posts are written with the help of AI and backed by sources. If you still spot a mistake, email us at the address in our <a href={`/${lang}/impressum/`}>imprint</a> and we will fix it.</p>
+      <h2>And yes, it's actually true.</h2>
+      <p>That's our promise. Posts are written with the help of AI, but every fact needs at least two independent sources and has to pass a fact check before it goes live. If something can't be backed up properly, we'd rather skip a day than publish something wrong.</p>
+      <p>If you still spot a mistake, email us at the address in our <a href={`/${lang}/impressum/`}>imprint</a>. We fix it in the open and list it under <a href={`/${lang}/korrekturen/`}>Corrections</a>.</p>
       <p>The site is funded by Amazon affiliate links. If you buy something through one, we earn a small commission at no extra cost to you.</p>
     </>
   )}

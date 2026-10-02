@@ -40,6 +40,17 @@ Stil: Neo-Brutalismus. Dicke Ränder, harte Schatten ohne Weichzeichner, knallig
 
 Neue Varianten kommen als Modifier-Klasse in `global.css`, nicht als Überschreibung in der Komponente.
 
+## Slogan
+
+**„WTFact?! Und ja, das stimmt wirklich.“** (EN: „WTFact?! And yes, it's actually true.“), entschieden am 2. Oktober 2026. Texte stehen in `src/i18n/ui.ts` (`slogan`, `sloganFull`).
+
+1. Schreibweise fix: „WTFact?!“ immer mit „?!“, dann „Und ja, das stimmt wirklich.“ mit Punkt. Kein „WTFact!“, kein Ausrufezeichen am Ende. Englisch nie wörtlich („Really true“), sondern „And yes, it's actually true.“
+2. Steht „WTFact?!“ schon als Logo daneben, wird nur der zweite Teil gesetzt (Kopfzeile, Footer).
+3. Nur neben belegten Inhalten: kein Meme, kein Witzpost, keine Umfrage mit dem Slogan. Wo er steht, sind die Quellen einen Klick entfernt.
+4. Nicht im Beitragstext. Der Slogan gehört zur Marke, nicht zum Fakt (siehe `docs/styleguide.md`).
+5. Fehler werden offen korrigiert: Beitrag berichtigen und Eintrag in `src/data/corrections.ts`, erscheint auf `/de/korrekturen/` („Stimmt doch nicht“).
+6. Platzierung auf der Seite: Kopfzeile neben dem Logo (ab 761px Breite), Footer unter dem großen Logo, Über-Seite als Überschrift. Ein grafischer Stempel „Stimmt wirklich.“ ist geplant, aber noch nicht entschieden.
+
 ## Regeln, die der Build prüft
 
 1. Keine Farbwerte (`#…`, `rgb()`, `hsl()` …) außerhalb von `:root` in `global.css`.
