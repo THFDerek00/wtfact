@@ -29,4 +29,4 @@ node brand/build-brand.mjs
 node brand/build-social-kit.mjs   # Social-Kit; Titel, Hooks und Quellen kommen aus src/content/posts
 ```
 
-Gemeinsame Bausteine (Farben, Logo, Chips, Punktmuster) stehen in `brand-lib.mjs`. Jede Fläche in Kategoriefarbe trägt das Punktmuster.
+Gemeinsame Bausteine (Farben, Logo, Chips, Punktmuster) stehen in `brand-lib.mjs`. Alle Flächen tragen das Punktmuster der Seite (Raster 44 px, entspricht den 16 px auf dem Handy). Social-Grafiken mit Inhalt tragen unten rechts dezent „KI-generiert“ / „AI-generated“ (Transparenz nach EU-KI-Verordnung).

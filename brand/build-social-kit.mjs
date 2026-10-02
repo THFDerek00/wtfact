@@ -8,7 +8,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {
-  ROOT, DISPLAY, TEXT, C, r2, text, wrap, svg, png, wordmark, CAT_COLOR, iconG, card, chip, confetti, DOT_INK, dots, L,
+  ROOT, DISPLAY, TEXT, C, r2, text, wrap, svg, png, wordmark, CAT_COLOR, iconG, card, chip, confetti, dots, aiTag, L,
 } from './brand-lib.mjs';
 
 const OUT = 'brand/social/kit';
@@ -89,10 +89,12 @@ const K = {
 };
 
 // ---------- Bausteine ----------
-const catBg = (W, H, cat) => `<rect width="${W}" height="${H}" fill="${CAT_COLOR[cat]}"/>` + dots(W, H, DOT_INK);
-const colorBg = (W, H, fill) => `<rect width="${W}" height="${H}" fill="${fill}"/>` + dots(W, H, DOT_INK);
+const catBg = (W, H, cat) => `<rect width="${W}" height="${H}" fill="${CAT_COLOR[cat]}"/>` + dots(W, H);
+const colorBg = (W, H, fill) => `<rect width="${W}" height="${H}" fill="${fill}"/>` + dots(W, H);
+// Dunkle Bühne: Punkte in hellem Papierton
+const nightBg = (W, H) => `<rect width="${W}" height="${H}" fill="${NIGHT}"/>` + dots(W, H, '#f4f1ea14');
 const goldBg = (W, H) =>
-  `<defs><linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${GOLD.light}"/><stop offset=".45" stop-color="${GOLD.mid}"/><stop offset="1" stop-color="${GOLD.deep}"/></linearGradient></defs><rect width="${W}" height="${H}" fill="url(#gold)"/>`;
+  `<defs><linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${GOLD.light}"/><stop offset=".45" stop-color="${GOLD.mid}"/><stop offset="1" stop-color="${GOLD.deep}"/></linearGradient></defs><rect width="${W}" height="${H}" fill="url(#gold)"/>` + dots(W, H);
 const place = (x, y, body) => `<g transform="translate(${r2(x)} ${r2(y)})">${body}</g>`;
 // Pfeil nach rechts (kein Pfeil-Zeichen in den Schriften)
 const arrow = (x, y, s, fill = C.ink) =>
@@ -355,7 +357,7 @@ function proveIt(lang, answer = false) {
 function reelCover(lang) {
   const W = 1080, H = 1920, pad = 72, k = K[lang];
   const cw = W - pad * 2 - 14;
-  let b = `<rect width="${W}" height="${H}" fill="${NIGHT}"/>` + confetti(W, H, 40, 23, [40, 200, 1040, 1560]);
+  let b = nightBg(W, H) + confetti(W, H, 40, 23, [40, 200, 1040, 1560]);
   b += `<g transform="rotate(-5 540 470)">` + card(200, 380, 680, 190, C.yellow, { sw: 9, off: 16, rx: 40 }) +
     text(k.really, { x: 540, y: 510, size: 110, anchor: 'middle', track: -0.03 }) + `</g>`;
   b += card(pad, 680, cw, 700, C.white);
@@ -365,7 +367,7 @@ function reelCover(lang) {
 function reelEnd(lang) {
   const W = 1080, H = 1920, pad = 72, k = K[lang];
   const cw = W - pad * 2 - 14;
-  let b = `<rect width="${W}" height="${H}" fill="${NIGHT}"/>` + confetti(W, H, 46, 31, [40, 560, 1040, 1420]);
+  let b = nightBg(W, H) + confetti(W, H, 46, 31, [40, 560, 1040, 1420]);
   const m = wordmark({ size: 150, x: 0, y: 0, ink: C.paper });
   b += place(W / 2 - m.width / 2, 860, m.body);
   b += text(k.slogan, { x: W / 2, y: 1000, size: 58, anchor: 'middle', fill: C.paper });
@@ -468,7 +470,14 @@ function gamePromo(lang, story = false) {
 
 // ---------- Ausgabe ----------
 const files = [];
-const save = (rel, s, width) => { png(`${OUT}/${rel}`, s, width); files.push(rel); };
+// Jede Grafik bekommt unten rechts den dezenten Hinweis „KI-generiert“ / „AI-generated“
+const save = (rel, s, width) => {
+  const [, W, H] = s.match(/width="([\d.]+)" height="([\d.]+)"/).map(Number);
+  const lang = rel.slice(0, 2);
+  const tag = aiTag(W, H, lang, rel.includes('reel-') ? { fill: '#f4f1ea99' } : {});
+  png(`${OUT}/${rel}`, s.replace(/<\/svg>\n$/, `${tag}</svg>\n`), width);
+  files.push(rel);
+};
 
 for (const lang of ['de', 'en']) {
   // Leere Vorlagen je Kategorie

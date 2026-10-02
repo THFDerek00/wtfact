@@ -61,6 +61,8 @@ Wunsch von Eric (2026-10-02): Überall, wo eine Kategoriefarbe als Fläche aufta
 - Neue Kategorie: Token `--cat-<key>` plus eine Zeile `.cat-<key> { background: var(--dots), var(--cat-<key>); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }`.
 - Außerhalb von CSS (`src/og.ts`, `brand/build-brand.mjs`) wird das Muster nachgebaut, mit derselben Punktfarbe (9 % Schwarz).
 - Goldene Flächen (`.gold`, `--gold-surface`) bleiben glatt: Das Muster gehört zu den Kategorien, Gold ist keine.
+- Social-Media-Grafiken (`brand/`): Wunsch von Eric (2026-10-02), dort trägt **jeder** Hintergrund das Muster, auch Gold und die dunkle Bühne. Raster 44 px bei 1080 px Breite, damit es auf dem Handy so groß wirkt wie die 16 px der Seite.
+- Social-Media-Grafiken mit Inhalt tragen unten rechts klein „KI-generiert“ / „AI-generated“ (`aiTag` in `brand/brand-lib.mjs`), als Transparenzhinweis nach der EU-KI-Verordnung.
 
 ## Regeln, die der Build prüft
 
