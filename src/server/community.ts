@@ -5,9 +5,13 @@
 //   GET  /api/week   Stand der Woche: laufende Abstimmung (nur montags), Fakt der Woche und Fakt des Tages
 //   POST /api/vote   { voter, poll, key }        Stimme abgeben oder ändern (nur montags)
 //   POST /api/rate   { voter, key, verdict }     Wisch-Bewertung, verdict = like | meh
+//   GET  /api/history  Verlauf für die Hall of Fame: Fakten des Tages (30 Tage) und der Woche (12 Wochen)
 //
 // Ohne Binding antwortet alles mit 503 „not-configured“. Die Seite speichert dann nur im Browser.
-import { berlinDay, weekState, inPoll, pickWinner, pickFactOfDay, dayStartUtc, addDays, type FactMeta, type Ratings, type Verdict } from '../week';
+import {
+  berlinDay, weekState, inPoll, pickWinner, pickFactOfDay, dayStartUtc, addDays, lastDays, pastPolls,
+  type FactMeta, type Ratings, type Verdict, type DayPick, type WeekPick,
+} from '../week';
 
 interface D1Statement {
   bind(...values: unknown[]): D1Statement;
@@ -20,11 +24,15 @@ export interface Env {
   ASSETS: { fetch(input: Request | URL | string): Promise<Response> };
 }
 
-const json = (data: unknown, status = 200) =>
+const json = (data: unknown, status = 200, cache = 'no-store') =>
   new Response(JSON.stringify(data), {
     status,
-    headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' },
+    headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': cache },
   });
+
+// D1 erlaubt höchstens 100 Platzhalter pro Abfrage, deshalb werden lange Listen aufgeteilt.
+const CHUNK = 45;
+const chunks = <T>(a: T[]) => Array.from({ length: Math.ceil(a.length / CHUNK) }, (_, i) => a.slice(i * CHUNK, (i + 1) * CHUNK));
 
 const VOTER = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const VERDICTS: Verdict[] = ['like', 'meh'];
@@ -45,17 +53,38 @@ async function voteCounts(db: D1Database, poll: string) {
 
 /** Wisch-Bewertungen je Fakt. Mit `before` (UTC, „JJJJ-MM-TT HH:MM:SS“) nur Bewertungen davor. */
 async function ratingsFor(db: D1Database, keys: string[], before?: string): Promise<Ratings> {
-  if (!keys.length) return {};
-  const n = keys.length;
-  const { results } = await db
-    .prepare(
-      `SELECT fact_key, SUM(verdict = 'like') AS likes, SUM(verdict = 'meh') AS mehs FROM ratings
-       WHERE fact_key IN (${keys.map((_, i) => `?${i + 1}`).join(',')})${before ? ` AND created_at < ?${n + 1}` : ''}
-       GROUP BY fact_key`,
-    )
-    .bind(...keys, ...(before ? [before] : []))
-    .all<{ fact_key: string; likes: number; mehs: number }>();
-  return Object.fromEntries(results.map((r) => [r.fact_key, { like: Number(r.likes), meh: Number(r.mehs) }]));
+  const out: Ratings = {};
+  for (const part of chunks(keys)) {
+    const n = part.length;
+    const { results } = await db
+      .prepare(
+        `SELECT fact_key, SUM(verdict = 'like') AS likes, SUM(verdict = 'meh') AS mehs FROM ratings
+         WHERE fact_key IN (${part.map((_, i) => `?${i + 1}`).join(',')})${before ? ` AND created_at < ?${n + 1}` : ''}
+         GROUP BY fact_key`,
+      )
+      .bind(...part, ...(before ? [before] : []))
+      .all<{ fact_key: string; likes: number; mehs: number }>();
+    results.forEach((r) => (out[r.fact_key] = { like: Number(r.likes), meh: Number(r.mehs) }));
+  }
+  return out;
+}
+
+/** Bewertungen je Fakt, jeweils nur bis 0 Uhr nach seinem Erscheinungstag (so zählt der Fakt des Tages). */
+async function ratingsUntilNextDay(db: D1Database, facts: FactMeta[]): Promise<Ratings> {
+  const out: Ratings = {};
+  for (const part of chunks(facts)) {
+    const pairs = part.map((_, i) => `(?${2 * i + 1}, ?${2 * i + 2})`).join(',');
+    const { results } = await db
+      .prepare(
+        `WITH c(k, cut) AS (VALUES ${pairs})
+         SELECT c.k AS fact_key, SUM(r.verdict = 'like') AS likes, SUM(r.verdict = 'meh') AS mehs
+         FROM c JOIN ratings r ON r.fact_key = c.k AND r.created_at < c.cut GROUP BY c.k`,
+      )
+      .bind(...part.flatMap((f) => [f.key, dayStartUtc(addDays(f.date, 1))]))
+      .all<{ fact_key: string; likes: number; mehs: number }>();
+    results.forEach((r) => (out[r.fact_key] = { like: Number(r.likes), meh: Number(r.mehs) }));
+  }
+  return out;
 }
 
 async function body(request: Request): Promise<Record<string, unknown> | null> {
@@ -91,6 +120,36 @@ export async function handle(request: Request, env: Env): Promise<Response> {
       poll = { id: state.openPoll, counts, total: sum(counts) };
     }
     return json({ ...state, featured, daily, poll });
+  }
+
+  if (route === 'history' && request.method === 'GET') {
+    const all = await facts(env, url);
+    // Fakten des Tages: für jeden Tag der Sieger unter den Fakten vom Vortag.
+    const days = lastDays(state.today);
+    const oldest = addDays(days[days.length - 1], -1);
+    const pool = all.filter((f) => f.date >= oldest && f.date < state.today);
+    const dayRatings = await ratingsUntilNextDay(db, pool);
+    const dayPicks: DayPick[] = days.flatMap((d) => {
+      const p = pickFactOfDay(pool, dayRatings, d);
+      return p ? [{ ...p, ...(dayRatings[p.key] ?? { like: 0, meh: 0 }) }] : [];
+    });
+    // Fakten der Woche: Gewinner jeder abgeschlossenen Abstimmung.
+    const polls = pastPolls(state.today);
+    const { results } = await db
+      .prepare('SELECT poll, fact_key, COUNT(*) AS n FROM votes WHERE poll >= ?1 AND poll <= ?2 GROUP BY poll, fact_key')
+      .bind(polls[polls.length - 1], polls[0])
+      .all<{ poll: string; fact_key: string; n: number }>();
+    const byPoll: Record<string, Record<string, number>> = {};
+    results.forEach((r) => ((byPoll[r.poll] ??= {})[r.fact_key] = Number(r.n)));
+    const voted = polls.filter((p) => byPoll[p]);
+    const cands = all.filter((f) => voted.some((p) => inPoll(f.date, p)));
+    const allRatings = await ratingsFor(db, cands.map((c) => c.key));
+    const weekPicks: WeekPick[] = voted.flatMap((p) => {
+      const votes = byPoll[p];
+      const key = pickWinner(cands.filter((f) => inPoll(f.date, p)), votes, allRatings);
+      return key ? [{ poll: p, key, votes: votes[key], total: sum(votes) }] : [];
+    });
+    return json({ today: state.today, days: dayPicks, weeks: weekPicks }, 200, 'public, max-age=300');
   }
 
   if (route === 'vote' && request.method === 'POST') {

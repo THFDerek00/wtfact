@@ -75,6 +75,7 @@ const allUrls = (await postsFor(lang)).map(postUrl);
         <p class="note">{ui.tagline}</p>
         <p class="note">{ui.affiliateFooter} {ui.madeWith}</p>
         <nav>
+          <a href={`/${lang}/hall-of-fame/`}>{ui.fame.name}</a>
           <a href={`/${lang}/about/`}>{ui.about}</a>
           <a href={`/${lang}/korrekturen/`}>{ui.corrections}</a>
           <a href={`/${lang}/impressum/`}>{ui.imprint}</a>

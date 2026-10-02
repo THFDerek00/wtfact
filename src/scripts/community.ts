@@ -11,7 +11,7 @@ type Store = { voter?: string; ratings: Record<string, Verdict>; votes: Record<s
 export type Counts = { id: string; counts: Record<string, number>; total: number };
 export type Week = ReturnType<typeof weekState> & {
   featured: { poll: string; key: string; votes: number; total: number } | null;
-  /** Fakt des Tages aus allen Wisch-Bewertungen; null ohne Server (dann rechnet Weekly.astro selbst). */
+  /** Fakt des Tages aus allen Wisch-Bewertungen; null ohne Server (dann rechnet src/scripts/fame.ts selbst). */
   daily?: { day: string; key: string; like: number; meh: number } | null;
   poll: Counts | null;
   /** false = keine Verbindung zum Server, alles nur in diesem Browser */

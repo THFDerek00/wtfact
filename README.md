@@ -54,11 +54,18 @@ Farben, Schrift, Abstände und Bausteine sind in `docs/design-system.md` beschri
 - **Fakt des Tages:** Kein Abstimmen. Von den Fakten des Vortags wird der mit dem höchsten Anteil „Gefällt mir“
   beim Wischen Fakt des Tages. Gezählt werden die Bewertungen bis 0 Uhr, so bleibt er den ganzen Tag gleich.
   Gleicher Anteil (auch: noch gar keine Bewertungen) entscheidet das Los, für alle Besucher dasselbe.
-  Logik: `pickFactOfDay` in `src/week.ts`, Anzeige: `src/components/Weekly.astro`.
+  Logik: `pickFactOfDay` in `src/week.ts`, Anzeige: Hall of Fame (siehe unten).
 - **Montags-Abstimmung:** Jeden Montag (deutsche Zeit, 0 bis 24 Uhr) stimmen alle ab, welcher Fakt der
   letzten 7 Tage der beste war. Der Gewinner ist ab Dienstag eine Woche lang „Fakt der Woche“.
   Gleichstand: mehr „Gefällt mir“ beim Wischen gewinnt, danach der neuere Fakt. Ohne Stimmen gibt es keinen
-  Fakt der Woche. Komponente: `src/components/Weekly.astro`, Kalender: `src/week.ts`.
+  Fakt der Woche. Komponente: `src/components/Vote.astro` (auf der Hall of Fame), Kalender: `src/week.ts`.
+- **Hall of Fame** (`/de/hall-of-fame/`, `src/pages/[lang]/hall-of-fame.astro`): eigene Seite für Fakt des
+  Tages, Fakt der Woche und die Montags-Abstimmung. Dazu Countdowns (nächster Fakt des Tages, nächste
+  Abstimmung), Tippspiel „Wer wird morgen Fakt des Tages?“ mit Trefferserie, Verlauf (30 Tage, 12 Wochen)
+  mit Sammelalbum (gelesene Sieger, die Beitragsseite merkt sich gelesene Fakten) und eine Rangliste der
+  Kategorien. Auf der Startseite steht nur ein kurzer Hinweis (`src/components/FamePointer.astro`).
+  Browser-Logik: `src/scripts/fame.ts`, Verlauf vom Server: `GET /api/history`. Tipps und Album liegen nur im
+  Browser (`localStorage` `wtfact:fame`).
 - **Neu:** Fakten der letzten 7 Tage (heute eingeschlossen) tragen das Etikett „Neu“ (`src/components/NewBadge.astro`).
   Der Browser prüft das nach, damit es auch ohne neuen Build verschwindet.
 

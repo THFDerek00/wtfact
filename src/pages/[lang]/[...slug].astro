@@ -42,7 +42,7 @@ const no = String(factNumber(post, all)).padStart(3, '0');
     </div>
   </section>
 
-  <article class="narrow">
+  <article class="narrow" data-fact-key={d.translationKey}>
     <p class="hook card"><span class="hook-label">WTF?!</span>{d.hook}</p>
 
     <div class="content"><Content /></div>
@@ -77,6 +77,10 @@ const no = String(factNumber(post, all)).padStart(3, '0');
 </Base>
 
 <script>
+  import { markRead } from '../../scripts/fame';
+  // Für das Sammelalbum in der Hall of Fame: Dieser Fakt gilt als gelesen.
+  const key = document.querySelector<HTMLElement>('[data-fact-key]')?.dataset.factKey;
+  if (key) markRead(key);
   const bar = document.querySelector<HTMLElement>('.progress span');
   const update = () => {
     const max = document.documentElement.scrollHeight - innerHeight;
