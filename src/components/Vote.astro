@@ -1,0 +1,161 @@
+---
+// Montags-Abstimmung (Hall of Fame): Montags stimmen alle ab, welcher Fakt der letzten 7 Tage der beste war;
+// der Gewinner ist ab Dienstag eine Woche lang Fakt der Woche. Kalender: src/week.ts, Speichern: src/scripts/community.ts.
+// Die Kandidaten werden vorab gerendert und im Browser nur eingeblendet. An anderen Tagen bleibt alles versteckt.
+import { FACT_TIMES, type Lang } from '../config';
+import type { Post } from '../lib';
+import { postUrl } from '../lib';
+import { t } from '../i18n/ui';
+import { postDay } from '../week';
+interface Props { lang: Lang; posts: Post[] }
+const { lang, posts } = Astro.props;
+const ui = t(lang);
+const w = ui.weekly;
+// Zur Wahl stehen die Fakten der 7 Tage vor dem Montag, mit Puffer.
+const recent = posts.slice(0, 9 * FACT_TIMES.length);
+const panelId = `vote-panel-${lang}`;
+// Texte für das Skript. Zahlen sind Platzhalter (9001 …), die im Browser ersetzt werden.
+const texts = {
+  thanks: w.thanks, totalOne: w.total(1), totalMany: w.total(9003), localNote: w.localNote, closed: w.closed,
+  pct: lang === 'de' ? '9004 %' : '9004%',
+};
+---
+<section class="vote card" id="vote" data-vote data-texts={JSON.stringify(texts)} hidden>
+  <h2 class="vote-head">
+    <button class="vote-toggle" type="button" aria-expanded="false" aria-controls={panelId} data-vote-toggle>
+      <span class="kicker"><span class="chip accent">🗳️ {w.voteKicker}</span></span>
+      <span class="vote-title">{w.voteTitle}</span>
+      <span class="intro">{w.voteIntro}</span>
+      <span class="vote-cta btn">
+        <span class="when-closed">{w.voteOpen}</span><span class="when-open">{w.voteHide}</span>
+        <span class="chevron" aria-hidden="true">▾</span>
+      </span>
+    </button>
+  </h2>
+  <div class="vote-panel" id={panelId} data-vote-panel hidden>
+  <ul class="options" aria-label={w.voteLabel}>
+    {recent.map((p) => (
+      <li data-key={p.data.translationKey} data-date={postDay(p.data.date)} hidden>
+        <button class="option" type="button" aria-pressed="false" data-option={p.data.translationKey}>
+          <span class:list={['opt-emoji', `cat-${p.data.category}`]} aria-hidden="true">{p.data.emoji}</span>
+          <span class="opt-text">
+            <span class="sr-only">{w.voteFor}: </span>
+            <span class="opt-title">{p.data.title}</span>
+            <span class="opt-bar" aria-hidden="true"><span class:list={['opt-fill', `cat-${p.data.category}`]}></span></span>
+          </span>
+          <span class="opt-pct" data-pct></span>
+        </button>
+        <a class="opt-read" href={postUrl(p)} aria-label={`${ui.readMore}: ${p.data.title}`}><span aria-hidden="true">→</span></a>
+      </li>
+    ))}
+  </ul>
+    <p class="vote-status" data-vote-status aria-live="polite"></p>
+  </div>
+</section>
+
+<script>
+  import { week, vote, myVote, type Counts } from '../scripts/community';
+  import { inPoll } from '../week';
+
+  const box = document.querySelector<HTMLElement>('[data-vote]');
+  const texts: Record<string, string> = JSON.parse(box?.dataset.texts ?? '{}');
+  const fill = (tpl: string, v: Record<string, number>) => tpl.replace(/900\d/g, (m) => String(v[m] ?? m));
+
+  async function init() {
+    if (!box) return;
+    const state = await week();
+    const poll = state.openPoll;
+    if (!poll || !state.poll) return;
+    const items = [...box.querySelectorAll<HTMLElement>('.options li')].filter((li) => inPoll(li.dataset.date!, poll));
+    items.forEach((li) => (li.hidden = false));
+    box.hidden = items.length === 0;
+    const status = box.querySelector<HTMLElement>('[data-vote-status]')!;
+    // Ausklappen: erst nur der Kopf mit der Info, ein Klick öffnet die Fakten darunter.
+    const toggle = box.querySelector<HTMLButtonElement>('[data-vote-toggle]')!;
+    const panel = box.querySelector<HTMLElement>('[data-vote-panel]')!;
+    const setOpen = (open: boolean) => {
+      toggle.setAttribute('aria-expanded', String(open));
+      panel.hidden = !open;
+    };
+    toggle.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'));
+    // Von der Startseite mit #vote: gleich aufgeklappt.
+    if (location.hash === '#vote') setOpen(true);
+    const showResults = (c: Counts) => {
+      const mine = myVote(poll);
+      items.forEach((li) => {
+        const key = li.dataset.key!;
+        const pct = c.total ? Math.round(((c.counts[key] ?? 0) / c.total) * 100) : 0;
+        li.style.setProperty('--pct', String(pct));
+        li.toggleAttribute('data-results', true);
+        li.querySelector<HTMLElement>('[data-pct]')!.textContent = fill(texts.pct, { 9004: pct });
+        li.querySelector('button')!.setAttribute('aria-pressed', String(key === mine));
+      });
+      const total = c.total === 1 ? texts.totalOne : fill(texts.totalMany, { 9003: c.total });
+      status.textContent = `${texts.thanks} ${total}.${state.shared ? '' : ` ${texts.localNote}`}`;
+    };
+    if (myVote(poll)) showResults(state.poll);
+    items.forEach((li) =>
+      li.querySelector('button')!.addEventListener('click', async () => {
+        const res = await vote(poll, li.dataset.key!);
+        if (res === 'closed') status.textContent = texts.closed;
+        else showResults(res);
+      }),
+    );
+  }
+  init();
+</script>
+
+<style>
+  .vote { scroll-margin-top: var(--space-12); }
+  .option, .opt-text { min-width: 0; }
+  /* Abstimmung */
+  .vote { padding: var(--space-8); }
+  .vote .vote-head { margin: 0; font: inherit; letter-spacing: normal; }
+  .vote-toggle {
+    display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2); width: 100%; padding: 0;
+    border: 0; background: none; color: var(--ink); font: inherit; text-align: left; cursor: pointer;
+  }
+  .kicker { margin-bottom: var(--space-1); }
+  .vote-title { font-family: var(--font-display); font-size: var(--fs-display-sm); font-weight: 700; line-height: 1.1; }
+  .intro { color: var(--muted); max-width: 60ch; }
+  .vote-cta { margin-top: var(--space-3); }
+  .vote-toggle:hover .vote-cta { transform: translate(-2px, -2px); box-shadow: var(--shadow-lg); }
+  .chevron { display: inline-block; transition: transform var(--dur) var(--ease); }
+  .vote-toggle[aria-expanded='true'] .chevron { transform: rotate(180deg); }
+  .vote-toggle[aria-expanded='true'] .when-closed, .vote-toggle[aria-expanded='false'] .when-open { display: none; }
+  .vote-panel { margin-top: var(--space-6); animation: unfold var(--dur-swipe) var(--ease); }
+  @keyframes unfold { from { opacity: 0; transform: translateY(calc(-1 * var(--space-3))); } }
+  @media (prefers-reduced-motion: reduce) { .vote-panel { animation: none; } }
+  .options { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+  .options li { display: flex; gap: var(--space-2); align-items: stretch; }
+  .option {
+    flex: 1; display: flex; align-items: center; gap: var(--space-4); padding: var(--space-3) var(--space-4);
+    border: var(--bw) solid var(--line); border-radius: var(--radius-md); background: var(--surface); color: var(--ink);
+    font: inherit; text-align: left; cursor: pointer; box-shadow: var(--shadow-sm);
+    transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  }
+  .option:hover { transform: translate(-2px, -2px); box-shadow: var(--shadow-lg); }
+  .option[aria-pressed='true'] { outline: var(--bw-focus) solid var(--line); outline-offset: calc(-1 * var(--bw-focus)); }
+  .opt-emoji {
+    flex: 0 0 auto; display: grid; place-items: center; width: var(--space-11); aspect-ratio: 1;
+    border: var(--bw-sm) solid var(--line); border-radius: var(--radius-sm); font-size: var(--fs-2xl);
+  }
+  .opt-text { flex: 1; display: flex; flex-direction: column; gap: var(--space-2); }
+  .opt-title { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-base); line-height: 1.25; }
+  .opt-bar { display: none; height: var(--space-3); border: var(--bw-sm) solid var(--line); border-radius: var(--radius-pill); overflow: hidden; background: var(--bg); }
+  .opt-fill { display: block; height: 100%; width: calc(var(--pct, 0) * 1%); --dots-size: var(--dots-size-sm); transition: width var(--dur-swipe) var(--ease); }
+  .opt-pct { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lg); min-width: 4ch; text-align: right; }
+  li[data-results] .opt-bar { display: block; }
+  .opt-read {
+    display: grid; place-items: center; width: var(--space-10); border: var(--bw) solid var(--line); border-radius: var(--radius-md);
+    background: var(--surface); text-decoration: none; font-weight: 700; font-size: var(--fs-lg); box-shadow: var(--shadow-sm);
+  }
+  .vote-status { margin: var(--space-5) 0 0; font-weight: 600; min-height: 1.65em; }
+
+
+  @media (max-width: 640px) {
+    .vote { padding: var(--space-5); }
+    .option { gap: var(--space-3); padding: var(--space-3); }
+    .opt-emoji { width: var(--space-10); font-size: var(--fs-xl); }
+  }
+</style>

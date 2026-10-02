@@ -1,0 +1,507 @@
+---
+// Hall of Fame: eigene Seite für Fakt des Tages und Fakt der Woche (Wunsch von Eric, 2026-10-02),
+// mit Montags-Abstimmung, Countdowns, Tippspiel „Wer wird morgen Fakt des Tages?“, Verlauf mit
+// Sammelalbum und Kategorien-Rangliste. Auf der Startseite steht nur noch ein kurzer Hinweis (FamePointer.astro).
+// Rechnen und Speichern: src/scripts/fame.ts, Server: GET /api/history in src/server/community.ts.
+import Base from '../../layouts/Base.astro';
+import Vote from '../../components/Vote.astro';
+import { LANGS, CATEGORIES, FACT_TIMES, type Lang } from '../../config';
+import { t } from '../../i18n/ui';
+import { postsFor, factInfo, categoryIcon } from '../../lib';
+
+export function getStaticPaths() {
+  return LANGS.map((lang) => ({ params: { lang } }));
+}
+const lang = Astro.params.lang as Lang;
+const ui = t(lang);
+const f = ui.fame;
+const other: Lang = lang === 'de' ? 'en' : 'de';
+const posts = await postsFor(lang);
+const facts = posts.map(factInfo);
+// Texte für das Skript. Zahlen sind Platzhalter (9001, 9002), „§“ steht für ein Datum oder einen Titel.
+const texts = {
+  likeMeta: f.likeMeta(9001, 9002), likeMetaOne: f.likeMeta(9001, 1), lucky: f.lucky,
+  voteMeta: f.voteMeta(9001, 9002), voteMetaOne: f.voteMeta(9001, 1), weekOf: f.weekOf('§'),
+  dayOne: f.dayUnit(1), dayMany: f.dayUnit(9001), clockVote: f.clockVote, clockVoteEnds: f.clockVoteEnds,
+  dailyMeta: ui.daily.meta(9001, 9002), dailyMetaOne: ui.daily.meta(9001, 1), dailyLucky: ui.daily.lucky, dailyLocal: ui.daily.local,
+  chosen: ui.weekly.chosen(9001, 9002), chosenOne: ui.weekly.chosen(9001, 1), chosenLocal: ui.weekly.chosenLocal, nextVote: ui.weekly.nextVote,
+  dailyBadge: ui.daily.badge, weekBadge: ui.weekly.badge,
+  read: f.read, unread: f.unread, albumProgress: f.albumProgress(9001, 9002), albumDone: f.albumDone,
+  tipSaved: f.tipSaved, tipHit: f.tipHit, tipMiss: f.tipMiss('§'), catsMeta: f.catsMeta(9001, 9002),
+};
+---
+<Base lang={lang} title={f.title} description={f.intro} altUrl={`/${other}/hall-of-fame/`}>
+  <div data-fame data-facts={JSON.stringify(facts)} data-texts={JSON.stringify(texts)} data-lang={lang}>
+    <section class="stage fame-hero">
+      <div class="wrap">
+        <p class="kicker"><span class="sticker">🏆 {f.name}</span></p>
+        <h1>{f.title}</h1>
+        <p class="intro">{f.intro}</p>
+        <div class="hero-row">
+          <dl class="clocks" aria-label={f.clockLabel}>
+            <div class="clock"><dt>{f.clockDay}</dt><dd data-clock="day">--:--:--</dd></div>
+            <div class="clock"><dt data-clock-vote-label>{f.clockVote}</dt><dd data-clock="vote">--:--:--</dd></div>
+          </dl>
+          <a class="btn" href="#vote" data-vote-jump hidden><span aria-hidden="true">🗳️</span> {f.voteJump}</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap now">
+      <h2>{f.nowTitle}</h2>
+      <div class="now-grid">
+        <div class="slot" data-slot="daily"><p class="card slot-empty" data-empty>{f.noDaily}</p></div>
+        <div class="slot" data-slot="week"><p class="card slot-empty" data-empty>{f.noWeek}</p></div>
+      </div>
+      <p class="note" data-local-note hidden>{f.localNote}</p>
+    </section>
+
+    <div class="wrap vote-wrap"><Vote lang={lang} posts={posts} /></div>
+
+    <section class="wrap tip card" data-tip>
+      <p class="kicker"><span class="chip accent"><span aria-hidden="true">🎯</span> {f.tipKicker}</span></p>
+      <h2>{f.tipTitle}</h2>
+      <p class="lead">{f.tipIntro}</p>
+      <p class="tip-result" data-tip-result hidden></p>
+      <ul class="tip-options" aria-label={f.tipLabel} data-tip-options></ul>
+      <p class="note" data-tip-empty hidden>{f.tipEmpty(FACT_TIMES[0])}</p>
+      <p class="tip-status" data-tip-status aria-live="polite"></p>
+      <dl class="tip-stats">
+        <div><dt>{f.tipStreak}</dt><dd data-tip-streak>0</dd></div>
+        <div><dt>{f.tipHits}</dt><dd data-tip-hits>0</dd></div>
+      </dl>
+      <p class="note" data-tip-local hidden>{f.tipLocal}</p>
+    </section>
+
+    <section class="wrap history">
+      <div class="hist-head">
+        <h2>{f.historyTitle}</h2>
+        <div class="tabs" role="group" aria-label={f.historyLabel}>
+          <button class="chip" type="button" aria-pressed="true" data-tab="days"><span aria-hidden="true">⭐</span> {f.tabDays}</button>
+          <button class="chip" type="button" aria-pressed="false" data-tab="weeks"><span aria-hidden="true">🏆</span> {f.tabWeeks}</button>
+        </div>
+      </div>
+      <div class="album card">
+        <div>
+          <h3>{f.albumTitle}</h3>
+          <p class="note">{f.albumIntro}</p>
+        </div>
+        <div class="meter-box">
+          <p class="meter-label" data-album-label></p>
+          <div class="meter" role="progressbar" aria-label={f.albumTitle} aria-valuemin="0" aria-valuemax="0" aria-valuenow="0" data-album-meter>
+            <span class="meter-fill accent" data-album-fill></span>
+          </div>
+        </div>
+      </div>
+      <ol class="hist-list" data-list="days"></ol>
+      <ol class="hist-list" data-list="weeks" hidden></ol>
+      <p class="note" data-hist-empty="days" hidden>{f.emptyDays}</p>
+      <p class="note" data-hist-empty="weeks" hidden>{f.emptyWeeks}</p>
+      <div class="hist-more"><button class="btn btn--cyan" type="button" data-hist-more hidden>{f.showAll}</button></div>
+    </section>
+
+    <section class="wrap cats">
+      <h2>{f.catsTitle}</h2>
+      <p class="lead">{f.catsIntro}</p>
+      <ol class="rank" aria-label={f.catsLabel} data-ranks>
+        {CATEGORIES.map((c) => (
+          <li class="rank-row" data-cat={c} hidden>
+            <span class="rank-no" data-no></span>
+            <span class:list={['rank-icon', `cat-${c}`]}><img src={categoryIcon(c)} alt="" width="28" height="28" /></span>
+            <span class="rank-text">
+              <span class="rank-name">{ui.categories[c]}</span>
+              <span class="rank-bar" aria-hidden="true"><span class:list={['rank-fill', `cat-${c}`]}></span></span>
+              <span class="rank-meta" data-meta></span>
+            </span>
+            <span class="rank-score" data-score></span>
+          </li>
+        ))}
+      </ol>
+      <p class="note" data-cats-empty hidden>{f.catsEmpty}</p>
+      <p class="note storage">{f.storageNote}</p>
+    </section>
+
+    <template data-tpl="big">
+      <a class="card big">
+        <span class="big-art" data-art aria-hidden="true"><span class="big-emoji" data-emoji></span></span>
+        <span class="big-body">
+          <span class="chip" data-chip></span>
+          <span class="big-title" data-title></span>
+          <span class="big-hook" data-hook></span>
+          <span class="big-meta" data-meta></span>
+          <span class="more">{ui.readMore} <span aria-hidden="true">→</span></span>
+        </span>
+      </a>
+    </template>
+    <template data-tpl="tip">
+      <li>
+        <button class="tip-option" type="button" aria-pressed="false">
+          <span class="tip-emoji" data-emoji aria-hidden="true"></span>
+          <span class="tip-title"><span class="sr-only">{f.tipFor}: </span><span data-title></span></span>
+          <span class="tip-check" aria-hidden="true">🎯</span>
+        </button>
+      </li>
+    </template>
+    <template data-tpl="hist">
+      <li class="hist-item">
+        <span class="hist-date" data-date></span>
+        <a class="card hist-card" data-link>
+          <span class="tip-emoji" data-emoji aria-hidden="true"></span>
+          <span class="hist-text"><span class="hist-title" data-title></span><span class="hist-meta" data-meta></span></span>
+          <span class="chip hist-read" data-read></span>
+        </a>
+      </li>
+    </template>
+  </div>
+</Base>
+
+<script>
+  import { current, history, readKeys, tipFor, setTip, tipStats, type DailyMode } from '../../scripts/fame';
+  import { addDays, likePct, nextDayStart, dayStartUtc, type DayPick } from '../../week';
+  import type { FactInfo } from '../../lib';
+
+  const root = document.querySelector<HTMLElement>('[data-fame]')!;
+  const facts: FactInfo[] = JSON.parse(root.dataset.facts ?? '[]');
+  const texts: Record<string, string> = JSON.parse(root.dataset.texts ?? '{}');
+  const lang = root.dataset.lang === 'en' ? 'en-US' : 'de-DE';
+  const byKey = new Map(facts.map((x) => [x.key, x]));
+  const fill = (tpl: string, v: Record<string, number | string>) =>
+    tpl.replace(/900\d|§/g, (m) => String(v[m] ?? m));
+  const $ = <T extends HTMLElement = HTMLElement>(sel: string, el: ParentNode = root) => el.querySelector<T>(sel)!;
+  const tpl = (name: string) =>
+    ($<HTMLTemplateElement>(`[data-tpl="${name}"]`).content.firstElementChild as HTMLElement).cloneNode(true) as HTMLElement;
+  const dateLabel = (day: string, opts: Intl.DateTimeFormatOptions) =>
+    new Intl.DateTimeFormat(lang, { ...opts, timeZone: 'UTC' }).format(new Date(`${day}T12:00:00Z`));
+  const emoji = (el: HTMLElement, fact: FactInfo) => {
+    el.textContent = fact.emoji;
+    el.classList.add(`cat-${fact.cat}`);
+  };
+
+  function bigCard(fact: FactInfo, chip: string, accent: boolean, meta: string) {
+    const card = tpl('big') as HTMLAnchorElement;
+    card.href = fact.url;
+    $('[data-art]', card).classList.add(`cat-${fact.cat}`);
+    $('[data-emoji]', card).textContent = fact.emoji;
+    const c = $('[data-chip]', card);
+    c.textContent = chip;
+    c.classList.toggle('accent', accent);
+    $('[data-title]', card).textContent = fact.title;
+    $('[data-hook]', card).textContent = fact.hook;
+    $('[data-meta]', card).textContent = meta;
+    return card;
+  }
+
+  // ---------- Countdowns ----------
+  function clocks(today: string, nextPoll: string, pollOpen: boolean) {
+    const voteAt = pollOpen ? nextDayStart(today) : Date.parse(`${dayStartUtc(nextPoll).replace(' ', 'T')}Z`);
+    $('[data-clock-vote-label]').textContent = pollOpen ? texts.clockVoteEnds : texts.clockVote;
+    const fmt = (ms: number) => {
+      const s = Math.max(0, Math.floor(ms / 1000));
+      const d = Math.floor(s / 86400);
+      const hms = [Math.floor(s / 3600) % 24, Math.floor(s / 60) % 60, s % 60].map((n) => String(n).padStart(2, '0')).join(':');
+      return d ? `${d === 1 ? texts.dayOne : fill(texts.dayMany, { 9001: d })}, ${hms}` : hms;
+    };
+    const opened = Date.now();
+    const tick = () => {
+      const now = Date.now();
+      $('[data-clock="day"]').textContent = fmt(nextDayStart(today) - now);
+      $('[data-clock="vote"]').textContent = fmt(voteAt - now);
+      // Um Mitternacht wechselt alles: Wer die Seite offen hat, bekommt sie einmal neu geladen.
+      if (opened < nextDayStart(today) && now >= nextDayStart(today)) location.reload();
+    };
+    tick();
+    setInterval(tick, 1000);
+  }
+
+  // ---------- Fakt des Tages und Fakt der Woche ----------
+  function dailyMeta(mode: DailyMode, like: number, meh: number) {
+    if (mode === 'lucky') return texts.dailyLucky;
+    if (mode === 'local') return texts.dailyLocal;
+    const n = like + meh;
+    return fill(n === 1 ? texts.dailyMetaOne : texts.dailyMeta, { 9001: likePct({ like, meh }), 9002: n });
+  }
+
+  // ---------- Tippspiel ----------
+  function tipGame(today: string, days: DayPick[], shared: boolean) {
+    const box = $('[data-tip]');
+    const list = $('[data-tip-options]', box);
+    const status = $('[data-tip-status]', box);
+    const todays = facts.filter((x) => x.date === today);
+    $('[data-tip-empty]', box).hidden = todays.length > 0;
+    $('[data-tip-local]', box).hidden = shared;
+    const buttons: HTMLButtonElement[] = [];
+    const mark = () => buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.key === tipFor(today))));
+    todays.forEach((fact) => {
+      const li = tpl('tip');
+      const b = $<HTMLButtonElement>('button', li);
+      b.dataset.key = fact.key;
+      emoji($('[data-emoji]', li), fact);
+      $('[data-title]', li).textContent = fact.title;
+      b.addEventListener('click', () => {
+        setTip(today, fact.key);
+        mark();
+        status.textContent = texts.tipSaved;
+      });
+      buttons.push(b);
+      list.append(li);
+    });
+    mark();
+    if (tipFor(today)) status.textContent = texts.tipSaved;
+    const stats = tipStats(days, today);
+    $('[data-tip-streak]', box).textContent = String(stats.streak);
+    $('[data-tip-hits]', box).textContent = `${stats.hits} / ${stats.resolved.length}`;
+    const last = stats.last;
+    if (last) {
+      const result = $('[data-tip-result]', box);
+      result.textContent = last.hit ? `🎯 ${texts.tipHit}` : fill(texts.tipMiss, { '§': byKey.get(last.winner)?.title ?? '' });
+      result.toggleAttribute('data-hit', last.hit);
+      result.hidden = false;
+    }
+  }
+
+  // ---------- Verlauf, Sammelalbum, Kategorien ----------
+  type Entry = { key: string; date: string; meta: string };
+  function historyList(days: Entry[], weeks: Entry[]) {
+    const read = readKeys();
+    const lists = { days, weeks };
+    (Object.keys(lists) as (keyof typeof lists)[]).forEach((name) => {
+      const ol = $(`[data-list="${name}"]`);
+      lists[name].forEach((e) => {
+        const fact = byKey.get(e.key);
+        if (!fact) return;
+        const li = tpl('hist');
+        $('[data-date]', li).textContent = e.date;
+        const a = $<HTMLAnchorElement>('[data-link]', li);
+        a.href = fact.url;
+        emoji($('[data-emoji]', li), fact);
+        $('[data-title]', li).textContent = fact.title;
+        $('[data-meta]', li).textContent = e.meta;
+        const chip = $('[data-read]', li);
+        const isRead = read.has(e.key);
+        chip.textContent = isRead ? `✓ ${texts.read}` : texts.unread;
+        chip.classList.toggle('accent', isRead);
+        li.toggleAttribute('data-read', isRead);
+        ol.append(li);
+      });
+    });
+    // Erst die letzten Einträge, der Rest auf Knopfdruck.
+    const SHORT = 10;
+    let all = false;
+    const more = $<HTMLButtonElement>('[data-hist-more]');
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[data-tab]')];
+    const show = (name: string) => {
+      tabs.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.tab === name)));
+      const items = [...$(`[data-list="${name}"]`).children] as HTMLElement[];
+      items.forEach((li, i) => (li.hidden = !all && i >= SHORT));
+      more.hidden = all || items.length <= SHORT;
+      more.dataset.tab = name;
+      (['days', 'weeks'] as const).forEach((n) => {
+        $(`[data-list="${n}"]`).hidden = n !== name || lists[n].length === 0;
+        $(`[data-hist-empty="${n}"]`).hidden = n !== name || lists[n].length > 0;
+      });
+    };
+    tabs.forEach((b) => b.addEventListener('click', () => show(b.dataset.tab!)));
+    more.addEventListener('click', () => {
+      all = true;
+      show(more.dataset.tab!);
+    });
+    show('days');
+
+    // Sammelalbum: jeder Sieger (Tag oder Woche) zählt einmal.
+    const winners = new Set([...days, ...weeks].map((e) => e.key).filter((k) => byKey.has(k)));
+    const have = [...winners].filter((k) => read.has(k)).length;
+    const meter = $('[data-album-meter]');
+    meter.setAttribute('aria-valuemax', String(winners.size));
+    meter.setAttribute('aria-valuenow', String(have));
+    meter.style.setProperty('--pct', String(winners.size ? Math.round((have / winners.size) * 100) : 0));
+    $('[data-album-label]').textContent =
+      winners.size && have === winners.size ? texts.albumDone : fill(texts.albumProgress, { 9001: have, 9002: winners.size });
+  }
+
+  function ranking(days: Entry[], weeks: Entry[]) {
+    const score: Record<string, { d: number; w: number }> = {};
+    const add = (list: Entry[], field: 'd' | 'w') =>
+      list.forEach((e) => {
+        const cat = byKey.get(e.key)?.cat;
+        if (cat) (score[cat] ??= { d: 0, w: 0 })[field]++;
+      });
+    add(days, 'd');
+    add(weeks, 'w');
+    const total = (c: string) => (score[c] ? score[c].d + score[c].w : 0);
+    const ol = $('[data-ranks]');
+    const rows = [...ol.querySelectorAll<HTMLElement>('[data-cat]')];
+    const max = Math.max(0, ...rows.map((r) => total(r.dataset.cat!)));
+    rows
+      .sort((a, b) => total(b.dataset.cat!) - total(a.dataset.cat!) || (score[b.dataset.cat!]?.w ?? 0) - (score[a.dataset.cat!]?.w ?? 0))
+      .forEach((row, i) => {
+        const c = row.dataset.cat!;
+        const s = score[c];
+        row.hidden = !s;
+        if (!s) return;
+        $('[data-no]', row).textContent = i < 3 ? ['🥇', '🥈', '🥉'][i] : `${i + 1}.`;
+        $('[data-meta]', row).textContent = fill(texts.catsMeta, { 9001: s.d, 9002: s.w });
+        $('[data-score]', row).textContent = String(total(c));
+        row.style.setProperty('--pct', String(max ? Math.round((total(c) / max) * 100) : 0));
+        ol.append(row);
+      });
+    $('[data-cats-empty]').hidden = max > 0;
+  }
+
+  async function init() {
+    const now = await current(facts);
+    const { state, daily, featured } = now;
+    clocks(state.today, state.nextPoll, !!state.openPoll);
+    $('[data-vote-jump]').hidden = !state.openPoll;
+
+    const dSlot = $('[data-slot="daily"]');
+    const dFact = daily && byKey.get(daily.key);
+    if (daily && dFact) {
+      dSlot.replaceChildren(bigCard(dFact, `⭐ ${texts.dailyBadge}`, true, dailyMeta(daily.mode, daily.like, daily.meh)));
+    }
+    const wSlot = $('[data-slot="week"]');
+    const wFact = featured && byKey.get(featured.key);
+    if (featured && wFact) {
+      const chosen = state.shared
+        ? fill(featured.total === 1 ? texts.chosenOne : texts.chosen, { 9001: featured.votes, 9002: featured.total })
+        : texts.chosenLocal;
+      wSlot.replaceChildren(bigCard(wFact, `🏆 ${texts.weekBadge}`, false, state.openPoll ? chosen : `${chosen} ${texts.nextVote}`));
+    }
+
+    const hist = await history(facts, state.today, state.shared);
+    $('[data-local-note]').hidden = hist.shared;
+    const days: Entry[] = hist.days.map((p) => ({
+      key: p.key,
+      // Fakt des Tages ist er am Tag nach seinem Erscheinen.
+      date: dateLabel(addDays(p.day, 1), { weekday: 'short', day: 'numeric', month: 'short' }),
+      meta: p.like + p.meh > 0 ? fill(p.like + p.meh === 1 ? texts.likeMetaOne : texts.likeMeta, { 9001: likePct(p), 9002: p.like + p.meh }) : texts.lucky,
+    }));
+    const weeks: Entry[] = hist.weeks.map((p) => ({
+      key: p.key,
+      date: fill(texts.weekOf, { '§': dateLabel(p.poll, { day: 'numeric', month: 'long' }) }),
+      meta: fill(p.total === 1 ? texts.voteMetaOne : texts.voteMeta, { 9001: p.votes, 9002: p.total }),
+    }));
+    tipGame(state.today, hist.days, hist.shared);
+    historyList(days, weeks);
+    ranking(days, weeks);
+  }
+  init();
+</script>
+
+<style>
+  .fame-hero { padding: var(--space-11) 0 var(--space-11); }
+  .kicker { margin: 0 0 var(--space-4); }
+  h1 { margin: 0; font-size: var(--fs-display-md); line-height: 1.05; letter-spacing: -0.03em; max-width: 22ch; }
+  .intro { color: var(--on-night-muted); font-size: var(--fs-lg); max-width: 60ch; margin: var(--space-5) 0 var(--space-7); }
+  .hero-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-5); }
+  .clocks { display: flex; flex-wrap: wrap; gap: var(--space-4); margin: 0; }
+  .clock {
+    padding: var(--space-3) var(--space-5); border: var(--bw) solid var(--on-night); border-radius: var(--radius-md);
+    box-shadow: var(--shadow-on-night);
+  }
+  .clock dt { font-size: var(--fs-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--on-night-muted); }
+  .clock dd { margin: 0; font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  h2 { margin: 0 0 var(--space-5); font-size: var(--fs-display-sm); }
+  .lead { color: var(--muted); max-width: 62ch; margin: 0 0 var(--space-6); }
+  .note { color: var(--muted); font-size: var(--fs-sm); font-weight: 600; margin: var(--space-4) 0 0; }
+
+  /* Gerade ganz oben */
+  .now { margin-top: var(--space-11); }
+  .now-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-7); }
+  .slot { display: grid; }
+  .slot-empty { margin: 0; padding: var(--space-6); color: var(--muted); }
+  .big { display: grid; grid-template-rows: auto 1fr; overflow: hidden; text-decoration: none; transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
+  .big:hover { transform: translate(-3px, -3px) rotate(-0.4deg); box-shadow: var(--shadow-xl); }
+  .big-art { display: grid; place-items: center; aspect-ratio: 5 / 2; border-bottom: var(--bw) solid var(--line); --dots-size: var(--dots-size-lg); }
+  .big-emoji { font-size: var(--fs-emoji-lg); transform: rotate(-8deg); filter: var(--emoji-shadow); }
+  .big-body { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-6); }
+  .big-body .chip { align-self: flex-start; }
+  .big-title { font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 700; line-height: 1.15; letter-spacing: -0.02em; }
+  .big-hook { color: var(--muted); }
+  .big-meta { color: var(--muted); font-size: var(--fs-sm); font-weight: 600; }
+  .more { margin-top: auto; font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; color: var(--pink-text); }
+
+  .vote-wrap { margin-top: var(--space-11); }
+  .vote-wrap:has(> [hidden]) { display: none; }
+
+  /* Tippspiel */
+  .tip { margin-top: var(--space-11); padding: var(--space-8); }
+  .tip h2 { margin-bottom: var(--space-3); }
+  .tip-result { margin: 0 0 var(--space-5); padding: var(--space-3) var(--space-4); border: var(--bw-sm) solid var(--line); border-radius: var(--radius-md); font-weight: 700; }
+  .tip-result[data-hit] { background: var(--lime); color: var(--on-accent); }
+  .tip-options { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--space-4); }
+  .tip-option {
+    width: 100%; height: 100%; display: flex; align-items: center; gap: var(--space-4); padding: var(--space-3) var(--space-4);
+    border: var(--bw) solid var(--line); border-radius: var(--radius-md); background: var(--surface); color: var(--ink);
+    font: inherit; text-align: left; cursor: pointer; box-shadow: var(--shadow-sm);
+    transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  }
+  .tip-option:hover { transform: translate(-2px, -2px); box-shadow: var(--shadow-lg); }
+  .tip-option[aria-pressed='true'] { outline: var(--bw-focus) solid var(--line); outline-offset: calc(-1 * var(--bw-focus)); }
+  .tip-emoji {
+    flex: 0 0 auto; display: grid; place-items: center; width: var(--space-10); aspect-ratio: 1;
+    border: var(--bw-sm) solid var(--line); border-radius: var(--radius-sm); font-size: var(--fs-xl); --dots-size: var(--dots-size-sm);
+  }
+  .tip-title { flex: 1; min-width: 0; font-family: var(--font-display); font-weight: 700; line-height: 1.25; }
+  .tip-check { visibility: hidden; font-size: var(--fs-xl); }
+  .tip-option[aria-pressed='true'] .tip-check { visibility: visible; }
+  .tip-status { margin: var(--space-4) 0 0; font-weight: 600; min-height: 1.65em; }
+  .tip-stats { display: flex; flex-wrap: wrap; gap: var(--space-4); margin: var(--space-4) 0 0; }
+  .tip-stats div { padding: var(--space-2) var(--space-4); border: var(--bw-sm) solid var(--line); border-radius: var(--radius-md); background: var(--bg); }
+  .tip-stats dt { font-size: var(--fs-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  .tip-stats dd { margin: 0; font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 700; }
+
+  /* Verlauf */
+  .history { margin-top: var(--space-11); }
+  .hist-head { display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: center; justify-content: space-between; margin-bottom: var(--space-5); }
+  .hist-head h2 { margin: 0; }
+  .tabs { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .tabs .chip { cursor: pointer; }
+  .album { display: flex; flex-wrap: wrap; gap: var(--space-5); align-items: center; justify-content: space-between; padding: var(--space-5) var(--space-6); margin-bottom: var(--space-6); }
+  .album h3 { margin: 0; font-size: var(--fs-xl); }
+  .album .note { margin: var(--space-1) 0 0; }
+  .meter-box { flex: 0 1 320px; min-width: 220px; }
+  .meter-label { margin: 0 0 var(--space-2); font-weight: 700; }
+  .meter { height: var(--space-5); border: var(--bw-sm) solid var(--line); border-radius: var(--radius-pill); overflow: hidden; background: var(--bg); }
+  .meter-fill { display: block; height: 100%; width: calc(var(--pct, 0) * 1%); --dots-size: var(--dots-size-sm); transition: width var(--dur-swipe) var(--ease); }
+  .meter[aria-valuenow='0'] .meter-fill { visibility: hidden; }
+  .hist-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+  .hist-item { display: grid; grid-template-columns: 9ch minmax(0, 1fr); gap: var(--space-4); align-items: center; }
+  .hist-date { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); color: var(--muted); }
+  [data-list='weeks'] .hist-item { grid-template-columns: minmax(0, 1fr); gap: var(--space-1); }
+  .hist-card { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-3) var(--space-4); text-decoration: none; transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
+  .hist-card:hover { transform: translate(-2px, -2px); box-shadow: var(--shadow-lg); }
+  .hist-item:not([data-read]) .hist-card .tip-emoji { filter: grayscale(1); }
+  .hist-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--space-1); }
+  .hist-title { font-family: var(--font-display); font-weight: 700; line-height: 1.25; }
+  .hist-meta { color: var(--muted); font-size: var(--fs-sm); }
+  .hist-read { flex: 0 0 auto; }
+  .hist-more { display: flex; justify-content: center; margin-top: var(--space-6); }
+  .hist-more:has(> [hidden]) { display: none; }
+  .hist-item:not([data-read]) .hist-read { color: var(--muted); }
+
+  /* Kategorien */
+  .cats { margin-top: var(--space-11); }
+  .rank { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+  .rank-row { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-3) var(--space-4); border: var(--bw) solid var(--line); border-radius: var(--radius-md); background: var(--surface); box-shadow: var(--shadow-sm); }
+  .rank-no { flex: 0 0 auto; min-width: 3ch; font-family: var(--font-display); font-weight: 700; font-size: var(--fs-xl); text-align: center; }
+  .rank-icon { flex: 0 0 auto; display: grid; place-items: center; width: var(--space-10); aspect-ratio: 1; border: var(--bw-sm) solid var(--line); border-radius: var(--radius-sm); --dots-size: var(--dots-size-sm); }
+  .rank-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--space-1); }
+  .rank-name { font-family: var(--font-display); font-weight: 700; }
+  .rank-bar { height: var(--space-3); border: var(--bw-sm) solid var(--line); border-radius: var(--radius-pill); overflow: hidden; background: var(--bg); }
+  .rank-fill { display: block; height: 100%; width: calc(var(--pct, 0) * 1%); --dots-size: var(--dots-size-sm); }
+  .rank-meta { color: var(--muted); font-size: var(--fs-sm); }
+  .rank-score { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-2xl); min-width: 3ch; text-align: right; }
+  .storage { margin-top: var(--space-8); }
+
+  @media (max-width: 760px) {
+    .now-grid { grid-template-columns: minmax(0, 1fr); }
+    .tip { padding: var(--space-5); }
+    .hist-item { grid-template-columns: minmax(0, 1fr); gap: var(--space-1); }
+    .hist-read { display: none; }
+    .clock dd { font-size: var(--fs-xl); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .meter-fill { transition: none; }
+  }
+</style>

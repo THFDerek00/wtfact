@@ -2,7 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import PostCard from '../../components/PostCard.astro';
 import SwipeDeck from '../../components/SwipeDeck.astro';
-import Weekly from '../../components/Weekly.astro';
+import FamePointer from '../../components/FamePointer.astro';
 import { LANGS, CATEGORIES, type Lang } from '../../config';
 import { t } from '../../i18n/ui';
 import { postsFor, postUrl, factNumber, categoryIcon } from '../../lib';
@@ -56,7 +56,7 @@ const ticker = rest.slice(0, 12);
     </section>
   )}
 
-  <Weekly lang={lang} posts={posts} />
+  <FamePointer lang={lang} posts={posts} />
 
   <section class="wrap holes">
     <h2>{ui.rabbitHole}</h2>

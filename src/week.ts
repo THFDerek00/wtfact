@@ -126,3 +126,25 @@ export function dayStartUtc(day: string) {
   const minutes = m ? (m[1] === '-' ? -1 : 1) * (Number(m[2]) * 60 + Number(m[3])) : 0;
   return new Date(Date.parse(`${day}T00:00:00Z`) - minutes * 60_000).toISOString().slice(0, 19).replace('T', ' ');
 }
+
+// ---------- Hall of Fame: Verlauf ----------
+
+/** So viele Tage reicht der Verlauf der Fakten des Tages zurück (heute eingeschlossen). */
+export const HISTORY_DAYS = 30;
+/** So viele abgeschlossene Abstimmungen zeigt der Verlauf der Fakten der Woche. */
+export const HISTORY_WEEKS = 12;
+
+/** Die letzten `n` Tage bis `today`, neuester zuerst. */
+export const lastDays = (today: string, n = HISTORY_DAYS) => Array.from({ length: n }, (_, i) => addDays(today, -i));
+
+/** Abgeschlossene Abstimmungs-Montage, neuester zuerst. Der erste ist der, dessen Gewinner gerade Fakt der Woche ist. */
+export const pastPolls = (today: string, n = HISTORY_WEEKS) => {
+  const first = weekState(today).featuredPoll;
+  return Array.from({ length: n }, (_, i) => addDays(first, -7 * i));
+};
+
+/** Zeitpunkt (ms), an dem der deutsche Tag nach `day` beginnt. */
+export const nextDayStart = (day: string) => Date.parse(`${dayStartUtc(addDays(day, 1)).replace(' ', 'T')}Z`);
+
+export type DayPick = { day: string; key: string; like: number; meh: number };
+export type WeekPick = { poll: string; key: string; votes: number; total: number };

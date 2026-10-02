@@ -1,5 +1,6 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
 import { SITE, type Lang } from './config';
+import { postDay } from './week';
 
 export type Post = CollectionEntry<'posts'>;
 
@@ -30,3 +31,15 @@ export const readingMinutes = (body = '') => Math.max(1, Math.round(body.split(/
 export const factNumber = (p: Post, all: Post[]) => all.length - all.findIndex((o) => o.id === p.id);
 
 export const categoryIcon = (c: string) => `/brand/icons/${c}.svg`;
+
+/** Kurzinfo zu einem Fakt für Skripte im Browser (Hall of Fame, Hinweis auf der Startseite). */
+export const factInfo = (p: Post) => ({
+  key: p.data.translationKey,
+  date: postDay(p.data.date),
+  cat: p.data.category as string,
+  emoji: p.data.emoji,
+  title: p.data.title,
+  hook: p.data.hook,
+  url: postUrl(p),
+});
+export type FactInfo = ReturnType<typeof factInfo>;
