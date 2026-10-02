@@ -133,6 +133,6 @@ Eine Breite für alle Bereiche (Eric, 2026-10-02): `.wrap` ist überall `--conte
 Wunsch von Eric (2026-10-02):
 
 - **Emojis nur am Fakt**: auf Beitragsseiten (Bild, „Noch ein Fakt“) und auf den kleinen Faktenkarten (Startseite, Wisch-Karte, Hall of Fame, Abstimmung, Gold-Fakten). Knöpfe, Überschriften, Etiketten, Ticker und Navigation bekommen keine Emojis.
-- Wo ein Bild hilft, kommt ein Strich-Icon aus **Lucide** (`lucide-static`), eingebunden über `src/components/Icon.astro`: `<Icon name="chevron-right" />`. Icons sind `aria-hidden`, Farbe `currentColor`, Größe wächst mit der Schrift.
+- Wo ein Bild hilft, kommt ein Strich-Icon aus **Lucide**, eingebunden über `src/components/Icon.astro`; die Pfade liegen in `src/components/icons.ts` (kein npm-Paket nötig, neues Icon dort von lucide.dev ergänzen): `<Icon name="chevron-right" />`. Icons sind `aria-hidden`, Farbe `currentColor`, Größe wächst mit der Schrift.
 - **Pfeile sind immer Chevrons** (`chevron-right`, `-left`, `-down`, `-up`), keine Zeichen wie → ↓ ▾.
 - **Gefällt mir / Gefällt mir weniger**: `thumbs-up` / `thumbs-down`, auf Knöpfen und auf den Schildern der Wisch-Karte.
