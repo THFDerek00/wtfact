@@ -30,8 +30,6 @@ const d = post.data;
   .art {
     position: relative; display: grid; place-items: center; aspect-ratio: 16 / 9;
     border-bottom: var(--bw) solid var(--line);
-    background-image: radial-gradient(color-mix(in srgb, var(--on-accent) 14%, transparent) 18%, transparent 20%);
-    background-size: 16px 16px;
   }
   .emoji { font-size: var(--fs-emoji-md); transform: rotate(-8deg); filter: var(--emoji-shadow); transition: transform var(--dur) var(--ease-pop); }
   .post:hover .emoji { transform: rotate(8deg) scale(1.15); }

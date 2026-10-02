@@ -88,7 +88,7 @@ const no = String(factNumber(post, all)).padStart(3, '0');
   .progress { position: fixed; top: 0; left: 0; right: 0; height: 5px; z-index: 6; pointer-events: none; }
   .progress span { display: block; height: 100%; background: var(--pink); transform-origin: left; transform: scaleX(0); }
 
-  .banner { position: relative; overflow: hidden; border-bottom: var(--bw) solid var(--line); padding: var(--space-10) 0 var(--space-12); }
+  .banner { position: relative; overflow: hidden; border-bottom: var(--bw) solid var(--line); padding: var(--space-10) 0 var(--space-12); --dots-size: var(--dots-size-lg); }
   .banner-inner { position: relative; }
   .meta { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
   .no { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); }

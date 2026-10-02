@@ -47,6 +47,15 @@
   --cat-language: var(--lilac);
   --cat-sport: var(--blue);
 
+  /* Punktmuster: liegt auf JEDER Kategorie-Fläche (über .cat-*).
+     Rasterweite pro Ort über --dots-size umstellen (sm auf Chips/Sternen, lg auf großen Bannern). */
+  --dots-ink: color-mix(in srgb, var(--on-accent) 9%, transparent);
+  --dots: radial-gradient(var(--dots-ink) 22%, transparent 25%);
+  --dots-size-sm: 7px;
+  --dots-size-md: 16px;
+  --dots-size-lg: 22px;
+  --dots-size: var(--dots-size-md);
+
   /* Gold-Fakten (Science Jumper): goldene Fläche, Sterne in Kategoriefarbe */
   --gold: #f6c544;
   --gold-light: #ffe58a;
@@ -186,6 +195,7 @@ h1, h2, h3 { font-family: var(--font-display); line-height: 1.15; letter-spacing
   font-weight: 600;
   line-height: 1.5;
   text-decoration: none;
+  --dots-size: var(--dots-size-sm);
 }
 button.chip { cursor: pointer; }
 .chip[aria-pressed='true'] {
@@ -234,17 +244,18 @@ button.chip { cursor: pointer; }
 .stage .btn { border-color: var(--on-night); box-shadow: var(--shadow-night-sm); }
 .stage .btn:hover { box-shadow: var(--shadow-night-lg); }
 
-/* Kategorie-Flächen: setzen immer Fläche UND passende Schriftfarbe */
-.cat-science { background: var(--cat-science); color: var(--on-accent); }
-.cat-history { background: var(--cat-history); color: var(--on-accent); }
-.cat-tech { background: var(--cat-tech); color: var(--on-accent); }
-.cat-nature { background: var(--cat-nature); color: var(--on-accent); }
-.cat-body { background: var(--cat-body); color: var(--on-accent); }
-.cat-weird { background: var(--cat-weird); color: var(--on-accent); }
-.cat-survival { background: var(--cat-survival); color: var(--on-accent); }
-.cat-food { background: var(--cat-food); color: var(--on-accent); }
-.cat-language { background: var(--cat-language); color: var(--on-accent); }
-.cat-sport { background: var(--cat-sport); color: var(--on-accent); }
+/* Kategorie-Flächen: setzen immer Fläche, Punktmuster UND passende Schriftfarbe.
+   Neue Kategorie = neue Zeile nach demselben Muster (der Build prüft das). */
+.cat-science { background: var(--dots), var(--cat-science); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
+.cat-history { background: var(--dots), var(--cat-history); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
+.cat-tech { background: var(--dots), var(--cat-tech); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
+.cat-nature { background: var(--dots), var(--cat-nature); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
+.cat-body { background: var(--dots), var(--cat-body); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
+.cat-weird { background: var(--dots), var(--cat-weird); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
+.cat-survival { background: var(--dots), var(--cat-survival); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
+.cat-food { background: var(--dots), var(--cat-food); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
+.cat-language { background: var(--dots), var(--cat-language); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
+.cat-sport { background: var(--dots), var(--cat-sport); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
 .accent { background: var(--yellow); color: var(--on-accent); }
 .gold { background: var(--gold-surface); color: var(--on-accent); }
 

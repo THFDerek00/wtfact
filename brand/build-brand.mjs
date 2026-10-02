@@ -152,7 +152,10 @@ const card = (x, y, w, h, fill, { sw = 8, off = 14, rx = 36 } = {}) =>
 const chip = (label, x, y, fill, size = 34) => {
   const w = measure(label, size, DISPLAY) + size * 1.3;
   const h = size * 1.7;
+  // Kategorie-Chips tragen das Punktmuster wie auf der Seite (eigenes, feineres Raster)
+  const pat = `<defs><pattern id="chipdots" width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="2" fill="${DOT_INK}"/></pattern></defs>`;
   return { w, svg: `<rect x="${x}" y="${y}" width="${r2(w)}" height="${r2(h)}" rx="${r2(h / 2)}" fill="${fill}" stroke="${C.ink}" stroke-width="5"/>` +
+    pat + `<rect x="${x}" y="${y}" width="${r2(w)}" height="${r2(h)}" rx="${r2(h / 2)}" fill="url(#chipdots)"/>` +
     text(label, { x: x + w / 2, y: y + h / 2 + size * 0.36, size, anchor: 'middle' }) };
 };
 // Konfetti aus Kreisen/Quadraten in Markenfarben, deterministisch
@@ -171,6 +174,8 @@ function confetti(w, h, n, seed = 7, avoid = null) {
   }
   return o;
 }
+// Punktfarbe auf Kategorie-Flächen: wie --dots-ink in src/styles/global.css (9 % Schwarz)
+const DOT_INK = '#14141417';
 const dots = (w, h, fill = '#14141414') =>
   `<defs><pattern id="dots" width="36" height="36" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="3" fill="${fill}"/></pattern></defs><rect width="${w}" height="${h}" fill="url(#dots)"/>`;
 
@@ -264,7 +269,7 @@ for (const lang of ['de', 'en']) {
   // Instagram-Story-Highlight-Cover 1080×1920 (Symbol bleibt im runden Ausschnitt)
   for (const key of Object.keys(ICONS)) {
     const W = 1080, H = 1920;
-    let b = `<rect width="${W}" height="${H}" fill="${CAT_COLOR[key]}"/>`;
+    let b = `<rect width="${W}" height="${H}" fill="${CAT_COLOR[key]}"/>` + dots(W, H, DOT_INK);
     b += `<circle cx="${W / 2 + 18}" cy="${H / 2 + 18}" r="330" fill="${C.ink}"/>`;
     b += `<circle cx="${W / 2}" cy="${H / 2}" r="330" fill="${C.bg}" stroke="${C.ink}" stroke-width="16"/>`;
     b += iconG(key, W / 2 - 190, H / 2 - 190, 380, C.ink, 1.8);

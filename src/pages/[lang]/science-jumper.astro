@@ -348,7 +348,7 @@ const STARS = 9;
     clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
     animation: twinkle var(--dur-twinkle) ease-in-out infinite;
   }
-  .star-core { position: absolute; inset: var(--bw-sm); clip-path: inherit; }
+  .star-core { position: absolute; inset: var(--bw-sm); clip-path: inherit; --dots-size: var(--dots-size-sm); }
   .star:nth-child(1) { top: var(--space-3); right: var(--space-3); width: var(--star-size-lg); }
   .star:nth-child(2) { top: var(--space-10); right: var(--space-2); width: var(--star-size-sm); animation-delay: calc(var(--dur-twinkle) * -0.3); }
   .star:nth-child(3) { top: var(--space-2); right: var(--space-11); width: var(--star-size-sm); animation-delay: calc(var(--dur-twinkle) * -0.6); }
