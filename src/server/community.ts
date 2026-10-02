@@ -2,12 +2,12 @@
 // Läuft als Cloudflare Pages Function (functions/api/[[path]].ts) mit einer D1-Datenbank,
 // die als Binding `DB` eingetragen ist. Tabellen: db/schema.sql. Einrichtung: README.md.
 //
-//   GET  /api/week   Stand der Woche: laufende Abstimmung (nur montags) und aktueller Fakt der Woche
+//   GET  /api/week   Stand der Woche: laufende Abstimmung (nur montags), Fakt der Woche und Fakt des Tages
 //   POST /api/vote   { voter, poll, key }        Stimme abgeben oder ändern (nur montags)
 //   POST /api/rate   { voter, key, verdict }     Wisch-Bewertung, verdict = like | meh
 //
 // Ohne Binding antwortet alles mit 503 „not-configured“. Die Seite speichert dann nur im Browser.
-import { berlinDay, weekState, inPoll, pickWinner, type FactMeta, type Verdict } from '../week';
+import { berlinDay, weekState, inPoll, pickWinner, pickFactOfDay, dayStartUtc, addDays, type FactMeta, type Ratings, type Verdict } from '../week';
 
 interface D1Statement {
   bind(...values: unknown[]): D1Statement;
@@ -43,19 +43,19 @@ async function voteCounts(db: D1Database, poll: string) {
   return Object.fromEntries(results.map((r) => [r.fact_key, Number(r.n)])) as Record<string, number>;
 }
 
-async function ratingsFor(db: D1Database, keys: string[]) {
+/** Wisch-Bewertungen je Fakt. Mit `before` (UTC, „JJJJ-MM-TT HH:MM:SS“) nur Bewertungen davor. */
+async function ratingsFor(db: D1Database, keys: string[], before?: string): Promise<Ratings> {
   if (!keys.length) return {};
+  const n = keys.length;
   const { results } = await db
     .prepare(
       `SELECT fact_key, SUM(verdict = 'like') AS likes, SUM(verdict = 'meh') AS mehs FROM ratings
-       WHERE fact_key IN (${keys.map((_, i) => `?${i + 1}`).join(',')}) GROUP BY fact_key`,
+       WHERE fact_key IN (${keys.map((_, i) => `?${i + 1}`).join(',')})${before ? ` AND created_at < ?${n + 1}` : ''}
+       GROUP BY fact_key`,
     )
-    .bind(...keys)
+    .bind(...keys, ...(before ? [before] : []))
     .all<{ fact_key: string; likes: number; mehs: number }>();
-  return Object.fromEntries(results.map((r) => [r.fact_key, { like: Number(r.likes), meh: Number(r.mehs) }])) as Record<
-    string,
-    { like: number; meh: number }
-  >;
+  return Object.fromEntries(results.map((r) => [r.fact_key, { like: Number(r.likes), meh: Number(r.mehs) }]));
 }
 
 async function body(request: Request): Promise<Record<string, unknown> | null> {
@@ -80,12 +80,17 @@ export async function handle(request: Request, env: Env): Promise<Response> {
     const votes = await voteCounts(db, state.featuredPoll);
     const winner = pickWinner(cands, votes, await ratingsFor(db, cands.map((c) => c.key)));
     const featured = winner ? { poll: state.featuredPoll, key: winner, votes: votes[winner], total: sum(votes) } : null;
+    // Fakt des Tages: Fakten von gestern, Bewertungen bis heute 0 Uhr.
+    const yesterday = all.filter((f) => f.date === addDays(state.today, -1));
+    const dayRatings = await ratingsFor(db, yesterday.map((f) => f.key), dayStartUtc(state.today));
+    const pick = pickFactOfDay(yesterday, dayRatings, state.today);
+    const daily = pick ? { ...pick, ...(dayRatings[pick.key] ?? { like: 0, meh: 0 }) } : null;
     let poll = null;
     if (state.openPoll) {
       const counts = await voteCounts(db, state.openPoll);
       poll = { id: state.openPoll, counts, total: sum(counts) };
     }
-    return json({ ...state, featured, poll });
+    return json({ ...state, featured, daily, poll });
   }
 
   if (route === 'vote' && request.method === 'POST') {
