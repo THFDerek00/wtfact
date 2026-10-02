@@ -59,3 +59,14 @@ Build automatisch. Wer hier eine Zahl ändert, ändert sie auch dort.
 - Write it as a native German speaker would for a young audience (use "du"), not as a literal translation.
 - Use the correct German term, not a loose everyday word (e.g. "Kalmar", not "Tintenfisch", for squid).
 - German typographic quotes („…") and decimal commas. Facts, numbers and sources identical in both languages. [geprüft]
+
+## Golden facts (Science Jumper)
+
+<!-- Gold-Fakten stehen in src/data/golden-facts.json und werden im Spiel Science Jumper freigeschaltet.
+scripts/check-golden.mjs prüft sie bei jedem Build. -->
+
+- Golden facts are rewards: extra obscure, with a real wow factor, and never also published as a normal post.
+- Same truth and source rules as posts: at least 2 sources from 2 different websites, Wikipedia only with 2 more. [geprüft]
+- 50 to 130 words per language, no emoji, numbers in the title must appear in the text. [geprüft]
+- Unlock thresholds are round numbers: steps of 5 up to 20, then multiples of 25 (50, 75, 100, never 66). [geprüft]
+- The last golden fact unlocks at exactly 1000 points, with at least 10 golden facts before it. [geprüft]

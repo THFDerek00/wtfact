@@ -41,6 +41,22 @@
   --cat-weird: var(--yellow);
   --cat-survival: var(--teal);
 
+  /* Gold-Fakten (Science Jumper): goldene Fläche, Sterne in Kategoriefarbe */
+  --gold: #f6c544;
+  --gold-light: #ffe58a;
+  --gold-deep: #d99a1e;
+  --gold-surface: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 45%, var(--gold-deep) 100%);
+  --star-size-sm: 14px;
+  --star-size-md: 22px;
+  --star-size-lg: 32px;
+  --star-edge: drop-shadow(0 0 1px var(--on-accent)) drop-shadow(0 0 1px var(--on-accent));
+  --dur-twinkle: 2.4s;
+  --locked: #e9e4d8;
+
+  /* Spiel (Science Jumper): Flüssigkeit in den Reagenzgläsern */
+  --flask: #2f7bff;
+  --flask-glow: #8ec5ff;
+
   /* Schrift */
   --font-display: 'Space Grotesk Variable', system-ui, sans-serif;
   --font-body: 'Inter Variable', system-ui, sans-serif;
@@ -114,6 +130,7 @@
     --pink-text: #ff5a92;
     --focus: #ffd23f;
     --night: #000000;
+    --locked: #2a2731;
     color-scheme: dark;
   }
 }
@@ -220,6 +237,7 @@ button.chip { cursor: pointer; }
 .cat-weird { background: var(--cat-weird); color: var(--on-accent); }
 .cat-survival { background: var(--cat-survival); color: var(--on-accent); }
 .accent { background: var(--yellow); color: var(--on-accent); }
+.gold { background: var(--gold-surface); color: var(--on-accent); }
 
 .sr-only {
   position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;

@@ -122,7 +122,7 @@ function ratio(a, b) {
   return (x + 0.05) / (y + 0.05);
 }
 
-const accents = Object.keys(light).filter((k) => k.startsWith('--cat-')).concat('--yellow', '--orange', '--cyan');
+const accents = Object.keys(light).filter((k) => k.startsWith('--cat-')).concat('--yellow', '--orange', '--cyan', '--gold', '--gold-light', '--gold-deep');
 const PAIRS = [
   ...['--ink', '--muted', '--pink-text'].flatMap((fg) => ['--bg', '--surface'].map((bg) => [fg, bg, 4.5])),
   ...accents.map((bg) => ['--on-accent', bg, 4.5]),
