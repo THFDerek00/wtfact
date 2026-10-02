@@ -1,0 +1,408 @@
+{
+  "facts": [
+    {
+      "id": "lord-howe-dst",
+      "points": 10,
+      "category": "weird",
+      "emoji": "🕧",
+      "sources": [
+        {
+          "label": "Atlas Obscura: Lord Howe Island's Time in Lord Howe Island",
+          "url": "https://www.atlasobscura.com/places/lord-howe-islands-time"
+        },
+        {
+          "label": "SBS News: Daylight saving in Australia: When it starts and whether clocks go forward or back",
+          "url": "https://sbs.com.au/news/article/clocks-forward-or-back-daylight-saving-australia-explained/cu6xfjfkd"
+        }
+      ],
+      "de": {
+        "title": "Die Insel, die ihre Uhren nur halb umstellt",
+        "text": "Die meisten Orte mit Sommerzeit drehen die Uhr um eine ganze Stunde. Die Lord-Howe-Insel, ein winziges Stück Australien weit vor der Küste von New South Wales, macht lieber halbe Sachen: Normal gilt dort UTC+10:30, im Sommer geht die Uhr gerade mal 30 Minuten vor auf UTC+11. Damit passt sie dann zum Festland. Zweimal im Jahr gibt’s also nur eine halbe Stunde Schlaf weniger oder mehr. Die Insel gehört zu den ganz wenigen Orten der Welt mit so einer Halbstunden-Umstellung. Für alle, die Zeitzonen-Software programmieren, ist das ein kleines Kopfzerbrechen."
+      },
+      "en": {
+        "title": "The island that only changes its clocks by half",
+        "text": "Most places with daylight saving time jump a full hour. Lord Howe Island, a tiny piece of Australia far off the coast of New South Wales, does things by halves. Its standard time is UTC+10:30, and in summer the clocks move forward just 30 minutes to UTC+11, which lines it up with the mainland. So twice a year the islanders lose or gain a measly half hour of sleep. It is one of the very few places on Earth with a half-hour switch, which makes it a small headache for anyone writing time zone software."
+      }
+    },
+    {
+      "id": "fitzroy-turtle",
+      "points": 25,
+      "category": "nature",
+      "emoji": "🐢",
+      "sources": [
+        {
+          "label": "The University of Queensland: UQ researchers make head and tail of turtle breathing",
+          "url": "https://news.uq.edu.au/1997-02-06-uq-researchers-make-head-and-tail-turtle-breathing"
+        },
+        {
+          "label": "Live Science: Can turtles really breathe through their butts?",
+          "url": "https://www.livescience.com/can-turtles-breathe-through-butts"
+        }
+      ],
+      "de": {
+        "title": "Diese Schildkröte atmet durch den Hintern",
+        "text": "Die Fitzroy-Schildkröte aus Queensland in Australien hat ein Talent, das wie ein Witz klingt: Sie nimmt Sauerstoff über ihren Hintern auf. Ihre Kloake, die Allzweck-Öffnung am Heck, etwa so groß wie eine kleine Münze, führt in einen Hohlraum mit kiemenartigen Strukturen, die Sauerstoff direkt aus dem Flusswasser ziehen. Forschende der University of Queensland haben gemessen, dass die Tiere bis zu fünf Stunden abtauchen, ohne Luft zu holen. Bei anderen Schildkrötenarten lag das Maximum bei etwa zwei Stunden. Ein Forscher hält es sogar für möglich, dass sie unbegrenzt unten bleiben kann. Nicht elegant, aber extrem effektiv."
+      },
+      "en": {
+        "title": "This turtle breathes through its butt",
+        "text": "The Fitzroy River turtle from Queensland, Australia, has a talent that sounds like a joke: it takes up oxygen through its butt. Its cloaca, the all-purpose rear opening about the size of a small coin, leads to a cavity lined with gill-like structures that pull oxygen out of the river water. University of Queensland researchers recorded these turtles staying under for up to five hours without coming up for air, while the maximum recorded for other turtle species was about two. One researcher even says it could potentially stay down indefinitely. Not glamorous, but very effective."
+      }
+    },
+    {
+      "id": "cornea-oxygen",
+      "points": 50,
+      "category": "body",
+      "emoji": "👁️",
+      "sources": [
+        {
+          "label": "Britannica: Cornea | Structure, Function & Disease",
+          "url": "https://www.britannica.com/science/cornea"
+        },
+        {
+          "label": "Africa Check: Yes, the eye's cornea doesn't have blood and gets its oxygen from the air",
+          "url": "https://africacheck.org/fact-checks/meta-programme-fact-checks/yes-eyes-cornea-doesnt-have-blood-and-gets-its-oxygen-air"
+        }
+      ],
+      "de": {
+        "title": "Der Teil deines Körpers, der direkt aus der Luft atmet",
+        "text": "Wenn du jemandem in die Augen schaust, siehst du Gewebe ohne Blutversorgung. Bis auf den äußeren Rand hat die Hornhaut, die durchsichtige Wölbung vorne am Auge, überhaupt keine Blutgefäße. Sie würden dir sonst die Sicht versperren. Woher kommt also der Sauerstoff? Solange deine Augen offen sind, holt sich die Vorderseite ihn direkt aus der Luft, gelöst im dünnen Tränenfilm. Von hinten umspült sie eine klare Flüssigkeit im Augeninneren. Deshalb kann die Hornhaut auch anschwellen, wenn Kontaktlinsen zu wenig Sauerstoff durchlassen."
+      },
+      "en": {
+        "title": "The part of your body that breathes straight from the air",
+        "text": "Look at someone's eyes and you are looking at tissue with no blood supply. Apart from its outer edge, the cornea, the clear dome at the front of your eye, has no blood vessels at all, because they would block your view. So how does it get oxygen? While your eyes are open, its front surface takes oxygen straight from the air, dissolved in the thin film of tears. From behind, it is bathed by a clear fluid inside the eye. That is also why contact lenses that let too little oxygen through can make the cornea swell."
+      }
+    },
+    {
+      "id": "space-invaders-speed",
+      "points": 75,
+      "category": "tech",
+      "emoji": "👾",
+      "sources": [
+        {
+          "label": "The Register: Thirty-five years ago today: Space Invaders conquer the Earth",
+          "url": "https://www.theregister.com/on-prem/2013/06/05/thirty-five-years-ago-today-space-invaders-conquer-the-earth/510549?page=3"
+        },
+        {
+          "label": "SVG: Details You Didn't Know About Space Invaders",
+          "url": "https://www.svg.com/293293/details-you-didnt-know-about-space-invaders/"
+        }
+      ],
+      "de": {
+        "title": "Die Schwierigkeit von Space Invaders war ein Hardware-Zufall",
+        "text": "In Space Invaders (1978) marschieren die Aliens immer schneller, je mehr du abschießt. Geplant war das ursprünglich nicht. Das Spiel lief auf einem Intel-8080-Prozessor, der mit den vielen Sprites ordentlich zu kämpfen hatte. Jeder zerstörte Invader war eine Figur weniger zum Zeichnen, also wurden die übrigen ganz von selbst schneller. Entwickler Tomohiro Nishikado soll gemerkt haben, dass das Spiel dadurch spannender wird, und hat es angeblich drin gelassen, sogar mit passend schnellerer Musik. Eine der berühmtesten Schwierigkeitskurven der Spielegeschichte ist im Grunde ein Performance-Problem."
+      },
+      "en": {
+        "title": "Space Invaders' difficulty curve was a hardware accident",
+        "text": "In Space Invaders (1978), the aliens march faster the more of them you shoot. That was not originally a design idea. The game ran on an Intel 8080 processor that struggled to move all those sprites. Every invader you destroyed meant one less thing to draw, so the remaining ones sped up on their own. Designer Tomohiro Nishikado reportedly noticed that this made the game more tense and kept it in, even speeding up the music to match. One of gaming's most famous difficulty curves is basically a performance problem."
+      }
+    },
+    {
+      "id": "ea-nasir-complaint",
+      "points": 100,
+      "category": "history",
+      "emoji": "🏺",
+      "sources": [
+        {
+          "label": "British Museum: Collections Online | British Museum",
+          "url": "https://www.britishmuseum.org/collection/object/W_1953-0411-71"
+        },
+        {
+          "label": "Guinness World Records: Oldest written customer complaint",
+          "url": "https://www.guinnessworldrecords.com/world-records/537889-oldest-written-customer-complaint"
+        },
+        {
+          "label": "University of Liverpool: The oldest complaint in the world: a trip to the British Museum",
+          "url": "https://www.liverpool.ac.uk/archaeology-classics-and-egyptology/blog/2025/oldest-complaint-in-the-world-british-museum/"
+        }
+      ],
+      "de": {
+        "title": "Die älteste Kundenbeschwerde ist eine 1-Stern-Bewertung aus Ton",
+        "text": "Um 1750 v. Chr. war ein Mann namens Nanni in der Stadt Ur richtig sauer. Der Händler Ea-nasir hatte ihm hochwertige Kupferbarren versprochen und dann miese Ware geliefert. Sein Bote bekam angeblich nur ein „Nimm es oder lass es“ zu hören. Also drückte Nanni seine Wut in eine nur 11,6 cm hohe Tontafel: „Wofür hältst du mich, dass du jemanden wie mich so verächtlich behandelst?“ Laut Guinness ist das die älteste schriftliche Kundenbeschwerde, heute liegt sie im British Museum. Weitere Tafeln deuten darauf hin, dass Nanni nicht der einzige unzufriedene Kunde von Ea-nasir war. Bewertung: 1 Stern, nie wieder."
+      },
+      "en": {
+        "title": "The oldest customer complaint is a 1-star review in clay",
+        "text": "Around 1750 BC in the city of Ur, a man named Nanni was furious. He had been promised fine quality copper ingots by the merchant Ea-nasir and received inferior goods instead, and his messenger was apparently told to take it or leave it. So Nanni pressed his rage into a clay tablet just 11.6 cm tall: \"What do you take me for, that you treat somebody like me with such contempt?\" Guinness lists it as the oldest written customer complaint, and it now sits in the British Museum. Other tablets suggest Nanni was not Ea-nasir's only unhappy customer. Rating: 1 star, would not trade again."
+      }
+    },
+    {
+      "id": "lyrebird-chainsaw",
+      "points": 150,
+      "category": "nature",
+      "emoji": "🪶",
+      "sources": [
+        {
+          "label": "The Australian Museum: Superb Lyrebird",
+          "url": "https://australian.museum/learn/animals/birds/superb-lyrebird/"
+        },
+        {
+          "label": "Mental Floss: This Australian Bird Can Mimic the Sounds of Cameras, Chainsaws, and Car Alarms",
+          "url": "https://www.mentalfloss.com/article/653848/lyrebird-best-impressionist-animal-kingdom"
+        },
+        {
+          "label": "NSW National Parks: Superb lyrebird | Australian animals | NSW National Parks",
+          "url": "https://www.nationalparks.nsw.gov.au/plants-and-animals/superb-lyrebird"
+        }
+      ],
+      "de": {
+        "title": "Der Vogel, der wie eine Kettensäge klingen kann",
+        "text": "Der Prachtleierschwanz aus Australien ist im Grunde ein lebendes Soundboard. Laut Australian Museum besteht sein Gesang zu etwa 80 % aus Imitationen: heimische Vögel, Hundegebell, Automotoren und sogar Kettensägen. In David Attenboroughs BBC-Serie „The Life of Birds“ von 1998 ahmten Leierschwänze aus Gefangenschaft einen Kameraauslöser, einen Kamera-Motorantrieb und eine Autoalarmanlage fast perfekt nach. Ein Vogel im Zoo von Adelaide soll Kettensägen-Geräusche gelernt haben, während nebenan ein Gehege gebaut wurde. Was er oft genug hört, landet in seiner Playlist."
+      },
+      "en": {
+        "title": "The bird that can sound like a chainsaw",
+        "text": "The superb lyrebird from Australia is basically a living soundboard. According to the Australian Museum, about 80% of its song is mimicry: native birds, dog barks, car engines and even chainsaws. In David Attenborough's 1998 BBC series The Life of Birds, captive lyrebirds imitated a camera shutter, a camera's motor drive and a car alarm almost perfectly. One bird at Adelaide Zoo reportedly picked up chainsaw sounds while a nearby enclosure was being built. Whatever it hears often enough can end up in its playlist."
+      }
+    },
+    {
+      "id": "first-password-theft",
+      "points": 200,
+      "category": "tech",
+      "emoji": "🔑",
+      "sources": [
+        {
+          "label": "Gizmodo: The World's First Computer Password? It Was Useless Too",
+          "url": "https://gizmodo.com/the-world-s-first-computer-password-it-was-useless-too-5879856"
+        },
+        {
+          "label": "Purdue cyberTAP: How much do you know about the history of cybersecurity?",
+          "url": "https://cyber.tap.purdue.edu/blog/articles/how-much-do-you-know-about-the-history-of-cybersecurity/"
+        },
+        {
+          "label": "UNC School of Government: Hacking Hacked: Password Security in the Digital Age",
+          "url": "https://itd.sog.unc.edu/knowledge-base/article/hacking-hacked-password-security-digital-age"
+        }
+      ],
+      "de": {
+        "title": "Der erste Passwort-Diebstahl ging um mehr Rechenzeit",
+        "text": "Im Frühjahr 1962 hatte der MIT-Forscher Allan Scherr ein Problem: Am Time-Sharing-System CTSS bekam man nur vier Stunden Rechenzeit pro Woche, viel zu wenig für seine Simulationen. Seine Lösung war ziemlich dreist. Er reichte eine Lochkarte ein, die das System anwies, die Passwort-Datei auszudrucken, und es tat genau das. Scherr gab die Passwörter weiter, und jemand hinterließ über den Account des Laborleiters sogar spöttische Nachrichten. Gestanden hat er 25 Jahre später. Das gilt oft als erster Passwort-Diebstahl, und das Motiv war kein Geld, sondern Rechenzeit."
+      },
+      "en": {
+        "title": "The first password theft was about more computer time",
+        "text": "In spring 1962, MIT researcher Allan Scherr had a problem: users of the CTSS time-sharing system got only four hours of computer time per week, far too little for his simulations. His solution was blunt. He submitted a punched card asking the system to print out its password file, and it did. Scherr shared the passwords around, and someone even used the lab director's account to leave taunting messages. He confessed 25 years later. It is often called the first password theft, and the motive was not money but extra computer time."
+      }
+    },
+    {
+      "id": "bir-tawil",
+      "points": 250,
+      "category": "weird",
+      "emoji": "🏜️",
+      "sources": [
+        {
+          "label": "ZME Science: Bir Tawil: The World's Only Unclaimed Habitable Land Is a Battleground for Gold Miners, Tribes, and Fake Kings",
+          "url": "https://www.zmescience.com/feature-post/natural-sciences/geography/bir-tawil-the-worlds-only-unclaimed-habitable-land-is-a-battleground-for-gold-miners-tribes-and-fake-kings/"
+        },
+        {
+          "label": "Egyptian Streets: Bir Tawil: the Stateless Land of Many and No Rulers",
+          "url": "https://egyptianstreets.com/2023/07/20/bir-tawil-the-stateless-land-of-many-and-no-rulers/"
+        }
+      ],
+      "de": {
+        "title": "Die 2.060 km² Land, die zwei Länder nicht haben wollen",
+        "text": "Normalerweise streiten Länder um Land. Bei Bir Tawil ist es genau andersrum: Das 2.060 km² große Stück Wüste zwischen Ägypten und dem Sudan will keiner der beiden haben. Schuld sind zwei alte Grenzlinien, eine von 1899 entlang des 22. Breitengrads und eine Verwaltungsgrenze von 1902. Jedes Land beruft sich auf die Linie, die ihm das viel größere und wertvollere Hala’ib-Dreieck nebenan zuspricht. Nach genau dieser Linie gehört Bir Tawil aber dem anderen. Wer es beansprucht, schwächt also seinen Anspruch auf das bessere Stück."
+      },
+      "en": {
+        "title": "The 2,060 km² of land that two countries refuse to claim",
+        "text": "Countries usually fight over land. With Bir Tawil, it is the other way round. This 2,060 km² patch of desert between Egypt and Sudan is claimed by neither. The reason is two old border lines: one from 1899 along the 22nd parallel and an administrative one from 1902. Each country prefers the line that hands it the much larger and more valuable Hala'ib Triangle next door, and under that line Bir Tawil belongs to the other side. Claiming it would weaken your own claim to the better piece."
+      }
+    },
+    {
+      "id": "bacteria-ratio",
+      "points": 300,
+      "category": "body",
+      "emoji": "🦠",
+      "sources": [
+        {
+          "label": "PLOS Biology: Revised Estimates for the Number of Human and Bacteria Cells in the Body",
+          "url": "https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.1002533"
+        },
+        {
+          "label": "American Council on Science and Health: Commonly Cited Stat — 10 Bacteria For Every 1 Human Cell — Is Wrong",
+          "url": "https://www.acsh.org/news/2016/08/26/commonly-cited-stat-of-10-bacteria-for-every-1-human-cell-is-wrong"
+        }
+      ],
+      "de": {
+        "title": "Der 10-zu-1-Bakterien-Mythos",
+        "text": "Bestimmt hast du schon gehört, dass Bakterien deine eigenen Zellen 10 zu 1 überzählen. Dann wärst du vor allem Mikrobe. Die Zahl geht auf eine einzige grobe Überschlagsrechnung aus den 1970ern zurück, die jahrzehntelang abgeschrieben wurde. 2016 haben Ron Sender, Shai Fuchs und Ron Milo neu gerechnet, für einen „Referenzmann“ mit 70 kg. Ergebnis: etwa 38 Billionen Bakterien gegen rund 30 Billionen menschliche Zellen. Also eher 1 zu 1. Und weil ein einziger Toilettengang ungefähr ein Viertel bis ein Drittel des Darminhalts im Dickdarm rausspült, verschiebt sich das Verhältnis jeden Tag ein bisschen."
+      },
+      "en": {
+        "title": "The 10-to-1 Bacteria Myth",
+        "text": "You've probably heard that bacteria outnumber your own cells 10 to 1, which would make you mostly microbe. That number goes back to a single back-of-the-envelope estimate from the 1970s that got copied for decades. In 2016, Ron Sender, Shai Fuchs and Ron Milo redid the math for a \"reference man\" of 70 kg. Their result: about 38 trillion bacteria versus roughly 30 trillion human cells. So it's closer to 1 to 1. And since a single trip to the toilet can flush out roughly a quarter to a third of your colon's contents, the balance shifts a little every day."
+      }
+    },
+    {
+      "id": "great-moon-hoax",
+      "points": 400,
+      "category": "history",
+      "emoji": "🌕",
+      "sources": [
+        {
+          "label": "History: \"The Great Moon Hoax\" is published in the \"New York Sun\"",
+          "url": "https://www.history.com/this-day-in-history/august-25/the-great-moon-hoax"
+        },
+        {
+          "label": "Museum of Hoaxes: The Great Moon Hoax (1835)",
+          "url": "https://hoaxes.org/archive/permalink/the_great_moon_hoax"
+        }
+      ],
+      "de": {
+        "title": "Die Zeitung, die Fledermausmenschen auf dem Mond fand",
+        "text": "Am 25. August 1835 startete die New York Sun eine sechsteilige Serie mit einer Riesennews: Der berühmte Astronom Sir John Herschel habe mit einem neuen Teleskop Leben auf dem Mond entdeckt. Die Leser erfuhren von Einhörnern, Bibern, die auf zwei Beinen laufen, und pelzigen geflügelten Humanoiden, die an Fledermäuse erinnerten, im Text „Vespertilio-homo“ genannt. Als Quelle diente angeblich das Edinburgh Journal of Science, das schon Jahre vorher eingestellt worden war. Herschel saß in Südafrika und wusste nichts davon. Geschrieben hat das Ganze höchstwahrscheinlich Reporter Richard Adams Locke, und die Verkaufszahlen der Sun gingen durch die Decke."
+      },
+      "en": {
+        "title": "The Newspaper That Found Bat-People on the Moon",
+        "text": "On August 25, 1835, the New York Sun started a six-part series with huge news: famous astronomer Sir John Herschel had spotted life on the Moon with a giant new telescope. Readers learned about unicorns, beavers walking on two legs and furry winged humanoids resembling bats, which the story called \"Vespertilio-homo\". The claimed source was the Edinburgh Journal of Science, which had actually stopped publishing years earlier. Herschel himself was in South Africa and had no idea his name was attached. The writer was most likely reporter Richard Adams Locke, and the Sun's sales took off."
+      }
+    },
+    {
+      "id": "bdelloid-rotifers",
+      "points": 500,
+      "category": "survival",
+      "emoji": "🧊",
+      "sources": [
+        {
+          "label": "ScienceDaily: Arctic rotifer lives after 24,000 years in a frozen state",
+          "url": "https://www.sciencedaily.com/releases/2021/06/210607161159.htm"
+        },
+        {
+          "label": "Sci.News: Frozen Microscopic Animals Brought Back to Life after 24,000 Years",
+          "url": "https://www.sci.news/biology/frozen-bdelloid-rotifers-siberian-permafrost-09745.html"
+        },
+        {
+          "label": "Current Biology: A living bdelloid rotifer from 24,000-year-old Arctic permafrost",
+          "url": "https://www.cell.com/current-biology/fulltext/S0960-9822(21)00624-2"
+        }
+      ],
+      "de": {
+        "title": "24.000 Jahre im Eis und dann einfach weitermachen",
+        "text": "Russische Forschende haben sich durch sibirischen Permafrost gebohrt und winzige mehrzellige Tiere herausgeholt: bdelloide Rädertierchen. Laut Radiokarbondatierung war die Erde, aus der sie stammten, etwa 24.000 Jahre alt. Nach dem Auftauen wurde ein Rädertierchen der Gattung Adineta wieder aktiv und machte direkt, was es am besten kann: sich klonen. Diese Rädertierchen vermehren sich durch Jungfernzeugung, ganz ohne Partner. Das Team hat den Fund 2021 in Current Biology veröffentlicht und nennt ihn den bisher härtesten Beweis dafür, dass ein mehrzelliges Tier Zehntausende Jahre in einer Art Scheintod überstehen kann."
+      },
+      "en": {
+        "title": "24,000 Years on Ice, Then Back to Business",
+        "text": "Russian researchers drilled into Siberian permafrost and pulled out tiny multicellular animals called bdelloid rotifers. Radiocarbon dating put the soil they came from at about 24,000 years old. After thawing, a rotifer of the genus Adineta woke up and did what it does best: it cloned itself. These rotifers reproduce by parthenogenesis, no partner needed. The team reported the find in Current Biology in 2021 and called it the hardest proof so far that a multicellular animal can sit out tens of thousands of years in suspended animation."
+      }
+    },
+    {
+      "id": "sun-light-core",
+      "points": 600,
+      "category": "science",
+      "emoji": "☀️",
+      "sources": [
+        {
+          "label": "NASA Scientific Visualization Studio: Journey Of Light",
+          "url": "https://svs.gsfc.nasa.gov/11537"
+        },
+        {
+          "label": "ScienceAlert: The Longest Journey Sunlight Ever Takes Happens Before It Leaves The Sun",
+          "url": "https://www.sciencealert.com/the-sunlight-on-your-face-took-8-minutes-to-reach-earth-but-first-it-spent-170000-years-escaping-the-sun"
+        },
+        {
+          "label": "Astronomy: I heard that the light from nuclear fusion reactions in the Sun's core takes about 200,000 years to reach its surface. I thought the speed of light is constant. Why does it take so long?",
+          "url": "https://www.astronomy.com/science/i-heard-that-the-light-from-nuclear-fusion-reactions-in-the-suns-core-takes-about-200000-years-to-reach-its-surface-i-thought-the-speed-of-light-is-constant-why-does-it-take-so-long/"
+        }
+      ],
+      "de": {
+        "title": "Dein Sonnenlicht ist älter, als du denkst",
+        "text": "Das Sonnenlicht auf deinem Gesicht hat für rund 150 Millionen Kilometer Weltall nur gut 8 Minuten gebraucht. Der zähe Teil kam vorher. Die Energie dahinter entsteht durch Kernfusion im Sonnenkern, und raus aus der Sonne ist echt mühsam: Das Innere ist so dicht, dass Licht ständig verschluckt, neu ausgesendet und in zufällige Richtungen gestreut wird. Schätzungen für diesen Ausbruch reichen von etwa 40.000 Jahren (NASA) bis rund 170.000 oder sogar 200.000 Jahren, je nach Modell. Die Energie, die dich heute trifft, ist also wahrscheinlich schon vor dem Ende der letzten Eiszeit losgezogen."
+      },
+      "en": {
+        "title": "Your Sunlight Is Older Than You Think",
+        "text": "The sunlight on your face took just over 8 minutes to cross about 150 million kilometers of space. The hard part came earlier. The energy behind it was released by fusion in the Sun's core, and getting out of the Sun is a slog: the interior is so dense that light keeps getting absorbed, re-emitted and scattered in random directions. Estimates for that escape range from about 40,000 years (NASA) to around 170,000 or even 200,000 years, depending on the model. So the energy that hits you today likely set off before the end of the last ice age."
+      }
+    },
+    {
+      "id": "beard-tax",
+      "points": 700,
+      "category": "history",
+      "emoji": "🧔",
+      "sources": [
+        {
+          "label": "National Museum of American History: Beard Token, Russia, 1705",
+          "url": "https://americanhistory.si.edu/collections/object/nmah_1412643"
+        },
+        {
+          "label": "Russia Beyond: 319 years ago: Peter the Great established tax on beards",
+          "url": "https://www.rbth.com/arts/history/2017/09/05/319-years-ago-peter-the-great-established-tax-on-beards_833570"
+        }
+      ],
+      "de": {
+        "title": "Der Zar, der Bärte besteuerte",
+        "text": "1698 wollte der russische Zar Peter der Große, dass seine Oberschicht europäischer aussieht, und knöpfte sich deshalb die Bärte vor. Rasieren oder zahlen. Ab 1705 hing die Höhe der Steuer vom Stand ab, Bauern zahlten nur eine kleine Gebühr, wenn sie in eine Stadt kamen. Wer seinen Bart behielt, musste einen Nachweis dabeihaben: eine kleine Kupfermarke. Ein Exemplar von 1705 liegt heute im National Museum of American History der Smithsonian. Auf einer Seite sind Nase, Schnurrbart und Bart zu sehen, auf der anderen der Doppeladler, dazu die Aufschrift „Geld erhalten“. Quasi ein Parkausweis fürs Gesicht."
+      },
+      "en": {
+        "title": "The Tsar Who Charged for Beards",
+        "text": "In 1698, Russian Tsar Peter the Great wanted his elite to look more European, so he went after their beards. Shave, or pay a tax. From 1705 the rates depended on your social class, while peasants only paid a small fee when entering a city. Anyone who kept his beard had to carry proof: a small copper token. One from 1705, now in the Smithsonian's National Museum of American History, shows a nose, mustache and beard on one side, the words \"Money Collected\" and the double-headed eagle on the other. Basically a parking permit for your face."
+      }
+    },
+    {
+      "id": "nematodes-46000",
+      "points": 800,
+      "category": "survival",
+      "emoji": "🪱",
+      "sources": [
+        {
+          "label": "PLOS Genetics: A novel nematode species from the Siberian permafrost shares adaptive mechanisms for cryptobiotic survival with C. elegans dauer larva",
+          "url": "https://journals.plos.org/plosgenetics/article?id=10.1371%2Fjournal.pgen.1010798"
+        },
+        {
+          "label": "Scientific American: 46,000-Year-Old Worm Possibly Revived from Siberian Permafrost",
+          "url": "https://www.scientificamerican.com/article/46-000-year-old-worm-possibly-revived-from-siberian-permafrost/"
+        }
+      ],
+      "de": {
+        "title": "Die Würmer, die 46.000 Jahre verschlafen haben",
+        "text": "Etwa 40 Meter unter der Oberfläche am Fluss Kolyma in Sibirien fanden Forschende einen fossilen Nagetierbau und darin winzige Fadenwürmer. Die Radiokarbondatierung von Pflanzenresten aus dem Bau ergab rund 46.000 Jahre. Nach dem Auftauen wurden die Würmer wieder lebendig und entpuppten sich als neue Art: Panagrolaimus kolymaensis. Sie vermehren sich ohne Männchen und teilen Überlebenstricks mit einem berühmten Laborwurm. Die Studie erschien 2023 in PLOS Genetics. Ganz überzeugt sind nicht alle: Manche Fachleute sagen, die Datierung beweise das Alter der Erde, aber nicht unbedingt das der Würmer."
+      },
+      "en": {
+        "title": "The Worms That Slept Through 46,000 Years",
+        "text": "About 40 meters below the surface at the Kolyma River in Siberia, researchers found a fossil rodent burrow, and in it microscopic roundworms. Radiocarbon dating of plant material from the burrow came out at about 46,000 years. After thawing, the worms came back to life and turned out to be a new species: Panagrolaimus kolymaensis. They reproduce without males and share survival tricks with a famous lab worm. The study appeared in PLOS Genetics in 2023. Not everyone is convinced: some biologists say the dating proves the age of the soil, not necessarily of the worms."
+      }
+    },
+    {
+      "id": "pando",
+      "points": 900,
+      "category": "nature",
+      "emoji": "🌳",
+      "sources": [
+        {
+          "label": "Live Science: Pando: The world's largest tree and heaviest living organism",
+          "url": "https://www.livescience.com/planet-earth/plants/pando-the-worlds-largest-tree-and-heaviest-living-organism"
+        },
+        {
+          "label": "Friends of Pando: Pando FAQ: How Pando Works",
+          "url": "https://www.friendsofpando.org/faq-howpandoworks/"
+        }
+      ],
+      "de": {
+        "title": "Der Wald, der eigentlich ein Baum ist",
+        "text": "Im Fishlake National Forest in Utah steht ein Hain aus Zitterpappeln, der aussieht wie ein ganz normaler Wald. Ist er aber nicht. Alle rund 47.000 Stämme sind genetisch identisch und über ein gemeinsames Wurzelsystem verbunden. Deshalb zählt die Forschung das Ganze als einen einzigen Organismus namens Pando. Er bedeckt etwa 43 Hektar und wiegt schätzungsweise rund 5.900 Tonnen, damit gehört er zu den schwersten bekannten Lebewesen. Die einzelnen Stämme werden nur etwa 130 bis 150 Jahre alt, aber der Klon treibt aus den Wurzeln immer neue nach. Jeder Stamm ist im Grunde nur ein Ast auf Zeit."
+      },
+      "en": {
+        "title": "The Forest That Is Actually One Tree",
+        "text": "In Utah's Fishlake National Forest stands a grove of quaking aspens that looks like an ordinary forest. It isn't. All of its roughly 47,000 trunks are genetically identical and connected by one shared root system, so scientists count it as a single organism, named Pando. It covers about 43 hectares and is estimated to weigh around 5,900 tonnes, which makes it one of the heaviest living things known. The individual trunks only live around 130 to 150 years, but the clone keeps growing new ones from its roots. Each stem is basically just a temporary branch."
+      }
+    },
+    {
+      "id": "oklo-reactor",
+      "points": 1000,
+      "category": "science",
+      "emoji": "☢️",
+      "sources": [
+        {
+          "label": "POWER Magazine: The Curious Case of a Two-Billion-Year-Old Nuclear Reactor",
+          "url": "https://www.powermag.com/%E2%80%AAthe-curious-case-of-a-two-billion-year-old-nuclear-reactor/"
+        },
+        {
+          "label": "IAEA: Meet Oklo, the Earth’s Two-billion-year-old only Known Natural Nuclear Reactor",
+          "url": "https://www.iaea.org/newscenter/news/meet-oklo-the-earths-two-billion-year-old-only-known-natural-nuclear-reactor"
+        }
+      ],
+      "de": {
+        "title": "Die Erde hatte den ersten Atomreaktor",
+        "text": "1972 fiel bei einer Routineprüfung von Uranerz aus der Oklo-Mine in Gabun etwas Seltsames auf: Es enthielt 0,717 Prozent Uran-235 statt der 0,720 Prozent, die man sonst überall in natürlichem Uran findet. Winziger Unterschied, großes Rätsel. Der französische Physiker Francis Perrin und sein Team fanden Spaltprodukte im Erz und kamen dahinter, was passiert war. Vor etwa 2 Milliarden Jahren liefen in der Lagerstätte ganz von selbst Kettenreaktionen ab, wobei Grundwasser die Neutronen abbremste, ähnlich wie in einem modernen Reaktor. Die Natur hatte einen Teil des Brennstoffs also schon verbraucht."
+      },
+      "en": {
+        "title": "Earth Built a Nuclear Reactor First",
+        "text": "In 1972, a routine check of uranium ore from the Oklo mine in Gabon turned up something odd: it contained 0.717 percent uranium-235 instead of the 0.720 percent found in natural uranium everywhere else. Tiny gap, big mystery. French physicist Francis Perrin and colleagues found fission products in the ore and figured out what had happened. About 2 billion years ago, the uranium deposit had run self-sustaining chain reactions all on its own, with groundwater slowing down the neutrons, much like in a modern reactor. Nature had already used up some of the fuel."
+      }
+    }
+  ]
+}

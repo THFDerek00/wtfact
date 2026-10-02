@@ -15,6 +15,8 @@ Stil: Neo-Brutalismus. Dicke Ränder, harte Schatten ohne Weichzeichner, knallig
 | Fokus | `--focus`, `--bw-focus` | Globaler `:focus-visible`-Ring |
 | Akzente | `--pink`, `--yellow`, `--cyan`, `--lime`, `--violet`, `--orange`, `--teal`, `--tomato`, `--lilac`, `--blue` | Nur als Fläche |
 | Kategorien | `--cat-science` … `--cat-sport` | Kategorie umfärben = nur dieses Token ändern |
+| Gold-Fakten | `--gold`, `--gold-light`, `--gold-deep`, `--gold-surface` (Verlauf), `--star-size-sm/md/lg`, `--star-edge`, `--dur-twinkle`, `--locked` | Goldene Karten im Science Jumper; Text darauf ist `--on-accent`. Sterne bekommen ihre Farbe über die `.cat-*`-Klasse, neue Kategorien funktionieren also automatisch |
+| Spiel | `--flask`, `--flask-glow` | Blaue Flüssigkeit der Reagenzgläser im Science Jumper. Das Spiel liest alle Farben per `getComputedStyle` aus den Tokens |
 | Bühne | `--night`, `--on-night`, `--on-night-muted` | Dunkle Fläche für Hero, Footer, „Nächster Fakt“; in beiden Modi dunkel |
 | Schrift | `--font-display`, `--font-body`, `--fs-xs` (13) bis `--fs-3xl` (30), `--fs-display-sm/md/lg`, `--fs-emoji-sm…xl` | |
 | Abstände | `--space-1` (4px) bis `--space-12` (80px) | 4er-Raster |
@@ -33,6 +35,7 @@ Stil: Neo-Brutalismus. Dicke Ränder, harte Schatten ohne Weichzeichner, knallig
 | `.stage` | Dunkle Bühne; Buttons darin bekommen hellen Rand und Schatten | – |
 | `.chip` | Kategorie-Etikett oder Filter | neutral; mit `.cat-*` farbig; als Filter `aria-pressed="true"` (zeigt ✓) |
 | `.cat-*` / `.accent` | Akzentfläche | setzt Hintergrund **und** `--on-accent` als Schrift |
+| `.gold` | Goldene Fläche für freigeschaltete Gold-Fakten | setzt `--gold-surface` und `--on-accent` |
 | `.sr-only` | Nur für Screenreader | – |
 
 Neue Varianten kommen als Modifier-Klasse in `global.css`, nicht als Überschreibung in der Komponente.
@@ -45,6 +48,6 @@ Neue Varianten kommen als Modifier-Klasse in `global.css`, nicht als Überschrei
 4. Keine Inline-Styles (`style="…"`) in `.astro`-Dateien.
 5. Jeder `<button>` hat `type`, jede `role="group"` hat `aria-label`; Zustände über `aria-pressed`/`aria-current`, nicht über Klassen wie `on`.
 6. `global.css` enthält einen `:focus-visible`-Stil und eine `prefers-reduced-motion`-Regel; jede `.cat-*`-Klasse setzt `color: var(--on-accent)`.
-7. Kontrast (WCAG AA), hell und dunkel: `--ink`, `--muted`, `--pink-text` auf `--bg`/`--surface` mindestens 4.5:1; `--on-accent` auf jeder Akzentfläche mindestens 4.5:1; `--focus` mindestens 3:1.
+7. Kontrast (WCAG AA), hell und dunkel: `--ink`, `--muted`, `--pink-text` auf `--bg`/`--surface` mindestens 4.5:1; `--on-accent` auf jeder Akzentfläche (inkl. `--gold*`) mindestens 4.5:1; `--focus` mindestens 3:1.
 
 Layoutmaße wie `max-width` in Media Queries, `min-height` oder Spaltenbreiten im Grid sind erlaubt.
