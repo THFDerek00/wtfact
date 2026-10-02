@@ -6,14 +6,31 @@ const lang = Astro.params.lang as Lang;
 const o = SITE.owner;
 ---
 <Page lang={lang} title={lang === 'de' ? 'Impressum' : 'Imprint'}>
-  <h2>Angaben gemäß § 5 DDG</h2>
-  <p>{o.name}<br />{o.street}<br />{o.city}<br />Deutschland</p>
-  <h2>Kontakt</h2>
-  <p>E-Mail: {o.email}</p>
-  <h2>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV</h2>
-  <p>{o.name}, Anschrift wie oben</p>
-  <h2>Hinweis zu KI-Inhalten</h2>
-  <p>Die Beiträge auf {SITE.name} werden mit Unterstützung von KI erstellt und vor bzw. nach der Veröffentlichung redaktionell geprüft. Hinweise auf Fehler nehmen wir gern per E-Mail entgegen.</p>
-  <h2>Amazon-Partnerprogramm</h2>
-  <p>{SITE.name} ist Teilnehmer des Partnerprogramms von Amazon Europe S.à r.l. und des Amazon Associates Program, Partnerwerbeprogramme, die für Websites konzipiert wurden, mittels derer durch die Platzierung von Werbeanzeigen und Links zu amazon.de bzw. amazon.com Werbekostenerstattung verdient werden kann. Als Amazon-Partner verdienen wir an qualifizierten Verkäufen.</p>
+  {lang === 'de' ? (
+    <>
+      <h2>Angaben gemäß § 5 DDG</h2>
+      <p>{o.name}<br />{o.street}<br />{o.city}<br />Deutschland</p>
+      <h2>Kontakt</h2>
+      <p>E-Mail: <a href={`mailto:${o.email}`}>{o.email}</a>{o.phone && <><br />Telefon: {o.phone}</>}</p>
+      <h2>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV</h2>
+      <p>{o.name}, Anschrift wie oben</p>
+      <h2>Hinweis zu KI-Inhalten</h2>
+      <p>Die Beiträge auf {SITE.name} werden mit Unterstützung von KI erstellt und vor bzw. nach der Veröffentlichung redaktionell geprüft. Hinweise auf Fehler nehmen wir gern per E-Mail entgegen.</p>
+      <h2>Amazon-Partnerprogramm</h2>
+      <p>{SITE.name} ist Teilnehmer des Partnerprogramms von Amazon Europe S.à r.l. und des Amazon Associates Program, Partnerwerbeprogramme, die für Websites konzipiert wurden, mittels derer durch die Platzierung von Werbeanzeigen und Links zu amazon.de bzw. amazon.com Werbekostenerstattung verdient werden kann. Als Amazon-Partner verdienen wir an qualifizierten Verkäufen.</p>
+    </>
+  ) : (
+    <>
+      <h2>Information pursuant to § 5 DDG (German Digital Services Act)</h2>
+      <p>{o.name}<br />{o.street}<br />{o.city}<br />Germany</p>
+      <h2>Contact</h2>
+      <p>Email: <a href={`mailto:${o.email}`}>{o.email}</a>{o.phone && <><br />Phone: {o.phone}</>}</p>
+      <h2>Responsible for content pursuant to § 18 (2) MStV</h2>
+      <p>{o.name}, address as above</p>
+      <h2>Note on AI content</h2>
+      <p>Posts on {SITE.name} are created with the help of AI and editorially checked before or after publication. If you spot a mistake, please let us know by email.</p>
+      <h2>Amazon Associates</h2>
+      <p>{SITE.name} is a participant in the Amazon Europe S.à r.l. Associates Programme and the Amazon Services LLC Associates Program, affiliate advertising programs designed to provide a means for sites to earn advertising fees by advertising and linking to amazon.de and amazon.com. As an Amazon Associate we earn from qualifying purchases.</p>
+    </>
+  )}
 </Page>

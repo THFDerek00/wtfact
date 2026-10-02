@@ -7,11 +7,13 @@ export const SITE = {
   },
   // Angaben für das Impressum (Pflicht in Deutschland, § 5 DDG).
   owner: {
-    name: '[Vor- und Nachname]',
-    street: '[Straße Hausnummer]',
-    city: '[PLZ Ort]',
-    email: '[E-Mail-Adresse]',
-  },
+    name: 'Eric Steingröver',
+    street: 'Karl-Braun-Str. 15B',
+    city: '48477 Hörstel',
+    email: 'info@wtfact.xyz',
+    // Zweiter schneller Kontaktweg neben der E-Mail (z. B. Telefonnummer). Leer = wird nicht angezeigt.
+    phone: '',
+  } as { name: string; street: string; city: string; email: string; phone: string },
 } as const;
 
 export const LANGS = ['de', 'en'] as const;
