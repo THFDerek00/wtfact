@@ -3,6 +3,9 @@ import type { Lang, Category } from '../config';
 export const ui = {
   de: {
     tagline: 'Jeden Tag ein Fakt, der dich „WTF?!" sagen lässt.',
+    // Slogan: „WTFact?!“ ist das Logo, das hier ist der zweite Teil. Regeln: docs/styleguide.md, Abschnitt „Slogan“.
+    slogan: 'Und ja, das stimmt wirklich.',
+    sloganFull: 'WTFact?! Und ja, das stimmt wirklich.',
     latest: 'Neueste Fakten',
     readMore: 'Weiterlesen',
     todaysFact: 'Fakt des Tages',
@@ -20,6 +23,7 @@ export const ui = {
     imprint: 'Impressum',
     privacy: 'Datenschutz',
     about: 'Über WTFact',
+    corrections: 'Stimmt doch nicht',
     madeWith: 'Täglich neu, geschrieben mit Hilfe von KI und mit Quellen belegt.',
     readingTime: (m: number) => `${m} Min. Lesezeit`,
     categories: {
@@ -72,6 +76,8 @@ export const ui = {
   },
   en: {
     tagline: 'One fact a day that makes you go "WTF?!"',
+    slogan: "And yes, it's actually true.",
+    sloganFull: "WTFact?! And yes, it's actually true.",
     latest: 'Latest facts',
     readMore: 'Read more',
     todaysFact: 'Fact of the day',
@@ -89,6 +95,7 @@ export const ui = {
     imprint: 'Imprint',
     privacy: 'Privacy',
     about: 'About WTFact',
+    corrections: 'Corrections',
     madeWith: 'New every day, written with the help of AI and backed by sources.',
     readingTime: (m: number) => `${m} min read`,
     categories: {

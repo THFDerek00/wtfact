@@ -66,6 +66,14 @@ Build automatisch. Wer hier eine Zahl ändert, ändert sie auch dort.
 - Use the correct German term, not a loose everyday word (e.g. "Kalmar", not "Tintenfisch", for squid).
 - German typographic quotes („…") and decimal commas. Facts, numbers and sources identical in both languages. [geprüft]
 
+## Slogan and corrections
+
+- The brand slogan is "WTFact?! Und ja, das stimmt wirklich." (EN: "WTFact?! And yes, it's actually true.").
+  It belongs to the site, not to the fact: never use it, or "stimmt wirklich" / "actually true", in a post.
+  The post earns it with its sources.
+- If a published fact turns out to be wrong, the post is fixed and the fix is listed in
+  `src/data/corrections.ts` (page "Stimmt doch nicht" / "Corrections"). Never correct silently.
+
 ## Golden facts (Science Jumper)
 
 <!-- Gold-Fakten stehen in src/data/golden-facts.json und werden im Spiel Science Jumper freigeschaltet.

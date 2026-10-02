@@ -1,0 +1,43 @@
+---
+import Page from '../../layouts/Page.astro';
+import { LANGS, type Lang } from '../../config';
+import { t, dateFmt } from '../../i18n/ui';
+import { corrections } from '../../data/corrections';
+export function getStaticPaths() { return LANGS.map((lang) => ({ params: { lang } })); }
+const lang = Astro.params.lang as Lang;
+const ui = t(lang);
+---
+<Page lang={lang} title={ui.corrections}>
+  {lang === 'de' ? (
+    <p>Unser Versprechen ist „{ui.sloganFull}“ Jeder Fakt hat mindestens zwei Quellen und wird vor dem Erscheinen geprüft. Wenn trotzdem etwas falsch war, ändern wir es nicht heimlich, sondern berichtigen den Beitrag und schreiben es hier auf.</p>
+  ) : (
+    <p>Our promise is “{ui.sloganFull}” Every fact has at least two sources and is checked before it goes live. If something still turns out to be wrong, we don't quietly change it. We fix the post and list it here.</p>
+  )}
+
+  {corrections.length > 0 ? (
+    <ol class="list">
+      {corrections.map((c) => (
+        <li class="card">
+          <p class="date">{dateFmt(lang, new Date(c.date))}</p>
+          <p>{c.text[lang]} <a href={c.url[lang]}>{lang === 'de' ? 'Zum Beitrag' : 'Read the post'}</a></p>
+        </li>
+      ))}
+    </ol>
+  ) : (
+    <p class="card empty">{lang === 'de' ? 'Bisher mussten wir nichts korrigieren.' : "We haven't had to correct anything yet."}</p>
+  )}
+
+  <h2>{lang === 'de' ? 'Fehler gefunden?' : 'Spotted a mistake?'}</h2>
+  {lang === 'de' ? (
+    <p>Schreib uns an die Adresse im <a href={`/${lang}/impressum/`}>Impressum</a>, am besten mit einer Quelle. Wir prüfen jeden Hinweis und nennen hier, was wir korrigiert haben.</p>
+  ) : (
+    <p>Email us at the address in our <a href={`/${lang}/impressum/`}>imprint</a>, ideally with a source. We check every report and list what we corrected here.</p>
+  )}
+</Page>
+<style>
+  .list { list-style: none; padding: 0; margin: var(--space-6) 0 0; display: grid; gap: var(--space-4); }
+  .card { padding: var(--space-4) var(--space-5); }
+  .card p { margin: 0; }
+  .date { font-weight: 700; margin-bottom: var(--space-1); }
+  .empty { margin-top: var(--space-6); font-weight: 600; }
+</style>

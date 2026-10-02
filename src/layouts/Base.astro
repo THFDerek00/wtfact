@@ -54,6 +54,7 @@ const allUrls = (await postsFor(lang)).map(postUrl);
         <a href={`/${lang}/`} class="logo" aria-label={SITE.name}>
           WTF<span>act</span><b class="sticker">?!</b>
         </a>
+        <p class="slogan">{ui.slogan}</p>
         <div class="actions">
           <button class="btn btn--pink surprise" type="button" data-surprise={JSON.stringify(allUrls)} aria-label={ui.surprise}>
             <span aria-hidden="true">🎲</span><span class="label" aria-hidden="true">{ui.surprise}</span>
@@ -68,10 +69,12 @@ const allUrls = (await postsFor(lang)).map(postUrl);
     <footer class="foot stage">
       <div class="wrap">
         <a href={`/${lang}/`} class="logo big" aria-label={SITE.name}>WTF<span>act</span><b class="sticker">?!</b></a>
-        <p class="claim">{ui.tagline}</p>
+        <p class="claim">{ui.slogan}</p>
+        <p class="note">{ui.tagline}</p>
         <p class="note">{ui.affiliateFooter} {ui.madeWith}</p>
         <nav>
           <a href={`/${lang}/about/`}>{ui.about}</a>
+          <a href={`/${lang}/korrekturen/`}>{ui.corrections}</a>
           <a href={`/${lang}/impressum/`}>{ui.imprint}</a>
           <a href={`/${lang}/datenschutz/`}>{ui.privacy}</a>
           <a href={`/${lang}/rss.xml`}>RSS</a>
@@ -106,6 +109,10 @@ const allUrls = (await postsFor(lang)).map(postUrl);
   }
   .logo span { color: var(--pink-text); }
   .logo b { margin-left: var(--space-1); }
+  .slogan {
+    margin: 0 auto 0 0; font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700;
+    line-height: 1.2; color: var(--muted);
+  }
   .actions { display: flex; align-items: center; gap: var(--space-3); }
   .surprise { padding: var(--space-2) var(--space-4); font-size: var(--fs-sm); }
   .lang { padding: var(--space-1) var(--space-3); font-size: var(--fs-sm); }
@@ -113,10 +120,14 @@ const allUrls = (await postsFor(lang)).map(postUrl);
   .foot .logo { font-size: var(--fs-display-md); }
   .foot .logo span { color: var(--pink); }
   .claim { font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 700; line-height: 1.3; margin: var(--space-4) 0 var(--space-6); max-width: 30ch; }
+  .note + .note { margin-top: var(--space-2); }
   .note { margin: 0; max-width: 62ch; color: var(--on-night-muted); }
   .foot nav { display: flex; flex-wrap: wrap; gap: var(--space-5); margin: var(--space-5) 0; }
   .foot nav a { font-weight: 600; }
   .copy { margin: 0; color: var(--on-night-muted); }
+  @media (max-width: 760px) {
+    .slogan { display: none; }
+  }
   @media (max-width: 520px) {
     .logo { font-size: var(--fs-2xl); }
     .surprise .label { display: none; }
