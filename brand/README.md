@@ -18,7 +18,8 @@ Alles hier wird von `build-brand.mjs` erzeugt (Farben und Schriften wie auf der 
 | `social/<de|en>/vorlage-*.png` | Musterlayouts für Instagram-Post, Story/TikTok und Pinterest-Pin |
 | `social/kit/<de|en>/vorlagen/` | Leere Vorlagen je Kategorie (Post 1080×1350, Story 1080×1920) plus Wahr oder Fake?, Beweis es! und Reel-Titel |
 | `social/kit/<de|en>/beispiele/` | Post, Story und Pin für 10 echte Fakten von der Seite, einer pro Kategorie |
-| `social/kit/<de|en>/kampagnen/` | Quellen-Karussell, Wahr oder Fake?, Beweis es!, Reel-Abspann, Launch, Science Jumper |
+| `social/kit/<de|en>/kampagnen/` | Quellen-Karussell, Wahr oder Fake?, Beweis es!, Reel-Abspann, Launch, Science Jumper, Wischen, Montags-Abstimmung, Neu diese Woche |
+| `social/kit/<de|en>/vorlagen/abstimmung-…`, `fakt-der-woche-…` | Leere Vorlagen für die Montags-Abstimmung und den Fakt der Woche (Beispiel mit echtem Fakt in `beispiele/`) |
 | `social/kit/texte-de.md`, `texte-en.md` | Captions, Hashtags und Plan für die ersten 2 Wochen |
 
 Neu erzeugen:

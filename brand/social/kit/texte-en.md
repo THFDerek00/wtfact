@@ -100,6 +100,33 @@ New on WTFact: Science Jumper. 📚🔥 Jump over the flames, collect blue test 
 Play now: link in bio.
 `#wtfact #sciencejumper #browsergame #funfact #gaming`
 
+### Swiping (`kampagnen/wischen-post`, `-story`)
+New on WTFact: swipe the facts. 👆 Love today's fact? Drag it up and to the right. Not your thing? Up and to the left. The next one shows up right away.
+Try it: link in bio.
+`#wtfact #funfact #didyouknow #facts #swipe`
+
+### Monday vote (`kampagnen/abstimmung-montag-post`, `-story`, blank: `vorlagen/abstimmung-…`)
+Every Monday. The list shows the facts of the last 7 days; fill the blank template with that week's titles (newest first, like on the site).
+Monday is voting day! 🗳️ Which fact of the last 7 days was the best? The winner becomes fact of the week. Vote until midnight (German time): link in bio.
+No slogan on vote graphics or in the caption (slogan rule 3). Add a link sticker to the homepage on the story.
+
+### Fact of the week (`vorlagen/fakt-der-woche-…`, example `beispiele/fakt-der-woche-honey-forever-…`)
+On Tuesdays, once the vote is decided. The honey example only shows the layout: always post the real winner from the homepage, never a made-up one.
+You voted: 🏆 the fact of the week is "[title]". [One sentence about the fact.] Full fact + sources: link in bio.
+And yes, it's actually true.
+
+### New this week (`kampagnen/neu-diese-woche`)
+On Sundays as a reminder for the vote. Shows the 7 newest facts tagged "NEW".
+7 new facts in 7 days. Which one was your favourite? We vote tomorrow. 👀 Link in bio.
+
+### Weekly rhythm once voting is live
+| Day | What |
+|---|---|
+| Sunday | New this week (feed) |
+| Monday | Vote (feed + story with link sticker, story again in the evening) |
+| Tuesday | Fact of the week (feed + story) |
+| Once at launch | Swiping (feed + story) |
+
 ## First 2 weeks
 
 Same plan as the German channel (see `texte-de.md`), using the files in `en/`.

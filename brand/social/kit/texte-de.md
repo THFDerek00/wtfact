@@ -100,6 +100,33 @@ Neu auf WTFact: Science Jumper. 📚🔥 Spring über die Flammen, sammle blaue 
 Jetzt spielen: Link in Bio.
 `#wtfact #sciencejumper #browsergame #funfact #gaming`
 
+### Wischen (`kampagnen/wischen-post`, `-story`)
+Neu auf WTFact: Fakten wischen. 👆 Gefällt dir der Fakt des Tages, zieh ihn nach oben rechts. Eher nicht dein Ding? Nach oben links. Danach kommt sofort der nächste.
+Ausprobieren: Link in Bio.
+`#wtfact #funfact #wusstestdu #fakten #swipe`
+
+### Montags-Abstimmung (`kampagnen/abstimmung-montag-post`, `-story`, leer: `vorlagen/abstimmung-…`)
+Jeden Montag. Die Liste zeigt die Fakten der letzten 7 Tage, die leere Vorlage füllst du mit den Titeln der Woche (Reihenfolge wie auf der Seite, neuester zuerst).
+Montag ist Abstimmungstag! 🗳️ Welcher Fakt der letzten 7 Tage war der beste? Der Gewinner wird eine Woche lang Fakt der Woche. Abstimmen bis heute 24 Uhr: Link in Bio.
+Kein Slogan auf Abstimmungs-Grafiken oder in der Caption (Slogan-Regel 3). Auf der Story zusätzlich ein Link-Sticker zur Startseite.
+
+### Fakt der Woche (`vorlagen/fakt-der-woche-…`, Beispiel `beispiele/fakt-der-woche-honey-forever-…`)
+Dienstags, wenn die Abstimmung entschieden ist. Das Beispiel mit dem Honig zeigt nur das Layout: Gepostet wird immer der echte Gewinner von der Startseite, nie ein ausgedachter.
+Ihr habt gewählt: 🏆 Der Fakt der Woche ist „[Titel]“. [Ein Satz zum Fakt.] Ganzer Fakt + Quellen: Link in Bio.
+Und ja, das stimmt wirklich.
+
+### Neu diese Woche (`kampagnen/neu-diese-woche`)
+Sonntags als Erinnerung an die Abstimmung. Zeigt die 7 neuesten Fakten mit „NEU“.
+7 neue Fakten in 7 Tagen. Welcher war dein Favorit? Morgen stimmen wir ab. 👀 Link in Bio.
+
+### Wochenrhythmus ab dem Start der Abstimmung
+| Tag | Was |
+|---|---|
+| Sonntag | Neu diese Woche (Feed) |
+| Montag | Abstimmung (Feed + Story mit Link-Sticker, abends nochmal die Story) |
+| Dienstag | Fakt der Woche (Feed + Story) |
+| Einmalig zum Start | Wischen (Feed + Story) |
+
 ## Plan für die ersten 2 Wochen
 
 | Tag | Feed (Instagram) | Story | Reel/TikTok | Pinterest |
