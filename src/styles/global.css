@@ -35,6 +35,14 @@
   --on-night: #fffaf0;
   --on-night-muted: #c9c4d1;
 
+  /* Dunkler Hintergrund (nur im Dunkelmodus, Komponente NightSky.astro) */
+  --sky-dot: rgb(255 250 240 / 0.09);
+  --sky-spot: color-mix(in srgb, var(--yellow) 55%, transparent);
+  --sky-gap: 22px;
+  --sky-spot-size: 220px;
+  --sky-shape-opacity: 0.45;
+  --sky-stage: color-mix(in srgb, var(--night) 30%, transparent); /* Bühne lässt den Hintergrund leicht durch */
+
   /* Kategorien */
   --cat-science: var(--cyan);
   --cat-history: var(--orange);
@@ -148,6 +156,7 @@
   --ease-pop: cubic-bezier(0.3, 1.6, 0.5, 1);
   --dur-marquee: 80s;
   --dur-swipe: 0.3s; /* Karte fliegt nach dem Wischen weg */
+  --dur-sky-drift: 26s; /* Formenflug im dunklen Hintergrund */
 
   color-scheme: light;
 }
@@ -267,6 +276,8 @@ button.chip { cursor: pointer; }
 
 /* Dunkle Bühne: alles darin hell, Fokus-Ring gelb */
 .stage { background: var(--night); color: var(--on-night); --focus: var(--yellow); }
+/* Im Dunkelmodus mit Hintergrund-Variante: Bühne halb durchsichtig, damit Punkte/Formen durchscheinen */
+html[data-sky] .stage { background: var(--sky-stage); }
 .stage .btn { border-color: var(--on-night); box-shadow: var(--shadow-night-sm); }
 .stage .btn:hover { box-shadow: var(--shadow-night-lg); }
 
