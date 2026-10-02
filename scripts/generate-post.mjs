@@ -1,9 +1,10 @@
 // Schreibt den nächsten WTFact-Beitrag des Tages auf Deutsch und Englisch.
 // Aufruf: ANTHROPIC_API_KEY=... node scripts/generate-post.mjs
 //
-// Pro Tag gibt es so viele Beiträge wie Uhrzeiten in FACT_TIMES (src/config.ts), jeder Aufruf
-// schreibt den nächsten fehlenden. Jeder Beitrag des Tages hat eine eigene Kategorie, und keine
-// davon war am Vortag dran. Das Datum im Frontmatter trägt die Uhrzeit, zu der er erscheint.
+// Pro Tag gibt es FACTS_PER_DAY Beiträge (src/config.ts), jeder Aufruf schreibt den nächsten
+// fehlenden. Jeder Beitrag des Tages hat eine eigene Kategorie, und keine davon war am Vortag dran.
+// Das Datum ist der Zeitpunkt, zu dem der Fakt geschrieben wurde. Er ist also sofort sichtbar,
+// sobald Eric den PR zusammenführt.
 //
 // Ablauf:
 // 1. Recherche: Claude sucht per Websuche einen überraschenden, belegbaren Fakt
@@ -25,7 +26,7 @@ const MODEL = 'claude-opus-5-5';
 const CONFIG = fs.readFileSync('src/config.ts', 'utf8');
 const listIn = (name) => [...CONFIG.match(new RegExp(`${name}\\s*=\\s*\\[([^\\]]*)\\]`))[1].matchAll(/'([^']+)'/g)].map((m) => m[1]);
 const CATEGORIES = listIn('CATEGORIES');
-const FACT_TIMES = listIn('FACT_TIMES');
+const FACTS_PER_DAY = Number(CONFIG.match(/FACTS_PER_DAY\s*=\s*(\d+)/)[1]);
 const TZ = 'Europe/Berlin';
 
 const client = new Anthropic();
@@ -44,20 +45,23 @@ const existing = facts
 const berlinDay = (d) => new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
 const today = berlinDay(new Date());
 const yesterday = berlinDay(new Date(Date.parse(`${today}T12:00:00Z`) - 86_400_000));
-// "+02:00" im Sommer, "+01:00" im Winter.
-const berlinOffset = (day, time) => {
-  const probe = new Date(`${day}T${time}:00Z`);
-  const name = new Intl.DateTimeFormat('en-US', { timeZone: TZ, timeZoneName: 'longOffset' }).formatToParts(probe).find((p) => p.type === 'timeZoneName').value;
-  return name === 'GMT' ? '+00:00' : name.replace('GMT', '');
+// Jetzt in deutscher Zeit mit Zeitzone, z. B. "2026-10-03T04:12:30+02:00".
+const berlinNow = () => {
+  const d = new Date();
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat('en-CA', { timeZone: TZ, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'longOffset' })
+      .formatToParts(d)
+      .map((p) => [p.type, p.value]),
+  );
+  const off = parts.timeZoneName === 'GMT' ? '+00:00' : parts.timeZoneName.replace('GMT', '');
+  return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}:${parts.second}${off}`;
 };
 
 const todays = existing.filter((p) => p.day === today);
-if (todays.length >= FACT_TIMES.length) {
+if (todays.length >= FACTS_PER_DAY) {
   console.log(`Für ${today} gibt es schon ${todays.length} Beiträge. Nichts zu tun.`);
   process.exit(0);
 }
-const time = FACT_TIMES[todays.length];
-const publishAt = `${today}T${time}:00${berlinOffset(today, time)}`;
 
 // Gesperrt: Kategorien vom Vortag und die, die heute schon dran waren.
 const blocked = new Set(existing.filter((p) => p.day === yesterday || p.day === today).map((p) => p.category));
@@ -70,7 +74,7 @@ if (!allowed.length) {
 const lastUsed = Object.fromEntries(CATEGORIES.map((c) => [c, '0000']));
 for (const p of existing) if (p.date > (lastUsed[p.category] ?? '')) lastUsed[p.category] = p.date;
 const category = allowed.sort((a, b) => lastUsed[a].localeCompare(lastUsed[b]))[0];
-console.log(`Beitrag ${todays.length + 1} von ${FACT_TIMES.length} für ${today} um ${time} Uhr, Kategorie ${category} (gesperrt: ${[...blocked].join(', ') || 'keine'}).`);
+console.log(`Beitrag ${todays.length + 1} von ${FACTS_PER_DAY} für ${today}, Kategorie ${category} (gesperrt: ${[...blocked].join(', ') || 'keine'}).`);
 
 // Alle Beiträge gegen Dopplungen mitgeben, die neuesten 200 zusätzlich mit ihrem Kernsatz.
 const recentTitles =
@@ -248,7 +252,8 @@ const slugify = (s) =>
   s.toLowerCase().normalize('NFKD').replace(/ß/g, 'ss').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
 // Adressen sind je Sprache eindeutig. Ist eine schon vergeben, kommt das Datum dazu.
 const taken = (lang, slug) => facts.some((f) => f[lang]?.slug === slug);
-const fact = { key: post.translationKey, date: publishAt, category, emoji: post.emoji, draft: false };
+const createdAt = berlinNow();
+const fact = { key: post.translationKey, date: createdAt, category, emoji: post.emoji, draft: false };
 for (const lang of ['de', 'en']) {
   const v = post[lang];
   let slug = slugify(v.slug) || post.translationKey;
@@ -259,5 +264,5 @@ const file = saveFact(db, fact);
 db.close();
 console.log('Gespeichert:', file);
 
-// Für den Workflow: eine Zeile pro Beitrag mit Uhrzeit, Titel und Datei (Tabulator-getrennt).
-if (process.env.POSTS_MANIFEST) fs.appendFileSync(process.env.POSTS_MANIFEST, [publishAt, post.de.title, file].join('\t') + '\n');
+// Für den Workflow: eine Zeile pro Beitrag mit Zeitpunkt, Titel und Datei (Tabulator-getrennt).
+if (process.env.POSTS_MANIFEST) fs.appendFileSync(process.env.POSTS_MANIFEST, [createdAt, post.de.title, file].join('\t') + '\n');

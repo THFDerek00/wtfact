@@ -2,7 +2,7 @@
 // Montags-Abstimmung (Hall of Fame): Montags stimmen alle ab, welcher Fakt der letzten 7 Tage der beste war;
 // der Gewinner ist ab Dienstag eine Woche lang Fakt der Woche. Kalender: src/week.ts, Speichern: src/scripts/community.ts.
 // Die Kandidaten werden vorab gerendert und im Browser nur eingeblendet. An anderen Tagen bleibt alles versteckt.
-import { FACT_TIMES, type Lang } from '../config';
+import { FACTS_PER_DAY, type Lang } from '../config';
 import type { Post } from '../lib';
 import { postUrl } from '../lib';
 import { t } from '../i18n/ui';
@@ -13,7 +13,7 @@ const { lang, posts } = Astro.props;
 const ui = t(lang);
 const w = ui.weekly;
 // Zur Wahl stehen die Fakten der 7 Tage vor dem Montag, mit Puffer.
-const recent = posts.slice(0, 9 * FACT_TIMES.length);
+const recent = posts.slice(0, 9 * FACTS_PER_DAY);
 const panelId = `vote-panel-${lang}`;
 // Texte für das Skript. Zahlen sind Platzhalter (9001 …), die im Browser ersetzt werden.
 const texts = {

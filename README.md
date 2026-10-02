@@ -10,9 +10,10 @@ Zweisprachige Fakten-Website (Deutsch/Englisch), gebaut mit Astro.
 
 ## Tägliche Beiträge
 
-Jeden Tag erscheinen drei neue Fakten: um **8, 13 und 18 Uhr** (deutsche Zeit, `FACT_TIMES` in `src/config.ts`).
-Die drei stammen aus drei verschiedenen Kategorien, und keine davon war am Vortag dran. Von den übrigen
-Kategorien kommt jeweils die dran, die am längsten Pause hatte.
+Claude schreibt jeden Morgen drei neue Fakten (`FACTS_PER_DAY` in `src/config.ts`), veröffentlicht sie aber
+nicht selbst: Jeder Fakt kommt als Pull Request, und Eric entscheidet, welche er mergt. Die drei stammen aus
+drei verschiedenen Kategorien, und keine davon war am Vortag dran. Von den übrigen Kategorien kommt jeweils
+die dran, die am längsten Pause hatte. Fakten aus noch offenen PRs zählen dabei mit.
 
 `.github/workflows/daily-post.yml` läuft jeden Morgen um 4 Uhr (Winter 3 Uhr) und ruft
 `scripts/generate-post.mjs` bis zu dreimal auf. Jeder Aufruf schreibt den nächsten Fakt des Tages:
@@ -23,15 +24,14 @@ Kategorien kommt jeweils die dran, die am längsten Pause hatte.
 3. Das Skript prüft die Regeln aus `docs/styleguide.md` (`scripts/post-rules.mjs`), etwa Länge,
    mindestens zwei unabhängige Quellen und keine Zahlen in der Überschrift, die nicht im Text stehen.
 4. Ein Faktencheck-Durchgang öffnet jede Quelle und prüft jede Aussage, die Überschrift und die Quellentitel.
-5. Nur wenn alles passt, wird der Beitrag in der Datenbank gespeichert (Datei `db/facts/<key>.sql`). Sein `date` trägt die Uhrzeit, zu der er erscheint
-   (z. B. `2026-10-03T13:00:00+02:00`).
+5. Nur wenn alles passt, wird der Beitrag in der Datenbank gespeichert (Datei `db/facts/<key>.sql`).
+   Sein `date` ist der Zeitpunkt, zu dem er geschrieben wurde (z. B. `2026-10-03T04:12:30+02:00`).
 
-Jeder Fakt bekommt einen zweiten Versuch. Fällt er trotzdem durch, rückt der nächste Fakt auf seine Uhrzeit vor,
-an dem Tag gibt es dann eben nur zwei. Danach wird die Seite testweise gebaut, und jeder Fakt kommt als eigener
-Pull Request (Zweig `beitrag/JJJJ-MM-TT-HHMM`).
+Jeder Fakt bekommt einen zweiten Versuch. Fällt er trotzdem durch, gibt es an dem Tag eben nur zwei.
+Danach wird die Seite testweise gebaut, und jeder Fakt kommt als eigener Pull Request (Zweig `beitrag/JJJJ-MM-TT-N`).
 
-`.github/workflows/publish-posts.yml` führt jeden PR zu seiner Uhrzeit nach `main` zusammen, Cloudflare Pages
-baut die Seite dann neu. Wer einen Fakt stoppen will, schließt seinen PR vorher.
+**Veröffentlichen:** den PR mergen. Der Fakt ist dann sofort sichtbar, sobald die Seite nach dem Merge neu
+gebaut und hochgeladen ist. **Nicht veröffentlichen:** den PR schließen. Nichts wird automatisch gemergt.
 
 ## Fakten-Datenbank
 

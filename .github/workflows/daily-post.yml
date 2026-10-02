@@ -25,7 +25,7 @@ jobs:
           cache: npm
       - run: npm ci
 
-      # Drei Fakten pro Tag (FACT_TIMES in src/config.ts), jeder in einer anderen Kategorie und
+      # Drei Fakten pro Tag (FACTS_PER_DAY in src/config.ts), jeder in einer anderen Kategorie und
       # keiner aus einer Kategorie vom Vortag. Pro Fakt gibt es einen zweiten Versuch, falls die
       # Qualitätsprüfung den ersten Entwurf verwirft. Fällt ein Fakt ganz aus, rückt der nächste
       # auf seine Uhrzeit vor; lieber ein Fakt weniger als ein falscher.
@@ -34,6 +34,7 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           POSTS_MANIFEST: ${{ runner.temp }}/posts.tsv
+          GH_TOKEN: ${{ github.token }}
         run: |
           if [ -z "$ANTHROPIC_API_KEY" ]; then
             echo "::error::Das Secret ANTHROPIC_API_KEY fehlt (Settings > Secrets and variables > Actions)."
@@ -48,7 +49,16 @@ jobs:
             echo "skip=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          slots=$(node -e "console.log(require('fs').readFileSync('src/config.ts','utf8').match(/FACT_TIMES\s*=\s*\[([^\]]*)\]/)[1].split(',').filter(s => s.trim()).length)")
+          # Fakten aus PRs, die Eric noch nicht zusammengeführt hat, zählen mit: für die Sperre der
+          # Kategorien vom Vortag und gegen Dopplungen. Sie liegen nur im Arbeitsordner, nicht im Commit.
+          gh pr list --state open --base main --json headRefName --jq '.[].headRefName | select(startswith("beitrag/"))' |
+          while read -r b; do
+            git fetch -q origin "$b"
+            git diff --name-only --diff-filter=A HEAD FETCH_HEAD -- db/facts | while read -r f; do
+              git show "FETCH_HEAD:$f" > "$f"
+            done
+          done
+          slots=$(node -e "console.log(require('fs').readFileSync('src/config.ts','utf8').match(/FACTS_PER_DAY\s*=\s*(\d+)/)[1])")
           for n in $(seq 1 "$slots"); do
             node scripts/generate-post.mjs || node scripts/generate-post.mjs || echo "::warning::Fakt $n wurde verworfen."
           done
@@ -61,8 +71,8 @@ jobs:
         if: steps.gen.outputs.skip != 'true'
         run: npm run build
 
-      # Jeder Fakt kommt als eigener Pull Request (Zweig beitrag/JJJJ-MM-TT-HHMM).
-      # publish-posts.yml veröffentlicht ihn zu seiner Uhrzeit, falls niemand den PR vorher schließt.
+      # Jeder Fakt kommt als eigener Pull Request (Zweig beitrag/JJJJ-MM-TT-N). Veröffentlicht wird
+      # nichts automatisch: Eric führt die PRs selbst zusammen, dann geht der Fakt sofort live.
       - name: Als Pull Requests vorschlagen
         if: steps.gen.outputs.skip != 'true'
         env:
@@ -73,16 +83,16 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           base=$(git rev-parse --abbrev-ref HEAD)
           # Eigene Eingabe (3), damit git und gh die Liste nicht mitlesen.
+          n=0
           while IFS=$'\t' read -r at title file <&3; do
-            day=${at:0:10}
-            hhmm=${at:11:2}${at:14:2}
-            branch="beitrag/$day-$hhmm"
+            n=$((n + 1))
+            branch="beitrag/${at:0:10}-$n"
             git switch -c "$branch"
             # Ein Fakt = eine SQL-Datei in db/facts/ (beide Sprachen), im PR als Text lesbar.
             git add "$file"
             git commit -m "Neuer Beitrag: $title"
             git push -u origin "$branch"
-            gh pr create --base main --head "$branch" --title "Neuer Beitrag ${at:11:5} Uhr: $title" \
-              --body "Wird heute um **${at:11:5} Uhr** automatisch veröffentlicht (**Beiträge veröffentlichen**). Nicht veröffentlichen: diesen PR schließen."
+            gh pr create --base main --head "$branch" --title "Neuer Fakt: $title" \
+              --body "Fakt $n von heute, fertig recherchiert und geprüft. **Veröffentlichen:** diesen PR mergen, der Fakt ist dann sofort auf der Seite. **Nicht veröffentlichen:** diesen PR schließen."
             git switch "$base"
           done 3< "$POSTS_MANIFEST"
