@@ -42,12 +42,13 @@ Stil: Neo-Brutalismus. Dicke Ränder, harte Schatten ohne Weichzeichner, knallig
 
 Neue Varianten kommen als Modifier-Klasse in `global.css`, nicht als Überschreibung in der Komponente.
 
-## Bewerten, Abstimmung, Fakt der Woche, Neu
+## Bewerten, Fakt des Tages, Abstimmung, Fakt der Woche, Neu
 
 Wunsch von Eric (2026-10-02). Abläufe und Einrichtung: `README.md`.
 
 - **Wisch-Karte** (`SwipeDeck.astro`): Nach oben links ziehen = „Gefällt mir weniger“ (Schild und Knopf in `--pink`), nach oben rechts = „Gefällt mir“ (`--lime`). Knöpfe und Social-Grafiken: links immer „weniger“, rechts „gefällt mir“. Das Schild auf der Karte erscheint beim Ziehen auf der Seite, von der die Karte wegzieht. Senkrecht ziehen scrollt die Seite. Es gibt immer auch die zwei Knöpfe und die Pfeiltasten, Wischen allein reicht nicht (Barrierefreiheit).
 - **Abstimmung** (`Weekly.astro`): nur montags sichtbar, jede Option zeigt Emoji-Fläche in Kategoriefarbe (`.cat-*`, also mit Punkten) und nach der Stimme einen Balken in Kategoriefarbe, ebenfalls mit Punkten. Die gewählte Option hat `aria-pressed="true"`. Die Abstimmung ist eingeklappt: Zuerst sieht man nur den Kopf (Etikett, Frage, Info) mit einem gelben Knopf „Fakten zeigen und abstimmen“ (`.btn`, Pfeil ▾). Der ganze Kopf ist ein `<button aria-expanded>`, ein Klick klappt die Fakten nach unten auf; der Zustand steht nur in `aria-expanded`, nie in einer Klasse. Kein Slogan in der Abstimmung (siehe Slogan-Regel 3).
+- **Fakt des Tages** (`Weekly.astro`): dieselbe große Karte wie der Fakt der Woche, aber mit gelbem Etikett „⭐ Fakt des Tages“ (`.chip.accent`). Steht über Abstimmung und Fakt der Woche. Darunter eine graue Zeile mit dem Anteil „Gefällt mir“.
 - **Fakt der Woche**: große Karte mit Bildfläche in Kategoriefarbe (`.cat-*`, Raster `--dots-size-lg`) und Etikett „🏆 Fakt der Woche“. Gold ist für die Gold-Fakten im Spiel reserviert und wird hier nicht benutzt.
 - **Neu** (`NewBadge.astro`, `.chip--new`): gelbes Etikett in Großbuchstaben, für Fakten aus den letzten 7 Tagen. Steht auf jeder Faktenkarte oben rechts im Bild (Handy: unten links), auf der Wisch-Karte neben dem Etikett und im Kopf der Beitragsseite.
 

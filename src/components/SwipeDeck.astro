@@ -24,7 +24,7 @@ const rest = Math.max(0, posts.length - 1);
         <a class="today-link" href={postUrl(p)} draggable="false">
           <span class="today-head">
             {i === 0
-              ? <span class="chip accent">⚡ {ui.todaysFact}</span>
+              ? <span class="chip accent">⚡ {ui.latestFact}</span>
               : <span class:list={['chip', `cat-${p.data.category}`]}>{ui.categories[p.data.category]}</span>}
             <NewBadge lang={lang} date={p.data.date} />
             <span class="no">#{String(factNumber(p, posts)).padStart(3, '0')}</span>

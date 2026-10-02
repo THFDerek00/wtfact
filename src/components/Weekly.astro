@@ -1,5 +1,6 @@
 ---
-// Montags-Abstimmung und Fakt der Woche (Startseite).
+// Fakt des Tages, Montags-Abstimmung und Fakt der Woche (Startseite).
+// Fakt des Tages: der Fakt von gestern mit dem höchsten Anteil „Gefällt mir“ beim Wischen (src/week.ts).
 // Montags stimmen alle ab, welcher Fakt der letzten 7 Tage der beste war; der Gewinner ist ab
 // Dienstag eine Woche lang Fakt der Woche. Kalender: src/week.ts, Speichern: src/scripts/community.ts.
 // Die letzten Fakten werden hier vorab gerendert und im Browser nur ein- oder ausgeblendet.
@@ -16,14 +17,36 @@ const w = ui.weekly;
 // Bei FACT_TIMES.length Fakten pro Tag reichen also 16 Tage, mit etwas Puffer.
 const recent = posts.slice(0, 17 * FACT_TIMES.length);
 const panelId = `vote-panel-${lang}`;
+// Fakt des Tages stammt von gestern: die Fakten von heute und gestern reichen.
+const dailyPosts = posts.slice(0, 2 * FACT_TIMES.length);
+const d = ui.daily;
 // Texte für das Skript. Zahlen sind Platzhalter (9001 …), die im Browser ersetzt werden.
 const texts = {
   chosen: w.chosen(9001, 9002), chosenOne: w.chosen(9001, 1), chosenLocal: w.chosenLocal, nextVote: w.nextVote,
   thanks: w.thanks, totalOne: w.total(1), totalMany: w.total(9003), localNote: w.localNote, closed: w.closed,
   pct: lang === 'de' ? '9004 %' : '9004%',
+  dailyMeta: d.meta(9005, 9006), dailyMetaOne: d.meta(9005, 1), dailyLucky: d.lucky, dailyLocal: d.local,
 };
 ---
 <section class="wrap weekly" data-weekly data-texts={JSON.stringify(texts)}>
+  <div class="daily" data-daily hidden>
+    <h2><span aria-hidden="true">⭐</span> {d.title}</h2>
+    {dailyPosts.map((p) => (
+      <a class="card fotw-card" href={postUrl(p)} data-key={p.data.translationKey} data-date={postDay(p.data.date)} hidden>
+        <span class:list={['fotw-art', `cat-${p.data.category}`]} aria-hidden="true">
+          <span class="fotw-emoji">{p.data.emoji}</span>
+        </span>
+        <span class="fotw-body">
+          <span class="chip accent chip--day">⭐ {d.badge}</span>
+          <span class="fotw-title">{p.data.title}</span>
+          <span class="fotw-hook">{p.data.hook}</span>
+          <span class="more">{ui.readMore} <span aria-hidden="true">→</span></span>
+        </span>
+      </a>
+    ))}
+    <p class="fotw-meta" data-daily-meta></p>
+  </div>
+
   <div class="vote card" data-vote hidden>
     <h2 class="vote-head">
       <button class="vote-toggle" type="button" aria-expanded="false" aria-controls={panelId} data-vote-toggle>
@@ -79,8 +102,8 @@ const texts = {
 </section>
 
 <script>
-  import { week, vote, myVote, type Counts } from '../scripts/community';
-  import { inPoll } from '../week';
+  import { week, vote, myVote, myRatings, type Counts } from '../scripts/community';
+  import { inPoll, addDays, likePct, pickFactOfDay } from '../week';
 
   const root = document.querySelector<HTMLElement>('[data-weekly]');
   const texts: Record<string, string> = JSON.parse(root?.dataset.texts ?? '{}');
@@ -92,6 +115,30 @@ const texts = {
     const voteBox = root.querySelector<HTMLElement>('[data-vote]')!;
     const fotw = root.querySelector<HTMLElement>('[data-fotw]')!;
     const teaser = root.querySelector<HTMLElement>('[data-teaser]')!;
+
+    // Fakt des Tages
+    const daily = root.querySelector<HTMLElement>('[data-daily]')!;
+    const dailyCards = [...daily.querySelectorAll<HTMLElement>('.fotw-card')];
+    let pick: { key: string; like: number; meh: number } | null = null;
+    let dailyText = '';
+    if (state.shared) {
+      pick = state.daily ?? null;
+      const n = pick ? pick.like + pick.meh : 0;
+      dailyText = n ? fill(n === 1 ? texts.dailyMetaOne : texts.dailyMeta, { 9005: likePct(pick!), 9006: n }) : texts.dailyLucky;
+    } else {
+      const yesterday = addDays(state.today, -1);
+      const cands = dailyCards.filter((c) => c.dataset.date === yesterday).map((c) => ({ key: c.dataset.key!, date: c.dataset.date! }));
+      const mine = myRatings();
+      const p = pickFactOfDay(cands, mine, state.today);
+      pick = p && { key: p.key, ...(mine[p.key] ?? { like: 0, meh: 0 }) };
+      dailyText = cands.some((c) => mine[c.key]) ? texts.dailyLocal : texts.dailyLucky;
+    }
+    const dailyCard = pick && dailyCards.find((c) => c.dataset.key === pick!.key);
+    if (dailyCard) {
+      dailyCard.hidden = false;
+      daily.hidden = false;
+      root.querySelector<HTMLElement>('[data-daily-meta]')!.textContent = dailyText;
+    }
 
     // Fakt der Woche
     const f = state.featured;
@@ -200,7 +247,7 @@ const texts = {
   .fotw-art { display: grid; place-items: center; border-right: var(--bw) solid var(--line); --dots-size: var(--dots-size-lg); }
   .fotw-emoji { font-size: var(--fs-emoji-xl); transform: rotate(-8deg); filter: var(--emoji-shadow); }
   .fotw-body { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-7); }
-  .chip--week { align-self: flex-start; }
+  .chip--week, .chip--day { align-self: flex-start; }
   .fotw-title { font-family: var(--font-display); font-size: var(--fs-3xl); font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; }
   .fotw-hook { color: var(--muted); }
   .more { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; color: var(--pink-text); }
@@ -212,7 +259,7 @@ const texts = {
     .vote { padding: var(--space-5); }
     .option { gap: var(--space-3); padding: var(--space-3); }
     .opt-emoji { width: var(--space-10); font-size: var(--fs-xl); }
-    .fotw-card { grid-template-columns: 1fr; }
+    .fotw-card { grid-template-columns: minmax(0, 1fr); }
     .fotw-art { aspect-ratio: 2 / 1; border-right: 0; border-bottom: var(--bw) solid var(--line); }
     .fotw-body { padding: var(--space-5); }
     .fotw-title { font-size: var(--fs-2xl); }

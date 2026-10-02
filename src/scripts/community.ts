@@ -11,6 +11,8 @@ type Store = { voter?: string; ratings: Record<string, Verdict>; votes: Record<s
 export type Counts = { id: string; counts: Record<string, number>; total: number };
 export type Week = ReturnType<typeof weekState> & {
   featured: { poll: string; key: string; votes: number; total: number } | null;
+  /** Fakt des Tages aus allen Wisch-Bewertungen; null ohne Server (dann rechnet Weekly.astro selbst). */
+  daily?: { day: string; key: string; like: number; meh: number } | null;
   poll: Counts | null;
   /** false = keine Verbindung zum Server, alles nur in diesem Browser */
   shared: boolean;
@@ -64,6 +66,9 @@ async function api<T>(path: string, payload?: unknown): Promise<{ ok: true; data
 }
 
 export const myRating = (key: string) => load().ratings[key];
+/** Alle eigenen Wisch-Bewertungen als Zähler (je Fakt 1 like oder 1 meh). */
+export const myRatings = () =>
+  Object.fromEntries(Object.entries(load().ratings).map(([k, v]) => [k, { like: v === 'like' ? 1 : 0, meh: v === 'meh' ? 1 : 0 }]));
 export const myVote = (poll: string) => load().votes[poll];
 
 /** Bewertung speichern. Antwort: Zähler aller Besucher, oder null ohne Server. */
@@ -95,6 +100,7 @@ export async function week(): Promise<Week> {
   return {
     ...state,
     featured: mine ? { poll: state.featuredPoll, key: mine, votes: 1, total: 1 } : null,
+    daily: null,
     poll: state.openPoll ? localCounts(state.openPoll) : null,
     shared: false,
   };
