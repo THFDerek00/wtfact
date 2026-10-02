@@ -156,7 +156,11 @@ const SHAPES = [
     if (variant === 'dots') stop = dots();
     if (variant === 'glow') stop = glow();
   }
+  // Läuft das Skript erneut (z. B. in der klickbaren Vorschau bei jedem Seitenwechsel), erst das alte stoppen
+  const w = window as Window & { __wtfSkyStop?: () => void };
+  w.__wtfSkyStop?.();
   dark.addEventListener('change', apply);
+  w.__wtfSkyStop = () => { stop(); dark.removeEventListener('change', apply); };
   apply();
 </script>
 
