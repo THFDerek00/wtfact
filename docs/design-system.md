@@ -17,7 +17,7 @@ Stil: Neo-Brutalismus. Dicke Ränder, harte Schatten ohne Weichzeichner, knallig
 | Kategorien | `--cat-science` … `--cat-sport` | Kategorie umfärben = nur dieses Token ändern |
 | Punktmuster | `--dots`, `--dots-ink`, `--dots-size` (Standard `--dots-size-md` 16px), `--dots-size-sm` (Chips, Sterne), `--dots-size-lg` (Banner) | Liegt auf jeder Kategorie-Fläche, siehe „Punktmuster“ unten |
 | Gold-Fakten | `--gold`, `--gold-light`, `--gold-deep`, `--gold-surface` (Verlauf), `--star-size-sm/md/lg`, `--star-edge`, `--dur-twinkle`, `--locked` | Goldene Karten im Science Jumper; Text darauf ist `--on-accent`. Sterne bekommen ihre Farbe über die `.cat-*`-Klasse, neue Kategorien funktionieren also automatisch |
-| Spiel | `--flask`, `--flask-glow` | Blaue Flüssigkeit der Reagenzgläser im Science Jumper. Das Spiel liest alle Farben per `getComputedStyle` aus den Tokens |
+| Spiel | `--flask`, `--flask-glow`, `--book-*`, `--wood*`, `--metal`, `--brick*`, `--roof*`, `--smoke` | Reagenzgläser, Buch, Kisten, Fässer und Häuser im Science Jumper. Das Spiel liest alle Farben per `getComputedStyle` aus den Tokens |
 | Bühne | `--night`, `--on-night`, `--on-night-muted` | Dunkle Fläche für Hero, Footer, „Nächster Fakt“; in beiden Modi dunkel |
 | Schrift | `--font-display`, `--font-body`, `--fs-xs` (13) bis `--fs-3xl` (30), `--fs-display-sm/md/lg`, `--fs-emoji-sm…xl` | |
 | Abstände | `--space-1` (4px) bis `--space-12` (80px) | 4er-Raster |
