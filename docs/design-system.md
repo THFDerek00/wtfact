@@ -22,6 +22,9 @@ Stil: Neo-Brutalismus. Dicke Ränder, harte Schatten ohne Weichzeichner, knallig
 | Hintergrund | `--sky-dot`, `--sky-spot`, `--sky-gap`, `--sky-spot-size`, `--sky-shape-opacity`, `--sky-glow-edge`, `--sky-stage`, `--dur-sky-drift` | Helle Werte in `:root`, dunkle in den Dark-Mode-Blöcken, siehe „Hintergrund“ unten |
 | Schrift | `--font-display`, `--font-body`, `--fs-xs` (13) bis `--fs-3xl` (30), `--fs-display-sm/md/lg`, `--fs-emoji-sm…xl` | |
 | Abstände | `--space-1` (4px) bis `--space-12` (80px) | 4er-Raster |
+| Breite | `--content-width` (1280px), `--gutter`, `--measure` (72ch) | Eine Breite für alle Bereiche, siehe „Breite“ unten |
+| Icons | `--icon-size`, `--icon-size-lg`, `--icon-stroke` | Lucide-Icons über `Icon.astro`, siehe „Icons und Emojis“ unten |
+| Wisch-Karte | `--swipe-title-lines`, `--swipe-hook-lines` | Feste Zeilenzahl auf der Wisch-Karte |
 | Ränder | `--bw-xs` 1, `--bw-sm` 2, `--bw` 2.5, `--bw-accent` 6 | |
 | Radien | `--radius-sm` 8, `--radius-md` 14, `--radius-pill` | |
 | Schatten | `--shadow-xs/sm/md/lg/xl`, `--shadow-night-sm/lg`, `--shadow-on-night`, `--shadow-new` (bleibt dunkel, für „Neu“ und Wisch-Schilder), `--emoji-shadow` | |
@@ -39,6 +42,9 @@ Stil: Neo-Brutalismus. Dicke Ränder, harte Schatten ohne Weichzeichner, knallig
 | `.cat-*` | Kategorie-Fläche | setzt Farbe, Punktmuster **und** `--on-accent` als Schrift |
 | `.accent` | Gelbe Akzentfläche (ohne Kategorie) | setzt Hintergrund und `--on-accent` |
 | `.gold` | Goldene Fläche für freigeschaltete Gold-Fakten | setzt `--gold-surface` und `--on-accent` |
+| `.wrap` | Inhaltsbereich, immer `--content-width` breit | – |
+| `.prose` | Fließtext innerhalb von `.wrap`, höchstens `--measure` | – |
+| `.icon` | Lucide-Icon (`<Icon name="…" />`) | Größe über `--icon-size` |
 | `.sr-only` | Nur für Screenreader | – |
 
 Neue Varianten kommen als Modifier-Klasse in `global.css`, nicht als Überschreibung in der Komponente.
@@ -53,7 +59,10 @@ Wunsch von Eric (2026-10-02). Abläufe und Einrichtung: `README.md`.
 - **Hall of Fame** (`src/pages/[lang]/hall-of-fame.astro`): dunkle Bühne mit Countdowns, darunter Fakt des Tages und Fakt der Woche als zwei gleich große Karten nebeneinander (Bildfläche oben in Kategoriefarbe, `--dots-size-lg`), dann Abstimmung, Tippspiel, Verlauf, Kategorien-Rangliste. Gewählte Tipps und Verlaufs-Tabs über `aria-pressed`. Im Verlauf haben ungelesene Sieger ein graues Emoji-Feld und das Etikett „Noch nicht gelesen“, gelesene ein gelbes „✓ Gelesen“. Balken der Rangliste in Kategoriefarbe mit Punkten, der Album-Balken gelb (`.accent`).
 - **Fakt des Tages**: große Karte mit gelbem Etikett „⭐ Fakt des Tages“ (`.chip.accent`), darunter eine graue Zeile mit dem Anteil „Gefällt mir“.
 - **Fakt der Woche**: große Karte mit Bildfläche in Kategoriefarbe (`.cat-*`, Raster `--dots-size-lg`) und Etikett „🏆 Fakt der Woche“. Gold ist für die Gold-Fakten im Spiel reserviert und wird hier nicht benutzt.
-- **Neu** (`NewBadge.astro`, `.chip--new`): gelbes Etikett in Großbuchstaben, für Fakten aus den letzten 7 Tagen. Steht auf jeder Faktenkarte oben rechts im Bild (Handy: unten links), auf der Wisch-Karte neben dem Etikett und im Kopf der Beitragsseite.
+- **Neu** (`NewBadge.astro`, `.chip--new`): gelbes Etikett für Fakten aus den letzten 7 Tagen, genauso groß wie ein `.chip`. Steht immer direkt rechts neben dem Kategorie-Etikett (Faktenkarte, Wisch-Karte, Beitragsseite, Gold-Fakten), nie groß über dem Bild (Eric, 2026-10-02).
+- **Wisch-Karte, feste Größe**: Alle Karten liegen übereinander in derselben Rasterzelle und werden mit `data-off` nur unsichtbar geschaltet. Der Stapel ist dadurch immer so hoch wie die höchste Karte, die Seite verschiebt sich beim Wischen nicht (Eric, 2026-10-02). „Weiterlesen“ steht unten bündig.
+- **Ticker** (gelbes Band unter dem Hero): ohne Ränder oben, unten und zwischen den Meldungen; getrennt wird nur mit einem kleinen Punkt (Eric, 2026-10-02).
+- **Gold-Fakten** (Science Jumper): In der Sammlung nur eine kurze Vorschau wie die Faktenkarten (goldene Bildfläche mit Sternen, Kategorie, Titel, erster Satz). Ein Klick öffnet die eigene Seite `/[lang]/science-jumper/[id]/` mit dem ganzen Fakt und den Quellen; gesperrte Fakten zeigen dort nur, ab welchem Highscore sie aufgehen.
 
 ## Slogan
 
@@ -114,3 +123,16 @@ Hinter der ganzen Seite liegt eine Hintergrund-Ebene (`src/components/NightSky.a
 9. Schrift auf Punkten: `--on-accent` auf Kategoriefarbe **gemischt mit der Punktfarbe** mindestens 4.5:1 (hell und dunkel). Deshalb ist `--dots-ink` auf 9 % begrenzt; bei 14 % fielen Technik und Körper durch.
 
 Layoutmaße wie `max-width` in Media Queries, `min-height` oder Spaltenbreiten im Grid sind erlaubt.
+
+## Breite
+
+Eine Breite für alle Bereiche (Eric, 2026-10-02): `.wrap` ist überall `--content-width` breit, auch auf Beitragsseiten, Textseiten und der 404. Die alte schmale `.narrow`-Spalte gibt es nicht mehr. Beitragsseiten nutzen die Breite zweispaltig (Fakt links, „Noch ein Fakt“ und Verwandtes rechts, unter 960px untereinander). Reine Textseiten (`Page.astro`) begrenzen ihre Zeilen auf `--measure`, bleiben aber links bündig mit allem anderen.
+
+## Icons und Emojis
+
+Wunsch von Eric (2026-10-02):
+
+- **Emojis nur am Fakt**: auf Beitragsseiten (Bild, „Noch ein Fakt“) und auf den kleinen Faktenkarten (Startseite, Wisch-Karte, Hall of Fame, Abstimmung, Gold-Fakten). Knöpfe, Überschriften, Etiketten, Ticker und Navigation bekommen keine Emojis.
+- Wo ein Bild hilft, kommt ein Strich-Icon aus **Lucide** (`lucide-static`), eingebunden über `src/components/Icon.astro`: `<Icon name="chevron-right" />`. Icons sind `aria-hidden`, Farbe `currentColor`, Größe wächst mit der Schrift.
+- **Pfeile sind immer Chevrons** (`chevron-right`, `-left`, `-down`, `-up`), keine Zeichen wie → ↓ ▾.
+- **Gefällt mir / Gefällt mir weniger**: `thumbs-up` / `thumbs-down`, auf Knöpfen und auf den Schildern der Wisch-Karte.

@@ -5,9 +5,10 @@ interface Props { lang: Lang; title: string }
 const { lang, title } = Astro.props;
 ---
 <Base lang={lang} title={title}>
-  <article class="narrow page"><h1>{title}</h1><slot /></article>
+  <article class="wrap page"><h1>{title}</h1><slot /></article>
 </Base>
 <style>
+  .page > :global(*) { max-width: var(--measure); }
   .page h1 { font-size: var(--fs-display-md); }
   .page :global(h2) { font-size: var(--fs-xl); margin-top: var(--space-8); }
 </style>

@@ -1,0 +1,216 @@
+---
+// Eigene Seite für jeden Gold-Fakt aus dem Science Jumper (Wunsch von Eric, 2026-10-02): In der Sammlung
+// steht nur eine kurze Vorschau, hier der ganze Fakt mit Quellen. Wie auf der Spielseite steht der Inhalt
+// kodiert im HTML und wird erst eingesetzt, wenn der Highscore im Browser hoch genug ist.
+import Base from '../../../layouts/Base.astro';
+import Icon from '../../../components/Icon.astro';
+import ShareBar from '../../../components/ShareBar.astro';
+import { LANGS, type Lang } from '../../../config';
+import { t } from '../../../i18n/ui';
+import { open, readGold } from '../../../../scripts/facts-db.mjs';
+import { goldUrl } from '../../../scripts/gold';
+
+export function getStaticPaths() {
+  const db = open();
+  const facts = readGold(db);
+  db.close();
+  return LANGS.flatMap((lang) =>
+    facts.map((f, i) => ({ params: { lang, id: f.id }, props: { fact: f, prev: facts[i - 1], next: facts[i + 1] } })),
+  );
+}
+type Gold = ReturnType<typeof readGold>[number];
+const { fact: f, prev, next } = Astro.props as { fact: Gold; prev?: Gold; next?: Gold };
+const lang = Astro.params.lang as Lang;
+const ui = t(lang);
+const g = ui.game;
+const other: Lang = lang === 'de' ? 'en' : 'de';
+const cat = f.category as keyof typeof ui.categories;
+const payload = {
+  id: f.id,
+  points: f.points,
+  category: f.category,
+  categoryName: ui.categories[cat] ?? f.category,
+  emoji: f.emoji,
+  title: f[lang].title,
+  text: f[lang].text,
+  sources: f.sources,
+};
+const encoded = Buffer.from(JSON.stringify(payload), 'utf8').toString('base64');
+const STARS = 9;
+const game = `/${lang}/science-jumper/`;
+---
+<Base lang={lang} title={g.pageTitle(f.points)} description={g.pageDesc} altUrl={goldUrl(other, f.id)}>
+  <section class="banner gold" data-gold-page data-gold={encoded} data-lang={lang}>
+    <span class="stars" aria-hidden="true">
+      {Array.from({ length: STARS }, () => <span class="star"><span class:list={['star-core', `cat-${f.category}`]}></span></span>)}
+    </span>
+    <div class="wrap banner-inner">
+      <a class="back" href={`${game}#gold`}><Icon name="chevron-left" /> {g.backToGame}</a>
+      <div class="meta">
+        <span class="chip pts">{g.goldBadge} · {f.points}</span>
+        <span class:list={['chip', `cat-${f.category}`]}>{ui.categories[cat] ?? f.category}</span>
+      </div>
+      <h1 data-f="title">{g.pageTitle(f.points)}</h1>
+      <span class="big-emoji" aria-hidden="true" data-f="emoji"><Icon name="lock" /></span>
+    </div>
+  </section>
+
+  <div class="wrap layout">
+    <article class="main">
+      <div class="card locked" data-locked>
+        <span class="lock-icon"><Icon name="lock" /></span>
+        <h2>{g.locked}</h2>
+        <p>{g.lockedText(f.points)}</p>
+        <p class="best" data-best data-text={g.yourBest(9001)}></p>
+        <a class="btn" href={game}><Icon name="play" /> {g.playNow}</a>
+      </div>
+
+      <div data-open hidden>
+        <p class="hook card"><span class="hook-label">WTF?!</span><span data-f="lead"></span></p>
+        <p class="text" data-f="text"></p>
+        <section class="sources" id="sources">
+          <h2>{ui.sources}</h2>
+          <ol data-f="sources"></ol>
+        </section>
+        <ShareBar lang={lang} title={g.pageTitle(f.points)} />
+      </div>
+    </article>
+
+    <aside class="side">
+      {next && (
+        <a class="next card" href={goldUrl(lang, next.id)}>
+          <span class="next-label">{g.nextGold} <Icon name="chevron-right" /></span>
+          <span class="next-title">{g.lockedAt(next.points)}</span>
+        </a>
+      )}
+      <nav class="more-links">
+        {prev && <a href={goldUrl(lang, prev.id)}><Icon name="chevron-left" /> {g.prevGold}</a>}
+        <a href={`${game}#gold`}><Icon name="chevron-right" /> {g.allGold}</a>
+      </nav>
+    </aside>
+  </div>
+</Base>
+
+<script>
+  import { loadStore, decode, splitLead, type GoldFact } from '../../../scripts/gold';
+
+  const root = document.querySelector<HTMLElement>('[data-gold-page]');
+  if (root) {
+    const fact = decode<GoldFact>(root.dataset.gold ?? '');
+    const { best } = loadStore();
+    const best$ = document.querySelector<HTMLElement>('[data-best]')!;
+    best$.textContent = (best$.dataset.text ?? '').replace('9001', String(best));
+    if (best >= fact.points) {
+      const q = (k: string) => document.querySelector<HTMLElement>(`[data-f="${k}"]`)!;
+      const [lead, rest] = splitLead(fact.text);
+      q('title').textContent = fact.title;
+      q('emoji').textContent = fact.emoji;
+      q('lead').textContent = lead;
+      q('text').textContent = rest;
+      q('text').hidden = !rest;
+      const list = q('sources');
+      for (const s of fact.sources) {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = s.url;
+        a.rel = 'noopener nofollow';
+        a.target = '_blank';
+        a.textContent = s.label;
+        li.append(a);
+        list.append(li);
+      }
+      document.title = `${fact.title} | WTFact`;
+      document.querySelector<HTMLElement>('[data-locked]')!.hidden = true;
+      document.querySelector<HTMLElement>('[data-open]')!.hidden = false;
+      root.toggleAttribute('data-unlocked', true);
+    }
+  }
+</script>
+
+<style>
+  .banner { position: relative; overflow: hidden; border-bottom: var(--bw) solid var(--line); padding: var(--space-8) 0 var(--space-12); }
+  .banner-inner { position: relative; }
+  .back { display: inline-flex; align-items: center; gap: var(--space-1); margin-bottom: var(--space-5); font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; text-decoration: none; }
+  .back:hover { text-decoration: underline; }
+  .meta { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
+  .pts { background: var(--night); color: var(--on-night); border-color: var(--on-accent); }
+  h1 { position: relative; z-index: 1; font-size: var(--fs-display-lg); margin: var(--space-4) 0 0; max-width: 24ch; }
+  .big-emoji {
+    position: absolute; right: 0; bottom: calc(-1 * var(--space-10));
+    font-size: var(--fs-emoji-xl); line-height: 1; transform: rotate(12deg); filter: var(--emoji-shadow); opacity: 0.9;
+    --icon-size: 1em; --icon-stroke: 1.5;
+  }
+  [data-unlocked] .big-emoji { right: calc(-1 * var(--space-10)); font-size: var(--fs-emoji-2xl); bottom: calc(-1 * var(--space-12)); }
+
+  /* Sterne wie auf den Vorschaukarten, hier etwas verteilter über das Banner */
+  .stars { position: absolute; inset: 0; pointer-events: none; }
+  .star {
+    position: absolute; width: var(--star-size-lg); aspect-ratio: 1;
+    background: var(--on-accent);
+    clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    animation: twinkle var(--dur-twinkle) ease-in-out infinite;
+  }
+  .star-core { position: absolute; inset: var(--bw-sm); clip-path: inherit; --dots-size: var(--dots-size-sm); }
+  .star:nth-child(1) { top: 12%; right: 6%; }
+  .star:nth-child(2) { top: 30%; right: 22%; width: var(--star-size-sm); animation-delay: calc(var(--dur-twinkle) * -0.3); }
+  .star:nth-child(3) { top: 8%; right: 38%; width: var(--star-size-md); animation-delay: calc(var(--dur-twinkle) * -0.6); }
+  .star:nth-child(4) { bottom: 14%; right: 30%; animation-delay: calc(var(--dur-twinkle) * -0.15); }
+  .star:nth-child(5) { bottom: 10%; left: 6%; width: var(--star-size-md); animation-delay: calc(var(--dur-twinkle) * -0.8); }
+  .star:nth-child(6) { top: 14%; left: 48%; width: var(--star-size-sm); animation-delay: calc(var(--dur-twinkle) * -0.45); }
+  .star:nth-child(7) { top: 52%; right: 4%; width: var(--star-size-md); animation-delay: calc(var(--dur-twinkle) * -0.7); }
+  .star:nth-child(8) { bottom: 22%; left: 40%; width: var(--star-size-sm); animation-delay: calc(var(--dur-twinkle) * -0.9); }
+  .star:nth-child(9) { top: 10%; left: 3%; width: var(--star-size-sm); animation-delay: calc(var(--dur-twinkle) * -0.25); }
+  @keyframes twinkle {
+    0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    50% { transform: scale(0.55) rotate(25deg); opacity: 0.6; }
+  }
+
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 380px); gap: var(--space-11); align-items: start; }
+  .main { font-size: var(--fs-lg); }
+  .side { position: sticky; top: var(--space-12); display: flex; flex-direction: column; gap: var(--space-6); margin-top: var(--space-8); }
+
+  .locked {
+    position: relative; margin: calc(-1 * var(--space-9)) 0 var(--space-8); padding: var(--space-6);
+    display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); box-shadow: var(--shadow-lg);
+  }
+  .locked h2 { margin: 0; font-size: var(--fs-2xl); }
+  .locked p { margin: 0; }
+  .lock-icon { font-size: var(--fs-2xl); line-height: 1; }
+  .best { color: var(--muted); font-size: var(--fs-md); font-weight: 600; }
+  .locked .btn { margin-top: var(--space-2); }
+
+  .hook {
+    position: relative; margin: calc(-1 * var(--space-9)) 0 var(--space-8); padding: var(--space-6) var(--space-5) var(--space-5);
+    font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 600; line-height: 1.4;
+    box-shadow: var(--shadow-lg);
+  }
+  .hook-label {
+    position: absolute; top: calc(-1 * var(--space-4)); left: var(--space-5);
+    padding: 0 var(--space-2); border: var(--bw-sm) solid var(--line); border-radius: var(--radius-sm);
+    background: var(--gold); color: var(--on-accent); font-size: var(--fs-sm); font-weight: 800; transform: rotate(-3deg);
+  }
+  .text { margin: 0; }
+  .sources { margin: var(--space-9) 0; font-size: var(--fs-sm); color: var(--muted); scroll-margin-top: var(--space-12); }
+  .sources h2 { font-size: var(--fs-lg); color: var(--ink); margin: 0 0 var(--space-2); }
+  .sources ol { margin: 0; padding-left: var(--space-5); }
+
+  .next {
+    display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-6);
+    background: var(--gold-surface); color: var(--on-accent); text-decoration: none;
+    transition: transform var(--dur) var(--ease-pop), box-shadow var(--dur) var(--ease);
+  }
+  .next:hover { transform: translate(-3px, -3px) rotate(-0.6deg); box-shadow: var(--shadow-xl); }
+  .next-label { display: inline-flex; align-items: center; gap: var(--space-1); font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; }
+  .next-title { font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 700; line-height: 1.1; }
+  .more-links { display: flex; flex-direction: column; gap: var(--space-2); font-family: var(--font-display); font-weight: 700; }
+  .more-links a { display: inline-flex; align-items: center; gap: var(--space-1); text-decoration: none; color: var(--pink-text); }
+  .more-links a:hover { text-decoration: underline; }
+
+  @media (max-width: 960px) {
+    .layout { grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
+    .side { position: static; margin-top: 0; }
+  }
+  @media (max-width: 560px) {
+    .big-emoji, [data-unlocked] .big-emoji { font-size: var(--fs-emoji-md); right: 0; bottom: auto; top: 0; }
+  }
+</style>

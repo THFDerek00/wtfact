@@ -3,6 +3,7 @@ import Base from '../../layouts/Base.astro';
 import PostCard from '../../components/PostCard.astro';
 import SwipeDeck from '../../components/SwipeDeck.astro';
 import FamePointer from '../../components/FamePointer.astro';
+import Icon from '../../components/Icon.astro';
 import { LANGS, CATEGORIES, type Lang } from '../../config';
 import { t } from '../../i18n/ui';
 import { postsFor, postUrl, factNumber, categoryIcon } from '../../lib';
@@ -26,11 +27,11 @@ const ticker = rest.slice(0, 12);
         <h1>{ui.hero[0]} <span class="sticker">{ui.hero[1]}</span> {ui.hero[2]}</h1>
         <p class="sub">{ui.heroSub}</p>
         <div class="ctas">
-          {hero && <a class="btn" href={postUrl(hero)}>{ui.readToday} <span aria-hidden="true">→</span></a>}
+          {hero && <a class="btn" href={postUrl(hero)}>{ui.readToday} <Icon name="chevron-right" /></a>}
           <button class="btn btn--pink" type="button" data-surprise={JSON.stringify(posts.map(postUrl))}>
-            <span aria-hidden="true">🎲</span> {ui.surprise}
+            <Icon name="dices" /> {ui.surprise}
           </button>
-          <a class="btn btn--cyan" href={`/${lang}/science-jumper/`}><span aria-hidden="true">🧪</span> {ui.game.cta}</a>
+          <a class="btn btn--cyan" href={`/${lang}/science-jumper/`}><Icon name="flask-conical" /> {ui.game.cta}</a>
         </div>
       </div>
 
@@ -46,7 +47,7 @@ const ticker = rest.slice(0, 12);
             {ticker.map((p) => (
               <li>
                 <a href={postUrl(p)} tabindex={copy === 1 ? -1 : undefined}>
-                  <span aria-hidden="true">{p.data.emoji}</span> {p.data.hook}
+                  {p.data.hook}
                 </a>
               </li>
             ))}
@@ -131,12 +132,13 @@ const ticker = rest.slice(0, 12);
   .ctas { display: flex; flex-wrap: wrap; gap: var(--space-4); }
 
 
-  /* Ticker */
-  .ticker { background: var(--yellow); color: var(--on-accent); border-block: var(--bw) solid var(--line); overflow: hidden; }
+  /* Ticker: gelbes Band ohne Ränder (Wunsch von Eric, 2026-10-02), Meldungen nur durch Punkte getrennt */
+  .ticker { background: var(--yellow); color: var(--on-accent); overflow: hidden; }
   .track { display: flex; width: max-content; animation: marquee var(--dur-marquee) linear infinite; }
   .ticker:hover .track, .ticker:focus-within .track { animation-play-state: paused; }
   .ticker ul { display: flex; list-style: none; margin: 0; padding: 0; }
-  .ticker li { padding: var(--space-3) var(--space-6); border-right: var(--bw-sm) solid var(--on-accent); white-space: nowrap; }
+  .ticker li { display: flex; align-items: center; gap: var(--space-6); padding: var(--space-3) 0 var(--space-3) var(--space-6); white-space: nowrap; }
+  .ticker li::after { content: ''; width: var(--space-2); aspect-ratio: 1; border-radius: var(--radius-pill); background: currentColor; }
   .ticker a { font-family: var(--font-display); font-weight: 600; text-decoration: none; }
   .ticker a:hover { text-decoration: underline; }
   @keyframes marquee { to { transform: translateX(-50%); } }
@@ -169,7 +171,7 @@ const ticker = rest.slice(0, 12);
   .head { display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: center; justify-content: space-between; margin-bottom: var(--space-6); }
   .head h2 { margin: 0; }
   .filters { display: flex; flex-wrap: wrap; gap: var(--space-2); }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-7); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: var(--space-7); }
   .loadmore { display: flex; justify-content: center; margin-top: var(--space-10); }
 
   @media (max-width: 1060px) {

@@ -5,6 +5,7 @@
 // Rechnen und Speichern: src/scripts/fame.ts, Server: GET /api/history in src/server/community.ts.
 import Base from '../../layouts/Base.astro';
 import Vote from '../../components/Vote.astro';
+import Icon from '../../components/Icon.astro';
 import { LANGS, CATEGORIES, FACT_TIMES, type Lang } from '../../config';
 import { t } from '../../i18n/ui';
 import { postsFor, factInfo, categoryIcon } from '../../lib';
@@ -34,7 +35,7 @@ const texts = {
   <div data-fame data-facts={JSON.stringify(facts)} data-texts={JSON.stringify(texts)} data-lang={lang}>
     <section class="stage fame-hero">
       <div class="wrap">
-        <p class="kicker"><span class="sticker">🏆 {f.name}</span></p>
+        <p class="kicker"><span class="sticker"><Icon name="trophy" /> {f.name}</span></p>
         <h1>{f.title}</h1>
         <p class="intro">{f.intro}</p>
         <div class="hero-row">
@@ -42,7 +43,7 @@ const texts = {
             <div class="clock"><dt>{f.clockDay}</dt><dd data-clock="day">--:--:--</dd></div>
             <div class="clock"><dt data-clock-vote-label>{f.clockVote}</dt><dd data-clock="vote">--:--:--</dd></div>
           </dl>
-          <a class="btn" href="#vote" data-vote-jump hidden><span aria-hidden="true">🗳️</span> {f.voteJump}</a>
+          <a class="btn" href="#vote" data-vote-jump hidden><Icon name="vote" /> {f.voteJump}</a>
         </div>
       </div>
     </section>
@@ -59,7 +60,7 @@ const texts = {
     <div class="wrap vote-wrap"><Vote lang={lang} posts={posts} /></div>
 
     <section class="wrap tip card" data-tip>
-      <p class="kicker"><span class="chip accent"><span aria-hidden="true">🎯</span> {f.tipKicker}</span></p>
+      <p class="kicker"><span class="chip accent"><Icon name="target" /> {f.tipKicker}</span></p>
       <h2>{f.tipTitle}</h2>
       <p class="lead">{f.tipIntro}</p>
       <p class="tip-result" data-tip-result hidden></p>
@@ -77,8 +78,8 @@ const texts = {
       <div class="hist-head">
         <h2>{f.historyTitle}</h2>
         <div class="tabs" role="group" aria-label={f.historyLabel}>
-          <button class="chip" type="button" aria-pressed="true" data-tab="days"><span aria-hidden="true">⭐</span> {f.tabDays}</button>
-          <button class="chip" type="button" aria-pressed="false" data-tab="weeks"><span aria-hidden="true">🏆</span> {f.tabWeeks}</button>
+          <button class="chip" type="button" aria-pressed="true" data-tab="days"><Icon name="star" /> {f.tabDays}</button>
+          <button class="chip" type="button" aria-pressed="false" data-tab="weeks"><Icon name="trophy" /> {f.tabWeeks}</button>
         </div>
       </div>
       <div class="album card">
@@ -129,7 +130,7 @@ const texts = {
           <span class="big-title" data-title></span>
           <span class="big-hook" data-hook></span>
           <span class="big-meta" data-meta></span>
-          <span class="more">{ui.readMore} <span aria-hidden="true">→</span></span>
+          <span class="more">{ui.readMore} <Icon name="chevron-right" /></span>
         </span>
       </a>
     </template>
@@ -138,7 +139,7 @@ const texts = {
         <button class="tip-option" type="button" aria-pressed="false">
           <span class="tip-emoji" data-emoji aria-hidden="true"></span>
           <span class="tip-title"><span class="sr-only">{f.tipFor}: </span><span data-title></span></span>
-          <span class="tip-check" aria-hidden="true">🎯</span>
+          <span class="tip-check"><Icon name="check" /></span>
         </button>
       </li>
     </template>
@@ -253,7 +254,7 @@ const texts = {
     const last = stats.last;
     if (last) {
       const result = $('[data-tip-result]', box);
-      result.textContent = last.hit ? `🎯 ${texts.tipHit}` : fill(texts.tipMiss, { '§': byKey.get(last.winner)?.title ?? '' });
+      result.textContent = last.hit ? texts.tipHit : fill(texts.tipMiss, { '§': byKey.get(last.winner)?.title ?? '' });
       result.toggleAttribute('data-hit', last.hit);
       result.hidden = false;
     }
@@ -338,7 +339,7 @@ const texts = {
         const s = score[c];
         row.hidden = !s;
         if (!s) return;
-        $('[data-no]', row).textContent = i < 3 ? ['🥇', '🥈', '🥉'][i] : `${i + 1}.`;
+        $('[data-no]', row).textContent = `${i + 1}.`;
         $('[data-meta]', row).textContent = fill(texts.catsMeta, { 9001: s.d, 9002: s.w });
         $('[data-score]', row).textContent = String(total(c));
         row.style.setProperty('--pct', String(max ? Math.round((total(c) / max) * 100) : 0));
@@ -356,7 +357,7 @@ const texts = {
     const dSlot = $('[data-slot="daily"]');
     const dFact = daily && byKey.get(daily.key);
     if (daily && dFact) {
-      dSlot.replaceChildren(bigCard(dFact, `⭐ ${texts.dailyBadge}`, true, dailyMeta(daily.mode, daily.like, daily.meh)));
+      dSlot.replaceChildren(bigCard(dFact, texts.dailyBadge, true, dailyMeta(daily.mode, daily.like, daily.meh)));
     }
     const wSlot = $('[data-slot="week"]');
     const wFact = featured && byKey.get(featured.key);
@@ -364,7 +365,7 @@ const texts = {
       const chosen = state.shared
         ? fill(featured.total === 1 ? texts.chosenOne : texts.chosen, { 9001: featured.votes, 9002: featured.total })
         : texts.chosenLocal;
-      wSlot.replaceChildren(bigCard(wFact, `🏆 ${texts.weekBadge}`, false, state.openPoll ? chosen : `${chosen} ${texts.nextVote}`));
+      wSlot.replaceChildren(bigCard(wFact, texts.weekBadge, false, state.openPoll ? chosen : `${chosen} ${texts.nextVote}`));
     }
 
     const hist = await history(facts, state.today, state.shared);
@@ -419,7 +420,7 @@ const texts = {
   .big-title { font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 700; line-height: 1.15; letter-spacing: -0.02em; }
   .big-hook { color: var(--muted); }
   .big-meta { color: var(--muted); font-size: var(--fs-sm); font-weight: 600; }
-  .more { margin-top: auto; font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; color: var(--pink-text); }
+  .more { display: inline-flex; align-items: center; gap: var(--space-1); margin-top: auto; font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; color: var(--pink-text); }
 
   .vote-wrap { margin-top: var(--space-11); }
   .vote-wrap:has(> [hidden]) { display: none; }

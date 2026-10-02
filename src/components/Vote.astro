@@ -6,6 +6,7 @@ import { FACT_TIMES, type Lang } from '../config';
 import type { Post } from '../lib';
 import { postUrl } from '../lib';
 import { t } from '../i18n/ui';
+import Icon from './Icon.astro';
 import { postDay } from '../week';
 interface Props { lang: Lang; posts: Post[] }
 const { lang, posts } = Astro.props;
@@ -23,12 +24,12 @@ const texts = {
 <section class="vote card" id="vote" data-vote data-texts={JSON.stringify(texts)} hidden>
   <h2 class="vote-head">
     <button class="vote-toggle" type="button" aria-expanded="false" aria-controls={panelId} data-vote-toggle>
-      <span class="kicker"><span class="chip accent">🗳️ {w.voteKicker}</span></span>
+      <span class="kicker"><span class="chip accent"><Icon name="vote" /> {w.voteKicker}</span></span>
       <span class="vote-title">{w.voteTitle}</span>
       <span class="intro">{w.voteIntro}</span>
       <span class="vote-cta btn">
         <span class="when-closed">{w.voteOpen}</span><span class="when-open">{w.voteHide}</span>
-        <span class="chevron" aria-hidden="true">▾</span>
+        <Icon name="chevron-down" class="chevron" />
       </span>
     </button>
   </h2>
@@ -45,7 +46,7 @@ const texts = {
           </span>
           <span class="opt-pct" data-pct></span>
         </button>
-        <a class="opt-read" href={postUrl(p)} aria-label={`${ui.readMore}: ${p.data.title}`}><span aria-hidden="true">→</span></a>
+        <a class="opt-read" href={postUrl(p)} aria-label={`${ui.readMore}: ${p.data.title}`}><Icon name="chevron-right" /></a>
       </li>
     ))}
   </ul>
@@ -120,8 +121,8 @@ const texts = {
   .intro { color: var(--muted); max-width: 60ch; }
   .vote-cta { margin-top: var(--space-3); }
   .vote-toggle:hover .vote-cta { transform: translate(-2px, -2px); box-shadow: var(--shadow-lg); }
-  .chevron { display: inline-block; transition: transform var(--dur) var(--ease); }
-  .vote-toggle[aria-expanded='true'] .chevron { transform: rotate(180deg); }
+  .vote-cta :global(.chevron) { transition: transform var(--dur) var(--ease); }
+  .vote-toggle[aria-expanded='true'] :global(.chevron) { transform: rotate(180deg); }
   .vote-toggle[aria-expanded='true'] .when-closed, .vote-toggle[aria-expanded='false'] .when-open { display: none; }
   .vote-panel { margin-top: var(--space-6); animation: unfold var(--dur-swipe) var(--ease); }
   @keyframes unfold { from { opacity: 0; transform: translateY(calc(-1 * var(--space-3))); } }
