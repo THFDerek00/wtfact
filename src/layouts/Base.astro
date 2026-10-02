@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import NightSky from '../components/NightSky.astro';
+import Icon from '../components/Icon.astro';
 import { SITE, type Lang } from '../config';
 import { t } from '../i18n/ui';
 import { postsFor, postUrl } from '../lib';
@@ -63,7 +64,7 @@ const allUrls = (await postsFor(lang)).map(postUrl);
         <p class="slogan">{ui.slogan}</p>
         <div class="actions">
           <button class="btn btn--pink surprise" type="button" data-surprise={JSON.stringify(allUrls)} aria-label={ui.surprise}>
-            <span aria-hidden="true">🎲</span><span class="label" aria-hidden="true">{ui.surprise}</span>
+            <Icon name="dices" /><span class="label" aria-hidden="true">{ui.surprise}</span>
           </button>
           <button class="chip theme" type="button" data-theme-toggle aria-pressed="false" aria-label={ui.darkMode} title={ui.darkMode}>
             <svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" /></svg>

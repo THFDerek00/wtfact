@@ -3,11 +3,14 @@
 // Karte nach oben links ziehen = „Gefällt mir weniger“, nach oben rechts = „Gefällt mir“.
 // Dasselbe geht mit den beiden Knöpfen darunter und mit den Pfeiltasten links/rechts.
 // Speichern: src/scripts/community.ts (Server, ohne Server nur im Browser).
+// Alle Karten liegen übereinander in derselben Rasterzelle und sind nur unsichtbar geschaltet (data-off),
+// so ist der Stapel immer so hoch wie die höchste Karte und die Seite springt beim Wischen nicht.
 import type { Lang } from '../config';
 import type { Post } from '../lib';
 import { postUrl, factNumber } from '../lib';
 import { t } from '../i18n/ui';
 import NewBadge from './NewBadge.astro';
+import Icon from './Icon.astro';
 interface Props { lang: Lang; posts: Post[] }
 const { lang, posts } = Astro.props;
 const ui = t(lang);
@@ -20,26 +23,24 @@ const rest = Math.max(0, posts.length - 1);
     <span class="plate plate-a" aria-hidden="true"></span>
     <span class="plate plate-b" aria-hidden="true"></span>
     {deck.map((p, i) => (
-      <article class="card today" data-key={p.data.translationKey} hidden={i > 0}>
+      <article class="card today" data-key={p.data.translationKey} data-off={i > 0 ? '' : undefined}>
         <a class="today-link" href={postUrl(p)} draggable="false">
           <span class="today-head">
-            {i === 0
-              ? <span class="chip accent">⚡ {ui.latestFact}</span>
-              : <span class:list={['chip', `cat-${p.data.category}`]}>{ui.categories[p.data.category]}</span>}
+            <span class:list={['chip', `cat-${p.data.category}`]}>{ui.categories[p.data.category]}</span>
             <NewBadge lang={lang} date={p.data.date} />
-            <span class="no">#{String(factNumber(p, posts)).padStart(3, '0')}</span>
+            <span class="no">{i === 0 && <span class="latest"><Icon name="zap" /> {ui.latestFact}<span aria-hidden="true">·</span></span>}<span>#{String(factNumber(p, posts)).padStart(3, '0')}</span></span>
           </span>
           <span class:list={['today-art', `cat-${p.data.category}`]} aria-hidden="true"><span>{p.data.emoji}</span></span>
           <span class="today-title">{p.data.title}</span>
           <span class="today-hook">{p.data.hook}</span>
-          <span class="more">{ui.readMore} <span aria-hidden="true">→</span></span>
+          <span class="more">{ui.readMore} <Icon name="chevron-right" /></span>
         </a>
-        <span class="verdict verdict--meh" aria-hidden="true">{ui.swipe.meh}</span>
-        <span class="verdict verdict--like" aria-hidden="true">{ui.swipe.like}</span>
+        <span class="verdict verdict--meh" aria-hidden="true"><Icon name="thumbs-down" /> {ui.swipe.meh}</span>
+        <span class="verdict verdict--like" aria-hidden="true"><Icon name="thumbs-up" /> {ui.swipe.like}</span>
       </article>
     ))}
-    <div class="card today done" data-done hidden>
-      <span class="done-emoji" aria-hidden="true">🎉</span>
+    <div class="card today done" data-done data-off>
+      <Icon name="party-popper" class="done-icon" />
       <span class="today-title">{ui.swipe.doneTitle}</span>
       <span class="today-hook">{ui.swipe.doneText(rest)}</span>
       <span class="done-actions">
@@ -50,8 +51,8 @@ const rest = Math.max(0, posts.length - 1);
   </div>
 
   <div class="rate" role="group" aria-label={ui.swipe.label}>
-    <button class="btn btn--pink" type="button" data-rate="meh"><span aria-hidden="true">↖</span> {ui.swipe.meh}</button>
-    <button class="btn btn--lime" type="button" data-rate="like">{ui.swipe.like} <span aria-hidden="true">↗</span></button>
+    <button class="btn btn--pink" type="button" data-rate="meh"><Icon name="thumbs-down" /> {ui.swipe.meh}</button>
+    <button class="btn btn--lime" type="button" data-rate="like"><Icon name="thumbs-up" /> {ui.swipe.like}</button>
   </div>
   <p class="hint">{ui.swipe.hint}</p>
   <p class="status" data-status aria-live="polite" data-like={ui.swipe.savedLike} data-meh={ui.swipe.savedMeh} data-share={ui.swipe.share(0)}></p>
@@ -72,8 +73,8 @@ const rest = Math.max(0, posts.length - 1);
 
     const show = () => {
       current = queue[0];
-      cards.forEach((c) => (c.hidden = c !== current));
-      done.hidden = !!current;
+      cards.forEach((c) => c.toggleAttribute('data-off', c !== current));
+      done.toggleAttribute('data-off', !!current);
       buttons.forEach((b) => (b.disabled = !current));
       if (current) {
         current.removeAttribute('data-fly');
@@ -183,7 +184,9 @@ const rest = Math.max(0, posts.length - 1);
 
 <style>
   .swipe { display: flex; flex-direction: column; align-items: center; gap: var(--space-5); justify-self: center; width: 100%; max-width: 460px; }
-  .deck { position: relative; width: 100%; color: var(--ink); }
+  .deck { position: relative; display: grid; width: 100%; color: var(--ink); }
+  .deck > .today { grid-area: 1 / 1; }
+  .today[data-off] { visibility: hidden; pointer-events: none; }
   .plate { position: absolute; inset: 0; border: var(--bw) solid var(--on-night); border-radius: var(--radius-lg); }
   .plate-a { background: var(--cyan); transform: rotate(6deg) translate(var(--space-3), var(--space-2)); }
   .plate-b { background: var(--pink); transform: rotate(-4deg) translate(calc(-1 * var(--space-3)), var(--space-1)); }
@@ -201,19 +204,24 @@ const rest = Math.max(0, posts.length - 1);
   .today[data-fly='like'] { transform: translate(120%, -70%) rotate(24deg); opacity: 0; }
   .today[data-fly='meh'] { transform: translate(-120%, -70%) rotate(-24deg); opacity: 0; }
   .today-link {
-    display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-5);
+    display: flex; flex-direction: column; gap: var(--space-3); height: 100%; padding: var(--space-5);
     color: inherit; text-decoration: none; -webkit-user-drag: none;
   }
   .today-head { display: flex; gap: var(--space-2); align-items: center; }
-  .no { margin-left: auto; font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); color: var(--muted); }
+  .latest { display: inline-flex; align-items: center; gap: var(--space-1); }
+  .no { display: inline-flex; align-items: center; gap: var(--space-1); margin-left: auto; white-space: nowrap; font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); color: var(--muted); }
   .today-art { display: grid; place-items: center; aspect-ratio: 2 / 1; border: var(--bw) solid var(--line); border-radius: var(--radius-md); }
   .today-art span { font-size: var(--fs-emoji-xl); transform: rotate(-8deg); filter: var(--emoji-shadow); }
   .today-title { font-family: var(--font-display); font-size: var(--fs-3xl); font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; }
   .today-hook { color: var(--muted); font-size: var(--fs-md); }
-  .more { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; color: var(--pink-text); }
+  .today-link .today-title, .today-link .today-hook { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
+  .today-link .today-title { -webkit-line-clamp: var(--swipe-title-lines); line-clamp: var(--swipe-title-lines); }
+  .today-link .today-hook { -webkit-line-clamp: var(--swipe-hook-lines); line-clamp: var(--swipe-hook-lines); }
+  .more { display: inline-flex; align-items: center; gap: var(--space-1); margin-top: auto; font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; color: var(--pink-text); }
 
   /* Schild, das beim Ziehen in der Ecke auftaucht */
   .verdict {
+    display: inline-flex; align-items: center; gap: var(--space-2);
     position: absolute; top: var(--space-12); z-index: 1; pointer-events: none;
     padding: var(--space-2) var(--space-4); border: var(--bw) solid var(--on-accent); border-radius: var(--radius-sm);
     box-shadow: var(--shadow-new); color: var(--on-accent);
@@ -226,8 +234,8 @@ const rest = Math.max(0, posts.length - 1);
   .today[data-lean='meh'] .verdict--meh, .today[data-fly='meh'] .verdict--meh { opacity: var(--lean); }
   .today[data-fly] { --lean: 1; }
 
-  .done { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-8) var(--space-5); text-align: center; align-items: center; cursor: default; }
-  .done-emoji { font-size: var(--fs-emoji-lg); }
+  .done { display: flex; flex-direction: column; justify-content: center; gap: var(--space-3); padding: var(--space-8) var(--space-5); text-align: center; align-items: center; cursor: default; }
+  .done :global(.done-icon) { font-size: var(--fs-emoji-md); --icon-size: 1em; --icon-stroke: 1.75; color: var(--pink-text); }
   .done-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-3); margin-top: var(--space-2); }
 
   .rate { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-4); margin-top: var(--space-4); }

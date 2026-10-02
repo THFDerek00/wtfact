@@ -1,8 +1,10 @@
 ---
 import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
 import { LANGS, type Lang } from '../../config';
 import { t } from '../../i18n/ui';
 import { open, readGold } from '../../../scripts/facts-db.mjs';
+import { splitLead } from '../../scripts/gold';
 
 export function getStaticPaths() {
   return LANGS.map((lang) => ({ params: { lang } }));
@@ -25,8 +27,9 @@ const payload = facts.map((f) => ({
   categoryName: ui.categories[f.category as keyof typeof ui.categories] ?? f.category,
   emoji: f.emoji,
   title: f[lang].title,
-  text: f[lang].text,
-  sources: f.sources,
+  // Hier nur der erste Satz für die Vorschau; der ganze Text steht auf /[lang]/science-jumper/[id]/.
+  text: splitLead(f[lang].text)[0],
+  sources: [],
 }));
 const encoded = Buffer.from(JSON.stringify(payload), 'utf8').toString('base64');
 const texts = { ...g, sourcesLabel: ui.sources };
@@ -37,7 +40,7 @@ const STARS = 9;
 <Base lang={lang} title={g.title} description={g.intro} altUrl={`/${other}/science-jumper/`}>
   <section class="stage play">
     <div class="wrap">
-      <p class="kicker"><span class="sticker">🧪 {g.name}</span></p>
+      <p class="kicker"><span class="sticker"><Icon name="flask-conical" /> {g.name}</span></p>
       <h1>{g.title}</h1>
       <p class="intro">{g.intro}</p>
 
@@ -59,13 +62,13 @@ const STARS = 9;
           <div><dt>{g.best}</dt><dd data-stat="best">0</dd></div>
           <div><dt>{g.total}</dt><dd data-stat="total">0</dd></div>
         </dl>
-        <button class="btn" type="button" data-start><span aria-hidden="true">▶</span> {g.start}</button>
+        <button class="btn" type="button" data-start><Icon name="play" /> {g.start}</button>
       </div>
       <p class="controls" id="jumper-controls">{g.controls}</p>
       <p class="sr-only" aria-live="polite" data-live></p>
       <p class="toast" data-toast hidden>
-        <span aria-hidden="true">🏆</span> <span data-toast-text></span>
-        <a href="#gold">{g.goldTitle} <span aria-hidden="true">↓</span></a>
+        <Icon name="trophy" /> <span data-toast-text></span>
+        <a href="#gold">{g.goldTitle} <Icon name="chevron-down" /></a>
       </p>
     </div>
   </section>
@@ -89,7 +92,7 @@ const STARS = 9;
       {facts.map((f) => (
         <li class="slot" data-slot={f.id}>
           <div class="locked">
-            <span class="lock" aria-hidden="true">🔒</span>
+            <span class="lock"><Icon name="lock" /></span>
             <span class="pts">{f.points}</span>
             <span class="sr-only">{g.locked},</span>
             <span class="at">{g.lockedAt(f.points)}</span>
@@ -104,41 +107,39 @@ const STARS = 9;
       <button class="btn btn--ghost" type="button" data-reset>{g.reset}</button>
     </div>
 
+    <!-- Kurze Vorschau wie die Faktenkarten auf der Startseite; der ganze Fakt steht auf seiner eigenen Seite -->
     <template data-card>
-      <article class="goldcard gold">
-        <span class="stars" aria-hidden="true">
-          {Array.from({ length: STARS }, () => <span class="star"><span class="star-core"></span></span>)}
+      <a class="card goldcard">
+        <span class="gc-art gold" aria-hidden="true">
+          <span class="stars">
+            {Array.from({ length: STARS }, () => <span class="star"><span class="star-core"></span></span>)}
+          </span>
+          <span class="gc-pts" data-f="badge"></span>
+          <span class="gc-emoji" data-f="emoji"></span>
         </span>
-        <div class="gc-head">
-          <span class="chip badge"><span aria-hidden="true">🏆</span> <span data-f="badge"></span></span>
-          <span class="chip" data-f="cat"></span>
-          <span class="chip newb" data-f="new" hidden>{g.newBadge}</span>
-        </div>
-        <span class="gc-emoji" aria-hidden="true" data-f="emoji"></span>
-        <h3 data-f="title"></h3>
-        <p data-f="text"></p>
-        <details>
-          <summary>{ui.sources}</summary>
-          <ul data-f="sources"></ul>
-        </details>
-      </article>
+        <span class="gc-body">
+          <span class="gc-tags">
+            <span class="chip" data-f="cat"></span>
+            <span class="chip chip--new" data-f="new" hidden>{g.newBadge}</span>
+          </span>
+          <span class="gc-title" data-f="title"></span>
+          <span class="gc-teaser" data-f="text"></span>
+          <span class="more">{ui.readMore} <Icon name="chevron-right" /></span>
+        </span>
+      </a>
     </template>
   </section>
 </Base>
 
 <script>
   import { createJumper } from '../../scripts/jumper';
-
-  type Fact = { id: string; points: number; category: string; categoryName: string; emoji: string; title: string; text: string; sources: { label: string; url: string }[] };
-  // Freigeschaltet wird nach dem Highscore EINES Laufs, nicht nach gesammelten Punkten.
-  type Store = { best: number; seen: number };
-  const KEY = 'wtfact-jumper-v1';
+  import { loadStore, saveStore, decode, goldUrl, type GoldFact as Fact } from '../../scripts/gold';
 
   const sec = document.querySelector<HTMLElement>('[data-gold]')!;
   const T = JSON.parse(sec.dataset.texts ?? '{}') as Record<string, string>;
   const de = sec.dataset.lang === 'de';
-  const bytes = Uint8Array.from(atob(sec.dataset.gold ?? ''), (c) => c.charCodeAt(0));
-  const facts = JSON.parse(new TextDecoder().decode(bytes)) as Fact[];
+  const lang = sec.dataset.lang ?? 'de';
+  const facts = decode<Fact[]>(sec.dataset.gold ?? '');
 
   // Texte mit Zahlen (die Funktionen aus ui.ts) hier im Browser nachgebaut.
   const fmt = {
@@ -150,18 +151,8 @@ const STARS = 9;
     badge: (pts: number) => `${T.goldBadge} · ${pts}`,
   };
 
-  function load(): Store {
-    try {
-      const s = JSON.parse(localStorage.getItem(KEY) ?? '{}');
-      return { best: Math.max(0, Number(s.best) || 0), seen: Math.min(Math.max(0, Number(s.seen) || 0), Math.max(0, Number(s.best) || 0)) };
-    } catch {
-      return { best: 0, seen: 0 };
-    }
-  }
-  function save() {
-    try { localStorage.setItem(KEY, JSON.stringify(store)); } catch { /* privates Fenster: nur für diese Sitzung */ }
-  }
-  const store = load();
+  const store = loadStore();
+  const save = () => saveStore(store);
   // Highscore beim letzten Besuch: alles darüber bekommt das Neu-Etikett.
   const seenAtLoad = store.seen;
 
@@ -172,7 +163,8 @@ const STARS = 9;
   const tpl = document.querySelector<HTMLTemplateElement>('[data-card]')!;
 
   function card(f: Fact, isNew: boolean) {
-    const node = tpl.content.firstElementChild!.cloneNode(true) as HTMLElement;
+    const node = tpl.content.firstElementChild!.cloneNode(true) as HTMLAnchorElement;
+    node.href = goldUrl(lang, f.id);
     const q = (k: string) => node.querySelector<HTMLElement>(`[data-f="${k}"]`)!;
     q('badge').textContent = fmt.badge(f.points);
     q('cat').textContent = f.categoryName;
@@ -180,20 +172,10 @@ const STARS = 9;
     q('new').hidden = !isNew;
     q('emoji').textContent = f.emoji;
     q('title').textContent = f.title;
+    // Vorschau: nur der erste Satz, der ganze Fakt mit Quellen steht auf seiner eigenen Seite.
     q('text').textContent = f.text;
     // Sterne in der Kategoriefarbe: die .cat-*-Klasse setzt die Fläche, so passen neue Kategorien automatisch.
     node.querySelectorAll('.star-core').forEach((s) => s.classList.add(`cat-${f.category}`));
-    const list = q('sources');
-    for (const s of f.sources) {
-      const li = document.createElement('li');
-      const a = document.createElement('a');
-      a.href = s.url;
-      a.rel = 'noopener nofollow';
-      a.target = '_blank';
-      a.textContent = s.label;
-      li.append(a);
-      list.append(li);
-    }
     return node;
   }
 
@@ -298,7 +280,7 @@ const STARS = 9;
     font-family: var(--font-display); font-weight: 700;
   }
   .toast:not([hidden]) { background: var(--gold-surface); color: var(--on-accent); }
-  .toast a { margin-left: auto; }
+  .toast a { display: inline-flex; align-items: center; gap: var(--space-1); margin-left: auto; }
 
   /* Sammlung */
   .gold-sec { margin-top: var(--space-11); scroll-margin-top: var(--space-12); }
@@ -316,7 +298,7 @@ const STARS = 9;
   }
   .meter-fill { display: block; height: 100%; width: calc(var(--fill) * 100%); background: var(--gold-surface); transition: width var(--dur) var(--ease); }
 
-  .slots { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--space-6); }
+  .slots { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: var(--space-6); }
   .locked {
     height: 100%; min-height: 180px;
     display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2);
@@ -325,26 +307,31 @@ const STARS = 9;
     background: var(--locked); color: var(--ink);
     font-family: var(--font-display);
   }
-  .lock { font-size: var(--fs-2xl); }
+  .lock { font-size: var(--fs-2xl); line-height: 1; }
   .pts { font-size: var(--fs-display-sm); font-weight: 700; line-height: 1; }
   .at { font-size: var(--fs-sm); font-weight: 600; margin-top: auto; }
 
+  /* Gold-Fakt als Vorschaukarte (wie PostCard): goldene Bildfläche oben, Titel und erster Satz darunter */
   .goldcard {
     position: relative; overflow: hidden; height: 100%;
-    display: flex; flex-direction: column; gap: var(--space-2);
-    padding: var(--space-5);
-    border: var(--bw) solid var(--line); border-radius: var(--radius-md); box-shadow: var(--shadow-md);
+    display: flex; flex-direction: column; text-decoration: none;
+    transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
   }
-  .goldcard > :not(.stars) { position: relative; }
-  .gc-head { display: flex; flex-wrap: wrap; gap: var(--space-2); }
-  .badge { background: var(--night); color: var(--on-night); border-color: var(--on-accent); }
-  .newb { background: var(--pink); color: var(--on-accent); border-color: var(--on-accent); }
-  .gc-emoji { font-size: var(--fs-emoji-sm); filter: var(--emoji-shadow); margin-top: var(--space-1); }
-  .goldcard h3 { margin: 0; font-size: var(--fs-xl); }
-  .goldcard p { margin: 0; font-size: var(--fs-md); }
-  .goldcard details { margin-top: auto; padding-top: var(--space-2); font-size: var(--fs-sm); }
-  .goldcard summary { cursor: pointer; font-family: var(--font-display); font-weight: 700; }
-  .goldcard ul { margin: var(--space-2) 0 0; padding-left: var(--space-5); }
+  .goldcard:hover { transform: translate(-3px, -3px) rotate(-0.5deg); box-shadow: var(--shadow-xl); }
+  .gc-art { position: relative; display: grid; place-items: center; aspect-ratio: 16 / 9; overflow: hidden; border-bottom: var(--bw) solid var(--line); }
+  .gc-emoji { position: relative; font-size: var(--fs-emoji-md); transform: rotate(-8deg); filter: var(--emoji-shadow); transition: transform var(--dur) var(--ease-pop); }
+  .goldcard:hover .gc-emoji { transform: rotate(8deg) scale(1.15); }
+  .gc-pts {
+    position: absolute; top: var(--space-3); left: var(--space-3); z-index: 1;
+    padding: 0 var(--space-2); border-radius: var(--radius-sm);
+    background: var(--night); color: var(--on-night);
+    font-family: var(--font-display); font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.04em;
+  }
+  .gc-body { display: flex; flex-direction: column; gap: var(--space-2); flex: 1; padding: var(--space-4) var(--space-5) var(--space-5); }
+  .gc-tags { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .gc-title { margin-top: var(--space-1); font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 700; line-height: 1.15; letter-spacing: -0.02em; }
+  .gc-teaser { color: var(--muted); font-size: var(--fs-md); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }
+  .goldcard .more { display: inline-flex; align-items: center; gap: var(--space-1); margin-top: auto; padding-top: var(--space-2); font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; color: var(--pink-text); }
 
   /* Funkelnde Sterne: dunkler Rand außen, Kategoriefarbe innen (über .cat-*) */
   .stars { position: absolute; inset: 0; pointer-events: none; }

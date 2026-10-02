@@ -116,6 +116,21 @@
   --fs-emoji-xl: 120px;
   --fs-emoji-2xl: 168px;
 
+  /* Inhaltsbreite: EINE Breite für alle Bereiche (Wunsch von Eric, 2026-10-02).
+     .wrap nutzt sie; Fließtext bleibt mit --measure trotzdem gut lesbar. */
+  --content-width: 1280px;
+  --gutter: 16px;
+  --measure: 72ch;
+
+  /* Icons (Lucide, Komponente Icon.astro): wachsen mit der Schrift */
+  --icon-size: 1.15em;
+  --icon-size-lg: 1.6em;
+  --icon-stroke: 2.25;
+
+  /* Wisch-Karte: Bildfläche hat feste Höhe, Titel und Text feste Zeilenzahl, damit sich die Seite beim Wischen nicht verschiebt */
+  --swipe-title-lines: 3;
+  --swipe-hook-lines: 3;
+
   /* Abstände (4er-Raster) */
   --space-1: 4px;
   --space-2: 8px;
@@ -222,8 +237,15 @@ h1, h2, h3 { font-family: var(--font-display); line-height: 1.15; letter-spacing
   outline-offset: var(--bw-focus);
 }
 
-.wrap { width: min(1180px, 100% - 32px); margin-inline: auto; }
-.narrow { width: min(720px, 100% - 32px); margin-inline: auto; }
+.wrap { width: min(var(--content-width), 100% - 2 * var(--gutter)); margin-inline: auto; }
+/* Fließtext innerhalb von .wrap: gleiche Kante links, Zeilen nicht länger als --measure */
+.prose { max-width: var(--measure); }
+
+/* Lucide-Icon (Icon.astro) */
+.icon {
+  display: inline-block; flex: 0 0 auto; width: var(--icon-size); height: var(--icon-size); vertical-align: -0.2em;
+  fill: none; stroke: currentColor; stroke-width: var(--icon-stroke); stroke-linecap: round; stroke-linejoin: round;
+}
 
 .card {
   background: var(--surface);
@@ -253,14 +275,13 @@ button.chip { cursor: pointer; }
   transform: translate(-1px, -1px);
 }
 .chip[aria-pressed='true']::before { content: '✓'; }
-/* „Neu“-Etikett für Fakten aus den letzten 7 Tagen (Komponente NewBadge.astro) */
+
+/* „Neu“-Etikett für Fakten aus den letzten 7 Tagen (Komponente NewBadge.astro).
+   Steht immer direkt neben dem Kategorie-Etikett und ist genauso groß wie ein .chip. */
 .chip--new {
   background: var(--yellow);
   color: var(--on-accent);
-  border-color: var(--on-accent);
-  box-shadow: var(--shadow-new);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  border-color: var(--line);
 }
 
 /* Button: gelb als Standard, Varianten über Modifier */

@@ -2,13 +2,14 @@
 import type { Lang } from '../config';
 import { amazonUrl } from '../lib';
 import { t } from '../i18n/ui';
+import Icon from './Icon.astro';
 interface Props { lang: Lang; products: { name: string; query: string; why: string }[] }
 const { lang, products } = Astro.props;
 const ui = t(lang);
 ---
 {products.length > 0 && (
   <aside class="card box">
-    <h2>🛒 {ui.productsTitle} <span class="tag">{ui.adLabel}</span></h2>
+    <h2><Icon name="shopping-cart" /> {ui.productsTitle} <span class="tag">{ui.adLabel}</span></h2>
     <p class="ad">{ui.affiliateShort}</p>
     <ul>
       {products.map((p) => (
@@ -26,7 +27,7 @@ const ui = t(lang);
 
 <style>
   .box { padding: var(--space-6); margin: var(--space-9) 0; }
-  h2 { margin: 0 0 var(--space-2); font-size: var(--fs-xl); }
+  h2 { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin: 0 0 var(--space-2); font-size: var(--fs-xl); }
   .tag { font-size: var(--fs-xs); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); border: var(--bw-xs) solid var(--line); border-radius: var(--radius-sm); padding: 0 var(--space-2); vertical-align: middle; }
   ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
   li { display: flex; gap: var(--space-4); align-items: center; justify-content: space-between; padding: var(--space-4); border: var(--bw-sm) dashed var(--line); border-radius: var(--radius-sm); }
