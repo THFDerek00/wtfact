@@ -34,6 +34,10 @@ Build automatisch. Wer hier eine Zahl ändert, ändert sie auch dort.
 - Don't lean on filler intensifiers: use "crazy", "wild" or "verrückt" at most once per post. [geprüft]
   Let the fact do the work, or vary ("absurd", "schräg", "irre").
 - No health, legal or financial advice. No politics, tragedies, violence, or content unsuitable for 16-year-olds.
+- Category "survival" is about astonishing survival: abilities of animals, plants and microbes, documented human
+  survival stories (e.g. a famous rescue) and what the human body adapts to. Tell it as a sourced story or finding,
+  never as a survival guide: no tips, instructions or "you could do this too", and no deaths as the hook.
+  No gear, knives, medical or outdoor products as Amazon picks; books, plush toys and decoration are fine.
 
 ## Structure
 
@@ -48,6 +52,7 @@ Build automatisch. Wer hier eine Zahl ändert, ändert sie auch dort.
 - Exactly 2 Amazon products that genuinely fit the topic (a book, a toy, a gadget, a decoration). [geprüft]
 - Describe them generically so an Amazon search finds them. Never invent product numbers or prices.
 - The one-line reason is about the product, not a forced link back to the fact.
+- For category "survival": no gear, knives, medical or outdoor products; books, plush toys and decoration are fine.
 
 ## German version
 
