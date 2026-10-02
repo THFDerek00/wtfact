@@ -176,7 +176,7 @@ const ticker = rest.slice(0, 12);
   /* Rabbit Holes */
   .holes { margin-top: var(--space-11); }
   .holes h2, .head h2 { margin: 0 0 var(--space-6); font-size: var(--fs-display-sm); }
-  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-5); }
+  .tiles { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--space-5); }
   .tile {
     display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1);
     padding: var(--space-5); border: var(--bw) solid var(--line); border-radius: var(--radius-md);
@@ -200,6 +200,9 @@ const ticker = rest.slice(0, 12);
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-7); }
   .loadmore { display: flex; justify-content: center; margin-top: var(--space-10); }
 
+  @media (max-width: 1060px) {
+    .tiles { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+  }
   @media (max-width: 860px) {
     .hero { padding: var(--space-9) 0 var(--space-11); }
     .hero-grid { grid-template-columns: 1fr; gap: var(--space-10); }

@@ -25,6 +25,7 @@ export const ui = {
     categories: {
       science: 'Wissenschaft', history: 'Geschichte', tech: 'Technik',
       nature: 'Natur', body: 'Körper', weird: 'Kurioses', survival: 'Survival',
+      food: 'Essen', language: 'Sprache', sport: 'Sport',
     } satisfies Record<Category, string>,
     notFound: 'Dieser Fakt existiert nicht. Noch nicht.',
     hero: ['Jeden Tag ein Fakt, der dich', '„WTF?!“', 'sagen lässt.'],
@@ -63,6 +64,7 @@ export const ui = {
     categories: {
       science: 'Science', history: 'History', tech: 'Tech',
       nature: 'Nature', body: 'Body', weird: 'Weird', survival: 'Survival',
+      food: 'Food', language: 'Language', sport: 'Sport',
     } satisfies Record<Category, string>,
     notFound: 'This fact does not exist. Yet.',
     hero: ['One fact a day that makes you go', '“WTF?!”', ''],

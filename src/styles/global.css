@@ -26,6 +26,9 @@
   --violet: #9b6bff;
   --orange: #ff8a3d;
   --teal: #3de0b0;
+  --tomato: #ff5947;
+  --lilac: #e7a6ff;
+  --blue: #5c95ff;
 
   /* Bühne: dunkle Fläche für Hero, Ticker und Footer (in beiden Modi dunkel) */
   --night: #16131c;
@@ -40,6 +43,9 @@
   --cat-body: var(--pink);
   --cat-weird: var(--yellow);
   --cat-survival: var(--teal);
+  --cat-food: var(--tomato);
+  --cat-language: var(--lilac);
+  --cat-sport: var(--blue);
 
   /* Schrift */
   --font-display: 'Space Grotesk Variable', system-ui, sans-serif;
@@ -219,6 +225,9 @@ button.chip { cursor: pointer; }
 .cat-body { background: var(--cat-body); color: var(--on-accent); }
 .cat-weird { background: var(--cat-weird); color: var(--on-accent); }
 .cat-survival { background: var(--cat-survival); color: var(--on-accent); }
+.cat-food { background: var(--cat-food); color: var(--on-accent); }
+.cat-language { background: var(--cat-language); color: var(--on-accent); }
+.cat-sport { background: var(--cat-sport); color: var(--on-accent); }
 .accent { background: var(--yellow); color: var(--on-accent); }
 
 .sr-only {

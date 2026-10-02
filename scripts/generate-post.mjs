@@ -18,7 +18,7 @@ import { checkPost, checkPair } from './post-rules.mjs';
 
 const MODEL = 'claude-opus-5-5';
 const POSTS_DIR = 'src/content/posts';
-const CATEGORIES = ['science', 'history', 'tech', 'nature', 'body', 'weird', 'survival'];
+const CATEGORIES = ['science', 'history', 'tech', 'nature', 'body', 'weird', 'survival', 'food', 'language', 'sport'];
 
 const client = new Anthropic();
 
