@@ -38,6 +38,12 @@ Build automatisch. Wer hier eine Zahl ändert, ändert sie auch dort.
   survival stories (e.g. a famous rescue) and what the human body adapts to. Tell it as a sourced story or finding,
   never as a survival guide: no tips, instructions or "you could do this too", and no deaths as the hook.
   No gear, knives, medical or outdoor products as Amazon picks; books, plush toys and decoration are fine.
+- Category "food" is about surprising facts on food and drink: origins, chemistry, history of dishes and snacks.
+  No diet, nutrition or health claims and no "eat this / avoid that".
+- Category "language" is about words, languages, writing systems and where expressions come from. The fact must
+  work in both German and English; explain a word game for both audiences instead of translating it literally.
+- Category "sport" is about sports history, rules, records, equipment and the Olympics. No training or fitness
+  tips, no betting, and no injuries or deaths as the hook.
 
 ## Structure
 

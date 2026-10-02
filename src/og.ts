@@ -15,7 +15,7 @@ const fonts = [
 ];
 
 const CAT_COLORS: Record<string, string> = {
-  science: '#3ddcff', history: '#ff8a3d', tech: '#9b6bff', nature: '#b6f23a', body: '#ff3d7f', weird: '#ffd23f', survival: '#3de0b0',
+  science: '#3ddcff', history: '#ff8a3d', tech: '#9b6bff', nature: '#b6f23a', body: '#ff3d7f', weird: '#ffd23f', survival: '#3de0b0', food: '#ff5947', language: '#e7a6ff', sport: '#5c95ff',
 };
 
 // satori erwartet React-artige Elemente; ein kleiner Helfer spart JSX.

@@ -17,5 +17,5 @@ export const SITE = {
 export const LANGS = ['de', 'en'] as const;
 export type Lang = (typeof LANGS)[number];
 
-export const CATEGORIES = ['science', 'history', 'tech', 'nature', 'body', 'weird', 'survival'] as const;
+export const CATEGORIES = ['science', 'history', 'tech', 'nature', 'body', 'weird', 'survival', 'food', 'language', 'sport'] as const;
 export type Category = (typeof CATEGORIES)[number];
