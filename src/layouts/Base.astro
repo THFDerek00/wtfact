@@ -83,6 +83,9 @@ const allUrls = (await postsFor(lang)).map(postUrl);
       </div>
     </footer>
     <script>
+      import { isNew } from '../week';
+      // „Neu“ nach 7 Tagen ausblenden, auch wenn die Seite seitdem nicht neu gebaut wurde
+      document.querySelectorAll<HTMLElement>('[data-new-date]').forEach((el) => (el.hidden = !isNew(el.dataset.newDate ?? '')));
       document.querySelectorAll<HTMLElement>('[data-surprise]').forEach((el) =>
         el.addEventListener('click', () => {
           const urls: string[] = JSON.parse(el.dataset.surprise ?? '[]').filter((u: string) => u !== location.pathname);

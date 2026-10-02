@@ -8,7 +8,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {
-  ROOT, DISPLAY, TEXT, C, r2, text, wrap, svg, png, wordmark, CAT_COLOR, iconG, card, chip, confetti, dots, aiTag, L,
+  ROOT, DISPLAY, TEXT, C, r2, measure, text, wrap, svg, png, wordmark, CAT_COLOR, iconG, card, chip, confetti, dots, aiTag, L,
 } from './brand-lib.mjs';
 
 const OUT = 'brand/social/kit';
@@ -32,7 +32,7 @@ function readPosts(lang) {
       return v.startsWith('"') ? JSON.parse(v) : v;
     };
     const sources = [...fm.matchAll(/^\s+- label: (".*")$/gm)].map((m) => JSON.parse(m[1]));
-    posts[val('translationKey')] = { title: val('title'), hook: val('hook'), cat: val('category'), sources };
+    posts[val('translationKey')] = { key: val('translationKey'), title: val('title'), hook: val('hook'), cat: val('category'), emoji: val('emoji'), date: val('date'), sources };
   }
   return posts;
 }
@@ -60,6 +60,10 @@ const K = {
     weekHead: '7 Tage. 7 Fakten.', weekQ: 'Alle 7 stimmen wirklich. Hättest du’s geglaubt?',
     game: 'Science Jumper', gameSub: 'Spring über die Flammen, sammle Reagenzgläser und schalte 16 Gold-Fakten frei.', gameCta: 'Jetzt spielen: Link in Bio', gameKicker: 'Neu auf WTFact',
     sources: 'Quellen',
+    like: 'Gefällt mir', meh: 'Gefällt mir weniger', swipeHead: 'Wisch dich durch die Fakten.', swipeSub: 'Zieh den Fakt des Tages nach oben rechts, wenn er dir gefällt, und nach oben links, wenn eher nicht.', swipeCta: 'Ausprobieren: Link in Bio',
+    voteKicker: 'Montag ist Abstimmungstag', voteHead: 'Welcher Fakt war der beste der Woche?', voteCta: 'Abstimmen: Link in Bio', voteNote: 'Abstimmung heute bis 24 Uhr. Der Gewinner wird Fakt der Woche.', slot: 'Fakt',
+    fotwKicker: 'Von euch gewählt', fotw: 'Fakt der Woche', fotwHere: 'Gewinner-Fakt hier',
+    newHead: 'Neu diese Woche', newSub: 'Alle 7 sind diese Woche neu auf WTFact. Welcher kriegt am Montag deine Stimme?', newBadge: 'NEU',
     honey: [
       { kicker: 'Wusstest du das?', title: 'Dieser Honig ist 3.000 Jahre alt.', sub: 'Und er soll noch essbar sein.' },
       { head: 'Gefunden in Ägypten', body: 'In altägyptischen Gräbern fanden Archäologen Tongefäße mit Honig. Nach rund 3.000 Jahren soll er noch essbar gewesen sein.' },
@@ -79,6 +83,10 @@ const K = {
     weekHead: '7 days. 7 facts.', weekQ: 'All 7 are actually true. Would you have believed it?',
     game: 'Science Jumper', gameSub: 'Jump over the flames, collect test tubes and unlock 16 gold facts.', gameCta: 'Play now: link in bio', gameKicker: 'New on WTFact',
     sources: 'Sources',
+    like: 'Love it', meh: 'Not for me', swipeHead: 'Swipe through the facts.', swipeSub: 'Drag the fact of the day up and to the right if you love it, up and to the left if it’s not for you.', swipeCta: 'Try it: link in bio',
+    voteKicker: 'Monday is voting day', voteHead: 'Which fact was the best this week?', voteCta: 'Vote now: link in bio', voteNote: 'Voting closes tonight. The winner becomes fact of the week.', slot: 'Fact',
+    fotwKicker: 'Chosen by you', fotw: 'Fact of the week', fotwHere: 'Winning fact goes here',
+    newHead: 'New this week', newSub: 'All 7 are new on WTFact this week. Which one gets your vote on Monday?', newBadge: 'NEW',
     honey: [
       { kicker: 'Did you know?', title: 'This honey is 3,000 years old.', sub: 'And it is said to still be edible.' },
       { head: 'Found in Egypt', body: 'Archaeologists found clay pots of honey in ancient Egyptian tombs. After around 3,000 years it was reportedly still edible.' },
@@ -468,6 +476,175 @@ function gamePromo(lang, story = false) {
   return svg(W, H, b);
 }
 
+
+// ---------- 9) Bewerten, Abstimmung, Fakt der Woche, Neu ----------
+// Die 7 neuesten Fakten (wie auf der Seite: die Fakten der letzten 7 Tage)
+const latest = (lang, n = 7) => Object.values(POSTS[lang]).sort((a, b) => b.date.localeCompare(a.date)).slice(0, n);
+const newBadge = (lang, x, y, size = 30) => {
+  const label = K[lang].newBadge;
+  const w = measure(label, size, DISPLAY, 0.06) + size * 1.2, h = size * 1.6;
+  return `<rect x="${x + 5}" y="${y + 5}" width="${r2(w)}" height="${r2(h)}" rx="${r2(h / 2)}" fill="${C.ink}"/>` +
+    `<rect x="${x}" y="${y}" width="${r2(w)}" height="${r2(h)}" rx="${r2(h / 2)}" fill="${C.yellow}" stroke="${C.ink}" stroke-width="5"/>` +
+    text(label, { x: x + w / 2, y: y + h / 2 + size * 0.36, size, anchor: 'middle', track: 0.06 });
+};
+// Punktmuster für kleinere abgerundete Flächen (eigene Pattern-ID, damit es nicht mit dem Hintergrund kollidiert)
+const dotRect = (x, y, w, h, rx, grid = 30) =>
+  `<defs><pattern id="sd${grid}" width="${grid}" height="${grid}" patternUnits="userSpaceOnUse"><circle cx="${grid / 2}" cy="${grid / 2}" r="${r2(grid * 0.16)}" fill="#14141417"/></pattern></defs>` +
+  `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" fill="url(#sd${grid})"/>`;
+// Pokal (eigene Zeichnung, kein Emoji in den Schriften)
+const trophy = (cx, cy, s) =>
+  `<g transform="translate(${cx - s / 2} ${cy - s / 2}) scale(${s / 100})" stroke="${C.ink}" stroke-width="6" stroke-linejoin="round">` +
+  `<path d="M22 20c-14 0-16 22 6 30M78 20c14 0 16 22-6 30" fill="none" stroke-linecap="round"/>` +
+  `<path d="M24 8h52v24c0 18-12 30-26 30S24 50 24 32z" fill="${GOLD.mid}"/>` +
+  `<path d="M42 62h16v14H42z" fill="${GOLD.deep}"/><rect x="28" y="76" width="44" height="16" rx="4" fill="${GOLD.mid}"/>` +
+  `<path d="M38 20v14" stroke="${GOLD.light}" stroke-width="7" stroke-linecap="round"/></g>`;
+// Diagonaler Pfeil mit Schild, dir = -1 (oben links) oder 1 (oben rechts)
+function swipeArrow(cx, cy, dir, fill, label) {
+  const a = `<g transform="translate(${cx} ${cy}) rotate(${dir < 0 ? -135 : -45})">` +
+    `<path d="M-60 -16h70v-26l56 42-56 42v-26h-70z" fill="${fill}" stroke="${C.ink}" stroke-width="6" stroke-linejoin="round"/></g>`;
+  const size = 34, w = measure(label, size) + 48, h = 64;
+  const lx = dir < 0 ? cx - 20 - w / 2 : cx + 20 - w / 2, ly = cy + 70;
+  return a + `<g transform="rotate(${dir * 6} ${lx + w / 2} ${ly + h / 2})">` + card(lx, ly, w, h, fill, { sw: 5, off: 7, rx: 14 }) +
+    text(label, { x: lx + w / 2, y: ly + h / 2 + size * 0.36, size, anchor: 'middle' }) + `</g>`;
+}
+function swipePromo(lang, story = false) {
+  const W = 1080, H = story ? 1920 : 1350, pad = 72, k = K[lang], t = L[lang];
+  const cw = W - pad * 2 - 14, top = story ? 230 : 64;
+  const p = latest(lang, 1)[0];
+  let b = colorBg(W, H, C.cyan) + header(W, pad, top, lang);
+  const hy = top + 128 + (story ? 120 : 100);
+  b += text(k.swipeHead, { x: W / 2 - 7, y: hy, size: story ? 70 : 66, anchor: 'middle', track: -0.03 });
+  let y = hy;
+  if (story) {
+    const sl = wrap(k.swipeSub, 36, cw - 40, TEXT);
+    b += lineBlock(sl, W / 2 - 7, hy + 80, 36, { font: TEXT, anchor: 'middle', lh: 1.35 });
+    y = hy + 80 + (sl.length - 1) * 36 * 1.35;
+  }
+  // Pfeile oben links und oben rechts, Schilder darunter
+  const ay2 = y + 120;
+  b += swipeArrow(pad + 150, ay2, -1, C.pink, k.meh);
+  b += swipeArrow(W - pad - 14 - 150, ay2, 1, C.lime, k.like);
+  // Karte, leicht nach rechts gekippt wie beim Ziehen
+  const cardW = 540, inner = cardW - 100;
+  const tf = fit(p.title, inner, 3, [54, 48, 44]);
+  const all = wrap(p.hook, 28, inner, TEXT);
+  const hl = all.slice(0, story ? 2 : 0);
+  if (story && all.length > 2) hl[1] = hl[1].replace(/[ ,.;:]*$/, '') + '…';
+  const artH = story ? 160 : 120;
+  const cardH = 50 + 50 + 30 + artH + 40 + tf.lines.length * tf.size * 1.1 + (hl.length ? 20 + hl.length * 40 : 0) + 30;
+  const cx = (W - cardW) / 2 - 7, cy = r2(ay2 + 170);
+  b += `<g transform="rotate(7 ${cx + cardW / 2} ${cy + cardH / 2}) translate(30 -10)">`;
+  b += card(cx, cy, cardW, cardH, C.white);
+  const c = chip(t.cats[p.cat], 0, 0, CAT_COLOR[p.cat], 26);
+  b += place(cx + 50, cy + 40, c.svg) + newBadge(lang, cx + 50 + c.w + 16, cy + 42, 24);
+  const ay = cy + 40 + 50 + 30;
+  b += `<rect x="${cx + 50}" y="${ay}" width="${inner}" height="${artH}" rx="22" fill="${CAT_COLOR[p.cat]}" stroke="${C.ink}" stroke-width="5"/>`;
+  b += dotRect(cx + 50, ay, inner, artH, 22, 30);
+  b += iconG(p.cat, cx + 50 + inner - 130, ay + artH / 2 - 45, 90, C.ink, 2.2);
+  const ty = ay + artH + 40 + tf.size * 0.85;
+  b += lineBlock(tf.lines, cx + 50, ty, tf.size, { track: -0.02, lh: 1.1 });
+  b += lineBlock(hl, cx + 50, ty + (tf.lines.length - 1) * tf.size * 1.1 + 60, 28, { font: TEXT, fill: C.muted, lh: 40 / 28 });
+  // Schild „Gefällt mir“ auf der Karte
+  const lab = k.like.toUpperCase(), lw = measure(lab, 40) + 50;
+  b += `<g transform="rotate(-10 ${cx + 70 + lw / 2} ${ay + artH / 2})">` + card(cx + 70, ay + artH / 2 - 38, lw, 76, C.lime, { sw: 5, off: 7, rx: 14 }) +
+    text(lab, { x: cx + 95, y: ay + artH / 2 + 14, size: 40 }) + `</g>`;
+  b += `</g>`;
+  b += pill(k.swipeCta, pad, story ? H - 300 : H - 150, cw, { fill: C.white });
+  return svg(W, H, b);
+}
+// Abstimmung: Liste der 7 Fakten der Woche (ohne Slogan, Regel 3). facts = null → leere Vorlage
+function votePoll(lang, facts, story = false) {
+  const W = 1080, H = story ? 1920 : 1350, pad = 72, k = K[lang], t = L[lang];
+  const cw = W - pad * 2 - 14, top = story ? 230 : 64;
+  let b = colorBg(W, H, C.yellow) + header(W, pad, top, lang);
+  let y = top + 128 + 60;
+  b += text(k.voteKicker, { x: pad, y: y + 30, size: 38, font: TEXT, fill: PINK_TEXT });
+  const hf = fit(k.voteHead, cw, 2, [72, 64, 58]);
+  b += lineBlock(hf.lines, pad, y + 30 + 20 + hf.size, hf.size, { track: -0.03, lh: 1.08 });
+  y += 30 + 20 + hf.lines.length * hf.size * 1.08 + 40;
+  const rowH = story ? 100 : 76, rows = 7, maxLines = story ? 2 : 1;
+  b += card(pad, y, cw, rows * rowH + 40, C.white);
+  for (let i = 0; i < rows; i++) {
+    const ry = y + 20 + i * rowH, p = facts?.[i];
+    if (i) b += `<path d="M${pad + 30} ${ry}H${pad + cw - 30}" stroke="${C.ink}" stroke-opacity=".15" stroke-width="3"/>`;
+    const fill = p ? CAT_COLOR[p.cat] : C.bg;
+    const bs = rowH - 34;
+    b += `<rect x="${pad + 30}" y="${ry + 17}" width="${bs}" height="${bs}" rx="16" fill="${fill}" stroke="${C.ink}" stroke-width="5"/>`;
+    if (p) b += dotRect(pad + 30, ry + 17, bs, bs, 16, 22) + iconG(p.cat, pad + 30 + bs * 0.2, ry + 17 + bs * 0.2, bs * 0.6, C.ink, 2.4);
+    b += text(String(i + 1), { x: pad + 30 + bs + 40, y: ry + rowH / 2 + 14, size: 40 });
+    if (p) {
+      const tl = wrap(p.title, 28, cw - bs - 190, TEXT);
+      const two = tl.slice(0, maxLines);
+      if (tl.length > maxLines) two[maxLines - 1] = two[maxLines - 1].replace(/[ ,.;:]*$/, '') + '…';
+      b += lineBlock(two, pad + 30 + bs + 90, ry + rowH / 2 + (two.length === 1 ? 10 : -8), 28, { font: TEXT, lh: 1.3 });
+    } else {
+      b += `<rect x="${pad + 30 + bs + 90}" y="${ry + rowH / 2 - 8}" width="${cw - bs - 220}" height="16" rx="8" fill="${C.ink}" fill-opacity=".08"/>`;
+    }
+  }
+  y += rows * rowH + 40 + 50;
+  if (story) b += lineBlock(wrap(k.voteNote, 32, cw, TEXT), W / 2 - 7, y + 20, 32, { font: TEXT, anchor: 'middle', lh: 1.35 });
+  b += pill(k.voteCta, pad, story ? H - 330 : H - 150, cw, { fill: C.white });
+  return svg(W, H, b);
+}
+// Fakt der Woche: Gewinner-Fakt (oder leere Fläche) mit Pokal. Hintergrund in Kategoriefarbe, mit Punkten.
+function factOfWeek(lang, p, story = false) {
+  const W = 1080, H = story ? 1920 : 1350, pad = 72, k = K[lang], t = L[lang];
+  const cw = W - pad * 2 - 14, top = story ? 230 : 64;
+  let b = (p ? catBg(W, H, p.cat) : colorBg(W, H, C.yellow)) + header(W, pad, top, lang, p ? { cat: p.cat } : {});
+  const by = top + 128 + 60;
+  // Banner „Fakt der Woche“ mit Pokal
+  b += `<g transform="rotate(-3 ${W / 2} ${by + 90})">` + card(pad + 20, by, cw - 40, 180, C.yellow, { sw: 8, off: 14, rx: 36 }) +
+    trophy(pad + 20 + 100, by + 90, 130) +
+    text(k.fotwKicker, { x: pad + 20 + 190, y: by + 70, size: 34, font: TEXT, fill: PINK_TEXT }) +
+    text(k.fotw, { x: pad + 20 + 190, y: by + 140, size: 72, track: -0.03 }) + `</g>`;
+  const cy = by + 180 + 70, ctaY = story ? H - 400 : H - 150;
+  const areaH = ctaY - (story ? 140 : 100) - cy;
+  const inner = cw - 120;
+  if (p) {
+    let tf, hl, ch;
+    for (const [ts, hs] of [[84, 38], [76, 36], [68, 34], [60, 32], [54, 30]]) {
+      tf = { size: ts, lines: wrap(p.title, ts, inner, DISPLAY, -0.02) };
+      hl = { size: hs, lines: wrap(p.hook, hs, inner, TEXT) };
+      ch = 70 + tf.lines.length * ts * 1.08 + 40 + hl.lines.length * hs * 1.42 + 40;
+      if (ch <= areaH) break;
+    }
+    const y0 = r2(cy + (areaH - ch) / 2);
+    b += card(pad, y0, cw, ch, C.white);
+    b += lineBlock(tf.lines, pad + 60, y0 + 70 + tf.size * 0.8, tf.size, { track: -0.02, lh: 1.08 });
+    b += lineBlock(hl.lines, pad + 60, y0 + 70 + tf.lines.length * tf.size * 1.08 + 40 + hl.size * 0.5, hl.size, { font: TEXT, fill: C.muted, lh: 1.42 });
+    b += text(k.slogan, { x: W / 2 - 7, y: ctaY - 42, size: 40, anchor: 'middle' });
+  } else {
+    b += card(pad, cy, cw, areaH, C.white);
+    b += text(k.fotwHere, { x: W / 2 - 7, y: cy + areaH / 2 + 14, size: 40, font: TEXT, fill: '#b9b4ab', anchor: 'middle' });
+  }
+  b += pill(t.cta, pad, ctaY, cw, { fill: p && p.cat === 'weird' ? C.white : C.yellow });
+  return svg(W, H, b);
+}
+// Neu diese Woche: die 7 neuesten Fakten mit „NEU“-Etikett
+function newThisWeek(lang) {
+  const W = 1080, H = 1350, pad = 72, t = L[lang], k = K[lang];
+  const cw = W - pad * 2 - 14;
+  let b = colorBg(W, H, C.lime) + header(W, pad, 64, lang);
+  b += text(k.newHead, { x: pad, y: 300, size: 84, track: -0.03 });
+  b += newBadge(lang, pad + measure(k.newHead, 84, DISPLAY, -0.03) + 30, 240, 34);
+  const rows = latest(lang);
+  const ch = 40 + rows.length * 88 + 10;
+  b += card(pad, 340, cw, ch, C.white);
+  rows.forEach((p, i) => {
+    const y = 340 + 40 + i * 88;
+    const c = chip(t.cats[p.cat], 0, 0, CAT_COLOR[p.cat], 24);
+    b += place(pad + 40, y + 4, c.svg);
+    const tl = wrap(p.title, 28, cw - 80 - 230, TEXT);
+    const two = tl.slice(0, 2);
+    if (tl.length > 2) two[1] = two[1].replace(/[ ,.;:]*$/, '') + '…';
+    b += lineBlock(two, pad + 40 + 230, y + 26, 28, { font: TEXT, lh: 1.3 });
+  });
+  const qy = 340 + ch + 50;
+  b += lineBlock(wrap(k.newSub, 40, cw - 40, DISPLAY), W / 2 - 7, qy + 40, 40, { anchor: 'middle', lh: 1.2 });
+  b += pill(t.cta, pad, H - 150, cw, { fill: C.yellow });
+  return svg(W, H, b);
+}
+
 // ---------- Ausgabe ----------
 const files = [];
 // Jede Grafik bekommt unten rechts den dezenten Hinweis „KI-generiert“ / „AI-generated“
@@ -505,5 +682,17 @@ for (const lang of ['de', 'en']) {
   save(`${lang}/kampagnen/launch-woche-finale-1080x1350.png`, launchWeekFinale(lang));
   save(`${lang}/kampagnen/science-jumper-post-1080x1350.png`, gamePromo(lang));
   save(`${lang}/kampagnen/science-jumper-story-1080x1920.png`, gamePromo(lang, true));
+  // Bewerten, Abstimmung, Fakt der Woche, Neu
+  save(`${lang}/vorlagen/abstimmung-post-1080x1350.png`, votePoll(lang, null));
+  save(`${lang}/vorlagen/abstimmung-story-1080x1920.png`, votePoll(lang, null, true));
+  save(`${lang}/vorlagen/fakt-der-woche-post-1080x1350.png`, factOfWeek(lang, null));
+  save(`${lang}/vorlagen/fakt-der-woche-story-1080x1920.png`, factOfWeek(lang, null, true));
+  save(`${lang}/beispiele/fakt-der-woche-honey-forever-post-1080x1350.png`, factOfWeek(lang, post(lang, 'honey-forever')));
+  save(`${lang}/beispiele/fakt-der-woche-honey-forever-story-1080x1920.png`, factOfWeek(lang, post(lang, 'honey-forever'), true));
+  save(`${lang}/kampagnen/abstimmung-montag-post-1080x1350.png`, votePoll(lang, latest(lang)));
+  save(`${lang}/kampagnen/abstimmung-montag-story-1080x1920.png`, votePoll(lang, latest(lang), true));
+  save(`${lang}/kampagnen/wischen-post-1080x1350.png`, swipePromo(lang));
+  save(`${lang}/kampagnen/wischen-story-1080x1920.png`, swipePromo(lang, true));
+  save(`${lang}/kampagnen/neu-diese-woche-1080x1350.png`, newThisWeek(lang));
 }
 console.log(`${files.length} Grafiken`);

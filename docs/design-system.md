@@ -23,24 +23,33 @@ Stil: Neo-Brutalismus. Dicke Ränder, harte Schatten ohne Weichzeichner, knallig
 | Abstände | `--space-1` (4px) bis `--space-12` (80px) | 4er-Raster |
 | Ränder | `--bw-xs` 1, `--bw-sm` 2, `--bw` 2.5, `--bw-accent` 6 | |
 | Radien | `--radius-sm` 8, `--radius-md` 14, `--radius-pill` | |
-| Schatten | `--shadow-xs/sm/md/lg/xl`, `--shadow-night-sm/lg`, `--shadow-on-night`, `--emoji-shadow` | |
-| Bewegung | `--dur`, `--ease`, `--ease-pop`, `--dur-marquee` | Bei „Bewegung reduzieren“ global abgeschaltet, der Ticker wird dann scrollbar |
+| Schatten | `--shadow-xs/sm/md/lg/xl`, `--shadow-night-sm/lg`, `--shadow-on-night`, `--shadow-new` (bleibt dunkel, für „Neu“ und Wisch-Schilder), `--emoji-shadow` | |
+| Bewegung | `--dur`, `--ease`, `--ease-pop`, `--dur-marquee`, `--dur-swipe` (Karte fliegt nach dem Wischen weg) | Bei „Bewegung reduzieren“ global abgeschaltet, der Ticker wird dann scrollbar |
 
 ## Bausteine
 
 | Klasse | Zweck | Varianten / Zustände |
 |---|---|---|
 | `.card` | Kasten mit Rand und Schatten | – |
-| `.btn` | Aktion (Link oder Button) | `.btn--cyan`, `.btn--orange`, `.btn--pink`, `.btn--ghost`; hover, active, `:disabled`, Fokus |
+| `.btn` | Aktion (Link oder Button) | `.btn--cyan`, `.btn--orange`, `.btn--pink`, `.btn--lime`, `.btn--ghost`; hover, active, `:disabled`, Fokus |
 | `.sticker` | Schräger gelber Aufkleber („?!“ im Logo, „WTF?!“ in der Headline) | – |
 | `.stage` | Dunkle Bühne; Buttons darin bekommen hellen Rand und Schatten | – |
-| `.chip` | Kategorie-Etikett oder Filter | neutral; mit `.cat-*` farbig; als Filter `aria-pressed="true"` (zeigt ✓) |
+| `.chip` | Kategorie-Etikett oder Filter | neutral; mit `.cat-*` farbig; als Filter `aria-pressed="true"` (zeigt ✓); `.chip--new` = gelbes „Neu“-Etikett |
 | `.cat-*` | Kategorie-Fläche | setzt Farbe, Punktmuster **und** `--on-accent` als Schrift |
 | `.accent` | Gelbe Akzentfläche (ohne Kategorie) | setzt Hintergrund und `--on-accent` |
 | `.gold` | Goldene Fläche für freigeschaltete Gold-Fakten | setzt `--gold-surface` und `--on-accent` |
 | `.sr-only` | Nur für Screenreader | – |
 
 Neue Varianten kommen als Modifier-Klasse in `global.css`, nicht als Überschreibung in der Komponente.
+
+## Bewerten, Abstimmung, Fakt der Woche, Neu
+
+Wunsch von Eric (2026-10-02). Abläufe und Einrichtung: `README.md`.
+
+- **Wisch-Karte** (`SwipeDeck.astro`): Nach oben links ziehen = „Gefällt mir weniger“ (Schild und Knopf in `--pink`), nach oben rechts = „Gefällt mir“ (`--lime`). Knöpfe und Social-Grafiken: links immer „weniger“, rechts „gefällt mir“. Das Schild auf der Karte erscheint beim Ziehen auf der Seite, von der die Karte wegzieht. Senkrecht ziehen scrollt die Seite. Es gibt immer auch die zwei Knöpfe und die Pfeiltasten, Wischen allein reicht nicht (Barrierefreiheit).
+- **Abstimmung** (`Weekly.astro`): nur montags sichtbar, jede Option zeigt Emoji-Fläche in Kategoriefarbe (`.cat-*`, also mit Punkten) und nach der Stimme einen Balken in Kategoriefarbe, ebenfalls mit Punkten. Die gewählte Option hat `aria-pressed="true"`. Kein Slogan in der Abstimmung (siehe Slogan-Regel 3).
+- **Fakt der Woche**: große Karte mit Bildfläche in Kategoriefarbe (`.cat-*`, Raster `--dots-size-lg`) und Etikett „🏆 Fakt der Woche“. Gold ist für die Gold-Fakten im Spiel reserviert und wird hier nicht benutzt.
+- **Neu** (`NewBadge.astro`, `.chip--new`): gelbes Etikett in Großbuchstaben, für Fakten aus den letzten 7 Tagen. Steht auf jeder Faktenkarte oben rechts im Bild (Handy: unten links), auf der Wisch-Karte neben dem Etikett und im Kopf der Beitragsseite.
 
 ## Slogan
 

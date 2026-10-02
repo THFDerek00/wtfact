@@ -137,6 +137,7 @@
   --shadow-lg: 6px 6px 0 var(--line);
   --shadow-xl: 10px 10px 0 var(--line);
   --shadow-on-night: 8px 8px 0 var(--yellow);
+  --shadow-new: 2px 2px 0 var(--on-accent); /* „Neu“-Etikett: bleibt auch im Dark Mode dunkel */
   --shadow-night-sm: 3px 3px 0 var(--on-night);
   --shadow-night-lg: 6px 6px 0 var(--on-night);
   --emoji-shadow: drop-shadow(3px 3px 0 rgb(0 0 0 / 0.25));
@@ -146,6 +147,7 @@
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ease-pop: cubic-bezier(0.3, 1.6, 0.5, 1);
   --dur-marquee: 80s;
+  --dur-swipe: 0.3s; /* Karte fliegt nach dem Wischen weg */
 
   color-scheme: light;
 }
@@ -217,6 +219,15 @@ button.chip { cursor: pointer; }
   transform: translate(-1px, -1px);
 }
 .chip[aria-pressed='true']::before { content: '✓'; }
+/* „Neu“-Etikett für Fakten aus den letzten 7 Tagen (Komponente NewBadge.astro) */
+.chip--new {
+  background: var(--yellow);
+  color: var(--on-accent);
+  border-color: var(--on-accent);
+  box-shadow: var(--shadow-new);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
 
 /* Button: gelb als Standard, Varianten über Modifier */
 .btn {
@@ -241,6 +252,7 @@ button.chip { cursor: pointer; }
 .btn--cyan { background: var(--cyan); }
 .btn--orange { background: var(--orange); }
 .btn--pink { background: var(--pink); }
+.btn--lime { background: var(--lime); }
 .btn--ghost { background: var(--surface); color: var(--ink); }
 
 /* Aufkleber: leicht schräg gestellte Akzentfläche, z. B. „?!" oder „WTF?!" */
