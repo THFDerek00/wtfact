@@ -1,0 +1,6 @@
+# Nur index.php ist von außen erreichbar. week.php, die Konfiguration und der Ordner data/
+# (Ausweichort für die SQLite-Datei) bleiben gesperrt. Gilt für Apache, also auch für Plesk/IONOS.
+<FilesMatch "^(week\.php|config\..*\.php)$">
+  Require all denied
+</FilesMatch>
+RedirectMatch 404 ^/api/data(/|$)

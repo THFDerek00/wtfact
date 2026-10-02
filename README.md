@@ -32,10 +32,12 @@ Danach wird die Seite testweise gebaut, und jeder Fakt kommt als eigener Pull Re
 
 **Veröffentlichen:** den PR mergen. Der Fakt ist dann sofort sichtbar, sobald die Seite nach dem Merge neu
 gebaut und hochgeladen ist. **Nicht veröffentlichen:** den PR schließen. Nichts wird automatisch gemergt.
+`.github/workflows/publish-posts.yml` führt jeden PR zu seiner Uhrzeit nach `main` zusammen, danach baut
+`.github/workflows/deploy.yml` die Seite neu und lädt sie zu IONOS hoch (siehe „Hosting“). Wer einen Fakt stoppen will, schließt seinen PR vorher.
 
 ## Fakten-Datenbank
 
-Alle Inhalte stehen in SQLite, der gleichen Datenbank-Sprache wie Cloudflare D1:
+Alle Inhalte stehen in SQLite:
 
 - `db/facts-schema.sql`: Tabellen `facts`, `texts` (pro Sprache), `products`, `sources`, `gold_facts`, `gold_texts`, `gold_sources`.
 - `db/wtfact.sqlite`: die Datenbank selbst. Seite, Prüfungen, Generator und Social-Kit lesen nur hier.
@@ -53,7 +55,7 @@ Befehle:
 - `npm run db:stats` zeigt, wie viele Fakten es je Kategorie gibt.
 - Einen Fakt von der Seite nehmen, ohne ihn zu löschen: `draft` auf `1`.
 
-Braucht Node 22.13 oder neuer (eingebautes `node:sqlite`, kein Zusatzpaket). Cloudflare Pages liest die Version aus `.node-version`.
+Braucht Node 22.13 oder neuer (eingebautes `node:sqlite`, kein Zusatzpaket).
 Alte Markdown-Beiträge in `src/content/posts/` (etwa aus einem PR von vor der Umstellung) werden beim Bauen noch mitgelesen;
 `npm run db:dump` wandelt sie in SQL-Dateien um.
 
@@ -61,7 +63,7 @@ Alte Markdown-Beiträge in `src/content/posts/` (etwa aus einem PR von vor der U
 
 `docs/styleguide.md` ist die einzige Quelle für Ton und Regeln: Claude bekommt die Datei wörtlich als Vorgabe.
 `npm run check` prüft alle Beiträge dagegen und läuft automatisch vor jedem `npm run build`.
-Ein Beitrag, der die Regeln verletzt, lässt also auch den Build auf Cloudflare und in GitHub scheitern.
+Ein Beitrag, der die Regeln verletzt, lässt also auch den Build in GitHub scheitern und wird nicht hochgeladen.
 
 Voraussetzung: Repository-Secret `ANTHROPIC_API_KEY`. Manuell starten: Actions > Tägliche Beiträge > Run workflow,
 oder lokal `npm run post`.
@@ -88,23 +90,44 @@ Farben, Schrift, Abstände und Bausteine sind in `docs/design-system.md` beschri
   Abstimmung), Tippspiel „Wer wird morgen Fakt des Tages?“ mit Trefferserie, Verlauf (30 Tage, 12 Wochen)
   mit Sammelalbum (gelesene Sieger, die Beitragsseite merkt sich gelesene Fakten) und eine Rangliste der
   Kategorien. Auf der Startseite steht nur ein kurzer Hinweis (`src/components/FamePointer.astro`).
-  Browser-Logik: `src/scripts/fame.ts`, Verlauf vom Server: `GET /api/history`. Tipps und Album liegen nur im
+  Browser-Logik: `src/scripts/fame.ts`, Verlauf vom Server: `GET /api/index.php?r=history`. Tipps und Album liegen nur im
   Browser (`localStorage` `wtfact:fame`).
 - **Neu:** Fakten der letzten 7 Tage (heute eingeschlossen) tragen das Etikett „Neu“ (`src/components/NewBadge.astro`).
   Der Browser prüft das nach, damit es auch ohne neuen Build verschwindet.
 
-Stimmen und Bewertungen speichert eine Cloudflare Pages Function (`functions/api/[[path]].ts`,
-Logik in `src/server/community.ts`) in einer D1-Datenbank. Ohne Datenbank (lokal, in der Vorschau oder bevor
-sie eingerichtet ist) funktioniert alles weiter, wird aber nur im jeweiligen Browser gespeichert.
+Stimmen und Bewertungen speichert die PHP-API in `public/api/` (landet beim Bauen in `dist/api/`).
+Ohne erreichbare API (lokal mit `npm run dev`, in der Vorschau) funktioniert alles weiter, wird aber nur im
+jeweiligen Browser gespeichert.
 
-Einrichtung, einmalig im Cloudflare-Dashboard:
+- `public/api/index.php`: Routen `?r=week`, `?r=history`, `?r=vote`, `?r=rate`. Braucht keine `.htaccess`-Regeln.
+- `public/api/week.php`: Kalender und Gewinner, gleiche Rechnung wie `src/week.ts`. Wer eins ändert, ändert beide.
+- Gespeichert wird in SQLite (`pdo_sqlite`, bei Plesk dabei). Die Datei `community.sqlite` liegt im Ordner
+  `wtfact-data/` neben `httpdocs/` und ist damit nicht aus dem Netz abrufbar. Geht das nicht, nimmt die API
+  `httpdocs/api/data/` und sperrt den Ordner per `.htaccess`. Tabellen legt die API beim ersten Aufruf selbst an.
+- Lieber MySQL/MariaDB aus Plesk: `public/api/config.example.php` als `httpdocs/api/config.local.php` auf den Server
+  legen und ausfüllen. Der Upload fasst diese Datei nicht an.
+- Die Kennung `voter` ist eine Zufallszahl aus dem Browser. IP-Adressen werden nicht gespeichert. Gegen
+  Massenstimmen zählt die API pro Tag und Anschluss mit (höchstens 30 Stimmen und 600 Bewertungen, `LIMITS` in
+  `index.php`), über einen Hash aus IP und einem Zufallswert, der am nächsten Tag samt Zählern gelöscht wird.
+- Lokal testen: `npm run build && php -S localhost:8080 -t dist`, dann `http://localhost:8080/api/index.php?r=week`.
 
-1. **Storage & Databases > D1 > Create database**, Name `wtfact`.
-2. In der Datenbank **Console** öffnen, den Inhalt von `db/schema.sql` einfügen und ausführen.
-3. **Workers & Pages >** Pages-Projekt **> Settings > Bindings > Add > D1 database**:
-   Variable name `DB`, Datenbank `wtfact`. Für Production und Preview eintragen.
-4. Neu deployen. `https://<domain>/api/week` antwortet dann mit JSON statt mit `not-configured`.
+## Hosting (IONOS mit Plesk)
 
-Die Kennung `voter` ist eine Zufallszahl aus dem Browser, es werden keine IP-Adressen gespeichert.
-Falls jemand massenhaft abstimmt: in Cloudflare unter **Security > WAF > Rate limiting rules** eine Regel für
-`/api/vote` und `/api/rate` anlegen (z. B. 20 Anfragen pro Minute und IP).
+Die Seite ist statisch (`dist/`), dazu kommt die PHP-API. `.github/workflows/deploy.yml` baut nach jedem Merge
+nach `main` und nach jedem Veröffentlichen eines Fakts und lädt per SFTP nur geänderte Dateien hoch. Gelöscht werden
+nur Dateien, die ein früherer Upload angelegt hat (Liste: `.deploy-manifest.json` im Webordner, Logik:
+`scripts/deploy-plan.mjs`). Datenbank, `config.local.php` und alles andere auf dem Server bleiben.
+
+Einmalig einrichten:
+
+1. In Plesk unter **Websites & Domains >** Domain **> Hosting & DNS > Hosting** (bzw. „Hosting-Einstellungen“):
+   PHP 8 einschalten, Dokumentenstamm `httpdocs`. Beim Systembenutzer **SSH-Zugriff** auf
+   `/bin/bash (chrooted)` stellen, sonst geht kein SFTP. Benutzername und Passwort stehen dort ebenfalls.
+2. In GitHub unter **Settings > Secrets and variables > Actions > Secrets** anlegen:
+   `DEPLOY_HOST` (Domain oder IP des Plesk-Servers), `DEPLOY_USER` (Systembenutzer), `DEPLOY_PASSWORD`.
+   Optional unter **Variables**: `DEPLOY_PATH` (Standard `httpdocs`), `DEPLOY_PORT` (Standard `22`).
+3. **Actions > Hochladen zu IONOS > Run workflow**. Danach muss `https://<domain>/api/index.php?r=week`
+   JSON zeigen. Steht dort `not-configured`, sagt `reason`, was fehlt (z. B. `no-pdo-sqlite`: in Plesk unter
+   PHP-Einstellungen die Erweiterung `pdo_sqlite` aktivieren oder MySQL nehmen, siehe oben).
+
+Ohne `DEPLOY_HOST` baut der Workflow nur und lädt nichts hoch.
