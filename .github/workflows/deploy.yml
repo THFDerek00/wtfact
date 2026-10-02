@@ -1,0 +1,63 @@
+name: Hochladen zu IONOS
+
+# Baut die Seite und lädt sie per SFTP in den Webordner bei IONOS (Plesk): nach jedem Merge nach main,
+# nach jedem Lauf von „Beiträge veröffentlichen“ (dessen Merges lösen sonst keinen Push-Lauf aus)
+# und von Hand über Actions > Hochladen zu IONOS > Run workflow.
+#
+# Secrets (Settings > Secrets and variables > Actions > Secrets):
+#   DEPLOY_HOST      Server aus Plesk, z. B. die Domain oder die IP des Servers
+#   DEPLOY_USER      Systembenutzer des Abonnements (Plesk: Websites & Domains > Hosting & DNS > Hosting)
+#   DEPLOY_PASSWORD  Passwort dieses Benutzers
+# Optional (Settings > Secrets and variables > Actions > Variables):
+#   DEPLOY_PATH      Webordner, Standard httpdocs
+#   DEPLOY_PORT      Standard 22
+# Ohne DEPLOY_HOST wird nur gebaut und nichts hochgeladen.
+on:
+  push:
+    branches: [main]
+  workflow_run:
+    workflows: ['Beiträge veröffentlichen']
+    types: [completed]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+
+      - name: Hochladen
+        env:
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          DUSER: ${{ secrets.DEPLOY_USER }}
+          LFTP_PASSWORD: ${{ secrets.DEPLOY_PASSWORD }}
+          DIR: ${{ vars.DEPLOY_PATH || 'httpdocs' }}
+          PORT: ${{ vars.DEPLOY_PORT || '22' }}
+        run: |
+          if [ -z "$HOST" ]; then
+            echo "::notice::DEPLOY_HOST fehlt, nichts hochgeladen. Einrichtung: README.md, Abschnitt Hosting."
+            exit 0
+          fi
+          sudo apt-get install -y -qq lftp >/dev/null
+          T="$RUNNER_TEMP"
+          open="set sftp:auto-confirm yes; set xfer:clobber on; set net:max-retries 3; set net:timeout 30; open --env-password -u $DUSER -p $PORT sftp://$HOST; cd $DIR"
+          # Liste vom letzten Upload holen (fehlt beim ersten Mal, dann wird alles hochgeladen).
+          rm -f "$T/old.json"
+          lftp -c "$open; get .deploy-manifest.json -o $T/old.json" 2>/dev/null || echo "Noch kein früherer Upload gefunden."
+          node scripts/deploy-plan.mjs dist "$T/old.json" "$T/new.json" "$T/plan.lftp"
+          lftp -c "$open; source $T/plan.lftp"

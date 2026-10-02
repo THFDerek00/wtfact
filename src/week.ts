@@ -1,6 +1,6 @@
 // Kalender für „Neu“, die Montags-Abstimmung und den Fakt der Woche.
-// Wird von der Seite (Browser) und von den Cloudflare-Funktionen (functions/api) benutzt,
-// damit beide dieselben Tage rechnen. Alle Tage sind deutsche Kalendertage (Europe/Berlin)
+// Wird von der Seite (Browser) benutzt; die PHP-API (public/api/week.php) rechnet dieselben Tage nach.
+// Wer hier etwas ändert, ändert es dort auch. Alle Tage sind deutsche Kalendertage (Europe/Berlin)
 // im Format JJJJ-MM-TT.
 //
 // Ablauf einer Woche:
@@ -116,15 +116,21 @@ export function pickFactOfDay(facts: FactMeta[], ratings: Ratings, today: string
   return ranked[0] ? { day, key: ranked[0].key } : null;
 }
 
-/** Beginn eines deutschen Tages in UTC, im SQLite-Format „JJJJ-MM-TT HH:MM:SS“. */
-export function dayStartUtc(day: string) {
-  const noon = new Date(`${day}T12:00:00Z`);
+/** Abstand der deutschen Uhrzeit zu UTC in Minuten zu einem Zeitpunkt (ms). */
+const berlinOffset = (ms: number) => {
   const off = new Intl.DateTimeFormat('en-US', { timeZone: TZ, timeZoneName: 'longOffset' })
-    .formatToParts(noon)
+    .formatToParts(new Date(ms))
     .find((p) => p.type === 'timeZoneName')!.value; // „GMT+02:00“
   const m = off.match(/([+-])(\d\d):(\d\d)/);
-  const minutes = m ? (m[1] === '-' ? -1 : 1) * (Number(m[2]) * 60 + Number(m[3])) : 0;
-  return new Date(Date.parse(`${day}T00:00:00Z`) - minutes * 60_000).toISOString().slice(0, 19).replace('T', ' ');
+  return m ? (m[1] === '-' ? -1 : 1) * (Number(m[2]) * 60 + Number(m[3])) : 0;
+};
+
+/** Beginn eines deutschen Tages in UTC, im SQLite-Format „JJJJ-MM-TT HH:MM:SS“. */
+export function dayStartUtc(day: string) {
+  const midnight = Date.parse(`${day}T00:00:00Z`);
+  // Zweimal rechnen: an Tagen mit Zeitumstellung gilt um Mitternacht noch der Abstand vom Vortag.
+  const guess = midnight - berlinOffset(Date.parse(`${day}T12:00:00Z`)) * 60_000;
+  return new Date(midnight - berlinOffset(guess) * 60_000).toISOString().slice(0, 19).replace('T', ' ');
 }
 
 // ---------- Hall of Fame: Verlauf ----------

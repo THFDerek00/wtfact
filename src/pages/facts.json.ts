@@ -1,5 +1,5 @@
-// Liste aller veröffentlichten Fakten (Schlüssel, Tag, Kategorie). Die Cloudflare-Funktionen unter
-// functions/api lesen sie, um zu prüfen, welche Fakten bei einer Abstimmung zur Wahl stehen.
+// Liste aller veröffentlichten Fakten (Schlüssel, Tag, Kategorie). Die PHP-API (public/api/index.php)
+// liest sie, um zu prüfen, welche Fakten bei einer Abstimmung zur Wahl stehen.
 import { postsFor } from '../lib';
 import { postDay } from '../week';
 
