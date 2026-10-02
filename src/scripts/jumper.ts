@@ -829,6 +829,7 @@ export function createJumper({ canvas, text, best, onCollect, onGameOver }: Jump
   document.addEventListener('visibilitychange', () => document.hidden && pause());
   window.addEventListener('resize', resize);
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { pal = readPalette(); draw(); });
+  window.addEventListener('wtfact-theme', () => { pal = readPalette(); draw(); });
   document.fonts?.ready.then(draw);
 
   reset();

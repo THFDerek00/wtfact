@@ -1,5 +1,5 @@
 ---
-// Hintergrund im Dunkelmodus. Pro Sitzung wird eine von drei Varianten
+// Hintergrund hinter der Seite, im hellen und dunklen Modus (Farben je Modus über die --sky-*-Tokens). Pro Sitzung wird eine von drei Varianten
 // zufällig gezogen und bleibt bis zum Schließen des Tabs gleich (Wunsch von Eric, 2026-10-02):
 //   dots   = Punktnacht: leises Punktraster, unter der Maus leuchten die Punkte gelb
 //   shapes = Formenflug: Umriss-Formen in Kategoriefarben schweben langsam
@@ -37,7 +37,7 @@ const SHAPES = [
   const KEY = 'wtfact-sky';
   const root = document.documentElement;
   const sky = document.querySelector<HTMLElement>('.sky');
-  const dark = matchMedia('(prefers-color-scheme: dark)');
+  const scheme = matchMedia('(prefers-color-scheme: dark)');
   const still = matchMedia('(prefers-reduced-motion: reduce)');
 
   function pick(): Variant {
@@ -87,6 +87,7 @@ const SHAPES = [
     const token = (name: string) => css.getPropertyValue(name).trim();
     const gap = parseFloat(token('--sky-gap'));
     const base = token('--sky-dot');
+    const edge = token('--sky-glow-edge');
     const colors: string[] = JSON.parse(sky!.dataset.cats ?? '[]').map((c: string) => token(`--cat-${c}`)).filter(Boolean);
     type Lit = { i: number; j: number; c: string; t: number; d: number; k?: number };
     const lit: Lit[] = [];
@@ -129,6 +130,11 @@ const SHAPES = [
         const k = p.k ?? Math.sin(Math.min(1, (now - p.t) / p.d) * Math.PI);
         const x = p.i * gap + gap / 2, y = p.j * gap + gap / 2;
         dot(x, y, 1.4 + 2.6 * k, p.c, 0.95 * k);
+        // Heller Modus: dunkler Rand, sonst verschwinden Gelb und Türkis auf dem hellen Grund
+        if (k > 0.05) {
+          ctx.shadowBlur = 0; ctx.globalAlpha = k; ctx.strokeStyle = edge; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.arc(x, y, 1.4 + 2.6 * k, 0, Math.PI * 2); ctx.stroke();
+        }
         for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) dot(x + di * gap, y + dj * gap, 1.4 + 0.6 * k, p.c, 0.45 * k);
       }
       ctx.globalAlpha = 1; ctx.shadowBlur = 0;
@@ -147,11 +153,11 @@ const SHAPES = [
     return () => { removeEventListener('resize', fit); cancelAnimationFrame(raf); };
   }
 
-  // Nur im Dunkelmodus aktiv; wechselt das System das Farbschema, an- oder abschalten
+  // Wechselt der Modus (System oder Umschalter), neu starten, damit die Farben aus den Tokens neu gelesen werden
   function apply() {
     stop();
     stop = () => {};
-    if (!sky || !dark.matches) { delete root.dataset.sky; return; }
+    if (!sky) return;
     root.dataset.sky = variant;
     if (variant === 'dots') stop = dots();
     if (variant === 'glow') stop = glow();
@@ -159,16 +165,14 @@ const SHAPES = [
   // Läuft das Skript erneut (z. B. in der klickbaren Vorschau bei jedem Seitenwechsel), erst das alte stoppen
   const w = window as Window & { __wtfSkyStop?: () => void };
   w.__wtfSkyStop?.();
-  dark.addEventListener('change', apply);
-  w.__wtfSkyStop = () => { stop(); dark.removeEventListener('change', apply); };
+  scheme.addEventListener('change', apply);
+  addEventListener('wtfact-theme', apply);
+  w.__wtfSkyStop = () => { stop(); scheme.removeEventListener('change', apply); removeEventListener('wtfact-theme', apply); };
   apply();
 </script>
 
 <style>
-  .sky { display: none; }
-  @media (prefers-color-scheme: dark) {
-    .sky { display: block; position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
-  }
+  .sky { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
   .sky > * { display: none; position: absolute; inset: 0; }
   :global(html[data-sky='dots']) .sky-dots,
   :global(html[data-sky='dots']) .sky-spot,

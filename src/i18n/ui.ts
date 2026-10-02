@@ -43,6 +43,7 @@ export const ui = {
     tickerLabel: 'Schnelle Fakten',
     sourcesCount: (n: number) => `${n} Quellen`,
     skip: 'Zum Inhalt springen',
+    darkMode: 'Dunkler Modus',
     newBadge: 'Neu',
     swipe: {
       label: 'Wie findest du diesen Fakt?',
@@ -209,6 +210,7 @@ export const ui = {
     tickerLabel: 'Quick facts',
     sourcesCount: (n: number) => `${n} sources`,
     skip: 'Skip to content',
+    darkMode: 'Dark mode',
     newBadge: 'New',
     swipe: {
       label: 'How do you like this fact?',

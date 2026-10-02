@@ -119,7 +119,10 @@ function readTokens(block) {
   return t;
 }
 const light = readTokens(tokensSrc.match(/^:root\s*\{([\s\S]*?)^\}/m)[1]);
-const darkBlock = tokensSrc.match(/prefers-color-scheme:\s*dark\)\s*\{\s*:root\s*\{([^}]*)\}/);
+const darkBlock = tokensSrc.match(/prefers-color-scheme:\s*dark\)\s*\{\s*:root:not\(\[data-theme='light'\]\)\s*\{([^}]*)\}/);
+const darkToggle = tokensSrc.match(/^:root\[data-theme='dark'\]\s*\{([^}]*)\}/m);
+if (!darkBlock || !darkToggle) errors.push(`${TOKENS}: Dunkle Tokens brauchen zwei Blöcke: @media (prefers-color-scheme: dark) { :root:not([data-theme='light']) {…} } und :root[data-theme='dark'] {…}.`);
+else if (JSON.stringify(readTokens(darkBlock[1])) !== JSON.stringify(readTokens(darkToggle[1]))) errors.push(`${TOKENS}: Die beiden Dark-Mode-Blöcke (System und Umschalter) sind unterschiedlich. Beide gleich halten.`);
 const dark = { ...light, ...(darkBlock ? readTokens(darkBlock[1]) : {}) };
 
 function resolve(t, name) {
