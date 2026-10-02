@@ -2,7 +2,7 @@
 // Kompakter Hinweis auf der Startseite: Fakt des Tages und Fakt der Woche in je einer Zeile,
 // alles Weitere (Abstimmung, Verlauf, Tippspiel) steht auf der eigenen Seite /[lang]/hall-of-fame/.
 // Welche Fakten gerade vorne sind, rechnet src/scripts/fame.ts im Browser aus.
-import { FACT_TIMES, type Lang } from '../config';
+import { FACTS_PER_DAY, type Lang } from '../config';
 import { factInfo, type Post } from '../lib';
 import { t } from '../i18n/ui';
 import Icon from './Icon.astro';
@@ -11,7 +11,7 @@ const { lang, posts } = Astro.props;
 const ui = t(lang);
 const f = ui.fame;
 // Ein Fakt der Woche ist höchstens 15 Tage alt, der Fakt des Tages einen Tag.
-const facts = posts.slice(0, 17 * FACT_TIMES.length).map(factInfo);
+const facts = posts.slice(0, 17 * FACTS_PER_DAY).map(factInfo);
 const href = `/${lang}/hall-of-fame/`;
 ---
 <section class="wrap pointer-wrap" aria-label={f.pointerLabel} data-fame-pointer data-facts={JSON.stringify(facts)}>

@@ -6,7 +6,7 @@
 import Base from '../../layouts/Base.astro';
 import Vote from '../../components/Vote.astro';
 import Icon from '../../components/Icon.astro';
-import { LANGS, CATEGORIES, FACT_TIMES, type Lang } from '../../config';
+import { LANGS, CATEGORIES, type Lang } from '../../config';
 import { t } from '../../i18n/ui';
 import { postsFor, factInfo, categoryIcon } from '../../lib';
 
@@ -65,7 +65,7 @@ const texts = {
       <p class="lead">{f.tipIntro}</p>
       <p class="tip-result" data-tip-result hidden></p>
       <ul class="tip-options" aria-label={f.tipLabel} data-tip-options></ul>
-      <p class="note" data-tip-empty hidden>{f.tipEmpty(FACT_TIMES[0])}</p>
+      <p class="note" data-tip-empty hidden>{f.tipEmpty}</p>
       <p class="tip-status" data-tip-status aria-live="polite"></p>
       <dl class="tip-stats">
         <div><dt>{f.tipStreak}</dt><dd data-tip-streak>0</dd></div>
