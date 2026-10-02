@@ -14,6 +14,7 @@ const ui = t(lang);
 const w = ui.weekly;
 // Ein Gewinner ist höchstens 15 Tage alt (Fakt vom Montag davor, gezeigt bis zum nächsten Montag).
 const recent = posts.slice(0, 24);
+const panelId = `vote-panel-${lang}`;
 // Texte für das Skript. Zahlen sind Platzhalter (9001 …), die im Browser ersetzt werden.
 const texts = {
   chosen: w.chosen(9001, 9002), chosenOne: w.chosen(9001, 1), chosenLocal: w.chosenLocal, nextVote: w.nextVote,
@@ -23,9 +24,18 @@ const texts = {
 ---
 <section class="wrap weekly" data-weekly data-texts={JSON.stringify(texts)}>
   <div class="vote card" data-vote hidden>
-    <p class="kicker"><span class="chip accent">🗳️ {w.voteKicker}</span></p>
-    <h2>{w.voteTitle}</h2>
-    <p class="intro">{w.voteIntro}</p>
+    <h2 class="vote-head">
+      <button class="vote-toggle" type="button" aria-expanded="false" aria-controls={panelId} data-vote-toggle>
+        <span class="kicker"><span class="chip accent">🗳️ {w.voteKicker}</span></span>
+        <span class="vote-title">{w.voteTitle}</span>
+        <span class="intro">{w.voteIntro}</span>
+        <span class="vote-cta btn">
+          <span class="when-closed">{w.voteOpen}</span><span class="when-open">{w.voteHide}</span>
+          <span class="chevron" aria-hidden="true">▾</span>
+        </span>
+      </button>
+    </h2>
+    <div class="vote-panel" id={panelId} data-vote-panel hidden>
     <ul class="options" aria-label={w.voteLabel}>
       {recent.map((p) => (
         <li data-key={p.data.translationKey} data-date={postDay(p.data.date)} hidden>
@@ -42,7 +52,8 @@ const texts = {
         </li>
       ))}
     </ul>
-    <p class="vote-status" data-vote-status aria-live="polite"></p>
+      <p class="vote-status" data-vote-status aria-live="polite"></p>
+    </div>
   </div>
 
   <div class="fotw" data-fotw hidden>
@@ -98,6 +109,14 @@ const texts = {
       items.forEach((li) => (li.hidden = false));
       voteBox.hidden = items.length === 0;
       const status = root.querySelector<HTMLElement>('[data-vote-status]')!;
+      // Ausklappen: erst nur der Kopf mit der Info, ein Klick öffnet die Fakten darunter.
+      const toggle = root.querySelector<HTMLButtonElement>('[data-vote-toggle]')!;
+      const panel = root.querySelector<HTMLElement>('[data-vote-panel]')!;
+      toggle.addEventListener('click', () => {
+        const open = toggle.getAttribute('aria-expanded') !== 'true';
+        toggle.setAttribute('aria-expanded', String(open));
+        panel.hidden = !open;
+      });
       const showResults = (c: Counts) => {
         const mine = myVote(poll);
         items.forEach((li) => {
@@ -132,9 +151,22 @@ const texts = {
 
   /* Abstimmung */
   .vote { padding: var(--space-8); }
-  .kicker { margin: 0 0 var(--space-3); }
-  .vote h2 { margin-bottom: var(--space-2); }
-  .intro { margin: 0 0 var(--space-6); color: var(--muted); max-width: 60ch; }
+  .weekly .vote-head { margin: 0; font: inherit; letter-spacing: normal; }
+  .vote-toggle {
+    display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2); width: 100%; padding: 0;
+    border: 0; background: none; color: var(--ink); font: inherit; text-align: left; cursor: pointer;
+  }
+  .kicker { margin-bottom: var(--space-1); }
+  .vote-title { font-family: var(--font-display); font-size: var(--fs-display-sm); font-weight: 700; line-height: 1.1; }
+  .intro { color: var(--muted); max-width: 60ch; }
+  .vote-cta { margin-top: var(--space-3); }
+  .vote-toggle:hover .vote-cta { transform: translate(-2px, -2px); box-shadow: var(--shadow-lg); }
+  .chevron { display: inline-block; transition: transform var(--dur) var(--ease); }
+  .vote-toggle[aria-expanded='true'] .chevron { transform: rotate(180deg); }
+  .vote-toggle[aria-expanded='true'] .when-closed, .vote-toggle[aria-expanded='false'] .when-open { display: none; }
+  .vote-panel { margin-top: var(--space-6); animation: unfold var(--dur-swipe) var(--ease); }
+  @keyframes unfold { from { opacity: 0; transform: translateY(calc(-1 * var(--space-3))); } }
+  @media (prefers-reduced-motion: reduce) { .vote-panel { animation: none; } }
   .options { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
   .options li { display: flex; gap: var(--space-2); align-items: stretch; }
   .option {
