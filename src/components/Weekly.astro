@@ -21,8 +21,7 @@ const texts = {
   pct: lang === 'de' ? '9004 %' : '9004%',
 };
 ---
-<section class="wrap weekly" data-weekly>
-  <script type="application/json" data-weekly-texts set:html={JSON.stringify(texts)} />
+<section class="wrap weekly" data-weekly data-texts={JSON.stringify(texts)}>
   <div class="vote card" data-vote hidden>
     <p class="kicker"><span class="chip accent">🗳️ {w.voteKicker}</span></p>
     <h2>{w.voteTitle}</h2>
@@ -72,7 +71,7 @@ const texts = {
   import { inPoll } from '../week';
 
   const root = document.querySelector<HTMLElement>('[data-weekly]');
-  const texts: Record<string, string> = JSON.parse(root?.querySelector('[data-weekly-texts]')?.textContent ?? '{}');
+  const texts: Record<string, string> = JSON.parse(root?.dataset.texts ?? '{}');
   const fill = (tpl: string, v: Record<string, number>) => tpl.replace(/900\d/g, (m) => String(v[m] ?? m));
 
   async function init() {
