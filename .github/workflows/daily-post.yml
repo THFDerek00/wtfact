@@ -1,8 +1,9 @@
 name: Tägliche Beiträge
 
+# Läuft nicht mehr nach Zeitplan: Die drei Fakten am Morgen schreibt eine wiederkehrende Claude-Aufgabe
+# (Routine „WTFact: drei Fakten am Morgen“, 3:52 Uhr deutscher Zeit, siehe README). Dieser Workflow bleibt für
+# Handstarts, falls das Repository-Secret ANTHROPIC_API_KEY gesetzt ist.
 on:
-  schedule:
-    - cron: '0 2 * * *' # 04:00 Uhr deutscher Sommerzeit, 03:00 Uhr Winterzeit
   workflow_dispatch: {}
 
 permissions:

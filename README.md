@@ -15,8 +15,12 @@ nicht selbst: Jeder Fakt kommt als Pull Request, und Eric entscheidet, welche er
 drei verschiedenen Kategorien, und keine davon war am Vortag dran. Von den übrigen Kategorien kommt jeweils
 die dran, die am längsten Pause hatte. Fakten aus noch offenen PRs zählen dabei mit.
 
-`.github/workflows/daily-post.yml` läuft jeden Morgen um 4 Uhr (Winter 3 Uhr) und ruft
-`scripts/generate-post.mjs` bis zu dreimal auf. Jeder Aufruf schreibt den nächsten Fakt des Tages:
+Geschrieben werden sie von einer wiederkehrenden Claude-Aufgabe (Routine „WTFact: drei Fakten am Morgen“),
+die jeden Morgen um 3:52 Uhr deutscher Zeit in Claude Code startet. Sie folgt denselben Schritten und Regeln wie
+das Skript unten und legt die PRs an. Gibt es für den Tag schon `beitrag/JJJJ-MM-TT-*`-Zweige, tut sie nichts.
+
+Alternativ, von Hand: `.github/workflows/daily-post.yml` (Actions > Tägliche Beiträge > Run workflow, braucht das
+Secret `ANTHROPIC_API_KEY`) ruft `scripts/generate-post.mjs` bis zu dreimal auf. Jeder Aufruf schreibt den nächsten Fakt des Tages:
 
 1. Claude recherchiert per Websuche einen belegbaren, überraschenden Fakt in der gewählten Kategorie
    und schreibt einen Entwurf.
