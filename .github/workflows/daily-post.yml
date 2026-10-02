@@ -1,8 +1,8 @@
-name: Täglicher Beitrag
+name: Tägliche Beiträge
 
 on:
   schedule:
-    - cron: '0 4 * * *' # 06:00 Uhr deutscher Sommerzeit, 05:00 Uhr Winterzeit
+    - cron: '0 2 * * *' # 04:00 Uhr deutscher Sommerzeit, 03:00 Uhr Winterzeit
   workflow_dispatch: {}
 
 permissions:
@@ -16,7 +16,7 @@ concurrency:
 jobs:
   post:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -25,37 +25,63 @@ jobs:
           cache: npm
       - run: npm ci
 
-      - name: Beitrag schreiben
+      # Drei Fakten pro Tag (FACT_TIMES in src/config.ts), jeder in einer anderen Kategorie und
+      # keiner aus einer Kategorie vom Vortag. Pro Fakt gibt es einen zweiten Versuch, falls die
+      # Qualitätsprüfung den ersten Entwurf verwirft. Fällt ein Fakt ganz aus, rückt der nächste
+      # auf seine Uhrzeit vor; lieber ein Fakt weniger als ein falscher.
+      - name: Beiträge schreiben
         id: gen
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          POSTS_MANIFEST: ${{ runner.temp }}/posts.tsv
         run: |
           if [ -z "$ANTHROPIC_API_KEY" ]; then
             echo "::error::Das Secret ANTHROPIC_API_KEY fehlt (Settings > Secrets and variables > Actions)."
             exit 1
           fi
-          # Ein zweiter Versuch, falls die Qualitätsprüfung den ersten Entwurf verwirft.
-          node scripts/generate-post.mjs || node scripts/generate-post.mjs
-
-      - name: Seite testweise bauen
-        run: npm run build
-
-      # Der Beitrag kommt als Pull Request. publish-posts.yml veröffentlicht ihn ein paar
-      # Stunden später, falls niemand den PR vorher schließt.
-      - name: Als Pull Request vorschlagen
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TITLE: ${{ steps.gen.outputs.title }}
-        run: |
-          if [ -z "$(git status --porcelain src/content)" ]; then
-            echo "Kein neuer Beitrag."
+          touch "$POSTS_MANIFEST"
+          # Die Beiträge von heute warten als offene PRs, nicht auf main. Bei einem zweiten Lauf
+          # am selben Tag würden sonst noch einmal drei geschrieben.
+          today=$(TZ=Europe/Berlin date +%F)
+          if git ls-remote --exit-code --heads origin "refs/heads/beitrag/$today-*" > /dev/null; then
+            echo "Für $today gibt es schon Beitrags-PRs. Nichts zu tun."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          branch="beitrag/$(date -u +%F)"
+          slots=$(node -e "console.log(require('fs').readFileSync('src/config.ts','utf8').match(/FACT_TIMES\s*=\s*\[([^\]]*)\]/)[1].split(',').filter(s => s.trim()).length)")
+          for n in $(seq 1 "$slots"); do
+            node scripts/generate-post.mjs || node scripts/generate-post.mjs || echo "::warning::Fakt $n wurde verworfen."
+          done
+          if [ ! -s "$POSTS_MANIFEST" ]; then
+            echo "::error::Heute ist kein Fakt durch die Prüfung gekommen."
+            exit 1
+          fi
+
+      - name: Seite testweise bauen
+        if: steps.gen.outputs.skip != 'true'
+        run: npm run build
+
+      # Jeder Fakt kommt als eigener Pull Request (Zweig beitrag/JJJJ-MM-TT-HHMM).
+      # publish-posts.yml veröffentlicht ihn zu seiner Uhrzeit, falls niemand den PR vorher schließt.
+      - name: Als Pull Requests vorschlagen
+        if: steps.gen.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          POSTS_MANIFEST: ${{ runner.temp }}/posts.tsv
+        run: |
           git config user.name "WTFact Bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git switch -c "$branch"
-          git add src/content
-          git commit -m "Neuer Beitrag: $TITLE"
-          git push -u origin "$branch"
-          gh pr create --base main --head "$branch" --title "Neuer Beitrag: $TITLE" --body "Wird automatisch veröffentlicht, wenn **Beiträge veröffentlichen** das nächste Mal läuft (täglich 10 Uhr). Nicht veröffentlichen: diesen PR schließen."
+          base=$(git rev-parse --abbrev-ref HEAD)
+          # Eigene Eingabe (3), damit git und gh die Liste nicht mitlesen.
+          while IFS=$'\t' read -r at title de en <&3; do
+            day=${at:0:10}
+            hhmm=${at:11:2}${at:14:2}
+            branch="beitrag/$day-$hhmm"
+            git switch -c "$branch"
+            git add "$de" "$en"
+            git commit -m "Neuer Beitrag: $title"
+            git push -u origin "$branch"
+            gh pr create --base main --head "$branch" --title "Neuer Beitrag ${at:11:5} Uhr: $title" \
+              --body "Wird heute um **${at:11:5} Uhr** automatisch veröffentlicht (**Beiträge veröffentlichen**). Nicht veröffentlichen: diesen PR schließen."
+            git switch "$base"
+          done 3< "$POSTS_MANIFEST"

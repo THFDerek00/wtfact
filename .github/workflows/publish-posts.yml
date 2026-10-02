@@ -1,32 +1,47 @@
 name: Beiträge veröffentlichen
 
-# Führt die Beitrags-PRs von "Täglicher Beitrag" nach main zusammen, sobald sie
-# mindestens 3 Stunden offen waren. Wer einen Beitrag stoppen will, schließt den PR.
+# Führt die Beitrags-PRs von "Tägliche Beiträge" zu ihrer Uhrzeit nach main zusammen
+# (8, 13 und 18 Uhr deutscher Zeit, siehe FACT_TIMES in src/config.ts). Die Uhrzeit steht im
+# Zweignamen: beitrag/JJJJ-MM-TT-HHMM. Wer einen Beitrag stoppen will, schließt den PR.
 on:
   schedule:
-    - cron: '0 8 * * *' # 10:00 Uhr deutscher Sommerzeit, 09:00 Uhr Winterzeit
+    # GitHub rechnet in UTC. Beide Stunden je Uhrzeit, damit es im Sommer (UTC+2) und
+    # im Winter (UTC+1) passt; zusammengeführt wird nur, was schon fällig ist.
+    - cron: '0 6,7,11,12,16,17 * * *'
   workflow_dispatch: {}
 
 permissions:
   contents: write
   pull-requests: write
 
+concurrency:
+  group: publish-posts
+  cancel-in-progress: false
+
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Wartende Beiträge zusammenführen
+      - name: Fällige Beiträge zusammenführen
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          cutoff=$(date -u -d '3 hours ago' +%s)
-          gh pr list --state open --base main --json number,headRefName,createdAt \
-            --jq '.[] | select(.headRefName | startswith("beitrag/")) | "\(.number) \(.createdAt)"' |
-          while read -r number created; do
-            if [ "$(date -u -d "$created" +%s)" -gt "$cutoff" ]; then
-              echo "PR #$number ist jünger als 3 Stunden, bleibt bis morgen offen."
+          now=$(date -u +%s)
+          gh pr list --state open --base main --json number,headRefName \
+            --jq '.[] | select(.headRefName | startswith("beitrag/")) | "\(.headRefName) \(.number)"' |
+            sort > "$RUNNER_TEMP/prs.txt"
+          # Eigene Eingabe (3), damit gh die Liste nicht mitliest.
+          while read -r branch number <&3; do
+            stamp=${branch#beitrag/}
+            day=${stamp:0:10}
+            hhmm=${stamp:11:4}
+            # Ältere Zweige ohne Uhrzeit (beitrag/JJJJ-MM-TT) gelten als 8 Uhr.
+            [ -z "$hhmm" ] && hhmm=0800
+            due=$(TZ=Europe/Berlin date -d "$day ${hhmm:0:2}:${hhmm:2:2}" +%s) || continue
+            if [ "$now" -lt "$due" ]; then
+              echo "PR #$number ($branch) ist erst um ${hhmm:0:2}:${hhmm:2:2} Uhr dran."
               continue
             fi
             gh pr merge "$number" --squash --delete-branch
-          done
+          done 3< "$RUNNER_TEMP/prs.txt"

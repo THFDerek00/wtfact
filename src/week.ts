@@ -84,3 +84,45 @@ export function pickWinner(
     .sort((a, b) => (votes[b.key] ?? 0) - (votes[a.key] ?? 0) || score(b.key) - score(a.key) || b.date.localeCompare(a.date));
   return ranked[0]?.key ?? null;
 }
+
+// ---------- Fakt des Tages ----------
+// Kein Abstimmen: Fakt des Tages wird, wer von den Fakten des Vortags beim Wischen den höchsten
+// Anteil „Gefällt mir“ hat. Gezählt wird bis Mitternacht, damit er den ganzen Tag gleich bleibt.
+// Gleicher Anteil (auch: noch keine Bewertungen) entscheidet das Los, für alle Besucher gleich.
+
+export type Ratings = Record<string, { like: number; meh: number }>;
+
+/** Anteil „Gefällt mir“ in Prozent (0 ohne Bewertungen). */
+export const likePct = (r?: { like: number; meh: number }) =>
+  r && r.like + r.meh > 0 ? Math.round((r.like / (r.like + r.meh)) * 100) : 0;
+
+// Fester Zufall pro Tag und Fakt (FNV-1a), damit jeder Besucher dasselbe Los sieht.
+const lot = (day: string, key: string) => {
+  let h = 0x811c9dc5;
+  for (const ch of `${day}:${key}`) h = Math.imul(h ^ ch.charCodeAt(0), 0x01000193) >>> 0;
+  return h;
+};
+
+/** Fakt des Tages für `today` aus den Fakten von gestern, oder null, wenn gestern keiner erschienen ist. */
+export function pickFactOfDay(facts: FactMeta[], ratings: Ratings, today: string = berlinDay()) {
+  const day = addDays(today, -1);
+  const share = (k: string) => {
+    const r = ratings[k];
+    return r && r.like + r.meh > 0 ? r.like / (r.like + r.meh) : 0;
+  };
+  const ranked = facts
+    .filter((f) => f.date === day)
+    .sort((a, b) => share(b.key) - share(a.key) || lot(today, a.key) - lot(today, b.key));
+  return ranked[0] ? { day, key: ranked[0].key } : null;
+}
+
+/** Beginn eines deutschen Tages in UTC, im SQLite-Format „JJJJ-MM-TT HH:MM:SS“. */
+export function dayStartUtc(day: string) {
+  const noon = new Date(`${day}T12:00:00Z`);
+  const off = new Intl.DateTimeFormat('en-US', { timeZone: TZ, timeZoneName: 'longOffset' })
+    .formatToParts(noon)
+    .find((p) => p.type === 'timeZoneName')!.value; // „GMT+02:00“
+  const m = off.match(/([+-])(\d\d):(\d\d)/);
+  const minutes = m ? (m[1] === '-' ? -1 : 1) * (Number(m[2]) * 60 + Number(m[3])) : 0;
+  return new Date(Date.parse(`${day}T00:00:00Z`) - minutes * 60_000).toISOString().slice(0, 19).replace('T', ' ');
+}

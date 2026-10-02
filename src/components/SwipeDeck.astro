@@ -1,5 +1,5 @@
 ---
-// Begrüßungskarte auf der Startseite: Fakt des Tages, danach die nächsten neuen Fakten als Stapel.
+// Begrüßungskarte auf der Startseite: neuester Fakt, danach die nächsten neuen Fakten als Stapel.
 // Karte nach oben links ziehen = „Gefällt mir weniger“, nach oben rechts = „Gefällt mir“.
 // Dasselbe geht mit den beiden Knöpfen darunter und mit den Pfeiltasten links/rechts.
 // Speichern: src/scripts/community.ts (Server, ohne Server nur im Browser).
@@ -24,7 +24,7 @@ const rest = Math.max(0, posts.length - 1);
         <a class="today-link" href={postUrl(p)} draggable="false">
           <span class="today-head">
             {i === 0
-              ? <span class="chip accent">⚡ {ui.todaysFact}</span>
+              ? <span class="chip accent">⚡ {ui.latestFact}</span>
               : <span class:list={['chip', `cat-${p.data.category}`]}>{ui.categories[p.data.category]}</span>}
             <NewBadge lang={lang} date={p.data.date} />
             <span class="no">#{String(factNumber(p, posts)).padStart(3, '0')}</span>

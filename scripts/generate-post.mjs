@@ -1,5 +1,9 @@
-// Schreibt jeden Tag einen neuen WTFact-Beitrag auf Deutsch und Englisch.
+// Schreibt den nächsten WTFact-Beitrag des Tages auf Deutsch und Englisch.
 // Aufruf: ANTHROPIC_API_KEY=... node scripts/generate-post.mjs
+//
+// Pro Tag gibt es so viele Beiträge wie Uhrzeiten in FACT_TIMES (src/config.ts), jeder Aufruf
+// schreibt den nächsten fehlenden. Jeder Beitrag des Tages hat eine eigene Kategorie, und keine
+// davon war am Vortag dran. Das Datum im Frontmatter trägt die Uhrzeit, zu der er erscheint.
 //
 // Ablauf:
 // 1. Recherche: Claude sucht per Websuche einen überraschenden, belegbaren Fakt
@@ -18,7 +22,11 @@ import { checkPost, checkPair } from './post-rules.mjs';
 
 const MODEL = 'claude-opus-5-5';
 const POSTS_DIR = 'src/content/posts';
-const CATEGORIES = ['science', 'history', 'tech', 'nature', 'body', 'weird', 'survival', 'food', 'language', 'sport'];
+const CONFIG = fs.readFileSync('src/config.ts', 'utf8');
+const listIn = (name) => [...CONFIG.match(new RegExp(`${name}\\s*=\\s*\\[([^\\]]*)\\]`))[1].matchAll(/'([^']+)'/g)].map((m) => m[1]);
+const CATEGORIES = listIn('CATEGORIES');
+const FACT_TIMES = listIn('FACT_TIMES');
+const TZ = 'Europe/Berlin';
 
 const client = new Anthropic();
 
@@ -32,23 +40,45 @@ function readPosts(lang) {
     .map((f) => {
       const src = fs.readFileSync(path.join(dir, f), 'utf8');
       const get = (k) => src.match(new RegExp(`^${k}:\\s*"?(.*?)"?$`, 'm'))?.[1] ?? '';
-      return { file: f, title: get('title'), category: get('category'), date: get('date'), key: get('translationKey'), hook: get('hook') };
+      const date = get('date');
+      return { file: f, title: get('title'), category: get('category'), date, day: date.slice(0, 10), key: get('translationKey'), hook: get('hook') };
     })
     .sort((a, b) => b.date.localeCompare(a.date));
 }
 
 const existing = readPosts('en');
-const today = new Date().toISOString().slice(0, 10);
 
-if (readPosts('de').some((p) => p.date === today)) {
-  console.log(`Für ${today} gibt es schon einen Beitrag. Nichts zu tun.`);
+// Tage und Uhrzeiten rechnen in deutscher Zeit.
+const berlinDay = (d) => new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
+const today = berlinDay(new Date());
+const yesterday = berlinDay(new Date(Date.parse(`${today}T12:00:00Z`) - 86_400_000));
+// "+02:00" im Sommer, "+01:00" im Winter.
+const berlinOffset = (day, time) => {
+  const probe = new Date(`${day}T${time}:00Z`);
+  const name = new Intl.DateTimeFormat('en-US', { timeZone: TZ, timeZoneName: 'longOffset' }).formatToParts(probe).find((p) => p.type === 'timeZoneName').value;
+  return name === 'GMT' ? '+00:00' : name.replace('GMT', '');
+};
+
+const todays = existing.filter((p) => p.day === today);
+if (todays.length >= FACT_TIMES.length) {
+  console.log(`Für ${today} gibt es schon ${todays.length} Beiträge. Nichts zu tun.`);
   process.exit(0);
 }
+const time = FACT_TIMES[todays.length];
+const publishAt = `${today}T${time}:00${berlinOffset(today, time)}`;
 
-// Kategorie wählen, die am längsten nicht dran war.
+// Gesperrt: Kategorien vom Vortag und die, die heute schon dran waren.
+const blocked = new Set(existing.filter((p) => p.day === yesterday || p.day === today).map((p) => p.category));
+const allowed = CATEGORIES.filter((c) => !blocked.has(c));
+if (!allowed.length) {
+  console.error(`Keine Kategorie frei (gesperrt: ${[...blocked].join(', ')}).`);
+  process.exit(1);
+}
+// Davon die Kategorie wählen, die am längsten nicht dran war.
 const lastUsed = Object.fromEntries(CATEGORIES.map((c) => [c, '0000']));
 for (const p of existing) if (p.date > (lastUsed[p.category] ?? '')) lastUsed[p.category] = p.date;
-const category = CATEGORIES.sort((a, b) => lastUsed[a].localeCompare(lastUsed[b]))[0];
+const category = allowed.sort((a, b) => lastUsed[a].localeCompare(lastUsed[b]))[0];
+console.log(`Beitrag ${todays.length + 1} von ${FACT_TIMES.length} für ${today} um ${time} Uhr, Kategorie ${category} (gesperrt: ${[...blocked].join(', ') || 'keine'}).`);
 
 // Alle Beiträge gegen Dopplungen mitgeben, die neuesten 200 zusätzlich mit ihrem Kernsatz.
 const recentTitles =
@@ -226,13 +256,14 @@ const slugify = (s) =>
   s.toLowerCase().normalize('NFKD').replace(/ß/g, 'ss').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
 const q = (s) => JSON.stringify(s);
 
+const written = [];
 for (const lang of ['de', 'en']) {
   const v = post[lang];
   const md = [
     '---',
     `title: ${q(v.title)}`,
     `teaser: ${q(v.teaser)}`,
-    `date: ${today}`,
+    `date: ${publishAt}`,
     `category: ${category}`,
     `emoji: ${q(post.emoji)}`,
     `translationKey: ${q(post.translationKey)}`,
@@ -249,8 +280,9 @@ for (const lang of ['de', 'en']) {
   let file = path.join(POSTS_DIR, lang, `${slugify(v.slug) || post.translationKey}.md`);
   if (fs.existsSync(file)) file = file.replace(/\.md$/, `-${today}.md`);
   fs.writeFileSync(file, md);
+  written.push(file);
   console.log('Geschrieben:', file);
 }
 
-// Titel für die Commit-Nachricht
-if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT, `title=${post.de.title}\n`);
+// Für den Workflow: eine Zeile pro Beitrag mit Uhrzeit, Titel und Dateien (Tabulator-getrennt).
+if (process.env.POSTS_MANIFEST) fs.appendFileSync(process.env.POSTS_MANIFEST, [publishAt, post.de.title, ...written].join('\t') + '\n');
