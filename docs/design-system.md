@@ -19,7 +19,7 @@ Stil: Neo-Brutalismus. Dicke Ränder, harte Schatten ohne Weichzeichner, knallig
 | Gold-Fakten | `--gold`, `--gold-light`, `--gold-deep`, `--gold-surface` (Verlauf), `--star-size-sm/md/lg`, `--star-edge`, `--dur-twinkle`, `--locked` | Goldene Karten im Science Jumper; Text darauf ist `--on-accent`. Sterne bekommen ihre Farbe über die `.cat-*`-Klasse, neue Kategorien funktionieren also automatisch |
 | Spiel | `--flask`, `--flask-glow`, `--book-*`, `--wood*`, `--metal`, `--brick*`, `--roof*`, `--smoke` | Reagenzgläser, Buch, Kisten, Fässer und Häuser im Science Jumper. Das Spiel liest alle Farben per `getComputedStyle` aus den Tokens |
 | Bühne | `--night`, `--on-night`, `--on-night-muted` | Dunkle Fläche für Hero, Footer, „Nächster Fakt“; in beiden Modi dunkel |
-| Dunkler Hintergrund | `--sky-dot`, `--sky-spot`, `--sky-gap`, `--sky-spot-size`, `--sky-shape-opacity`, `--sky-stage`, `--dur-sky-drift` | Nur im Dunkelmodus, siehe „Dunkler Hintergrund“ unten |
+| Hintergrund | `--sky-dot`, `--sky-spot`, `--sky-gap`, `--sky-spot-size`, `--sky-shape-opacity`, `--sky-glow-edge`, `--sky-stage`, `--dur-sky-drift` | Helle Werte in `:root`, dunkle in den Dark-Mode-Blöcken, siehe „Hintergrund“ unten |
 | Schrift | `--font-display`, `--font-body`, `--fs-xs` (13) bis `--fs-3xl` (30), `--fs-display-sm/md/lg`, `--fs-emoji-sm…xl` | |
 | Abstände | `--space-1` (4px) bis `--space-12` (80px) | 4er-Raster |
 | Ränder | `--bw-xs` 1, `--bw-sm` 2, `--bw` 2.5, `--bw-accent` 6 | |
@@ -77,9 +77,15 @@ Wunsch von Eric (2026-10-02): Überall, wo eine Kategoriefarbe als Fläche aufta
 - Social-Media-Grafiken (`brand/`): Wunsch von Eric (2026-10-02), dort trägt **jeder** Hintergrund das Muster, auch Gold und die dunkle Bühne. Raster 44 px bei 1080 px Breite, damit es auf dem Handy so groß wirkt wie die 16 px der Seite.
 - Social-Media-Grafiken mit Inhalt tragen unten rechts klein „KI-generiert“ / „AI-generated“ (`aiTag` in `brand/brand-lib.mjs`), als Transparenzhinweis nach der EU-KI-Verordnung.
 
-## Dunkler Hintergrund
+## Hell und Dunkel
 
-Im Dunkelmodus liegt hinter der ganzen Seite eine Hintergrund-Ebene (`src/components/NightSky.astro`, eingebunden in `Base.astro`). Pro Sitzung wird zufällig **eine** von drei Varianten gezogen und bleibt bis zum Schließen des Tabs gleich, die Varianten werden nie gemischt (Eric, 2026-10-02):
+Ohne eigene Wahl folgt die Seite der Systemeinstellung. Der Knopf oben rechts (Mond/Sonne, `aria-pressed` = dunkel an) setzt `data-theme="light|dark"` auf `<html>` und speichert die Wahl in `localStorage` (`wtfact-theme`); ein kleines Skript im `<head>` setzt sie vor dem ersten Zeichnen. Danach feuert das Fenster das Ereignis `wtfact-theme`, damit Canvas-Grafiken (Hintergrund, Science Jumper) ihre Farben neu lesen.
+
+Die dunklen Tokens stehen deshalb in **zwei gleichen Blöcken**: `@media (prefers-color-scheme: dark) { :root:not([data-theme='light']) {…} }` und `:root[data-theme='dark'] {…}`. Der Build bricht ab, wenn sie auseinanderlaufen.
+
+## Hintergrund
+
+Hinter der ganzen Seite liegt eine Hintergrund-Ebene (`src/components/NightSky.astro`, eingebunden in `Base.astro`). Pro Sitzung wird zufällig **eine** von drei Varianten gezogen und bleibt bis zum Schließen des Tabs gleich, die Varianten werden nie gemischt (Eric, 2026-10-02):
 
 | Variante | Was passiert | Bewegung |
 |---|---|---|
@@ -89,10 +95,10 @@ Im Dunkelmodus liegt hinter der ganzen Seite eine Hintergrund-Ebene (`src/compon
 
 - Die Wahl steht in `sessionStorage` (`wtfact-sky`). Ist der Speicher gesperrt, wird pro Seitenaufruf neu gezogen.
 - Zum Ansehen einer bestimmten Variante `?sky=dots`, `?sky=shapes` oder `?sky=glow` an die Adresse hängen.
-- `.stage` wird dann halb durchsichtig (`--sky-stage`), damit der Hintergrund auch im Hero und Footer durchscheint.
+- Gilt im hellen und dunklen Modus. Hell: dunkle Punkte, pinker Lichtkegel, kräftigere Formen, Leuchtpunkte mit dunklem Rand (`--sky-glow-edge`), damit Gelb und Türkis auf dem hellen Grund sichtbar bleiben.
+- Im dunklen Modus wird `.stage` halb durchsichtig (`--sky-stage`), damit der Hintergrund auch im Hero und Footer durchscheint. Im hellen Modus bleibt die Bühne deckend dunkel.
 - Formen sind nur Umrisse, keine Flächen, deshalb gilt die Punktmuster-Regel dort nicht. Farben für den Canvas kommen per `getComputedStyle` aus den `--cat-*`-Tokens, neue Kategorien leuchten also automatisch mit.
 - „Bewegung reduzieren“: Formen stehen still, Leuchtpunkte leuchten fest an ein paar Stellen, der Lichtkegel wandert nicht von selbst.
-- Im hellen Modus ist die Ebene aus.
 
 ## Regeln, die der Build prüft
 

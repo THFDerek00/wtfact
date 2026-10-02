@@ -35,13 +35,14 @@
   --on-night: #fffaf0;
   --on-night-muted: #c9c4d1;
 
-  /* Dunkler Hintergrund (nur im Dunkelmodus, Komponente NightSky.astro) */
-  --sky-dot: rgb(255 250 240 / 0.09);
-  --sky-spot: color-mix(in srgb, var(--yellow) 55%, transparent);
+  /* Hintergrund-Ebene (Komponente NightSky.astro): helle Werte hier, dunkle unten */
+  --sky-dot: rgb(20 20 20 / 0.13);
+  --sky-spot: color-mix(in srgb, var(--pink) 75%, transparent);
   --sky-gap: 22px;
   --sky-spot-size: 220px;
-  --sky-shape-opacity: 0.45;
-  --sky-stage: color-mix(in srgb, var(--night) 30%, transparent); /* Bühne lässt den Hintergrund leicht durch */
+  --sky-shape-opacity: 0.75;
+  --sky-glow-edge: rgb(20 20 20 / 0.5); /* dunkler Rand, damit Gelb/Türkis auf Hell sichtbar bleiben */
+  --sky-stage: var(--night); /* hell: Bühne bleibt deckend dunkel */
 
   /* Kategorien */
   --cat-science: var(--cyan);
@@ -156,12 +157,14 @@
   --ease-pop: cubic-bezier(0.3, 1.6, 0.5, 1);
   --dur-marquee: 80s;
   --dur-swipe: 0.3s; /* Karte fliegt nach dem Wischen weg */
-  --dur-sky-drift: 26s; /* Formenflug im dunklen Hintergrund */
+  --dur-sky-drift: 26s; /* Formenflug im Hintergrund */
 
   color-scheme: light;
 }
+/* Dunkler Modus: folgt dem System, außer man hat oben rechts umgeschaltet (data-theme auf <html>).
+   Beide Blöcke müssen gleich sein, der Build prüft das. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --bg: #111014;
     --surface: #1c1a21;
     --ink: #f4f1ea;
@@ -171,8 +174,30 @@
     --focus: #ffd23f;
     --night: #000000;
     --locked: #2a2731;
+    --sky-dot: rgb(255 250 240 / 0.09);
+    --sky-spot: color-mix(in srgb, var(--yellow) 55%, transparent);
+    --sky-shape-opacity: 0.45;
+    --sky-glow-edge: transparent;
+    --sky-stage: color-mix(in srgb, var(--night) 30%, transparent); /* Hintergrund scheint durch */
     color-scheme: dark;
   }
+}
+:root[data-theme='dark'] {
+  --bg: #111014;
+  --surface: #1c1a21;
+  --ink: #f4f1ea;
+  --muted: #a9a5b0;
+  --line: #f4f1ea;
+  --pink-text: #ff5a92;
+  --focus: #ffd23f;
+  --night: #000000;
+  --locked: #2a2731;
+  --sky-dot: rgb(255 250 240 / 0.09);
+  --sky-spot: color-mix(in srgb, var(--yellow) 55%, transparent);
+  --sky-shape-opacity: 0.45;
+  --sky-glow-edge: transparent;
+  --sky-stage: color-mix(in srgb, var(--night) 30%, transparent); /* Hintergrund scheint durch */
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
