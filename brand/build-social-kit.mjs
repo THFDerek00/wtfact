@@ -1,15 +1,16 @@
 // Erzeugt das Social-Media-Kit von WTFact: leere Vorlagen je Kategorie, Beispiel-Posts mit echten
 // Fakten von der Seite und Grafiken für die Kampagnen (DE und EN).
-// Titel, Hooks und Quellen kommen direkt aus src/content/posts, damit nur belegte Fakten auftauchen.
+// Titel, Hooks und Quellen kommen direkt aus der Fakten-Datenbank (scripts/facts-db.mjs), damit nur belegte Fakten auftauchen.
 //
 // Einmalig nötig (wird nicht im Projekt installiert):
 //   npm i --no-save opentype.js @resvg/resvg-js @fontsource/space-grotesk @fontsource/inter
-// Dann:  node brand/build-social-kit.mjs
+// Dann:  node --disable-warning=ExperimentalWarning brand/build-social-kit.mjs
 import fs from 'node:fs';
 import path from 'node:path';
 import {
   ROOT, DISPLAY, TEXT, C, r2, measure, text, wrap, svg, png, wordmark, CAT_COLOR, iconG, card, chip, confetti, dots, aiTag, L,
 } from './brand-lib.mjs';
+import { open as openFacts, readFacts } from '../scripts/facts-db.mjs';
 
 const OUT = 'brand/social/kit';
 // Weitere Farben aus src/styles/global.css
@@ -20,20 +21,14 @@ const FLASK = { liquid: '#2f7bff', glow: '#8ec5ff' };
 const CATS = ['science', 'history', 'tech', 'nature', 'body', 'weird', 'survival', 'food', 'language', 'sport'];
 
 // ---------- Beiträge lesen ----------
+// Aus der Inhalts-Datenbank (db/wtfact.sqlite, wird bei Bedarf aus db/facts/ gebaut).
 function readPosts(lang) {
-  const dir = path.join(ROOT, 'src/content/posts', lang);
+  const db = openFacts({ root: ROOT });
   const posts = {};
-  for (const f of fs.readdirSync(dir)) {
-    const fm = fs.readFileSync(path.join(dir, f), 'utf8').split('\n---')[0];
-    const val = (k) => {
-      const m = fm.match(new RegExp(`^${k}: (.*)$`, 'm'));
-      if (!m) return null;
-      const v = m[1].trim();
-      return v.startsWith('"') ? JSON.parse(v) : v;
-    };
-    const sources = [...fm.matchAll(/^\s+- label: (".*")$/gm)].map((m) => JSON.parse(m[1]));
-    posts[val('translationKey')] = { key: val('translationKey'), title: val('title'), hook: val('hook'), cat: val('category'), emoji: val('emoji'), date: val('date'), sources };
-  }
+  // Nach Adresse sortiert wie früher die Dateien, damit Fakten mit gleichem Datum gleich einsortiert werden.
+  for (const f of readFacts(db).filter((f) => f[lang]).sort((a, b) => a[lang].slug.localeCompare(b[lang].slug)))
+    posts[f.key] = { key: f.key, title: f[lang].title, hook: f[lang].hook, cat: f.category, emoji: f.emoji, date: f.date, sources: f[lang].sources.map((s) => s.label) };
+  db.close();
   return posts;
 }
 const POSTS = { de: readPosts('de'), en: readPosts('en') };

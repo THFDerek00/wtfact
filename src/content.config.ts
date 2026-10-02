@@ -1,9 +1,47 @@
 import { defineCollection, z } from 'astro:content';
-import { glob } from 'astro/loaders';
 import { CATEGORIES } from './config';
+import { DB_FILE, FACTS_DIR, build, open, readPosts } from '../scripts/facts-db.mjs';
 
+// Die Fakten kommen aus der SQLite-Datenbank (scripts/facts-db.mjs), nicht mehr aus Markdown-Dateien.
+// Die id bleibt "<sprache>/<slug>", damit alle Adressen gleich bleiben.
 const posts = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/posts' }),
+  loader: {
+    name: 'wtfact-sqlite',
+    load: async ({ store, parseData, renderMarkdown, generateDigest, watcher, logger }) => {
+      const sync = async () => {
+        const db = open();
+        // Gleiche Reihenfolge wie früher die Dateien (Sprache, dann Adresse), damit Fakten mit
+        // demselben Datum ihre Reihenfolge behalten.
+        const rows = readPosts(db).sort((a, b) => `${a.lang}/${a.slug}`.localeCompare(`${b.lang}/${b.slug}`));
+        db.close();
+        store.clear();
+        for (const { lang, slug, body, ...data } of rows) {
+          const id = `${lang}/${slug}`;
+          store.set({
+            id,
+            data: await parseData({ id, data }),
+            body,
+            rendered: await renderMarkdown(body),
+            digest: generateDigest({ data, body }),
+          });
+        }
+        logger.info(`${rows.length} Sprachversionen aus ${DB_FILE} geladen.`);
+      };
+      await sync();
+      // Im Entwicklungsmodus: geänderte SQL-Dateien sofort übernehmen.
+      watcher?.add(FACTS_DIR);
+      const reload = async (file: string) => {
+        if (!file.includes(FACTS_DIR) || !file.endsWith('.sql')) return;
+        try {
+          build({ quiet: true });
+          await sync();
+        } catch (e) {
+          logger.warn((e as Error).message);
+        }
+      };
+      for (const event of ['add', 'change', 'unlink'] as const) watcher?.on(event, reload);
+    },
+  },
   schema: z.object({
     title: z.string(),
     teaser: z.string(),

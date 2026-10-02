@@ -3,13 +3,19 @@
   "type": "module",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=22.13"
+  },
   "scripts": {
     "dev": "astro dev",
-    "check": "node scripts/check-posts.mjs && node scripts/check-golden.mjs && node scripts/check-design.mjs",
-    "prebuild": "node scripts/check-posts.mjs && node scripts/check-golden.mjs && node scripts/check-design.mjs",
+    "check": "node --disable-warning=ExperimentalWarning scripts/facts-db.mjs build && node --disable-warning=ExperimentalWarning scripts/check-posts.mjs && node --disable-warning=ExperimentalWarning scripts/check-golden.mjs && node scripts/check-design.mjs",
+    "prebuild": "node --disable-warning=ExperimentalWarning scripts/facts-db.mjs build && node --disable-warning=ExperimentalWarning scripts/check-posts.mjs && node --disable-warning=ExperimentalWarning scripts/check-golden.mjs && node scripts/check-design.mjs",
     "build": "astro build",
     "preview": "astro preview",
-    "post": "node scripts/generate-post.mjs",
+    "post": "node --disable-warning=ExperimentalWarning scripts/generate-post.mjs",
+    "db:build": "node --disable-warning=ExperimentalWarning scripts/facts-db.mjs build",
+    "db:dump": "node --disable-warning=ExperimentalWarning scripts/facts-db.mjs dump",
+    "db:stats": "node --disable-warning=ExperimentalWarning scripts/facts-db.mjs stats",
     "check:design": "node scripts/check-design.mjs"
   },
   "dependencies": {
