@@ -76,7 +76,7 @@ Build automatisch. Wer hier eine Zahl ändert, ändert sie auch dort.
 
 ## Golden facts (Science Jumper)
 
-<!-- Gold-Fakten stehen in src/data/golden-facts.json und werden im Spiel Science Jumper freigeschaltet.
+<!-- Gold-Fakten stehen in der Datenbank (Tabelle gold_facts, Dateien db/gold/*.sql) und werden im Spiel Science Jumper freigeschaltet.
 scripts/check-golden.mjs prüft sie bei jedem Build. -->
 
 - Golden facts are rewards: extra obscure, with a real wow factor, and never also published as a normal post.

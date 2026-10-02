@@ -2,7 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import { LANGS, type Lang } from '../../config';
 import { t } from '../../i18n/ui';
-import golden from '../../data/golden-facts.json';
+import { open, readGold } from '../../../scripts/facts-db.mjs';
 
 export function getStaticPaths() {
   return LANGS.map((lang) => ({ params: { lang } }));
@@ -12,9 +12,12 @@ const ui = t(lang);
 const g = ui.game;
 const other: Lang = lang === 'de' ? 'en' : 'de';
 
-// Gold-Fakten, nach Punkten sortiert. Der Inhalt steht kodiert im HTML und wird erst
-// nach dem Freischalten im Browser eingesetzt, damit er nicht einfach im Quelltext steht.
-const facts = [...golden.facts].sort((a, b) => a.points - b.points);
+// Gold-Fakten aus der Datenbank (Tabelle gold_facts), nach Punkten sortiert. Der Inhalt steht
+// kodiert im HTML und wird erst nach dem Freischalten im Browser eingesetzt, damit er nicht
+// einfach im Quelltext steht.
+const db = open();
+const facts = readGold(db);
+db.close();
 const payload = facts.map((f) => ({
   id: f.id,
   points: f.points,

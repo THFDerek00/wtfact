@@ -2,3 +2,6 @@ node_modules/
 dist/
 .astro/
 .env
+# Wird aus db/facts/ und db/gold/ gebaut (npm run db:build)
+db/wtfact.sqlite
+db/wtfact.sqlite.tmp

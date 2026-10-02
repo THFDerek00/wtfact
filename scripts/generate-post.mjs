@@ -11,17 +11,17 @@
 // 2. Formatierung: Claude gibt den Beitrag als validiertes JSON in beiden Sprachen zurück.
 // 3. Das Skript prüft die Regeln aus docs/styleguide.md (scripts/post-rules.mjs).
 // 4. Faktencheck: Ein zweiter Claude-Durchgang öffnet jede Quelle und prüft jede Aussage.
-//    Nur wenn alles belegt ist, werden zwei Markdown-Dateien angelegt.
+//    Nur wenn alles belegt ist, kommt der Fakt in die Datenbank (db/wtfact.sqlite) und als
+//    lesbare Datei nach db/facts/<key>.sql, die der Workflow als PR vorschlägt.
 
 import fs from 'node:fs';
-import path from 'node:path';
 import Anthropic from '@anthropic-ai/sdk';
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod';
 import { z } from 'zod';
 import { checkPost, checkPair } from './post-rules.mjs';
+import { build, open, readFacts, saveFact } from './facts-db.mjs';
 
 const MODEL = 'claude-opus-5-5';
-const POSTS_DIR = 'src/content/posts';
 const CONFIG = fs.readFileSync('src/config.ts', 'utf8');
 const listIn = (name) => [...CONFIG.match(new RegExp(`${name}\\s*=\\s*\\[([^\\]]*)\\]`))[1].matchAll(/'([^']+)'/g)].map((m) => m[1]);
 const CATEGORIES = listIn('CATEGORIES');
@@ -32,21 +32,13 @@ const client = new Anthropic();
 
 // ---------- Bestehende Beiträge einlesen ----------
 
-function readPosts(lang) {
-  const dir = path.join(POSTS_DIR, lang);
-  return fs
-    .readdirSync(dir)
-    .filter((f) => f.endsWith('.md'))
-    .map((f) => {
-      const src = fs.readFileSync(path.join(dir, f), 'utf8');
-      const get = (k) => src.match(new RegExp(`^${k}:\\s*"?(.*?)"?$`, 'm'))?.[1] ?? '';
-      const date = get('date');
-      return { file: f, title: get('title'), category: get('category'), date, day: date.slice(0, 10), key: get('translationKey'), hook: get('hook') };
-    })
-    .sort((a, b) => b.date.localeCompare(a.date));
-}
-
-const existing = readPosts('en');
+// Datenbank frisch aus db/facts/ bauen, damit auch gerade erst gemergte Fakten zählen.
+build({ quiet: true });
+const db = open({ readOnly: false });
+const facts = readFacts(db);
+const existing = facts
+  .map((f) => ({ title: f.en.title, category: f.category, date: f.date, day: f.date.slice(0, 10), key: f.key, hook: f.en.hook }))
+  .sort((a, b) => b.date.localeCompare(a.date));
 
 // Tage und Uhrzeiten rechnen in deutscher Zeit.
 const berlinDay = (d) => new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
@@ -254,35 +246,18 @@ console.log('Faktencheck bestanden.');
 
 const slugify = (s) =>
   s.toLowerCase().normalize('NFKD').replace(/ß/g, 'ss').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
-const q = (s) => JSON.stringify(s);
-
-const written = [];
+// Adressen sind je Sprache eindeutig. Ist eine schon vergeben, kommt das Datum dazu.
+const taken = (lang, slug) => facts.some((f) => f[lang]?.slug === slug);
+const fact = { key: post.translationKey, date: publishAt, category, emoji: post.emoji, draft: false };
 for (const lang of ['de', 'en']) {
   const v = post[lang];
-  const md = [
-    '---',
-    `title: ${q(v.title)}`,
-    `teaser: ${q(v.teaser)}`,
-    `date: ${publishAt}`,
-    `category: ${category}`,
-    `emoji: ${q(post.emoji)}`,
-    `translationKey: ${q(post.translationKey)}`,
-    `hook: ${q(v.hook)}`,
-    'products:',
-    ...v.products.slice(0, 3).flatMap((p) => [`  - name: ${q(p.name)}`, `    query: ${q(p.query)}`, `    why: ${q(p.why)}`]),
-    'sources:',
-    ...sources.flatMap((s) => [`  - label: ${q(s.label)}`, `    url: ${q(s.url)}`]),
-    '---',
-    '',
-    v.body.trim(),
-    '',
-  ].join('\n');
-  let file = path.join(POSTS_DIR, lang, `${slugify(v.slug) || post.translationKey}.md`);
-  if (fs.existsSync(file)) file = file.replace(/\.md$/, `-${today}.md`);
-  fs.writeFileSync(file, md);
-  written.push(file);
-  console.log('Geschrieben:', file);
+  let slug = slugify(v.slug) || post.translationKey;
+  if (taken(lang, slug)) slug = `${slug}-${today}`;
+  fact[lang] = { slug, title: v.title, teaser: v.teaser, hook: v.hook, body: v.body.trim(), products: v.products.slice(0, 3), sources };
 }
+const file = saveFact(db, fact);
+db.close();
+console.log('Gespeichert:', file);
 
-// Für den Workflow: eine Zeile pro Beitrag mit Uhrzeit, Titel und Dateien (Tabulator-getrennt).
-if (process.env.POSTS_MANIFEST) fs.appendFileSync(process.env.POSTS_MANIFEST, [publishAt, post.de.title, ...written].join('\t') + '\n');
+// Für den Workflow: eine Zeile pro Beitrag mit Uhrzeit, Titel und Datei (Tabulator-getrennt).
+if (process.env.POSTS_MANIFEST) fs.appendFileSync(process.env.POSTS_MANIFEST, [publishAt, post.de.title, file].join('\t') + '\n');

@@ -73,12 +73,13 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           base=$(git rev-parse --abbrev-ref HEAD)
           # Eigene Eingabe (3), damit git und gh die Liste nicht mitlesen.
-          while IFS=$'\t' read -r at title de en <&3; do
+          while IFS=$'\t' read -r at title file <&3; do
             day=${at:0:10}
             hhmm=${at:11:2}${at:14:2}
             branch="beitrag/$day-$hhmm"
             git switch -c "$branch"
-            git add "$de" "$en"
+            # Ein Fakt = eine SQL-Datei in db/facts/ (beide Sprachen), im PR als Text lesbar.
+            git add "$file"
             git commit -m "Neuer Beitrag: $title"
             git push -u origin "$branch"
             gh pr create --base main --head "$branch" --title "Neuer Beitrag ${at:11:5} Uhr: $title" \

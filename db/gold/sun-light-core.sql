@@ -1,0 +1,12 @@
+-- Gold-Fakt „Dein Sonnenlicht ist älter, als du denkst“ (Science Jumper, ab Highscore 600)
+INSERT INTO gold_facts (id, points, category, emoji) VALUES
+  ('sun-light-core', 600, 'science', '☀️');
+
+INSERT INTO gold_texts (gold, lang, title, text) VALUES
+  ('sun-light-core', 'de', 'Dein Sonnenlicht ist älter, als du denkst', 'Das Sonnenlicht auf deinem Gesicht hat für rund 150 Millionen Kilometer Weltall nur gut 8 Minuten gebraucht. Der zähe Teil kam vorher. Die Energie dahinter entsteht durch Kernfusion im Sonnenkern, und raus aus der Sonne ist echt mühsam: Das Innere ist so dicht, dass Licht ständig verschluckt, neu ausgesendet und in zufällige Richtungen gestreut wird. Schätzungen für diesen Ausbruch reichen von etwa 40.000 Jahren (NASA) bis rund 170.000 oder sogar 200.000 Jahren, je nach Modell. Die Energie, die dich heute trifft, ist also wahrscheinlich schon vor dem Ende der letzten Eiszeit losgezogen.'),
+  ('sun-light-core', 'en', 'Your Sunlight Is Older Than You Think', 'The sunlight on your face took just over 8 minutes to cross about 150 million kilometers of space. The hard part came earlier. The energy behind it was released by fusion in the Sun''s core, and getting out of the Sun is a slog: the interior is so dense that light keeps getting absorbed, re-emitted and scattered in random directions. Estimates for that escape range from about 40,000 years (NASA) to around 170,000 or even 200,000 years, depending on the model. So the energy that hits you today likely set off before the end of the last ice age.');
+
+INSERT INTO gold_sources (gold, pos, label, url) VALUES
+  ('sun-light-core', 1, 'NASA Scientific Visualization Studio: Journey Of Light', 'https://svs.gsfc.nasa.gov/11537'),
+  ('sun-light-core', 2, 'ScienceAlert: The Longest Journey Sunlight Ever Takes Happens Before It Leaves The Sun', 'https://www.sciencealert.com/the-sunlight-on-your-face-took-8-minutes-to-reach-earth-but-first-it-spent-170000-years-escaping-the-sun'),
+  ('sun-light-core', 3, 'Astronomy: I heard that the light from nuclear fusion reactions in the Sun''s core takes about 200,000 years to reach its surface. I thought the speed of light is constant. Why does it take so long?', 'https://www.astronomy.com/science/i-heard-that-the-light-from-nuclear-fusion-reactions-in-the-suns-core-takes-about-200000-years-to-reach-its-surface-i-thought-the-speed-of-light-is-constant-why-does-it-take-so-long/');

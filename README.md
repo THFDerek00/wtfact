@@ -3,8 +3,8 @@
 Zweisprachige Fakten-Website (Deutsch/Englisch), gebaut mit Astro.
 
 - `npm install` und `npm run dev` startet die Seite lokal.
-- Beiträge liegen in `src/content/posts/de/` und `src/content/posts/en/` als Markdown.
-  Gleiche `translationKey` verbindet die beiden Sprachversionen.
+- Fakten und Gold-Fakten liegen in einer SQLite-Datenbank (siehe „Fakten-Datenbank“ unten).
+  Ein Fakt hat einen `key`, der die deutsche und englische Version verbindet.
 - Amazon-Tags, Impressumsangaben: `src/config.ts`.
 - Domain: `astro.config.mjs` (`site`).
 
@@ -23,7 +23,7 @@ Kategorien kommt jeweils die dran, die am längsten Pause hatte.
 3. Das Skript prüft die Regeln aus `docs/styleguide.md` (`scripts/post-rules.mjs`), etwa Länge,
    mindestens zwei unabhängige Quellen und keine Zahlen in der Überschrift, die nicht im Text stehen.
 4. Ein Faktencheck-Durchgang öffnet jede Quelle und prüft jede Aussage, die Überschrift und die Quellentitel.
-5. Nur wenn alles passt, wird der Beitrag gespeichert. Sein `date` trägt die Uhrzeit, zu der er erscheint
+5. Nur wenn alles passt, wird der Beitrag in der Datenbank gespeichert (Datei `db/facts/<key>.sql`). Sein `date` trägt die Uhrzeit, zu der er erscheint
    (z. B. `2026-10-03T13:00:00+02:00`).
 
 Jeder Fakt bekommt einen zweiten Versuch. Fällt er trotzdem durch, rückt der nächste Fakt auf seine Uhrzeit vor,
@@ -32,6 +32,30 @@ Pull Request (Zweig `beitrag/JJJJ-MM-TT-HHMM`).
 
 `.github/workflows/publish-posts.yml` führt jeden PR zu seiner Uhrzeit nach `main` zusammen, Cloudflare Pages
 baut die Seite dann neu. Wer einen Fakt stoppen will, schließt seinen PR vorher.
+
+## Fakten-Datenbank
+
+Alle Inhalte stehen in SQLite, der gleichen Datenbank-Sprache wie Cloudflare D1:
+
+- `db/facts-schema.sql`: Tabellen `facts`, `texts` (pro Sprache), `products`, `sources`, `gold_facts`, `gold_texts`, `gold_sources`.
+- `db/wtfact.sqlite`: die Datenbank selbst. Seite, Prüfungen, Generator und Social-Kit lesen nur hier.
+  Sie steht nicht in git und wird bei `npm run check` und `npm run build` frisch gebaut.
+- `db/facts/<key>.sql` und `db/gold/<id>.sql`: dieselben Daten als lesbare SQL-Datei, eine pro Fakt. Das ist die
+  Form in git. So zeigt jeder Fakten-PR den Text Zeile für Zeile, und die drei PRs pro Tag kommen sich nicht in die Quere
+  (eine Datenbank-Datei in git wäre im PR unlesbar und würde bei jedem zweiten PR einen Konflikt melden).
+
+Befehle:
+
+- `npm run db:build` baut `db/wtfact.sqlite` aus den SQL-Dateien.
+- Datenbank direkt bearbeiten, z. B. mit [DB Browser for SQLite](https://sqlitebrowser.org): danach `npm run db:dump`.
+  Das schreibt die Änderungen zurück in `db/facts/` und `db/gold/` (gelöschte Fakten verschwinden dort auch).
+  Vergessen ist kein Problem: `db:build` merkt, dass die Datenbank Änderungen hat, und bricht ab, statt sie zu überschreiben.
+- `npm run db:stats` zeigt, wie viele Fakten es je Kategorie gibt.
+- Einen Fakt von der Seite nehmen, ohne ihn zu löschen: `draft` auf `1`.
+
+Braucht Node 22.13 oder neuer (eingebautes `node:sqlite`, kein Zusatzpaket). Cloudflare Pages liest die Version aus `.node-version`.
+Alte Markdown-Beiträge in `src/content/posts/` (etwa aus einem PR von vor der Umstellung) werden beim Bauen noch mitgelesen;
+`npm run db:dump` wandelt sie in SQL-Dateien um.
 
 ## Stilregeln
 

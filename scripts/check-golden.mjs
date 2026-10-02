@@ -1,8 +1,9 @@
-// Prüft die Gold-Fakten aus dem Science Jumper (src/data/golden-facts.json).
+// Prüft die Gold-Fakten aus dem Science Jumper (Tabelle gold_facts, Dateien in db/gold/).
 // Läuft vor jedem Build. Gold-Fakten sind Fakten wie alle anderen: gleiche Quellenregeln
 // wie in docs/styleguide.md, dazu die Regeln für die Freischalt-Stufen.
 import fs from 'node:fs';
 import { host, countWords } from './post-rules.mjs';
+import { open, readGold } from './facts-db.mjs';
 
 export const GOLD = { last: 1000, minBeforeLast: 10, minWords: 50, maxWords: 130, minSources: 2, sourcesBesideWikipedia: 2 };
 
@@ -13,7 +14,9 @@ const numbers = (s) => (s.match(/\d[\d.,]*\d|\d/g) ?? []).map((n) => n.replace(/
 const roundStep = (p) => (p <= 20 ? p % 5 === 0 : p % 25 === 0);
 
 const categories = [...fs.readFileSync('src/config.ts', 'utf8').match(/CATEGORIES\s*=\s*\[([^\]]*)\]/)[1].matchAll(/'([\w-]+)'/g)].map((m) => m[1]);
-const { facts } = JSON.parse(fs.readFileSync('src/data/golden-facts.json', 'utf8'));
+const db = open();
+const facts = readGold(db);
+db.close();
 const problems = [];
 const ids = new Set();
 
