@@ -1,5 +1,5 @@
 // Browser-Teil für Wisch-Bewertungen, Montags-Abstimmung und Fakt der Woche.
-// Spricht mit /api (Cloudflare, siehe src/server/community.ts). Ist das nicht erreichbar
+// Spricht mit der PHP-API (public/api/index.php). Ist sie nicht erreichbar
 // (lokal, in der Vorschau oder bevor die Datenbank eingerichtet ist), läuft alles nur in diesem
 // Browser weiter: Bewertungen und die eigene Stimme bleiben gespeichert, Ergebnisse zählen dann
 // nur die eigene Stimme.
@@ -50,7 +50,7 @@ let offline = false;
 async function api<T>(path: string, payload?: unknown): Promise<{ ok: true; data: T } | { ok: false; status: number }> {
   if (offline) return { ok: false, status: 0 };
   try {
-    const r = await fetch(`/api/${path}`, payload
+    const r = await fetch(`/api/index.php?r=${path}`, payload
       ? { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) }
       : { cache: 'no-store' });
     if (r.status === 404 || r.status === 503 || r.status === 405 || !r.headers.get('content-type')?.includes('json')) {

@@ -1,5 +1,5 @@
 // Browser-Teil der Hall of Fame (Fakt des Tages, Fakt der Woche, Verlauf, Tippspiel, Sammelalbum).
-// Gemeinsame Zahlen kommen von /api (src/server/community.ts). Ohne Server rechnet alles mit den
+// Gemeinsame Zahlen kommen von der PHP-API (public/api/index.php). Ohne Server rechnet alles mit den
 // eigenen Bewertungen und Stimmen aus diesem Browser, genau wie die Abstimmung (src/scripts/community.ts).
 import { week, myRatings, myVote, type Week } from './community';
 import { addDays, lastDays, pastPolls, pickFactOfDay, type DayPick, type FactMeta, type WeekPick } from '../week';
@@ -32,7 +32,7 @@ export type History = { days: DayPick[]; weeks: WeekPick[]; shared: boolean };
 export async function history(facts: FactMeta[], today: string, shared: boolean): Promise<History> {
   if (shared) {
     try {
-      const r = await fetch('/api/history');
+      const r = await fetch('/api/index.php?r=history');
       if (r.ok && r.headers.get('content-type')?.includes('json')) {
         const data = (await r.json()) as Omit<History, 'shared'>;
         return { days: data.days, weeks: data.weeks, shared: true };
