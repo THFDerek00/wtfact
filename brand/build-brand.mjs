@@ -8,7 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import {
-  ROOT, TEXT, C, r2, text, wrap, svg, out, png, wordmark, logoFile, mark, ICONS, CAT_COLOR, iconG, card, chip, confetti, DOT_INK, dots, L,
+  ROOT, TEXT, C, r2, text, wrap, svg, out, png, wordmark, logoFile, mark, ICONS, CAT_COLOR, iconG, card, chip, confetti, dots, aiTag, L,
 } from './brand-lib.mjs';
 
 const EXAMPLE = {
@@ -63,7 +63,7 @@ for (const lang of ['de', 'en']) {
 // Profilbild 1080×1080 (Instagram, TikTok, Pinterest, YouTube; rund beschnitten sicher)
 {
   const S = 1080;
-  let b = `<rect width="${S}" height="${S}" fill="${C.pink}"/>` + dots(S, S, '#14141422');
+  let b = `<rect width="${S}" height="${S}" fill="${C.pink}"/>` + dots(S, S);
   const inner = mark({ size: 640 }).replace(/^<svg[^>]*>|<\/svg>\n$/g, '');
   b += `<g transform="translate(220 220)">${inner}</g>`;
   png('brand/social/profilbild-1080.png', svg(S, S, b));
@@ -74,7 +74,7 @@ for (const lang of ['de', 'en']) {
   // X/Twitter-Header 1500×500
   {
     const W = 1500, H = 500;
-    let b = `<rect width="${W}" height="${H}" fill="${C.yellow}"/>` + dots(W, H, '#14141420') + confetti(W, H, 30, 5, [380, 90, 1450, 430]);
+    let b = `<rect width="${W}" height="${H}" fill="${C.yellow}"/>` + dots(W, H) + confetti(W, H, 30, 5, [380, 90, 1450, 430]);
     const m = wordmark({ size: 130, x: 0, y: 0 });
     b += `<g transform="translate(${r2(W - 90 - m.width)} 225)">${m.body}</g>`;
     b += text(t.tagline[0], { x: W - 90, y: 330, size: 42, font: TEXT, anchor: 'end' });
@@ -84,7 +84,7 @@ for (const lang of ['de', 'en']) {
   // YouTube/Facebook-Banner 2560×1440 (Text in der sicheren Mitte 1546×423)
   {
     const W = 2560, H = 1440;
-    let b = `<rect width="${W}" height="${H}" fill="${C.cyan}"/>` + dots(W, H, '#14141420') + confetti(W, H, 70, 3, [480, 460, 2080, 980]);
+    let b = `<rect width="${W}" height="${H}" fill="${C.cyan}"/>` + dots(W, H) + confetti(W, H, 70, 3, [480, 460, 2080, 980]);
     b += card(560, 500, 1440, 440, C.bg, { sw: 10, off: 20, rx: 48 });
     const m = wordmark({ size: 150, x: 0, y: 0 });
     b += `<g transform="translate(${r2(1280 - m.width / 2)} 700)">${m.body}</g>`;
@@ -94,7 +94,7 @@ for (const lang of ['de', 'en']) {
   // Instagram-Story-Highlight-Cover 1080×1920 (Symbol bleibt im runden Ausschnitt)
   for (const key of Object.keys(ICONS)) {
     const W = 1080, H = 1920;
-    let b = `<rect width="${W}" height="${H}" fill="${CAT_COLOR[key]}"/>` + dots(W, H, DOT_INK);
+    let b = `<rect width="${W}" height="${H}" fill="${CAT_COLOR[key]}"/>` + dots(W, H);
     b += `<circle cx="${W / 2 + 18}" cy="${H / 2 + 18}" r="330" fill="${C.ink}"/>`;
     b += `<circle cx="${W / 2}" cy="${H / 2}" r="330" fill="${C.bg}" stroke="${C.ink}" stroke-width="16"/>`;
     b += iconG(key, W / 2 - 190, H / 2 - 190, 380, C.ink, 1.8);
@@ -128,6 +128,7 @@ for (const lang of ['de', 'en']) {
     b += `<rect x="${pad}" y="${by}" width="${btnW}" height="96" rx="48" fill="${C.yellow}" stroke="${C.ink}" stroke-width="6"/>`;
     b += text(t.cta, { x: pad + btnW / 2, y: by + 62, size: 40, anchor: 'middle' });
     b += text(`${t.daily} · ${t.sources}`, { x: W / 2, y: by - 40, size: 32, font: TEXT, fill: C.muted, anchor: 'middle' });
+    b += aiTag(W, H, lang);
     png(`brand/social/${lang}/${name}`, svg(W, H, b));
   };
   feedOrStory(1080, 1350, 'vorlage-instagram-post-1080x1350.png');
@@ -135,7 +136,7 @@ for (const lang of ['de', 'en']) {
   // Pinterest-Pin 1000×1500
   {
     const W = 1000, H = 1500;
-    let b = `<rect width="${W}" height="${H}" fill="${C.lime}"/>` + dots(W, H, '#14141420');
+    let b = `<rect width="${W}" height="${H}" fill="${C.lime}"/>` + dots(W, H);
     const tl = wrap(ex.title, 96, 720);
     const hl = wrap(ex.hook, 40, 720, TEXT);
     const ch = 60 + 120 + 40 + tl.length * 100 + 40 + hl.length * 56 + 50;
@@ -149,6 +150,7 @@ for (const lang of ['de', 'en']) {
     const m = wordmark({ size: 90, x: 0, y: 0 });
     b += `<g transform="translate(${r2(W / 2 - m.width / 2)} 1330)">${m.body}</g>`;
     b += text(t.short, { x: W / 2, y: 1420, size: 36, font: TEXT, anchor: 'middle' });
+    b += aiTag(W, H, lang);
     png(`brand/social/${lang}/vorlage-pinterest-pin-1000x1500.png`, svg(W, H, b));
   }
 }

@@ -172,8 +172,16 @@ export function confetti(w, h, n, seed = 7, avoid = null) {
 }
 // Punktfarbe auf Kategorie-Flächen: wie --dots-ink in src/styles/global.css (9 % Schwarz)
 export const DOT_INK = '#14141417';
-export const dots = (w, h, fill = '#14141414') =>
-  `<defs><pattern id="dots" width="36" height="36" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="3" fill="${fill}"/></pattern></defs><rect width="${w}" height="${h}" fill="url(#dots)"/>`;
+// Punktmuster wie --dots auf der Seite: Punktdurchmesser etwa 1/3 des Rasters.
+// Raster 44 px entspricht auf dem Handy (Grafik ca. 3-fach verkleinert) den 16 px der Seite.
+export const DOT_GRID = 44;
+export const dots = (w, h, fill = DOT_INK, grid = DOT_GRID) =>
+  `<defs><pattern id="dots" width="${grid}" height="${grid}" patternUnits="userSpaceOnUse"><circle cx="${grid / 2}" cy="${grid / 2}" r="${r2(grid * 0.16)}" fill="${fill}"/></pattern></defs><rect width="${w}" height="${h}" fill="url(#dots)"/>`;
+
+// Dezenter Hinweis auf KI-Erstellung (Transparenz nach EU-KI-Verordnung), unten rechts
+export const AI_LABEL = { de: 'KI-generiert', en: 'AI-generated' };
+export const aiTag = (W, H, lang, { fill = '#14141499', size = 22, inset = 26 } = {}) =>
+  text(AI_LABEL[lang], { x: W - inset, y: H - inset, size, font: TEXT, fill, anchor: 'end' });
 
 // ---------- Texte ----------
 export const L = {
