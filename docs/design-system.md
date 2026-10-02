@@ -51,7 +51,7 @@ Neue Varianten kommen als Modifier-Klasse in `global.css`, nicht als Überschrei
 3. Nur neben belegten Inhalten: kein Meme, kein Witzpost, keine Umfrage mit dem Slogan. Wo er steht, sind die Quellen einen Klick entfernt.
 4. Nicht im Beitragstext. Der Slogan gehört zur Marke, nicht zum Fakt (siehe `docs/styleguide.md`).
 5. Fehler werden offen korrigiert: Beitrag berichtigen und Eintrag in `src/data/corrections.ts`, erscheint auf `/de/korrekturen/` („Stimmt doch nicht“).
-6. Platzierung auf der Seite: Kopfzeile neben dem Logo (ab 761px Breite), Footer unter dem großen Logo, Über-Seite als Überschrift. Ein grafischer Stempel „Stimmt wirklich.“ ist geplant, aber noch nicht entschieden.
+6. Platzierung auf der Seite: Kopfzeile neben dem Logo (ab 761px Breite), Footer unter dem großen Logo, Über-Seite als Überschrift. Einen grafischen Stempel „Stimmt wirklich.“ gibt es vorerst nicht (Entscheidung 2. Oktober 2026).
 ## Punktmuster auf Kategorie-Flächen
 
 Wunsch von Eric (2026-10-02): Überall, wo eine Kategoriefarbe als Fläche auftaucht, liegt das Punktmuster der Faktenkarten darüber. Das gilt für alles, was es heute gibt (Kartenbild, Kacheln, Filter- und Etikett-Chips, Beitrags-Banner, „Fakt des Tages“, Sterne der Gold-Fakten, Teilen-Vorschaubild, Social-Grafiken) und für jede künftige Kategorie und Funktion.
