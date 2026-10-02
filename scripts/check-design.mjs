@@ -1,9 +1,11 @@
 // Prüft, dass das Design-System eingehalten wird (läuft vor jedem Build).
 // Regeln und Begründungen: docs/design-system.md
 import { readFileSync, readdirSync, statSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { join, relative, sep } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const ROOT = new URL('..', import.meta.url).pathname;
+// fileURLToPath statt .pathname, sonst wird unter Windows aus C:\… ein kaputtes C:\C:\….
+const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const TOKENS = 'src/styles/global.css';
 const errors = [];
 
@@ -36,7 +38,7 @@ function styleBlocks(file, src) {
 const lineAt = (src, i) => src.slice(0, i).split('\n').length;
 
 for (const file of files) {
-  const rel = relative(ROOT, file);
+  const rel = relative(ROOT, file).split(sep).join('/');
   const src = readFileSync(file, 'utf8');
 
   for (const { css, offset } of styleBlocks(file, src)) {
@@ -100,7 +102,7 @@ const cats = readFileSync(join(ROOT, 'src/config.ts'), 'utf8').match(/CATEGORIES
 for (const c of cats) if (!catRules.has(c)) errors.push(`${TOKENS}: Klasse .cat-${c} fehlt (Kategorie aus src/config.ts).`);
 // Kategoriefarben nur über die .cat-*-Klasse, nie direkt als Fläche. Sonst fehlt das Punktmuster.
 for (const file of files) {
-  const rel = relative(ROOT, file);
+  const rel = relative(ROOT, file).split(sep).join('/');
   const src = readFileSync(file, 'utf8');
   for (const { css, offset } of styleBlocks(file, src)) {
     const clean = (rel === TOKENS ? css.replace(/^\.cat-[\w-]+\s*\{[^}]*\}/gm, (x) => x.replace(/[^\n]/g, ' ')) : css)

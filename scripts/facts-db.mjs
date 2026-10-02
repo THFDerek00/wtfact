@@ -14,6 +14,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
+import { fileURLToPath } from 'node:url';
 
 export const DB_FILE = 'db/wtfact.sqlite';
 export const SCHEMA_FILE = 'db/facts-schema.sql';
@@ -283,7 +284,7 @@ export function open({ root = process.cwd(), readOnly = true } = {}) {
 
 // ---------- Kommandozeile ----------
 
-if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(new URL(import.meta.url).pathname)) {
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const [cmd = 'build', ...flags] = process.argv.slice(2);
   try {
     if (cmd === 'build') build({ force: flags.includes('--force') });
