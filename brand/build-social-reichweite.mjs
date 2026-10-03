@@ -8,7 +8,7 @@
 //   npm i --no-save opentype.js @resvg/resvg-js @fontsource/space-grotesk @fontsource/inter
 // Dann:  node --disable-warning=ExperimentalWarning brand/build-social-reichweite.mjs
 import {
-  ROOT, DISPLAY, TEXT, C, r2, measure, text, wrap, svg, png, wordmark, CAT_COLOR, iconG, card, chip, confetti, dots, aiTag, L,
+  ROOT, DISPLAY, TEXT, C, r2, measure, text, wrap, svg, png, wordmark, CAT_COLOR, iconG, card, chip, confetti, dots, dotsOn, aiTag, L,
 } from './brand-lib.mjs';
 import { open as openFacts, readFacts } from '../scripts/facts-db.mjs';
 
@@ -152,8 +152,8 @@ const K = {
 
 // ---------- Bausteine (wie in build-social-kit.mjs) ----------
 const W = 1080, PAD = 72, CW = W - PAD * 2 - 14;
-const catBg = (w, h, cat) => `<rect width="${w}" height="${h}" fill="${CAT_COLOR[cat]}"/>` + dots(w, h);
-const colorBg = (w, h, fill) => `<rect width="${w}" height="${h}" fill="${fill}"/>` + dots(w, h);
+const catBg = (w, h, cat) => `<rect width="${w}" height="${h}" fill="${CAT_COLOR[cat]}"/>` + dotsOn(w, h, CAT_COLOR[cat]);
+const colorBg = (w, h, fill) => `<rect width="${w}" height="${h}" fill="${fill}"/>` + dotsOn(w, h, fill);
 const goldBg = (w, h) =>
   `<defs><linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${GOLD.light}"/><stop offset=".45" stop-color="${GOLD.mid}"/><stop offset="1" stop-color="${GOLD.deep}"/></linearGradient></defs><rect width="${w}" height="${h}" fill="url(#gold)"/>` + dots(w, h);
 const place = (x, y, body) => `<g transform="translate(${r2(x)} ${r2(y)})">${body}</g>`;

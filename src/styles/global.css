@@ -60,6 +60,10 @@
      Rasterweite pro Ort über --dots-size umstellen (sm auf Chips/Sternen, lg auf großen Bannern). */
   --dots-ink: color-mix(in srgb, var(--on-accent) 9%, transparent);
   --dots: radial-gradient(var(--dots-ink) 22%, transparent 25%);
+  /* Kräftigere dunkle Punkte für warme Flächen (Rot, Orange, Pink): mit 9 % gehen sie dort unter.
+     Welche Kategorie welche Variante nimmt, prüft der Build (Farbton 320°–40°). */
+  --dots-ink-strong: color-mix(in srgb, var(--on-accent) 18%, transparent);
+  --dots-strong: radial-gradient(var(--dots-ink-strong) 22%, transparent 25%);
   --dots-size-sm: 7px;
   --dots-size-md: 16px;
   --dots-size-lg: 22px;
@@ -330,13 +334,13 @@ html[data-sky] .stage { background: var(--sky-stage); }
 /* Kategorie-Flächen: setzen immer Fläche, Punktmuster UND passende Schriftfarbe.
    Neue Kategorie = neue Zeile nach demselben Muster (der Build prüft das). */
 .cat-science { background: var(--dots), var(--cat-science); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
-.cat-history { background: var(--dots), var(--cat-history); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
+.cat-history { background: var(--dots-strong), var(--cat-history); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
 .cat-tech { background: var(--dots), var(--cat-tech); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
 .cat-nature { background: var(--dots), var(--cat-nature); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
-.cat-body { background: var(--dots), var(--cat-body); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
+.cat-body { background: var(--dots-strong), var(--cat-body); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
 .cat-weird { background: var(--dots), var(--cat-weird); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
 .cat-survival { background: var(--dots), var(--cat-survival); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
-.cat-food { background: var(--dots), var(--cat-food); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
+.cat-food { background: var(--dots-strong), var(--cat-food); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
 .cat-language { background: var(--dots), var(--cat-language); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
 .cat-sport { background: var(--dots), var(--cat-sport); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
 .accent { background: var(--yellow); color: var(--on-accent); }
