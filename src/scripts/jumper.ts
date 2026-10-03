@@ -36,6 +36,9 @@ const START_SPEED = 340;
 const MAX_SPEED = 760;
 const ACCEL = 8;
 const TAU = Math.PI * 2;
+const FLASK_W = 14;
+const FLASK_H = 30;
+const FLASK_GAP = 2;
 
 type Kind = 'flame-s' | 'flame-l' | 'flame-2' | 'crate' | 'barrel' | 'house';
 interface Obstacle { kind: Kind; x: number; w: number; h: number; seed: number }
@@ -83,7 +86,7 @@ export function createJumper({ canvas, text, best, onCollect, onGameOver }: Jump
   let last = 0;
   let raf = 0;
   let overAt = 0;
-  let landed = 0; // Zeitpunkt der letzten Landung, für den kleinen Stauch-Effekt
+  let landed = -1; // Zeitpunkt der letzten Landung, für den kleinen Stauch-Effekt (-1 = noch keine)
 
   const book = { x: 90, y: GROUND, vy: 0, w: 36, h: 46, holding: false, fast: false };
   let obstacles: Obstacle[] = [];
@@ -116,6 +119,10 @@ export function createJumper({ canvas, text, best, onCollect, onGameOver }: Jump
     pops = [];
     book.y = GROUND;
     book.vy = 0;
+    book.holding = false;
+    book.fast = false;
+    // Sonst hängt die Landezeit vom letzten Lauf nach und das Buch wird beim Start verzerrt.
+    landed = -1;
     nextObstacle = W + 120;
     nextFlask = W * 0.5;
   }
@@ -181,15 +188,18 @@ export function createJumper({ canvas, text, best, onCollect, onGameOver }: Jump
     const kind = pickKind();
     const [w, h] = SIZES[kind];
     const x = W + 20;
-    obstacles.push({ kind, x, w, h, seed: Math.random() * 10 });
+    const o: Obstacle = { kind, x, w, h, seed: Math.random() * 10 };
+    // Gläser, die schon an dieser Stelle warten, würden im Feuer stecken: weg damit.
+    flasks = flasks.filter((f) => f.taken || !touchesObstacle(f.x, f.y, o));
+    obstacles.push(o);
     // Belohnung für Mut: oft liegt ein Bogen aus Reagenzgläsern genau auf der Sprungbahn.
     if (Math.random() < 0.55) {
       const n = 3 + Math.floor(Math.random() * 2);
       for (let i = 0; i < n; i++) {
         const k = n === 1 ? 0.5 : i / (n - 1);
-        const fx = x + w / 2 - 7 + (k - 0.5) * (70 + w);
-        const fy = GROUND - h - 44 - Math.sin(k * Math.PI) * 30;
-        flasks.push({ x: fx, y: fy, taken: false, t: i * 0.4 });
+        const fx = x + w / 2 - FLASK_W / 2 + (k - 0.5) * (80 + w);
+        const fy = GROUND - h - 52 - Math.sin(k * Math.PI) * 28;
+        addFlask(fx, fy, i * 0.4);
       }
     }
     const gap = speed * 0.62 + 180 + Math.random() * (260 + speed * 0.25);
@@ -202,11 +212,30 @@ export function createJumper({ canvas, text, best, onCollect, onGameOver }: Jump
     const y = rows[Math.floor(Math.random() * rows.length)];
     const n = Math.random() < 0.55 ? 3 + Math.floor(Math.random() * 3) : 1;
     for (let i = 0; i < n; i++) {
-      const x = W + 20 + i * 26;
-      const blocked = obstacles.some((o) => x + 14 > o.x - 30 && x < o.x + o.w + 30 && y > GROUND - o.h - 34);
-      if (!blocked) flasks.push({ x, y, taken: false, t: i * 0.4 });
+      addFlask(W + 20 + i * 28, y, i * 0.4);
     }
     nextFlask = distance + 220 + Math.random() * 260;
+  }
+
+  // Reagenzglas samt Deckel und Wippen (±3 px) als Kasten, mit etwas Luft drumherum.
+  function flaskBox(x: number, y: number) {
+    return { l: x - 1 - FLASK_GAP, r: x + FLASK_W + 1 + FLASK_GAP, t: y - 3 - FLASK_GAP, b: y + FLASK_H + 3 + FLASK_GAP };
+  }
+  function touchesObstacle(x: number, y: number, o: Obstacle) {
+    // Flammen und Funken ragen etwas über das Hindernis hinaus, daher großzügiger Rand.
+    const f = flaskBox(x, y);
+    return f.r > o.x - 10 && f.l < o.x + o.w + 10 && f.b > GROUND - o.h - 18;
+  }
+  /** Legt ein Glas nur ab, wenn es weder ein anderes Glas noch ein Hindernis berührt. */
+  function addFlask(x: number, y: number, t: number) {
+    const a = flaskBox(x, y);
+    const clash = flasks.some((f) => {
+      if (f.taken) return false;
+      const b = flaskBox(f.x, f.y);
+      return a.l < b.r && a.r > b.l && a.t < b.b && a.b > b.t;
+    });
+    if (clash || obstacles.some((o) => touchesObstacle(x, y, o))) return;
+    flasks.push({ x, y, taken: false, t });
   }
 
   // --- Spiellogik -----------------------------------------------------------------
@@ -572,7 +601,7 @@ export function createJumper({ canvas, text, best, onCollect, onGameOver }: Jump
     let sx = 1, sy = 1;
     if (airborne && book.vy < 0) { sx = 0.94; sy = 1.07; }
     const since = time - landed;
-    if (!airborne && since < 0.12) { const k = 1 - since / 0.12; sx = 1 + 0.12 * k; sy = 1 - 0.1 * k; }
+    if (!airborne && landed >= 0 && since >= 0 && since < 0.12) { const k = 1 - since / 0.12; sx = 1 + 0.12 * k; sy = 1 - 0.1 * k; }
 
     ctx.save();
     ctx.translate(x + w / 2, y);
