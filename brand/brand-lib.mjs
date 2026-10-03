@@ -174,8 +174,8 @@ export function confetti(w, h, n, seed = 7, avoid = null) {
 }
 // Punktfarbe auf Kategorie-Flächen: wie --dots-ink in src/styles/global.css (9 % Schwarz)
 export const DOT_INK = '#14141417';
-// Auf warmen, kräftigen Farben (Rot, Orange, Pink) gehen dunkle Punkte unter: dort helle wie --dots-light (30 % Weiß).
-export const DOT_INK_LIGHT = '#ffffff4d';
+// Auf warmen, kräftigen Farben (Rot, Orange, Pink) gehen 9 % unter: dort kräftiger wie --dots-strong (18 % Schwarz).
+export const DOT_INK_STRONG = '#1414142e';
 // Gleiche Regel wie scripts/check-design.mjs: Farbton 320°–40°, Sättigung ab 60 %.
 export function dotInkFor(bg) {
   if (!/^#[0-9a-f]{6}$/i.test(bg ?? '')) return DOT_INK;
@@ -184,14 +184,14 @@ export function dotInkFor(bg) {
   if (!d) return DOT_INK;
   const hue = (mx === r ? ((g - b) / d + 6) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4) * 60;
   const sat = d / (1 - Math.abs(2 * l - 1));
-  return sat >= 0.6 && (hue >= 320 || hue <= 40) ? DOT_INK_LIGHT : DOT_INK;
+  return sat >= 0.6 && (hue >= 320 || hue <= 40) ? DOT_INK_STRONG : DOT_INK;
 }
 // Punktmuster wie --dots auf der Seite: Punktdurchmesser etwa 1/3 des Rasters.
 // Raster 44 px entspricht auf dem Handy (Grafik ca. 3-fach verkleinert) den 16 px der Seite.
 export const DOT_GRID = 44;
 export const dots = (w, h, fill = DOT_INK, grid = DOT_GRID) =>
   `<defs><pattern id="dots-${fill.slice(1)}" width="${grid}" height="${grid}" patternUnits="userSpaceOnUse"><circle cx="${grid / 2}" cy="${grid / 2}" r="${r2(grid * 0.16)}" fill="${fill}"/></pattern></defs><rect width="${w}" height="${h}" fill="url(#dots-${fill.slice(1)})"/>`;
-// Punktmuster passend zur Hintergrundfarbe (hell auf warmen Farben, sonst dunkel)
+// Punktmuster passend zur Hintergrundfarbe (kräftiger auf warmen Farben)
 export const dotsOn = (w, h, bg, grid = DOT_GRID) => dots(w, h, dotInkFor(bg), grid);
 
 // Dezenter Hinweis auf KI-Erstellung (Transparenz nach EU-KI-Verordnung), unten rechts

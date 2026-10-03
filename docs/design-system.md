@@ -15,7 +15,7 @@ Stil: Neo-Brutalismus. Dicke Ränder, harte Schatten ohne Weichzeichner, knallig
 | Fokus | `--focus`, `--bw-focus` | Globaler `:focus-visible`-Ring |
 | Akzente | `--pink`, `--yellow`, `--cyan`, `--lime`, `--violet`, `--orange`, `--teal`, `--tomato`, `--lilac`, `--blue` | Nur als Fläche |
 | Kategorien | `--cat-science` … `--cat-sport` | Kategorie umfärben = nur dieses Token ändern |
-| Punktmuster | `--dots`, `--dots-ink` (dunkle Punkte), `--dots-light`, `--dots-ink-light`, `--dot-light` (helle Punkte für warme Farben), `--dots-size` (Standard `--dots-size-md` 16px), `--dots-size-sm` (Chips, Sterne), `--dots-size-lg` (Banner) | Liegt auf jeder Kategorie-Fläche, siehe „Punktmuster“ unten |
+| Punktmuster | `--dots`, `--dots-ink` (dunkle Punkte), `--dots-strong`, `--dots-ink-strong` (kräftigere dunkle Punkte für warme Farben), `--dots-size` (Standard `--dots-size-md` 16px), `--dots-size-sm` (Chips, Sterne), `--dots-size-lg` (Banner) | Liegt auf jeder Kategorie-Fläche, siehe „Punktmuster“ unten |
 | Gold-Fakten | `--gold`, `--gold-light`, `--gold-deep`, `--gold-surface` (Verlauf), `--star-size-sm/md/lg`, `--star-edge`, `--dur-twinkle`, `--locked` | Goldene Karten im Science Jumper; Text darauf ist `--on-accent`. Sterne bekommen ihre Farbe über die `.cat-*`-Klasse, neue Kategorien funktionieren also automatisch |
 | Spiel | `--flask`, `--flask-glow`, `--book-*`, `--wood*`, `--metal`, `--brick*`, `--roof*`, `--smoke` | Reagenzgläser, Buch, Kisten, Fässer und Häuser im Science Jumper. Das Spiel liest alle Farben per `getComputedStyle` aus den Tokens |
 | Bühne | `--night`, `--on-night`, `--on-night-muted` | Dunkle Fläche für Hero, Footer, „Nächster Fakt“; in beiden Modi dunkel |
@@ -81,8 +81,8 @@ Wunsch von Eric (2026-10-02): Überall, wo eine Kategoriefarbe als Fläche aufta
 - So geht's: Element bekommt die Klasse `.cat-<kategorie>`. Das Muster kommt dann automatisch mit. Kategoriefarben nie direkt als `background` setzen.
 - Rastergröße pro Ort über `--dots-size` umstellen (z. B. `--dots-size: var(--dots-size-lg)` im Banner). `.chip` stellt selbst auf `sm`.
 - Neue Kategorie: Token `--cat-<key>` plus eine Zeile `.cat-<key> { background: var(--dots), var(--cat-<key>); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }`.
-- Punktfarbe (Wunsch von Eric, 2026-10-03): Auf warmen, kräftigen Farben (Farbton 320°–40°, Sättigung ab 60 %: Rot, Orange, Pink) gehen dunkle Punkte unter. Dort heißt es `var(--dots-light)` statt `var(--dots)`: weiße Punkte mit 30 %. Heute gilt das für Körper, Geschichte und Essen. Der Build verlangt die helle Variante bei jeder solchen Farbe, auch bei neuen Kategorien, und prüft für jede Kategorie, dass sich die Punkte sichtbar abheben (Farbabstand ΔE ≥ 6) und Schrift auf einem Punkt lesbar bleibt (4.5:1).
-- Außerhalb von CSS (`src/og.ts`, `brand/brand-lib.mjs`) wird das Muster nachgebaut, mit denselben Punktfarben (9 % Schwarz, auf warmen Farben 30 % Weiß). In `brand/` wählt `dotInkFor(farbe)` die Punktfarbe nach derselben Regel; Hintergründe mit `dotsOn(w, h, farbe)` anlegen.
+- Punktfarbe (Wunsch von Eric, 2026-10-03): Punkte sind überall einheitlich dunkel. Auf warmen, kräftigen Farben (Farbton 320°–40°, Sättigung ab 60 %: Rot, Orange, Pink) gehen 9 % unter, dort heißt es `var(--dots-strong)` (18 %) statt `var(--dots)`. Heute gilt das für Körper, Geschichte und Essen. Der Build verlangt die kräftige Variante bei jeder solchen Farbe, auch bei neuen Kategorien, und prüft für jede Kategorie, dass sich die Punkte sichtbar abheben (Farbabstand ΔE ≥ 6).
+- Außerhalb von CSS (`src/og.ts`, `brand/brand-lib.mjs`) wird das Muster nachgebaut, mit denselben Punktfarben (9 % Schwarz, auf warmen Farben 18 %). In `brand/` wählt `dotInkFor(farbe)` die Punktfarbe nach derselben Regel; Hintergründe mit `dotsOn(w, h, farbe)` anlegen.
 - Goldene Flächen (`.gold`, `--gold-surface`) bleiben glatt: Das Muster gehört zu den Kategorien, Gold ist keine.
 - Social-Media-Grafiken (`brand/`): Wunsch von Eric (2026-10-02), dort trägt **jeder** Hintergrund das Muster, auch Gold und die dunkle Bühne. Raster 44 px bei 1080 px Breite, damit es auf dem Handy so groß wirkt wie die 16 px der Seite.
 - Social-Media-Grafiken mit Inhalt tragen unten rechts klein „KI-generiert“ / „AI-generated“ (`aiTag` in `brand/brand-lib.mjs`), als Transparenzhinweis nach der EU-KI-Verordnung.
@@ -120,9 +120,9 @@ Hinter der ganzen Seite liegt eine Hintergrund-Ebene (`src/components/NightSky.a
 6. `global.css` enthält einen `:focus-visible`-Stil und eine `prefers-reduced-motion`-Regel; jede `.cat-*`-Klasse setzt `color: var(--on-accent)`.
 7. Kontrast (WCAG AA), hell und dunkel: `--ink`, `--muted`, `--pink-text` auf `--bg`/`--surface` mindestens 4.5:1; `--on-accent` auf jeder Akzentfläche (inkl. `--gold*`) mindestens 4.5:1; `--focus` mindestens 3:1.
 
-8. Punktmuster: Jede `.cat-*`-Klasse setzt `background: var(--dots), var(--cat-…)` (bzw. `var(--dots-light)`) und `background-size: var(--dots-size) var(--dots-size)`; jede Kategorie aus `src/config.ts` hat ihre `.cat-*`-Klasse; `var(--cat-…)` als `background`/`fill` außerhalb dieser Klassen bricht den Build ab.
-9. Punktfarbe: Kategorien mit warmer, kräftiger Farbe nutzen `--dots-light`; auf jeder Kategorie heben sich die Punkte mit ΔE ≥ 6 ab.
-10. Schrift auf Punkten: `--on-accent` auf Kategoriefarbe **gemischt mit der Punktfarbe** mindestens 4.5:1 (hell und dunkel). Deshalb ist `--dots-ink` auf 9 % begrenzt; bei 14 % fielen Technik und Körper durch.
+8. Punktmuster: Jede `.cat-*`-Klasse setzt `background: var(--dots), var(--cat-…)` (bzw. `var(--dots-strong)`) und `background-size: var(--dots-size) var(--dots-size)`; jede Kategorie aus `src/config.ts` hat ihre `.cat-*`-Klasse; `var(--cat-…)` als `background`/`fill` außerhalb dieser Klassen bricht den Build ab.
+9. Punktfarbe: Kategorien mit warmer, kräftiger Farbe nutzen `--dots-strong`; auf jeder Kategorie heben sich die Punkte mit ΔE ≥ 6 ab.
+10. Schrift auf Punkten: `--on-accent` auf der Kategoriefläche mit Punktmuster (Punkte decken ca. 15 % ab) mindestens 4.5:1, direkt auf einem Punkt mindestens 3:1, hell und dunkel.
 
 Layoutmaße wie `max-width` in Media Queries, `min-height` oder Spaltenbreiten im Grid sind erlaubt.
 

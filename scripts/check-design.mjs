@@ -88,13 +88,13 @@ const tokensSrc = readFileSync(join(ROOT, TOKENS), 'utf8');
 if (!/:focus-visible\s*\{/.test(tokensSrc)) errors.push(`${TOKENS}: globaler :focus-visible-Stil fehlt.`);
 if (!/prefers-reduced-motion:\s*reduce/.test(tokensSrc)) errors.push(`${TOKENS}: Regel für prefers-reduced-motion fehlt.`);
 const catRules = new Set();
-const catDots = new Map(); // Kategorie -> '--dots' oder '--dots-light'
+const catDots = new Map(); // Kategorie -> '--dots' oder '--dots-strong'
 for (const m of tokensSrc.matchAll(/^\.cat-([\w-]+)\s*\{([^}]*)\}/gm)) {
   const [, key, body] = m;
   catRules.add(key);
   if (!/color:\s*var\(--on-accent\)/.test(body)) errors.push(`${TOKENS}: .cat-${key} setzt keine Schriftfarbe var(--on-accent).`);
-  // Punktmuster auf jeder Kategorie-Fläche (Wunsch von Eric, 2026-10-02); helle Variante siehe Abschnitt 4
-  const dm = body.match(new RegExp(`background:\\s*var\\((--dots(?:-light)?)\\),\\s*var\\(--cat-${key}\\)`));
+  // Punktmuster auf jeder Kategorie-Fläche (Wunsch von Eric, 2026-10-02); kräftige Variante siehe Abschnitt 4
+  const dm = body.match(new RegExp(`background:\\s*var\\((--dots(?:-strong)?)\\),\\s*var\\(--cat-${key}\\)`));
   if (!dm || !/background-size:\s*var\(--dots-size\)/.test(body)) {
     errors.push(`${TOKENS}: .cat-${key} hat kein Punktmuster. Muster: background: var(--dots), var(--cat-${key}); background-size: var(--dots-size) var(--dots-size);`);
   } else catDots.set(key, dm[1]);
@@ -172,17 +172,19 @@ for (const [mode, t] of [['hell', light], ['dunkel', dark]]) {
 }
 
 // --- 4. Punktmuster: lesbar UND sichtbar --------------------------------------
-// Zwei Varianten: dunkle Punkte (--dots, --dots-ink aus --on-accent) und helle (--dots-light, --dots-ink-light aus --dot-light).
-// Auf warmen, kräftigen Farben (Rot, Orange, Pink) gehen dunkle Punkte unter (Eric, 2026-10-03: Körper, Geschichte, Essen),
-// dort sind helle Pflicht. Außerdem: Schrift auf einem Punkt bleibt lesbar, und der Punkt hebt sich sichtbar von der Fläche ab.
+// Zwei Varianten, beide dunkel (Eric, 2026-10-03: einheitlich dunkle Punkte): --dots (9 %) und --dots-strong (18 %).
+// Auf warmen, kräftigen Farben (Rot, Orange, Pink) gehen 9 % unter (Körper, Geschichte, Essen), dort ist --dots-strong Pflicht.
+// Schrift: auf der Fläche im Mittel (Punkte bedecken ca. 15 %) mindestens 4.5:1, direkt auf einem Punkt mindestens 3:1.
+// Sichtbarkeit: der Punkt hebt sich mit Farbabstand ΔE ≥ 6 von der Fläche ab.
 const share = (name) => Number((light[name] ?? '').match(/(\d+)%/)?.[1] ?? NaN) / 100;
 const DOT = {
-  '--dots': { share: share('--dots-ink'), color: (t) => resolve(t, '--on-accent'), max: 0.2 },
-  '--dots-light': { share: share('--dots-ink-light'), color: (t) => resolve(t, '--dot-light'), max: 0.5 },
+  '--dots': { share: share('--dots-ink'), max: 0.12 },
+  '--dots-strong': { share: share('--dots-ink-strong'), max: 0.25 },
 };
 for (const [name, d] of Object.entries(DOT)) {
-  if (!(d.share > 0 && d.share <= d.max)) errors.push(`${TOKENS}: ${name === '--dots' ? '--dots-ink' : '--dots-ink-light'} muss color-mix(… N%, transparent) mit 0 < N ≤ ${d.max * 100} sein.`);
+  if (!(d.share > 0 && d.share <= d.max)) errors.push(`${TOKENS}: ${name === '--dots' ? '--dots-ink' : '--dots-ink-strong'} muss color-mix(in srgb, var(--on-accent) N%, transparent) mit 0 < N ≤ ${d.max * 100} sein.`);
 }
+const DOT_COVERAGE = Math.PI * 0.22 * 0.22; // Punktradius 22 % des Rasters
 const hex = (v) => /^#[0-9a-f]{6}$/i.test(v ?? '');
 const mix = (a, b, w) => '#' + [0, 2, 4].map((i) => Math.round(parseInt(a.slice(1 + i, 3 + i), 16) * (1 - w) + parseInt(b.slice(1 + i, 3 + i), 16) * w).toString(16).padStart(2, '0')).join('');
 // Farbton in Grad und Sättigung (HSL)
@@ -206,15 +208,17 @@ const deltaE = (a, b) => { const p = lab(a), q = lab(b); return Math.hypot(p[0] 
 const MIN_DOT_DELTA_E = 6;
 for (const [key, variant] of catDots) {
   const lightBg = resolve(light, `--cat-${key}`);
-  if (hex(lightBg) && isWarm(lightBg) && variant !== '--dots-light') {
-    errors.push(`${TOKENS}: .cat-${key} ist eine warme, kräftige Farbe, dunkle Punkte sind darauf kaum zu sehen. Nutze var(--dots-light).`);
+  if (hex(lightBg) && isWarm(lightBg) && variant !== '--dots-strong') {
+    errors.push(`${TOKENS}: .cat-${key} ist eine warme, kräftige Farbe, Punkte mit 9 % sind darauf kaum zu sehen. Nutze var(--dots-strong).`);
   }
   for (const [mode, t] of [['hell', light], ['dunkel', dark]]) {
-    const bg = resolve(t, `--cat-${key}`), ink = resolve(t, '--on-accent'), d = DOT[variant], dot = d.color(t);
-    if (!hex(bg) || !hex(ink) || !hex(dot) || !(d.share > 0)) continue;
-    const spot = mix(bg, dot, d.share);
+    const bg = resolve(t, `--cat-${key}`), ink = resolve(t, '--on-accent'), d = DOT[variant];
+    if (!hex(bg) || !hex(ink) || !(d.share > 0)) continue;
+    const spot = mix(bg, ink, d.share);
+    const avg = ratio(ink, mix(bg, ink, d.share * DOT_COVERAGE));
+    if (avg < 4.5) errors.push(`${TOKENS}: Kontrast --on-accent auf --cat-${key} mit Punktmuster (${mode}) ist ${avg.toFixed(2)}:1, nötig 4.5:1.`);
     const r = ratio(ink, spot);
-    if (r < 4.5) errors.push(`${TOKENS}: Kontrast --on-accent auf --cat-${key} mit Punkt (${mode}) ist ${r.toFixed(2)}:1, nötig 4.5:1.`);
+    if (r < 3) errors.push(`${TOKENS}: Kontrast --on-accent direkt auf einem Punkt (--cat-${key}, ${mode}) ist ${r.toFixed(2)}:1, nötig 3:1.`);
     const e = deltaE(bg, spot);
     if (e < MIN_DOT_DELTA_E) errors.push(`${TOKENS}: Punkte auf --cat-${key} (${mode}) kaum sichtbar (Farbabstand ${e.toFixed(1)}, nötig ${MIN_DOT_DELTA_E}).`);
   }

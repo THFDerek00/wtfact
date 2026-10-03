@@ -18,11 +18,11 @@ const CAT_COLORS: Record<string, string> = {
   science: '#3ddcff', history: '#ff8a3d', tech: '#9b6bff', nature: '#b6f23a', body: '#ff3d7f', weird: '#ffd23f', survival: '#3de0b0', food: '#ff5947', language: '#e7a6ff', sport: '#5c95ff',
 };
 
-// Punktmuster wie auf jeder Kategorie-Fläche der Seite (--dots / --dots-light in global.css):
-// dunkle Punkte, auf warmen Farben (Körper, Geschichte, Essen) helle, sonst sieht man sie nicht.
-const LIGHT_DOTS = new Set(['history', 'body', 'food']);
+// Punktmuster wie auf jeder Kategorie-Fläche der Seite (--dots / --dots-strong in global.css):
+// dunkle Punkte, auf warmen Farben (Körper, Geschichte, Essen) kräftiger (18 % statt 9 %), sonst sieht man sie nicht.
+const STRONG_DOTS = new Set(['history', 'body', 'food']);
 const dotsFor = (cat: string) => ({
-  backgroundImage: `radial-gradient(circle, ${LIGHT_DOTS.has(cat) ? 'rgba(255,255,255,0.3)' : 'rgba(20,20,20,0.09)'} 22%, transparent 25%)`,
+  backgroundImage: `radial-gradient(circle, ${STRONG_DOTS.has(cat) ? 'rgba(20,20,20,0.18)' : 'rgba(20,20,20,0.09)'} 22%, transparent 25%)`,
   backgroundSize: '12px 12px',
 });
 
