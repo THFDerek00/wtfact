@@ -17,8 +17,9 @@ const fmt = new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', mo
 /** Heutiger Tag in Deutschland. */
 export const berlinDay = (d: Date = new Date()) => fmt.format(d);
 
-/** Tag eines Beitrags (Frontmatter `date`, steht als UTC-Mitternacht im Schema). */
-export const postDay = (d: Date) => d.toISOString().slice(0, 10);
+/** Deutscher Kalendertag eines Fakts. Reine Tage (2026-09-16) stehen als UTC-Mitternacht im Schema und bleiben gleich,
+ * Zeitpunkte (2026-10-03T00:30:00+02:00) zählen zu ihrem deutschen Tag, nicht zum UTC-Tag davor. */
+export const postDay = (d: Date) => berlinDay(d);
 
 export const addDays = (day: string, n: number) =>
   new Date(Date.parse(`${day}T00:00:00Z`) + n * 86_400_000).toISOString().slice(0, 10);
