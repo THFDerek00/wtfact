@@ -119,10 +119,14 @@ const rest = Math.max(0, posts.length - 1);
     });
 
     // Ziehen mit Maus, Finger oder Stift. Schräg nach oben = bewerten, senkrecht = Seite scrollen.
+    // Am Handy (Finger) scrollt der Browser selbst (touch-action: pan-y). Gewischt wird dort erst, wenn der
+    // Finger nach einem längeren Stück klar seitwärts geht, damit man beim Scrollen nicht aus Versehen wischt.
     let start: { x: number; y: number; lastY: number; id: number } | null = null;
     let mode: 'swipe' | 'scroll' | null = null;
     let moved = false;
     const LIMIT = 0.28; // Anteil der Kartenbreite, ab dem die Karte wegfliegt
+    const TOUCH = { start: 18, ratio: 1.5, limit: 0.35 }; // Finger: Strecke bis zur Entscheidung, |dx| > ratio·|dy|, Wegflieg-Anteil
+    const isTouch = (e: PointerEvent) => e.pointerType === 'touch';
 
     cards.forEach((card) => {
       card.addEventListener('pointerdown', (e) => {
@@ -135,9 +139,11 @@ const rest = Math.max(0, posts.length - 1);
         if (!start || e.pointerId !== start.id) return;
         const dx = e.clientX - start.x;
         const dy = e.clientY - start.y;
-        if (!mode && Math.hypot(dx, dy) > 10) {
+        const touch = isTouch(e);
+        if (!mode && Math.hypot(dx, dy) > (touch ? TOUCH.start : 10)) {
           moved = true;
-          mode = Math.abs(dx) >= Math.abs(dy) * 0.5 ? 'swipe' : 'scroll';
+          const sideways = touch ? Math.abs(dx) > Math.abs(dy) * TOUCH.ratio : Math.abs(dx) >= Math.abs(dy) * 0.5;
+          mode = sideways ? 'swipe' : 'scroll';
           if (mode === 'swipe') {
             card.setPointerCapture(e.pointerId);
             card.dataset.dragging = '';
@@ -147,10 +153,10 @@ const rest = Math.max(0, posts.length - 1);
           card.style.setProperty('--dx', `${dx}px`);
           card.style.setProperty('--dy', `${Math.min(dy, 40)}px`);
           card.style.setProperty('--rot', String(dx / 14));
-          const lean = Math.min(1, Math.abs(dx) / (card.offsetWidth * LIMIT));
+          const lean = Math.min(1, Math.abs(dx) / (card.offsetWidth * (touch ? TOUCH.limit : LIMIT)));
           card.dataset.lean = dx < 0 ? 'meh' : 'like';
           card.style.setProperty('--lean', String(lean));
-        } else if (mode === 'scroll' && e.pointerType !== 'mouse') {
+        } else if (mode === 'scroll' && e.pointerType === 'pen') {
           window.scrollBy({ top: start.lastY - e.clientY, behavior: 'instant' });
           start.lastY = e.clientY;
         }
@@ -160,7 +166,8 @@ const rest = Math.max(0, posts.length - 1);
         const dx = e.clientX - start.x;
         const dy = e.clientY - start.y;
         delete card.dataset.dragging;
-        if (mode === 'swipe' && Math.abs(dx) > card.offsetWidth * LIMIT && dy < card.offsetHeight * 0.3) {
+        const limit = isTouch(e) ? TOUCH.limit : LIMIT;
+        if (e.type === 'pointerup' && mode === 'swipe' && Math.abs(dx) > card.offsetWidth * limit && dy < card.offsetHeight * 0.3) {
           commit(dx < 0 ? 'meh' : 'like');
         } else if (mode === 'swipe') {
           card.style.setProperty('--dx', '0px');
@@ -200,6 +207,8 @@ const rest = Math.max(0, posts.length - 1);
     transform: translate(var(--dx), var(--dy)) rotate(calc(var(--rot) * 1deg));
     transition: transform var(--dur-swipe) var(--ease), opacity var(--dur-swipe) var(--ease);
   }
+  /* Handy: senkrechtes Scrollen übernimmt der Browser, seitwärts bleibt fürs Wischen */
+  @media (pointer: coarse) { .today { touch-action: pan-y; } }
   .today[data-dragging] { transition: none; cursor: grabbing; }
   .today[data-fly='like'] { transform: translate(120%, -70%) rotate(24deg); opacity: 0; }
   .today[data-fly='meh'] { transform: translate(-120%, -70%) rotate(-24deg); opacity: 0; }
