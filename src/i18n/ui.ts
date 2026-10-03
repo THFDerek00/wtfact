@@ -2,7 +2,7 @@ import type { Lang, Category } from '../config';
 
 export const ui = {
   de: {
-    tagline: 'Jeden Tag ein Fakt, der dich „WTF?!" sagen lässt.',
+    tagline: 'Jeden Tag neue Fakten, die dich „WTF?!" sagen lassen.',
     // Slogan: „WTFact?!“ ist das Logo, das hier ist der zweite Teil. Regeln: docs/styleguide.md, Abschnitt „Slogan“.
     slogan: 'Und ja, das stimmt wirklich.',
     sloganFull: 'WTFact?! Und ja, das stimmt wirklich.',
@@ -32,7 +32,7 @@ export const ui = {
       food: 'Essen', language: 'Sprache', sport: 'Sport',
     } satisfies Record<Category, string>,
     notFound: 'Dieser Fakt existiert nicht. Noch nicht.',
-    hero: ['Jeden Tag ein Fakt, der dich', '„WTF?!“', 'sagen lässt.'],
+    hero: ['Jeden Tag neue Fakten, die dich', '„WTF?!“', 'sagen lassen.'],
     heroSub: 'Kurze Geschichten aus Wissenschaft, Geschichte, Technik und Natur. Jede mit Quellen belegt, in wenigen Minuten gelesen.',
     readToday: 'Neuesten Fakt lesen',
     surprise: 'Überrasch mich',
@@ -179,7 +179,7 @@ export const ui = {
     },
   },
   en: {
-    tagline: 'One fact a day that makes you go "WTF?!"',
+    tagline: 'New facts every day that make you go "WTF?!"',
     slogan: "And yes, it's actually true.",
     sloganFull: "WTFact?! And yes, it's actually true.",
     latest: 'Latest facts',
@@ -208,7 +208,7 @@ export const ui = {
       food: 'Food', language: 'Language', sport: 'Sport',
     } satisfies Record<Category, string>,
     notFound: 'This fact does not exist. Yet.',
-    hero: ['One fact a day that makes you go', '“WTF?!”', ''],
+    hero: ['New facts every day that make you go', '“WTF?!”', ''],
     heroSub: 'Short stories from science, history, tech and nature. Every one backed by sources, read in a few minutes.',
     readToday: 'Read the latest fact',
     surprise: 'Surprise me',
