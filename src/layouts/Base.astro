@@ -15,7 +15,7 @@ interface Props {
 }
 const { lang, title, description, altUrl, image = `/og-default-${Astro.props.lang}.png` } = Astro.props;
 const ui = t(lang);
-const fullTitle = title ? `${title} | ${SITE.name}` : `${SITE.name}: ${ui.tagline}`;
+// Browser-Tab zeigt immer nur den Namen; og:title und Beschreibung bleiben aussagekräftig
 const desc = description ?? ui.tagline;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const other: Lang = lang === 'de' ? 'en' : 'de';
@@ -32,7 +32,7 @@ const allUrls = (await postsFor(lang)).map(postUrl);
       // Hell/Dunkel vor dem ersten Zeichnen setzen, sonst blitzt kurz der falsche Modus auf
       try { const t = localStorage.getItem('wtfact-theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch {}
     </script>
-    <title>{fullTitle}</title>
+    <title>{SITE.name}</title>
     <meta name="description" content={desc} />
     <link rel="canonical" href={canonical} />
     <link rel="alternate" hreflang={other} href={new URL(otherUrl, Astro.site)} />
