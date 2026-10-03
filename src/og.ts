@@ -18,8 +18,13 @@ const CAT_COLORS: Record<string, string> = {
   science: '#3ddcff', history: '#ff8a3d', tech: '#9b6bff', nature: '#b6f23a', body: '#ff3d7f', weird: '#ffd23f', survival: '#3de0b0', food: '#ff5947', language: '#e7a6ff', sport: '#5c95ff',
 };
 
-// Punktmuster wie auf jeder Kategorie-Fläche der Seite (--dots in global.css)
-const DOTS = { backgroundImage: 'radial-gradient(circle, rgba(20,20,20,0.09) 22%, transparent 25%)', backgroundSize: '12px 12px' };
+// Punktmuster wie auf jeder Kategorie-Fläche der Seite (--dots / --dots-light in global.css):
+// dunkle Punkte, auf warmen Farben (Körper, Geschichte, Essen) helle, sonst sieht man sie nicht.
+const LIGHT_DOTS = new Set(['history', 'body', 'food']);
+const dotsFor = (cat: string) => ({
+  backgroundImage: `radial-gradient(circle, ${LIGHT_DOTS.has(cat) ? 'rgba(255,255,255,0.3)' : 'rgba(20,20,20,0.09)'} 22%, transparent 25%)`,
+  backgroundSize: '12px 12px',
+});
 
 // satori erwartet React-artige Elemente; ein kleiner Helfer spart JSX.
 const h = (type: string, style: Record<string, unknown>, children?: unknown) => ({ type, props: { style, children } });
@@ -36,7 +41,7 @@ export async function ogImage(post: Post, lang: Lang) {
           h('span', { color: '#ff3d7f' }, 'act'),
           h('span', { marginLeft: 6, padding: '0 12px', borderRadius: 12, background: '#ffd23f', transform: 'rotate(-6deg)' }, '?!'),
         ]),
-        h('div', { display: 'flex', padding: '10px 22px', borderRadius: 999, border: '4px solid #141414', backgroundColor: CAT_COLORS[d.category] ?? '#ffd23f', ...DOTS, fontSize: 30 }, ui.categories[d.category]),
+        h('div', { display: 'flex', padding: '10px 22px', borderRadius: 999, border: '4px solid #141414', backgroundColor: CAT_COLORS[d.category] ?? '#ffd23f', ...dotsFor(d.category), fontSize: 30 }, ui.categories[d.category]),
       ]),
       h('div', { display: 'flex', fontFamily: 'Space Grotesk', fontSize: titleSize, lineHeight: 1.08, letterSpacing: -1.5 }, d.title),
       h('div', { display: 'flex', fontSize: 30, color: '#5b5b5b' }, ui.tagline),

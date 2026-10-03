@@ -149,9 +149,11 @@ export const chip = (label, x, y, fill, size = 34) => {
   const w = measure(label, size, DISPLAY) + size * 1.3;
   const h = size * 1.7;
   // Kategorie-Chips tragen das Punktmuster wie auf der Seite (eigenes, feineres Raster)
-  const pat = `<defs><pattern id="chipdots" width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="2" fill="${DOT_INK}"/></pattern></defs>`;
+  const ink = dotInkFor(fill);
+  const pid = `chipdots-${ink.slice(1)}`;
+  const pat = `<defs><pattern id="${pid}" width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="2" fill="${ink}"/></pattern></defs>`;
   return { w, svg: `<rect x="${x}" y="${y}" width="${r2(w)}" height="${r2(h)}" rx="${r2(h / 2)}" fill="${fill}" stroke="${C.ink}" stroke-width="5"/>` +
-    pat + `<rect x="${x}" y="${y}" width="${r2(w)}" height="${r2(h)}" rx="${r2(h / 2)}" fill="url(#chipdots)"/>` +
+    pat + `<rect x="${x}" y="${y}" width="${r2(w)}" height="${r2(h)}" rx="${r2(h / 2)}" fill="url(#${pid})"/>` +
     text(label, { x: x + w / 2, y: y + h / 2 + size * 0.36, size, anchor: 'middle' }) };
 };
 // Konfetti aus Kreisen/Quadraten in Markenfarben, deterministisch
@@ -172,11 +174,25 @@ export function confetti(w, h, n, seed = 7, avoid = null) {
 }
 // Punktfarbe auf Kategorie-Flächen: wie --dots-ink in src/styles/global.css (9 % Schwarz)
 export const DOT_INK = '#14141417';
+// Auf warmen, kräftigen Farben (Rot, Orange, Pink) gehen dunkle Punkte unter: dort helle wie --dots-light (30 % Weiß).
+export const DOT_INK_LIGHT = '#ffffff4d';
+// Gleiche Regel wie scripts/check-design.mjs: Farbton 320°–40°, Sättigung ab 60 %.
+export function dotInkFor(bg) {
+  if (!/^#[0-9a-f]{6}$/i.test(bg ?? '')) return DOT_INK;
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(bg.slice(1 + i, 3 + i), 16) / 255);
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn, l = (mx + mn) / 2;
+  if (!d) return DOT_INK;
+  const hue = (mx === r ? ((g - b) / d + 6) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4) * 60;
+  const sat = d / (1 - Math.abs(2 * l - 1));
+  return sat >= 0.6 && (hue >= 320 || hue <= 40) ? DOT_INK_LIGHT : DOT_INK;
+}
 // Punktmuster wie --dots auf der Seite: Punktdurchmesser etwa 1/3 des Rasters.
 // Raster 44 px entspricht auf dem Handy (Grafik ca. 3-fach verkleinert) den 16 px der Seite.
 export const DOT_GRID = 44;
 export const dots = (w, h, fill = DOT_INK, grid = DOT_GRID) =>
-  `<defs><pattern id="dots" width="${grid}" height="${grid}" patternUnits="userSpaceOnUse"><circle cx="${grid / 2}" cy="${grid / 2}" r="${r2(grid * 0.16)}" fill="${fill}"/></pattern></defs><rect width="${w}" height="${h}" fill="url(#dots)"/>`;
+  `<defs><pattern id="dots-${fill.slice(1)}" width="${grid}" height="${grid}" patternUnits="userSpaceOnUse"><circle cx="${grid / 2}" cy="${grid / 2}" r="${r2(grid * 0.16)}" fill="${fill}"/></pattern></defs><rect width="${w}" height="${h}" fill="url(#dots-${fill.slice(1)})"/>`;
+// Punktmuster passend zur Hintergrundfarbe (hell auf warmen Farben, sonst dunkel)
+export const dotsOn = (w, h, bg, grid = DOT_GRID) => dots(w, h, dotInkFor(bg), grid);
 
 // Dezenter Hinweis auf KI-Erstellung (Transparenz nach EU-KI-Verordnung), unten rechts
 export const AI_LABEL = { de: 'KI-generiert', en: 'AI-generated' };

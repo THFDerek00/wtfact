@@ -8,7 +8,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {
-  ROOT, DISPLAY, TEXT, C, r2, measure, text, wrap, svg, png, wordmark, CAT_COLOR, iconG, card, chip, confetti, dots, aiTag, L,
+  ROOT, DISPLAY, TEXT, C, r2, measure, text, wrap, svg, png, wordmark, CAT_COLOR, iconG, card, chip, confetti, dots, dotsOn, aiTag, L,
 } from './brand-lib.mjs';
 import { open as openFacts, readFacts } from '../scripts/facts-db.mjs';
 
@@ -92,8 +92,8 @@ const K = {
 };
 
 // ---------- Bausteine ----------
-const catBg = (W, H, cat) => `<rect width="${W}" height="${H}" fill="${CAT_COLOR[cat]}"/>` + dots(W, H);
-const colorBg = (W, H, fill) => `<rect width="${W}" height="${H}" fill="${fill}"/>` + dots(W, H);
+const catBg = (W, H, cat) => `<rect width="${W}" height="${H}" fill="${CAT_COLOR[cat]}"/>` + dotsOn(W, H, CAT_COLOR[cat]);
+const colorBg = (W, H, fill) => `<rect width="${W}" height="${H}" fill="${fill}"/>` + dotsOn(W, H, fill);
 // Dunkle Bühne: Punkte in hellem Papierton
 const nightBg = (W, H) => `<rect width="${W}" height="${H}" fill="${NIGHT}"/>` + dots(W, H, '#f4f1ea14');
 const goldBg = (W, H) =>
