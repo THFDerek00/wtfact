@@ -22,7 +22,8 @@ function community_db(): ?PDO
                 if (@is_file($f)) { $file = $f; break; }
             }
             if (!$file) {
-                $GLOBALS['community_why'] = 'Datei nicht gefunden (' . implode(', ', $tried) . ')';
+                $ob = (string) ini_get('open_basedir');
+                $GLOBALS['community_why'] = 'Datei nicht gefunden (' . implode(', ', $tried) . ')' . ($ob !== '' ? ", PHP darf nur hier lesen: $ob" : '');
                 return null;
             }
             // Nicht schreibgeschützt öffnen: Die API nutzt WAL, und das braucht auch beim Lesen Zugriff auf -shm.
@@ -58,19 +59,39 @@ function community_counts(): ?array
             $GLOBALS['community_why'] = $e->getMessage();
         }
     }
+    // Erst über die normale Adresse, dann direkt am eigenen Server (falls die Adresse von innen woanders landet).
     $site = rtrim((string) cfg('site', 'https://wtfact.xyz'), '/');
-    $h = curl_init($site . '/api/index.php?r=counts');
-    curl_setopt_array($h, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 15, CURLOPT_CONNECTTIMEOUT => 5, CURLOPT_USERAGENT => 'wtfact-steuerung']);
-    $body = curl_exec($h);
-    $status = (int) curl_getinfo($h, CURLINFO_HTTP_CODE);
-    $data = is_string($body) ? json_decode($body, true) : null;
-    if ($status === 200 && is_array($data) && isset($data['ratings'], $data['stats'])) {
-        $data['stats']['days'] = (object) ($data['stats']['days'] ?? []);
-        return $out = ['ratings' => (array) $data['ratings'], 'stats' => $data['stats'], 'via' => 'api'];
+    $host = (string) parse_url($site, PHP_URL_HOST);
+    $port = parse_url($site, PHP_URL_SCHEME) === 'http' ? 80 : 443;
+    $why = [];
+    foreach ([[], $host ? ["$host:$port:127.0.0.1"] : null] as $resolve) {
+        if ($resolve === null) continue;
+        $h = curl_init($site . '/api/index.php?r=counts&t=' . time());
+        curl_setopt_array($h, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 15, CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_USERAGENT => 'wtfact-steuerung', CURLOPT_ENCODING => '', CURLOPT_HTTPHEADER => ['Accept: application/json']]);
+        if ($resolve) curl_setopt($h, CURLOPT_RESOLVE, $resolve);
+        $body = curl_exec($h);
+        $status = (int) curl_getinfo($h, CURLINFO_HTTP_CODE);
+        $data = api_json($body);
+        if ($status === 200 && isset($data['ratings'], $data['stats']) && is_array($data['stats'])) {
+            $data['stats']['days'] = (object) ($data['stats']['days'] ?? []);
+            return $out = ['ratings' => (array) $data['ratings'], 'stats' => $data['stats'], 'via' => 'api'];
+        }
+        $why[] = ($resolve ? 'direkt ' : '') . ($status ?: curl_error($h))
+            . (is_string($body) && $status ? ', Antwort beginnt mit „' . mb_substr(trim(strip_tags($body)), 0, 80) . '“' : '');
     }
-    $GLOBALS['community_why'] = trim(($GLOBALS['community_why'] ?? '') . '; API der Seite: ' . ($status ?: curl_error($h)), '; ');
+    $GLOBALS['community_why'] = trim(($GLOBALS['community_why'] ?? '') . '; API der Seite: ' . implode('; ', $why), '; ');
     error_log('wtfact steuerung: Bewertungen auch über die API nicht lesbar: ' . $GLOBALS['community_why']);
     return null;
+}
+
+/** JSON aus der Antwort der Seiten-API, auch wenn PHP davor eine Warnung oder ein BOM ausgegeben hat. */
+function api_json($body): ?array
+{
+    if (!is_string($body)) return null;
+    $data = json_decode($body, true);
+    if (!is_array($data) && ($i = strpos($body, '{"ratings"')) !== false) $data = json_decode(substr($body, $i), true);
+    return is_array($data) ? $data : null;
 }
 
 /** Zählt Bewertungen und Stimmen. Gleicher Code wie in public/api/index.php (count_community). */
