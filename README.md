@@ -58,10 +58,8 @@ Lokal testen: `npm run build`, dann `php -S localhost:8081 -t dist-steuerung` (b
 
 ## Neue Fakten schreiben
 
-**Bis das Dashboard läuft (Stand 2026-10-08):** Claude schreibt jeden Morgen drei neue Fakten als PRs
-(Routine „WTFact: drei Fakten am Morgen“, 3:52 Uhr). Eric mergt, was erscheinen soll.
-
-**Danach (Wochenlauf):** Einmal pro Woche schreibt eine Claude-Routine die Fakten für die ganze nächste Woche
+**Wochenlauf (seit 2026-10-08, Routine „WTFact: 21 Fakten für die Woche“, samstags 3:52 Uhr):**
+Einmal pro Woche schreibt eine Claude-Routine die Fakten für die ganze nächste Woche
 (3 pro Tag, also 21) ohne Termin, legt sie gesammelt als PR `woche/<JJJJ>-KW<NN>` an und meldet sich im Projekt.
 Eric übernimmt den PR im Dashboard in den Pool und verteilt die Fakten auf die Slots. Nichts erscheint, ohne dass Eric es einplant.
 
