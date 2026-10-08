@@ -19,7 +19,7 @@ Freischalten zur geplanten Uhrzeit, Offline-Nehmen und Löschen.
   Ziehen in einen belegten Slot tauscht die beiden Fakten. Vergangene Slots sind gesperrt.
 - **Reiter „Alle Fakten“:** Liste mit Zustand (Pool, Geplant, Live, Offline), Termin und Daumen hoch/runter,
   Suche, Filter, Sortierung nach Beliebtheit. Aktionen: sofort veröffentlichen, offline nehmen, wieder online, löschen.
-- **Neue Fakten:** Der Wochenlauf legt einen PR `woche/…` an. Das Dashboard zeigt ihn oben an, „In den Pool übernehmen“ mergt ihn.
+- **Neue Fakten:** Der Wochenlauf legt einen PR `woche/…` an. Das Dashboard zeigt ihn oben an, „In den Pool übernehmen“ mergt ihn (eingeplante Fakten bleiben eingeplant).
 
 So funktioniert es:
 
@@ -58,10 +58,10 @@ Lokal testen: `npm run build`, dann `php -S localhost:8081 -t dist-steuerung` (b
 
 ## Neue Fakten schreiben
 
-**Wochenlauf (seit 2026-10-08, Routine „WTFact: 21 Fakten für die Woche“, samstags 3:52 Uhr):**
-Einmal pro Woche schreibt eine Claude-Routine die Fakten für die ganze nächste Woche
-(3 pro Tag, also 21) ohne Termin, legt sie gesammelt als PR `woche/<JJJJ>-KW<NN>` an und meldet sich im Projekt.
-Eric übernimmt den PR im Dashboard in den Pool und verteilt die Fakten auf die Slots. Nichts erscheint, ohne dass Eric es einplant.
+**Wochenlauf (Wunsch von Eric, 2026-10-08, Routine „WTFact: 21 Fakten für die Woche“, samstags gegen 10 Uhr):**
+Claude schreibt die 21 Fakten für die kommende Woche Sonntag bis Samstag (3 pro Tag), schon eingeplant zu den festen
+Zeiten (`SLOT_TIMES`), und legt sie gesammelt als PR `woche/<JJJJ>-KW<NN>` an. Fällt ein Fakt durch den Faktencheck,
+schreibt Claude Ersatz, bis es 21 sind. Eric übernimmt den PR im Dashboard (bis Sonntag 8 Uhr) und kann dort umplanen.
 
 Alternativ, von Hand: `.github/workflows/daily-post.yml` (Actions > Tägliche Beiträge > Run workflow, braucht das
 Secret `ANTHROPIC_API_KEY`) ruft `scripts/generate-post.mjs` auf. Mit `node scripts/generate-post.mjs --pool` landet der
