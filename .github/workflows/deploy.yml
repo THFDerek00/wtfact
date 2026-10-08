@@ -1,23 +1,33 @@
 name: Hochladen zu IONOS
 
-# Baut die Seite und lädt sie per SFTP in den Webordner bei IONOS (Plesk): nach jedem Merge nach main,
-# nach jedem Lauf von „Beiträge veröffentlichen“ (dessen Merges lösen sonst keinen Push-Lauf aus)
-# und von Hand über Actions > Hochladen zu IONOS > Run workflow.
+# Baut die Seite und lädt sie per SFTP in den Webordner bei IONOS (Plesk): nach jedem Commit auf main,
+# von Hand über Actions > Hochladen zu IONOS > Run workflow und wenn ein eingeplanter Fakt fällig ist.
+# Dazu kommt das Dashboard (dist-steuerung/) in den Ordner der Subdomain steuerung.wtfact.xyz.
+#
+# Fällige Fakten (README „Dashboard“): Das Dashboard startet diesen Workflow selbst, sobald ein Termin erreicht
+# ist (über die geplante Aufgabe in Plesk, api.php?r=cron). Als Rückfallebene schaut GitHub zusätzlich jede Stunde
+# nach (Job „check“, scripts/due-check.mjs) und baut nur, wenn wirklich etwas fällig ist.
 #
 # Secrets (Settings > Secrets and variables > Actions > Secrets):
 #   DEPLOY_HOST      Server aus Plesk, z. B. die Domain oder die IP des Servers
 #   DEPLOY_USER      Systembenutzer des Abonnements (Plesk: Websites & Domains > Hosting & DNS > Hosting)
 #   DEPLOY_PASSWORD  Passwort dieses Benutzers
+#   STEUERUNG_PASSWORD      Passwort für das Dashboard (Benutzer: STEUERUNG_USER, Standard „eric“)
+#   STEUERUNG_GITHUB_TOKEN  Fine-grained Token für das Dashboard (README „Dashboard“)
+#   STEUERUNG_CRON_TOKEN    beliebige lange Zeichenfolge für die geplante Aufgabe in Plesk
 # Optional (Settings > Secrets and variables > Actions > Variables):
 #   DEPLOY_PATH      Webordner, Standard httpdocs
 #   DEPLOY_PORT      Standard 22
+#   STEUERUNG_PATH   Ordner der Subdomain, Standard steuerung.wtfact.xyz
+#   STEUERUNG_USER   Benutzername für das Dashboard, Standard eric
+#   STEUERUNG_SLOTS  feste Zeiten, Standard 07:00,12:00,19:00
+#   SITE_URL         Standard https://wtfact.xyz
 # Ohne DEPLOY_HOST wird nur gebaut und nichts hochgeladen.
 on:
   push:
     branches: [main]
-  workflow_run:
-    workflows: ['Beiträge veröffentlichen']
-    types: [completed]
+  schedule:
+    - cron: '3 * * * *'
   workflow_dispatch: {}
 
 permissions:
@@ -28,7 +38,41 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Nur beim stündlichen Lauf: Ist seit dem letzten Upload ein Fakt fällig geworden?
+  check:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    outputs:
+      due: ${{ steps.due.outputs.due }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          sparse-checkout: |
+            db
+            scripts
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - id: due
+        env:
+          SITE: ${{ vars.SITE_URL || 'https://wtfact.xyz' }}
+        run: |
+          curl -fsS --max-time 20 "$SITE/facts.json" -o "$RUNNER_TEMP/live.json" || echo "facts.json nicht erreichbar."
+          node --disable-warning=ExperimentalWarning scripts/due-check.mjs "$RUNNER_TEMP/live.json"
+
   deploy:
+    needs: check
+    # Läuft nach jedem Commit und von Hand, stündlich nur wenn etwas fällig ist. Commits des Dashboards, die nur
+    # die Planung ändern (einplanen, zurück in den Pool), ändern nichts an der Seite und brauchen keinen Upload.
+    if: >-
+      always() && (
+        (github.event_name == 'schedule' && needs.check.outputs.due == 'true') ||
+        github.event_name == 'workflow_dispatch' ||
+        (github.event_name == 'push' &&
+          !startsWith(github.event.head_commit.message, 'Steuerung: Eingeplant') &&
+          !startsWith(github.event.head_commit.message, 'Steuerung: Zurück in den Pool'))
+      )
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -41,12 +85,37 @@ jobs:
       - run: npm ci
       - run: npm run build
 
+      # Zugangsdaten des Dashboards aus den Secrets. Ohne STEUERUNG_PASSWORD wird nichts geschrieben,
+      # dann gilt eine von Hand angelegte config.local.php im Ordner der Subdomain (Vorlage: steuerung/config.example.php).
+      - name: Dashboard einrichten
+        env:
+          S_USER: ${{ vars.STEUERUNG_USER || 'eric' }}
+          S_PASSWORD: ${{ secrets.STEUERUNG_PASSWORD }}
+          S_TOKEN: ${{ secrets.STEUERUNG_GITHUB_TOKEN }}
+          S_CRON: ${{ secrets.STEUERUNG_CRON_TOKEN }}
+          S_SLOTS: ${{ vars.STEUERUNG_SLOTS || '07:00,12:00,19:00' }}
+          S_SITE: ${{ vars.SITE_URL || 'https://wtfact.xyz' }}
+          S_REPO: ${{ github.repository }}
+        run: |
+          if [ -z "$S_PASSWORD" ]; then
+            echo "::notice::STEUERUNG_PASSWORD fehlt, Dashboard ohne Zugangsdaten hochgeladen. Einrichtung: README.md, Abschnitt Dashboard."
+            exit 0
+          fi
+          php -r '
+            $slots = array_values(array_filter(array_map("trim", explode(",", getenv("S_SLOTS")))));
+            $c = ["user" => getenv("S_USER"), "password_hash" => password_hash(getenv("S_PASSWORD"), PASSWORD_DEFAULT),
+                  "github_token" => getenv("S_TOKEN"), "cron_token" => getenv("S_CRON"), "slots" => $slots,
+                  "site" => getenv("S_SITE"), "repo" => getenv("S_REPO")];
+            file_put_contents("dist-steuerung/lib/config.local.php", "<?php\n// Vom Upload aus den GitHub-Secrets geschrieben. Nicht von Hand ändern.\nreturn " . var_export($c, true) . ";\n");
+          '
+
       - name: Hochladen
         env:
           HOST: ${{ secrets.DEPLOY_HOST }}
           DUSER: ${{ secrets.DEPLOY_USER }}
           LFTP_PASSWORD: ${{ secrets.DEPLOY_PASSWORD }}
           DIR: ${{ vars.DEPLOY_PATH || 'httpdocs' }}
+          SDIR: ${{ vars.STEUERUNG_PATH || 'steuerung.wtfact.xyz' }}
           PORT: ${{ vars.DEPLOY_PORT || '22' }}
         run: |
           if [ -z "$HOST" ]; then
@@ -55,9 +124,13 @@ jobs:
           fi
           sudo apt-get install -y -qq lftp >/dev/null
           T="$RUNNER_TEMP"
-          open="set sftp:auto-confirm yes; set xfer:clobber on; set net:max-retries 3; set net:timeout 30; open --env-password -u $DUSER -p $PORT sftp://$HOST; cd $DIR"
-          # Liste vom letzten Upload holen (fehlt beim ersten Mal, dann wird alles hochgeladen).
-          rm -f "$T/old.json"
-          lftp -c "$open; get .deploy-manifest.json -o $T/old.json" 2>/dev/null || echo "Noch kein früherer Upload gefunden."
-          node scripts/deploy-plan.mjs dist "$T/old.json" "$T/new.json" "$T/plan.lftp"
-          lftp -c "$open; source $T/plan.lftp"
+          base="set sftp:auto-confirm yes; set xfer:clobber on; set net:max-retries 3; set net:timeout 30; open --env-password -u $DUSER -p $PORT sftp://$HOST"
+          # Erst die Seite, dann das Dashboard. Je Ordner die Liste vom letzten Upload holen (fehlt beim ersten Mal,
+          # dann wird alles hochgeladen) und nur Geändertes übertragen.
+          for pair in "dist:$DIR" "dist-steuerung:$SDIR"; do
+            src="${pair%%:*}"; dst="${pair#*:}"
+            rm -f "$T/old.json"
+            lftp -c "$base; cd $dst; get .deploy-manifest.json -o $T/old.json" 2>/dev/null || echo "Noch kein früherer Upload in $dst."
+            node scripts/deploy-plan.mjs "$src" "$T/old.json" "$T/new.json" "$T/plan.lftp"
+            lftp -c "$base; mkdir -p -f $dst; cd $dst; source $T/plan.lftp"
+          done

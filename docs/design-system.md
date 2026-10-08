@@ -138,3 +138,11 @@ Wunsch von Eric (2026-10-02):
 - Wo ein Bild hilft, kommt ein Strich-Icon aus **Lucide**, eingebunden über `src/components/Icon.astro`; die Pfade liegen in `src/components/icons.ts` (kein npm-Paket nötig, neues Icon dort von lucide.dev ergänzen): `<Icon name="chevron-right" />`. Icons sind `aria-hidden`, Farbe `currentColor`, Größe wächst mit der Schrift.
 - **Pfeile sind immer Chevrons** (`chevron-right`, `-left`, `-down`, `-up`), keine Zeichen wie → ↓ ▾.
 - **Gefällt mir / Gefällt mir weniger**: `thumbs-up` / `thumbs-down`, auf Knöpfen und auf den Schildern der Wisch-Karte.
+
+## Dashboard, Daumen und Top 10
+
+Wunsch von Eric (2026-10-08). Abläufe: `README.md`, Abschnitt „Dashboard“.
+
+- **Dashboard** (`src/pages/steuerung/index.astro`): gleiche Tokens und Bausteine wie die Seite. Kopf als `.stage`, Reiter über `aria-pressed` (aktiv gelb). Fakten als kleine Karten mit Emoji-Feld in Kategoriefarbe (`.cat-*`); in den schmalen Tagesspalten ohne Emoji, Titel bis 3 Zeilen. Slots gestrichelt, „Sonder“ violett gestrichelt, vergangene Slots durchgezogen in `--locked`. Beim Ziehen über einer Ablage ein gestrichelter Fokus-Rahmen. Zustände als Etikett: Pool neutral, Geplant `--cyan`, Wird veröffentlicht `--yellow`, Live `--lime`, Offline `--pink`. Statt Ziehen geht immer auch Antippen und „Hierher“ (Handy, Tastatur).
+- **Daumen** (`Thumbs.astro`, unter jedem Fakt): links Daumen runter (`.btn--pink`), rechts Daumen hoch (`.btn--lime`), jeweils mit Zahl. Die eigene Wahl hat `aria-pressed="true"` und ein ✓.
+- **Top 10** (`TopTen.astro`, Hall of Fame zwischen „Gerade ganz oben“ und Abstimmung): nummerierte Liste aus `.card`-Zeilen, Platz 1 mit Nummer in `--pink-text`, rechts 👍/👎-Zahlen.

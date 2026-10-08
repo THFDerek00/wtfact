@@ -1,0 +1,78 @@
+---
+// Daumen hoch / Daumen runter unter jedem Fakt (Wunsch von Eric, 2026-10-08). Gleiche Bewertung wie die
+// Wisch-Karte: Wer hier bewertet, hat auch beim Wischen bewertet und umgekehrt (rate() in src/scripts/community.ts).
+// Zählt für Fakt des Tages und die Top 10 der Hall of Fame. Wie überall: links „weniger“, rechts „gefällt mir“.
+import Icon from './Icon.astro';
+import { t } from '../i18n/ui';
+import type { Lang } from '../config';
+interface Props { lang: Lang; factKey: string }
+const { lang, factKey } = Astro.props;
+const ui = t(lang).thumbs;
+---
+<section class="thumbs card" data-thumbs={factKey} data-thanks={ui.thanks} data-local={ui.local}>
+  <h2 class="q">{ui.question}</h2>
+  <div class="row" role="group" aria-label={ui.question}>
+    <button class="btn btn--pink" type="button" data-verdict="meh" aria-pressed="false">
+      <Icon name="thumbs-down" /> <span class="sr-only">{ui.down}</span> <span class="n" data-count="meh">0</span>
+    </button>
+    <button class="btn btn--lime" type="button" data-verdict="like" aria-pressed="false">
+      <Icon name="thumbs-up" /> <span class="sr-only">{ui.up}</span> <span class="n" data-count="like">0</span>
+    </button>
+  </div>
+  <p class="status" data-status aria-live="polite"></p>
+</section>
+
+<script>
+  import { rate, myRating, ratingOf } from '../scripts/community';
+  import type { Verdict } from '../week';
+
+  for (const box of document.querySelectorAll<HTMLElement>('[data-thumbs]')) {
+    const key = box.dataset.thumbs!;
+    const buttons = [...box.querySelectorAll<HTMLButtonElement>('[data-verdict]')];
+    const status = box.querySelector<HTMLElement>('[data-status]')!;
+    let counts = { like: 0, meh: 0 };
+    let shared = false;
+    const show = () => {
+      const mine = myRating(key);
+      for (const b of buttons) b.setAttribute('aria-pressed', String(b.dataset.verdict === mine));
+      // Ohne Server zählt nur die eigene Stimme.
+      const c = shared ? counts : { like: mine === 'like' ? 1 : 0, meh: mine === 'meh' ? 1 : 0 };
+      box.querySelector('[data-count="like"]')!.textContent = String(c.like);
+      box.querySelector('[data-count="meh"]')!.textContent = String(c.meh);
+    };
+    show();
+    ratingOf(key).then((c) => {
+      if (c) [counts, shared] = [c, true];
+      show();
+    });
+    for (const b of buttons) {
+      b.addEventListener('click', async () => {
+        const verdict = b.dataset.verdict as Verdict;
+        if (myRating(key) === verdict) return;
+        const before = myRating(key);
+        // Sofort anzeigen, der Server bestätigt danach mit den echten Zahlen.
+        if (shared) {
+          if (before) counts[before]--;
+          counts[verdict]++;
+        }
+        const pending = rate(key, verdict);
+        show();
+        const c = await pending;
+        if (c) [counts, shared] = [c, true];
+        show();
+        status.textContent = shared ? box.dataset.thanks! : `${box.dataset.thanks} ${box.dataset.local}`;
+      });
+    }
+  }
+</script>
+
+<style>
+  .thumbs { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); margin: var(--space-9) 0; padding: var(--space-5) var(--space-6); }
+  .q { margin: 0; font-size: var(--fs-xl); flex: 1 1 16ch; }
+  .row { display: flex; gap: var(--space-3); }
+  .btn[aria-pressed='true'] { box-shadow: var(--shadow-xs); transform: translate(2px, 2px); }
+  .btn[aria-pressed='true']::after { content: '✓'; }
+  .n { font-variant-numeric: tabular-nums; min-width: 2ch; text-align: left; }
+  .status { flex-basis: 100%; margin: 0; font-size: var(--fs-sm); color: var(--muted); }
+  .status:empty { display: none; }
+</style>

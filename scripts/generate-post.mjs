@@ -1,5 +1,6 @@
 // Schreibt den nächsten WTFact-Beitrag des Tages auf Deutsch und Englisch.
-// Aufruf: ANTHROPIC_API_KEY=... node scripts/generate-post.mjs
+// Aufruf: ANTHROPIC_API_KEY=... node scripts/generate-post.mjs [--pool]
+// Mit --pool landet der Fakt ohne Termin im Pool des Dashboards (Wochenvorrat, siehe README „Dashboard“).
 //
 // Pro Tag gibt es FACTS_PER_DAY Beiträge (src/config.ts), jeder Aufruf schreibt den nächsten
 // fehlenden. Jeder Beitrag des Tages hat eine eigene Kategorie, und keine davon war am Vortag dran.
@@ -37,8 +38,10 @@ const client = new Anthropic();
 build({ quiet: true });
 const db = open({ readOnly: false });
 const facts = readFacts(db);
+// Fakten im Pool (noch ohne Termin) zählen wie die neuesten: Sie erscheinen ja erst noch.
+const POOL_DATE = '9999-12-31';
 const existing = facts
-  .map((f) => ({ title: f.en.title, category: f.category, date: f.date, day: f.date.slice(0, 10), key: f.key, hook: f.en.hook }))
+  .map((f) => ({ title: f.en.title, category: f.category, date: f.date ?? POOL_DATE, day: (f.date ?? POOL_DATE).slice(0, 10), key: f.key, hook: f.en.hook, pool: !f.date }))
   .sort((a, b) => b.date.localeCompare(a.date));
 
 // Tage und Uhrzeiten rechnen in deutscher Zeit.
@@ -57,14 +60,19 @@ const berlinNow = () => {
   return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}:${parts.second}${off}`;
 };
 
+// --pool: Wochenvorrat für das Dashboard (steuerung.wtfact.xyz). Der Fakt bekommt keinen Termin (date = NULL)
+// und wird erst im Reiter „Veröffentlichungen“ eingeplant. Kein Tageslimit; Kategorie = die mit den wenigsten
+// Fakten im Pool, bei Gleichstand die, die am längsten nicht erschienen ist.
+const POOL = process.argv.includes('--pool');
+
 const todays = existing.filter((p) => p.day === today);
-if (todays.length >= FACTS_PER_DAY) {
+if (!POOL && todays.length >= FACTS_PER_DAY) {
   console.log(`Für ${today} gibt es schon ${todays.length} Beiträge. Nichts zu tun.`);
   process.exit(0);
 }
 
-// Gesperrt: Kategorien vom Vortag und die, die heute schon dran waren.
-const blocked = new Set(existing.filter((p) => p.day === yesterday || p.day === today).map((p) => p.category));
+// Gesperrt: Kategorien vom Vortag und die, die heute schon dran waren (im Pool-Modus keine).
+const blocked = new Set(POOL ? [] : existing.filter((p) => p.day === yesterday || p.day === today).map((p) => p.category));
 const allowed = CATEGORIES.filter((c) => !blocked.has(c));
 if (!allowed.length) {
   console.error(`Keine Kategorie frei (gesperrt: ${[...blocked].join(', ')}).`);
@@ -72,9 +80,14 @@ if (!allowed.length) {
 }
 // Davon die Kategorie wählen, die am längsten nicht dran war.
 const lastUsed = Object.fromEntries(CATEGORIES.map((c) => [c, '0000']));
-for (const p of existing) if (p.date > (lastUsed[p.category] ?? '')) lastUsed[p.category] = p.date;
-const category = allowed.sort((a, b) => lastUsed[a].localeCompare(lastUsed[b]))[0];
-console.log(`Beitrag ${todays.length + 1} von ${FACTS_PER_DAY} für ${today}, Kategorie ${category} (gesperrt: ${[...blocked].join(', ') || 'keine'}).`);
+for (const p of existing) if (!(POOL && p.pool) && p.date > (lastUsed[p.category] ?? '')) lastUsed[p.category] = p.date;
+const inPool = (c) => existing.filter((p) => p.pool && p.category === c).length;
+const category = allowed.sort((a, b) => (POOL ? inPool(a) - inPool(b) : 0) || lastUsed[a].localeCompare(lastUsed[b]))[0];
+console.log(
+  POOL
+    ? `Fakt für den Pool, Kategorie ${category} (${inPool(category)} schon im Pool).`
+    : `Beitrag ${todays.length + 1} von ${FACTS_PER_DAY} für ${today}, Kategorie ${category} (gesperrt: ${[...blocked].join(', ') || 'keine'}).`,
+);
 
 // Alle Beiträge gegen Dopplungen mitgeben, die neuesten 200 zusätzlich mit ihrem Kernsatz.
 const recentTitles =
@@ -253,7 +266,7 @@ const slugify = (s) =>
 // Adressen sind je Sprache eindeutig. Ist eine schon vergeben, kommt das Datum dazu.
 const taken = (lang, slug) => facts.some((f) => f[lang]?.slug === slug);
 const createdAt = berlinNow();
-const fact = { key: post.translationKey, date: createdAt, category, emoji: post.emoji, draft: false };
+const fact = { key: post.translationKey, date: POOL ? null : createdAt, category, emoji: post.emoji, draft: false };
 for (const lang of ['de', 'en']) {
   const v = post[lang];
   let slug = slugify(v.slug) || post.translationKey;

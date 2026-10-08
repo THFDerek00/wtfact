@@ -6,6 +6,8 @@
 //   POST ?r=vote     { voter, poll, key }        Stimme abgeben oder ändern (nur montags)
 //   POST ?r=rate     { voter, key, verdict }     Wisch-Bewertung, verdict = like | meh
 //   GET  ?r=history  Verlauf für die Hall of Fame: Fakten des Tages (30 Tage) und der Woche (12 Wochen)
+//   GET  ?r=rating&key=<key>  Daumen hoch/runter für einen Fakt (Faktseite)
+//   GET  ?r=top      Die 10 beliebtesten Fakten: meiste Daumen hoch minus runter (Hall of Fame)
 //
 // Gespeichert wird in SQLite (Standard, Datei neben dem Webordner, siehe wtf_db()) oder in MySQL/MariaDB,
 // wenn api/config.local.php das festlegt (Vorlage: api/config.example.php). Tabellen legt die API selbst an.
@@ -252,6 +254,26 @@ if ($route === 'history' && $method === 'GET') {
         if ($key) $weekPicks[] = ['poll' => $p, 'key' => $key, 'votes' => $votes[$key], 'total' => array_sum($votes)];
     }
     out(['today' => $today, 'days' => $dayPicks, 'weeks' => $weekPicks], 200, 'public, max-age=300');
+}
+
+if ($route === 'rating' && $method === 'GET') {
+    $key = str($_GET['key'] ?? null);
+    if (!in_array($key, array_column(facts(), 'key'), true)) out(['error' => 'unknown-fact'], 400);
+    out(ratings_for(wtf_db(), [$key])[$key] ?? ['like' => 0, 'meh' => 0], 200, 'public, max-age=30');
+}
+
+// Top 10: Daumen hoch minus Daumen runter, bei Gleichstand mehr Daumen hoch, dann der neuere Fakt.
+// Nur Fakten mit mindestens einem Daumen hoch. Gleiche Zählung wie topTen in src/week.ts.
+if ($route === 'top' && $method === 'GET') {
+    $all = facts();
+    $ratings = ratings_for(wtf_db(), array_column($all, 'key'));
+    $dateOf = array_column($all, 'date', 'key');
+    $list = [];
+    foreach ($ratings as $key => $r) if ($r['like'] > 0) $list[] = ['key' => $key, 'like' => $r['like'], 'meh' => $r['meh']];
+    usort($list, function ($a, $b) use ($dateOf) {
+        return ($b['like'] - $b['meh']) <=> ($a['like'] - $a['meh']) ?: $b['like'] <=> $a['like'] ?: strcmp($dateOf[$b['key']] ?? '', $dateOf[$a['key']] ?? '') ?: strcmp($a['key'], $b['key']);
+    });
+    out(array_slice($list, 0, 10), 200, 'public, max-age=120');
 }
 
 if ($route === 'vote' && $method === 'POST') {

@@ -18,7 +18,8 @@ if (!scriptArg) {
 const dist = resolve(distArg);
 const MANIFEST = '.deploy-manifest.json';
 // Liegen auf dem Server und gehören nicht dem Upload. Steht so etwas je in dist/, wird es trotzdem nicht angefasst.
-const KEEP = [/^api\/config\.local\.php$/, /^api\/data\//, /^\.deploy-manifest\.json$/];
+// config.local.php und data/ ohne api/ davor: dasselbe im Ordner des Dashboards (dist-steuerung/).
+const KEEP = [/^api\/config\.local\.php$/, /^api\/data\//, /^config\.local\.php$/, /^data\//, /^\.deploy-manifest\.json$/];
 
 const files = {};
 (function walk(dir) {

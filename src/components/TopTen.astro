@@ -1,0 +1,91 @@
+---
+// Top 10 der Hall of Fame (Wunsch von Eric, 2026-10-08): die beliebtesten Fakten nach Daumen hoch minus
+// Daumen runter, aus Wisch-Karte und Faktseiten. Server: GET /api/index.php?r=top, ohne Server topTen() aus
+// src/week.ts über die eigenen Bewertungen.
+import Icon from './Icon.astro';
+import { t } from '../i18n/ui';
+import type { Lang } from '../config';
+import type { FactInfo } from '../lib';
+interface Props { lang: Lang; facts: FactInfo[] }
+const { lang, facts } = Astro.props;
+const ui = t(lang).top;
+---
+<section class="wrap top10" data-top data-facts={JSON.stringify(facts.map(({ key, date, cat, emoji, title, url }) => ({ key, date, cat, emoji, title, url })))} data-up={ui.up} data-down={ui.down}>
+  <p class="kicker"><span class="chip accent"><Icon name="trophy" /> {ui.kicker}</span></p>
+  <h2>{ui.title}</h2>
+  <p class="lead">{ui.intro}</p>
+  <ol class="list" aria-label={ui.label} data-top-list></ol>
+  <p class="note" data-top-empty hidden>{ui.empty}</p>
+  <p class="note" data-top-local hidden>{ui.local}</p>
+</section>
+
+<script>
+  import { topFacts, myRatings, type TopEntry } from '../scripts/community';
+  import { topTen } from '../week';
+
+  type Info = { key: string; date: string; cat: string; emoji: string; title: string; url: string };
+  const root = document.querySelector<HTMLElement>('[data-top]');
+  if (root) {
+    const facts: Info[] = JSON.parse(root.dataset.facts ?? '[]');
+    const byKey = new Map(facts.map((f) => [f.key, f]));
+    const show = (list: TopEntry[], local: boolean) => {
+      const rows = list.filter((e) => byKey.has(e.key));
+      root.querySelector<HTMLElement>('[data-top-empty]')!.hidden = rows.length > 0;
+      root.querySelector<HTMLElement>('[data-top-local]')!.hidden = !local || rows.length === 0;
+      root.querySelector('[data-top-list]')!.replaceChildren(
+        ...rows.map((e, i) => {
+          const f = byKey.get(e.key)!;
+          const li = document.createElement('li');
+          const a = document.createElement('a');
+          a.className = 'card row';
+          a.href = f.url;
+          const no = document.createElement('span');
+          no.className = 'no';
+          no.textContent = String(i + 1);
+          const emoji = document.createElement('span');
+          emoji.className = `emoji cat-${f.cat}`;
+          emoji.setAttribute('aria-hidden', 'true');
+          emoji.textContent = f.emoji;
+          const title = document.createElement('span');
+          title.className = 'title';
+          title.textContent = f.title;
+          const score = document.createElement('span');
+          score.className = 'score';
+          score.textContent = `👍 ${e.like} · 👎 ${e.meh}`;
+          score.setAttribute('aria-label', `${root.dataset.up}: ${e.like}, ${root.dataset.down}: ${e.meh}`);
+          a.append(no, emoji, title, score);
+          li.append(a);
+          return li;
+        }),
+      );
+    };
+    show(topTen(facts, myRatings()), true);
+    topFacts().then((list) => list && show(list, false));
+  }
+</script>
+
+<style>
+  .top10 { margin-block: var(--space-10); }
+  .kicker { margin: 0 0 var(--space-3); }
+  h2 { font-size: var(--fs-display-sm); margin: 0 0 var(--space-3); }
+  .lead { max-width: var(--measure); margin: 0 0 var(--space-6); }
+  .list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+  .list :global(.row) {
+    display: flex; align-items: center; gap: var(--space-4); padding: var(--space-3) var(--space-4);
+    text-decoration: none; transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  }
+  .list :global(.row:hover) { transform: translate(-2px, -2px); box-shadow: var(--shadow-lg); }
+  .list :global(.no) { font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 800; min-width: 2ch; text-align: right; }
+  .list :global(li:first-child .no) { color: var(--pink-text); }
+  .list :global(.emoji) {
+    flex: 0 0 auto; display: grid; place-items: center; width: var(--space-10); height: var(--space-10);
+    border: var(--bw-sm) solid var(--line); border-radius: var(--radius-sm); font-size: var(--fs-xl);
+  }
+  .list :global(.title) { flex: 1; font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lg); line-height: 1.25; }
+  .list :global(.score) { font-size: var(--fs-sm); font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .note { color: var(--muted); font-size: var(--fs-sm); }
+  @media (max-width: 560px) {
+    .list :global(.row) { flex-wrap: wrap; }
+    .list :global(.score) { flex-basis: 100%; padding-left: calc(2ch + var(--space-10) + 2 * var(--space-4)); }
+  }
+</style>

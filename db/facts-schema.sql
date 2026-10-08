@@ -6,10 +6,12 @@
 -- Ein Fakt mit allem, was in beiden Sprachen gleich ist.
 CREATE TABLE facts (
   key      TEXT PRIMARY KEY,                -- verbindet DE und EN, z. B. 'bananas-berries'
-  date     TEXT NOT NULL,                   -- Erscheinungszeit, 'JJJJ-MM-TT' oder ISO mit Uhrzeit und Zeitzone
+  date     TEXT,                            -- Erscheinungszeit, 'JJJJ-MM-TT' oder ISO mit Uhrzeit und Zeitzone.
+                                            -- NULL = im Pool: geschrieben, aber noch nicht eingeplant (Dashboard „Veröffentlichungen“)
   category TEXT NOT NULL,                   -- siehe CATEGORIES in src/config.ts
   emoji    TEXT NOT NULL,
-  draft    INTEGER NOT NULL DEFAULT 0 CHECK (draft IN (0, 1))  -- 1 nimmt den Fakt von der Seite, ohne ihn zu löschen
+  draft    INTEGER NOT NULL DEFAULT 0 CHECK (draft IN (0, 1)),  -- 1 nimmt den Fakt von der Seite, ohne ihn zu löschen
+  slot     INTEGER CHECK (slot BETWEEN 0 AND 3)  -- im Dashboard eingeplant: 1 bis 3 = feste Zeit des Tages, 0 = Sonderveröffentlichung
 );
 
 -- Text eines Fakts in einer Sprache. body ist der Artikeltext mit Markdown-Auszeichnung (## Überschrift, > Zitat, **fett**).
