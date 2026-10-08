@@ -9,7 +9,7 @@ type Fact = {
   slug: string | null; like: number; meh: number;
 };
 type Pr = { number: number; title: string; url: string; branch: string; draft: boolean };
-/** Zahlen aus der Datenbank der Seite (steuerung/lib/ratings.php, community_stats); null = nicht lesbar. */
+/** Zahlen aus der Datenbank der Seite (steuerung/lib/ratings.php, community_counts); null = nicht lesbar. */
 type Stats = {
   ratings: number; voters: number; voters7: number;
   days: Record<string, { like: number; meh: number }>; polls: { poll: string; n: number }[];
@@ -17,6 +17,8 @@ type Stats = {
 type State = {
   now: string; slots: string[]; facts: Fact[]; ratings: boolean; liveKnown: boolean; prs: Pr[];
   head: string; repo: string; site: string; deploy: string | null; stats: Stats | null;
+  /** Woher die Bewertungen kamen, und falls gar nicht: warum (für den Hinweis). */
+  ratingsVia: 'db' | 'api' | null; ratingsWhy: string | null;
 };
 
 const $ = <T extends Element = HTMLElement>(sel: string, root: ParentNode = document) => root.querySelector<T>(sel)!;
@@ -638,7 +640,9 @@ function renderHome() {
   pollBox.hidden = !polls.length;
   if (polls.length) columns(pollBox, polls.map((p) => ({ label: `KW ${isoWeek(p.poll)}`, value: p.n, title: `Abstimmung ab ${dayLabel(p.poll)}: ${p.n} Stimmen` })));
   $('[data-poll-empty]').hidden = polls.length > 0;
-  $('[data-stats-note]').hidden = !!stats;
+  const statsNote = $('[data-stats-note]');
+  statsNote.hidden = !!stats;
+  if (!stats) statsNote.textContent = `Bewertungen und Stimmen sind gerade nicht lesbar${st.ratingsWhy ? ` (${st.ratingsWhy})` : ''}.`;
 }
 
 let statusFilter = '';
@@ -654,7 +658,9 @@ function renderAll() {
   );
   if (sort === 'score') rows = [...rows].sort((a, b) => b.like - b.meh - (a.like - a.meh) || b.like - a.like);
   if (sort === 'votes') rows = [...rows].sort((a, b) => b.like + b.meh - (a.like + a.meh));
-  $('[data-ratings-note]').hidden = state!.ratings;
+  const note = $('[data-ratings-note]');
+  note.hidden = state!.ratings;
+  if (!state!.ratings) note.textContent = `Bewertungen sind gerade nicht lesbar, deshalb stehen überall 0${state!.ratingsWhy ? ` (${state!.ratingsWhy})` : ''}.`;
   $('[data-all-count]').textContent = `${rows.length} von ${state!.facts.length} Fakten`;
   $('[data-rows]').replaceChildren(...rows.map(row));
 }

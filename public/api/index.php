@@ -8,6 +8,7 @@
 //   GET  ?r=history  Verlauf für die Hall of Fame: Fakten des Tages (30 Tage) und der Woche (12 Wochen)
 //   GET  ?r=rating&key=<key>  Daumen hoch/runter für einen Fakt (Faktseite)
 //   GET  ?r=top      Die 10 beliebtesten Fakten: meiste Daumen hoch minus runter (Hall of Fame)
+//   GET  ?r=counts   Daumen je Fakt und Zahlen für die Übersicht im Dashboard (steuerung/lib/ratings.php)
 //
 // Gespeichert wird in SQLite (Standard, Datei neben dem Webordner, siehe wtf_db()) oder in MySQL/MariaDB,
 // wenn api/config.local.php das festlegt (Vorlage: api/config.example.php). Tabellen legt die API selbst an.
@@ -274,6 +275,43 @@ if ($route === 'top' && $method === 'GET') {
         return ($b['like'] - $b['meh']) <=> ($a['like'] - $a['meh']) ?: $b['like'] <=> $a['like'] ?: strcmp($dateOf[$b['key']] ?? '', $dateOf[$a['key']] ?? '') ?: strcmp($a['key'], $b['key']);
     });
     out(array_slice($list, 0, 10), 200, 'public, max-age=120');
+}
+
+// Für das Dashboard, falls es die Datenbank nicht direkt lesen kann. Nur Summen, keine Kennungen.
+if ($route === 'counts' && $method === 'GET') {
+    out(count_community(wtf_db()), 200, 'private, max-age=30');
+}
+
+/** Zählt Bewertungen und Stimmen. Gleicher Code wie in steuerung/lib/ratings.php (count_community). */
+function count_community(PDO $db): array
+{
+    $ratings = [];
+    $stats = ['ratings' => 0, 'voters' => 0, 'voters7' => 0, 'days' => [], 'polls' => []];
+    $since = gmdate('Y-m-d', time() - 29 * 86400);
+    $week = gmdate('Y-m-d H:i:s', time() - 7 * 86400);
+    foreach ($db->query('SELECT fact_key, verdict, COUNT(*) AS n FROM ratings GROUP BY fact_key, verdict') as $r) {
+        $ratings[$r['fact_key']] = $ratings[$r['fact_key']] ?? ['like' => 0, 'meh' => 0];
+        $ratings[$r['fact_key']][$r['verdict'] === 'like' ? 'like' : 'meh'] += (int) $r['n'];
+    }
+    $r = $db->query('SELECT COUNT(*) AS n, COUNT(DISTINCT voter) AS v FROM ratings')->fetch();
+    $stats['ratings'] = (int) $r['n'];
+    $stats['voters'] = (int) $r['v'];
+    $s = $db->prepare('SELECT COUNT(DISTINCT voter) AS v FROM ratings WHERE created_at >= ?');
+    $s->execute([$week]);
+    $stats['voters7'] = (int) $s->fetch()['v'];
+    $s = $db->prepare('SELECT substr(created_at, 1, 10) AS d, verdict, COUNT(*) AS n FROM ratings
+        WHERE created_at >= ? GROUP BY substr(created_at, 1, 10), verdict');
+    $s->execute([$since]);
+    foreach ($s as $row) {
+        $d = $row['d'];
+        $stats['days'][$d] = $stats['days'][$d] ?? ['like' => 0, 'meh' => 0];
+        $stats['days'][$d][$row['verdict'] === 'like' ? 'like' : 'meh'] += (int) $row['n'];
+    }
+    foreach ($db->query('SELECT poll, COUNT(*) AS n FROM votes GROUP BY poll ORDER BY poll DESC LIMIT 8') as $row) {
+        $stats['polls'][] = ['poll' => $row['poll'], 'n' => (int) $row['n']];
+    }
+    $stats['days'] = (object) $stats['days'];
+    return ['ratings' => (object) $ratings, 'stats' => $stats];
 }
 
 if ($route === 'vote' && $method === 'POST') {
