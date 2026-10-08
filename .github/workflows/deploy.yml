@@ -124,7 +124,16 @@ jobs:
           fi
           sudo apt-get install -y -qq lftp >/dev/null
           T="$RUNNER_TEMP"
-          base="set sftp:auto-confirm yes; set xfer:clobber on; set net:max-retries 3; set net:timeout 30; open --env-password -u $DUSER -p $PORT sftp://$HOST"
+          base="set sftp:auto-confirm yes; set xfer:clobber on; set net:max-retries 3; set net:timeout 30; set net:reconnect-interval-base 5; open --env-password -u $DUSER -p $PORT sftp://$HOST"
+          # Verbindung vorab prüfen, damit ein Fehler sofort und verständlich gemeldet wird.
+          if ! timeout 15 bash -c "exec 3<>/dev/tcp/$HOST/$PORT" 2>/dev/null; then
+            echo "::error::$HOST ist auf Port $PORT nicht erreichbar. DEPLOY_HOST prüfen (nur die Domain, ohne https:// und /) und in Plesk beim Systembenutzer SSH-Zugriff einschalten."
+            exit 1
+          fi
+          if ! lftp -c "$base; set net:max-retries 1; ls > /dev/null"; then
+            echo "::error::Anmeldung per SFTP an $HOST fehlgeschlagen. DEPLOY_USER und DEPLOY_PASSWORD prüfen und in Plesk beim Systembenutzer SSH-Zugriff auf /bin/bash (chrooted) stellen."
+            exit 1
+          fi
           # Erst die Seite, dann das Dashboard. Je Ordner die Liste vom letzten Upload holen (fehlt beim ersten Mal,
           # dann wird alles hochgeladen) und nur Geändertes übertragen.
           for pair in "dist:$DIR" "dist-steuerung:$SDIR"; do
