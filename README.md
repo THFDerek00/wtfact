@@ -14,7 +14,7 @@ Zentrale Stelle für alle Fakten (Wunsch von Eric, 2026-10-08): Login, Wochenpla
 Freischalten zur geplanten Uhrzeit, Offline-Nehmen und Löschen.
 
 - **Reiter „Veröffentlichungen“:** links der Pool (geschrieben, noch ohne Termin), rechts die Woche mit drei festen
-  Zeiten pro Tag (Standard 7:00, 12:00 und 19:00 Uhr) und einem Feld „Sonder“ für zusätzliche Fakten zu einer frei
+  Zeiten pro Tag (8:00, 12:00 und 16:00 Uhr, `SLOT_TIMES` in `src/config.ts`) und einem Feld „Sonder“ für zusätzliche Fakten zu einer frei
   gewählten Uhrzeit. Fakt in einen Slot ziehen (oder antippen und „Hierher“), zurück in den Pool ziehen oder auf × tippen.
   Ziehen in einen belegten Slot tauscht die beiden Fakten. Vergangene Slots sind gesperrt.
 - **Reiter „Alle Fakten“:** Liste mit Zustand (Pool, Geplant, Live, Offline), Termin und Daumen hoch/runter,
@@ -48,7 +48,7 @@ Einmalig einrichten:
 3. **Secrets** in GitHub (Settings > Secrets and variables > Actions > Secrets): `STEUERUNG_PASSWORD` (dein Passwort fürs
    Dashboard), `STEUERUNG_GITHUB_TOKEN` (der Token aus Schritt 2), `STEUERUNG_CRON_TOKEN` (eine lange zufällige
    Zeichenfolge). Benutzername ist `eric` (änderbar über die Variable `STEUERUNG_USER`), die festen Zeiten über
-   `STEUERUNG_SLOTS` (z. B. `07:00,12:00,19:00`).
+   `STEUERUNG_SLOTS` (Standard `08:00,12:00,16:00`).
 4. **Actions > Hochladen zu IONOS > Run workflow.** Danach `https://steuerung.wtfact.xyz` öffnen und anmelden.
 5. **Geplante Aufgabe:** Plesk > Websites & Domains > *Geplante Aufgaben* > *Aufgabe hinzufügen* > *URL abrufen*:
    die Cron-Adresse von oben, Ausführen: *Benutzerdefiniert* `*/5 * * * *`.
@@ -58,10 +58,8 @@ Lokal testen: `npm run build`, dann `php -S localhost:8081 -t dist-steuerung` (b
 
 ## Neue Fakten schreiben
 
-**Bis das Dashboard läuft (Stand 2026-10-08):** Claude schreibt jeden Morgen drei neue Fakten als PRs
-(Routine „WTFact: drei Fakten am Morgen“, 3:52 Uhr). Eric mergt, was erscheinen soll.
-
-**Danach (Wochenlauf):** Einmal pro Woche schreibt eine Claude-Routine die Fakten für die ganze nächste Woche
+**Wochenlauf (seit 2026-10-08, Routine „WTFact: 21 Fakten für die Woche“, samstags 3:52 Uhr):**
+Einmal pro Woche schreibt eine Claude-Routine die Fakten für die ganze nächste Woche
 (3 pro Tag, also 21) ohne Termin, legt sie gesammelt als PR `woche/<JJJJ>-KW<NN>` an und meldet sich im Projekt.
 Eric übernimmt den PR im Dashboard in den Pool und verteilt die Fakten auf die Slots. Nichts erscheint, ohne dass Eric es einplant.
 
@@ -133,7 +131,7 @@ Farben, Schrift, Abstände und Bausteine sind in `docs/design-system.md` beschri
 - **Top 10** (`src/components/TopTen.astro`, auf der Hall of Fame): meiste Daumen hoch minus Daumen runter
   (`GET /api/index.php?r=top`, ohne Server `topTen` in `src/week.ts`).
 - **Hall of Fame** (`/de/hall-of-fame/`, `src/pages/[lang]/hall-of-fame.astro`): eigene Seite für Fakt des
-  Tages, Fakt der Woche und die Montags-Abstimmung. Dazu Countdowns (nächster Fakt des Tages, nächste
+  Tages, Fakt der Woche und die Montags-Abstimmung. Dazu Countdowns (nächster neuer Fakt zur nächsten festen Zeit aus `SLOT_TIMES`, nächster Fakt des Tages, nächste
   Abstimmung), Tippspiel „Wer wird morgen Fakt des Tages?“ mit Trefferserie, Verlauf (30 Tage, 12 Wochen)
   mit Sammelalbum (gelesene Sieger, die Beitragsseite merkt sich gelesene Fakten) und eine Rangliste der
   Kategorien. Auf der Startseite steht nur ein kurzer Hinweis (`src/components/FamePointer.astro`).

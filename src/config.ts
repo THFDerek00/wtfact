@@ -24,6 +24,11 @@ export const CATEGORIES = ['science', 'history', 'tech', 'nature', 'body', 'weir
 export type Category = (typeof CATEGORIES)[number];
 
 // So viele neue Fakten schreibt Claude jeden Morgen (je als eigener PR, Eric führt sie selbst zusammen).
-// Mit dem Dashboard (README „Dashboard“) gibt es stattdessen 3 feste Zeiten pro Tag; die stehen dort (STEUERUNG_SLOTS).
+// Mit dem Dashboard (README „Dashboard“) gibt es stattdessen 3 feste Zeiten pro Tag, siehe SLOT_TIMES.
 // Jeder aus einer anderen Kategorie, keiner aus einer Kategorie vom Vortag. Gelesen von scripts/generate-post.mjs.
 export const FACTS_PER_DAY = 3;
+
+// Feste Veröffentlichungszeiten pro Tag, deutsche Zeit (Wunsch von Eric, 2026-10-08: 8, 12 und 16 Uhr).
+// Gleiche Werte als Standard im Dashboard (steuerung/lib/bootstrap.php, slot_times) und in .github/workflows/deploy.yml
+// (STEUERUNG_SLOTS); `npm run check` prüft, dass alle drei übereinstimmen. Genutzt vom Countdown in der Hall of Fame.
+export const SLOT_TIMES = ['08:00', '12:00', '16:00'] as const;

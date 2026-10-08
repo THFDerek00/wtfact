@@ -20,7 +20,7 @@ name: Hochladen zu IONOS
 #   DEPLOY_PORT      Standard 22
 #   STEUERUNG_PATH   Ordner der Subdomain, Standard steuerung.wtfact.xyz
 #   STEUERUNG_USER   Benutzername für das Dashboard, Standard eric
-#   STEUERUNG_SLOTS  feste Zeiten, Standard 07:00,12:00,19:00
+#   STEUERUNG_SLOTS  feste Zeiten, Standard 08:00,12:00,16:00 (wie SLOT_TIMES in src/config.ts)
 #   SITE_URL         Standard https://wtfact.xyz
 # Ohne DEPLOY_HOST wird nur gebaut und nichts hochgeladen.
 on:
@@ -96,7 +96,7 @@ jobs:
           S_PASSWORD: ${{ secrets.STEUERUNG_PASSWORD }}
           S_TOKEN: ${{ secrets.STEUERUNG_GITHUB_TOKEN }}
           S_CRON: ${{ secrets.STEUERUNG_CRON_TOKEN }}
-          S_SLOTS: ${{ vars.STEUERUNG_SLOTS || '07:00,12:00,19:00' }}
+          S_SLOTS: ${{ vars.STEUERUNG_SLOTS || '08:00,12:00,16:00' }}
           S_SITE: ${{ vars.SITE_URL || 'https://wtfact.xyz' }}
           S_REPO: ${{ github.repository }}
         run: |

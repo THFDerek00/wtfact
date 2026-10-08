@@ -106,7 +106,7 @@ function now(): DateTimeImmutable
 /** Feste Veröffentlichungszeiten des Tages (deutsche Zeit), Slot 1 bis 3. */
 function slot_times(): array
 {
-    $t = cfg('slots', ['07:00', '12:00', '19:00']);
+    $t = cfg('slots', ['08:00', '12:00', '16:00']); // wie SLOT_TIMES in src/config.ts
     return array_values(array_slice((array) $t, 0, 3));
 }
 
