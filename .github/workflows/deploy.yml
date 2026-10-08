@@ -33,8 +33,9 @@ on:
 permissions:
   contents: read
 
+# Name geändert (vorher „deploy“), weil ein hängender Lauf vom 08.10. die alte Warteschlange bis zu 6 Stunden blockiert.
 concurrency:
-  group: deploy
+  group: upload
   cancel-in-progress: false
 
 jobs:
@@ -74,7 +75,7 @@ jobs:
           !startsWith(github.event.head_commit.message, 'Steuerung: Zurück in den Pool'))
       )
     runs-on: ubuntu-latest
-    # Ein hängender Upload blockiert sonst bis zu 6 Stunden alle weiteren (concurrency: deploy).
+    # Ein hängender Upload blockiert sonst bis zu 6 Stunden alle weiteren (concurrency: upload).
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
