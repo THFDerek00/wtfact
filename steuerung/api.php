@@ -95,7 +95,8 @@ if ($route === 'state' && $method === 'GET') {
     $m = mirror(!empty($_GET['fresh']));
     $db = facts_db($m);
     $live = live_keys();
-    $ratings = all_ratings();
+    $community = community_counts();
+    $ratings = $community['ratings'] ?? null;
     $facts = list_facts($db, $live);
     foreach ($facts as &$f) {
         $r = $ratings[$f['key']] ?? ['like' => 0, 'meh' => 0];
@@ -118,7 +119,9 @@ if ($route === 'state' && $method === 'GET') {
         'slots' => slot_times(),
         'facts' => $facts,
         'ratings' => $ratings !== null,
-        'stats' => community_stats(),
+        'stats' => $community['stats'] ?? null,
+        'ratingsVia' => $community['via'] ?? null,
+        'ratingsWhy' => $community ? null : $GLOBALS['community_why'],
         'liveKnown' => $live !== null,
         'prs' => $prs,
         'head' => substr($m['head'], 0, 7),
