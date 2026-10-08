@@ -5,7 +5,7 @@
 //   GET  ?r=session                              angemeldet? (liefert den CSRF-Schlüssel)
 //   POST ?r=login       { user, password }
 //   POST ?r=logout
-//   GET  ?r=state                                alle Fakten mit Zustand, Slots, Bewertungen, offene Fakten-PRs
+//   GET  ?r=state                                alle Fakten mit Zustand, Slots, Bewertungen, Statistik, offene Fakten-PRs
 //   POST ?r=schedule    { key, day, slot, time } einplanen: slot 1–3 = feste Zeit, 0 = Sonderveröffentlichung um time
 //   POST ?r=unschedule  { key }                  zurück in den Pool
 //   POST ?r=publish-now { key }                  sofort veröffentlichen
@@ -118,6 +118,7 @@ if ($route === 'state' && $method === 'GET') {
         'slots' => slot_times(),
         'facts' => $facts,
         'ratings' => $ratings !== null,
+        'stats' => community_stats(),
         'liveKnown' => $live !== null,
         'prs' => $prs,
         'head' => substr($m['head'], 0, 7),

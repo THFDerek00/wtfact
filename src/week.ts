@@ -134,6 +134,25 @@ export function dayStartUtc(day: string) {
   return new Date(midnight - berlinOffset(guess) * 60_000).toISOString().slice(0, 19).replace('T', ' ');
 }
 
+/** Zeitpunkt (ms) einer deutschen Uhrzeit „HH:MM“ an einem deutschen Tag, Sommer- und Winterzeit richtig. */
+export function berlinTime(day: string, time: string) {
+  const wall = Date.parse(`${day}T${time}:00Z`);
+  const guess = wall - berlinOffset(wall) * 60_000;
+  return wall - berlinOffset(guess) * 60_000;
+}
+
+/** Nächste feste Veröffentlichungszeit (ms) nach `now`, z. B. für den Countdown „Nächster neuer Fakt“. */
+export function nextSlotTime(slots: readonly string[], now: number = Date.now()) {
+  const today = berlinDay(new Date(now));
+  for (const day of [today, addDays(today, 1)]) {
+    for (const time of [...slots].sort()) {
+      const t = berlinTime(day, time);
+      if (t > now) return t;
+    }
+  }
+  return berlinTime(addDays(today, 2), [...slots].sort()[0]);
+}
+
 // ---------- Hall of Fame: Verlauf ----------
 
 /** So viele Tage reicht der Verlauf der Fakten des Tages zurück (heute eingeschlossen). */

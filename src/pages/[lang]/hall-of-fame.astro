@@ -7,7 +7,7 @@ import Base from '../../layouts/Base.astro';
 import Vote from '../../components/Vote.astro';
 import TopTen from '../../components/TopTen.astro';
 import Icon from '../../components/Icon.astro';
-import { LANGS, CATEGORIES, type Lang } from '../../config';
+import { LANGS, CATEGORIES, SLOT_TIMES, type Lang } from '../../config';
 import { t } from '../../i18n/ui';
 import { postsFor, factInfo, categoryIcon } from '../../lib';
 
@@ -33,7 +33,7 @@ const texts = {
 };
 ---
 <Base lang={lang} title={f.title} description={f.intro} altUrl={`/${other}/hall-of-fame/`}>
-  <div data-fame data-facts={JSON.stringify(facts)} data-texts={JSON.stringify(texts)} data-lang={lang}>
+  <div data-fame data-slots={JSON.stringify(SLOT_TIMES)} data-facts={JSON.stringify(facts)} data-texts={JSON.stringify(texts)} data-lang={lang}>
     <section class="stage fame-hero">
       <div class="wrap">
         <p class="kicker"><span class="sticker"><Icon name="trophy" /> {f.name}</span></p>
@@ -41,6 +41,7 @@ const texts = {
         <p class="intro">{f.intro}</p>
         <div class="hero-row">
           <dl class="clocks" aria-label={f.clockLabel}>
+            <div class="clock"><dt>{f.clockFact}</dt><dd data-clock="fact">--:--:--</dd></div>
             <div class="clock"><dt>{f.clockDay}</dt><dd data-clock="day">--:--:--</dd></div>
             <div class="clock"><dt data-clock-vote-label>{f.clockVote}</dt><dd data-clock="vote">--:--:--</dd></div>
           </dl>
@@ -161,11 +162,12 @@ const texts = {
 
 <script>
   import { current, history, readKeys, tipFor, setTip, tipStats, type DailyMode } from '../../scripts/fame';
-  import { addDays, likePct, nextDayStart, dayStartUtc, type DayPick } from '../../week';
+  import { addDays, likePct, nextDayStart, nextSlotTime, dayStartUtc, type DayPick } from '../../week';
   import type { FactInfo } from '../../lib';
 
   const root = document.querySelector<HTMLElement>('[data-fame]')!;
   const facts: FactInfo[] = JSON.parse(root.dataset.facts ?? '[]');
+  const slots: string[] = JSON.parse(root.dataset.slots ?? '[]');
   const texts: Record<string, string> = JSON.parse(root.dataset.texts ?? '{}');
   const lang = root.dataset.lang === 'en' ? 'en-US' : 'de-DE';
   const byKey = new Map(facts.map((x) => [x.key, x]));
@@ -208,6 +210,8 @@ const texts = {
     const opened = Date.now();
     const tick = () => {
       const now = Date.now();
+      // Neue Fakten erscheinen zu festen Zeiten (SLOT_TIMES in src/config.ts, 8, 12 und 16 Uhr)
+      $('[data-clock="fact"]').textContent = fmt(nextSlotTime(slots, now) - now);
       $('[data-clock="day"]').textContent = fmt(nextDayStart(today) - now);
       $('[data-clock="vote"]').textContent = fmt(voteAt - now);
       // Um Mitternacht wechselt alles: Wer die Seite offen hat, bekommt sie einmal neu geladen.

@@ -1,6 +1,6 @@
 // Browser-Teil des Dashboards (steuerung.wtfact.xyz). Oberfläche: src/pages/steuerung/index.astro,
 // Server: steuerung/api.php. Alle Zeiten in deutscher Zeit (Europe/Berlin).
-import { berlinDay, addDays, mondayOf, TZ } from '../week';
+import { berlinDay, addDays, mondayOf, berlinTime, TZ } from '../week';
 
 type Status = 'pool' | 'planned' | 'due' | 'live' | 'offline';
 type Fact = {
@@ -9,9 +9,14 @@ type Fact = {
   slug: string | null; like: number; meh: number;
 };
 type Pr = { number: number; title: string; url: string; branch: string; draft: boolean };
+/** Zahlen aus der Datenbank der Seite (steuerung/lib/ratings.php, community_stats); null = nicht lesbar. */
+type Stats = {
+  ratings: number; voters: number; voters7: number;
+  days: Record<string, { like: number; meh: number }>; polls: { poll: string; n: number }[];
+};
 type State = {
   now: string; slots: string[]; facts: Fact[]; ratings: boolean; liveKnown: boolean; prs: Pr[];
-  head: string; repo: string; site: string; deploy: string | null;
+  head: string; repo: string; site: string; deploy: string | null; stats: Stats | null;
 };
 
 const $ = <T extends Element = HTMLElement>(sel: string, root: ParentNode = document) => root.querySelector<T>(sel)!;
@@ -116,15 +121,7 @@ const dayOf = (f: Fact) => (f.at ? berlinDay(new Date(f.at)) : null);
 const noon = (day: string) => new Date(`${day}T12:00:00Z`);
 const dayLabel = (day: string) => dateFmt.format(noon(day));
 /** Zeitpunkt eines Slots als Date (deutsche Zeit, Sommer- und Winterzeit richtig). */
-function slotDate(day: string, time: string) {
-  const guess = new Date(`${day}T${time}:00Z`);
-  const offset = (d: Date) => {
-    const p = new Intl.DateTimeFormat('en-US', { timeZone: TZ, timeZoneName: 'longOffset' }).formatToParts(d).find((x) => x.type === 'timeZoneName')!.value;
-    const m = p.match(/GMT([+-])(\d\d):(\d\d)/);
-    return m ? (m[1] === '-' ? -1 : 1) * (Number(m[2]) * 60 + Number(m[3])) : 0;
-  };
-  return new Date(guess.getTime() - offset(guess) * 60_000);
-}
+const slotDate = (day: string, time: string) => new Date(berlinTime(day, time));
 function isoWeek(day: string) {
   const d = noon(day);
   d.setUTCDate(d.getUTCDate() + 3 - ((d.getUTCDay() + 6) % 7));
@@ -242,6 +239,7 @@ function openSpecial(key: string, day: string) {
 function render() {
   if (!state) return;
   renderPrs();
+  renderHome();
   renderPool();
   renderWeek();
   renderAll();
@@ -378,6 +376,271 @@ function renderWeek() {
   $('[data-days]').replaceChildren(...days);
 }
 
+// ---------- Übersicht ----------
+
+function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls = '', text?: string) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+const n0 = new Intl.NumberFormat('de-DE');
+const pct = (like: number, meh: number) => (like + meh ? Math.round((like / (like + meh)) * 100) : null);
+const isLive = (f: Fact) => f.status === 'live' || f.status === 'due';
+const factLink = (f: Fact) => {
+  const a = el(f.slug ? 'a' : 'span', 'r-title', f.title);
+  if (a instanceof HTMLAnchorElement) {
+    a.href = `${state!.site}/de/${f.slug}/`;
+    a.target = '_blank';
+    a.rel = 'noopener';
+  }
+  return a;
+};
+function rankItem(f: Fact, meta: string) {
+  const li = el('li');
+  const emoji = el('span', `fact-emoji cat-${f.category}`, f.emoji);
+  emoji.setAttribute('aria-hidden', 'true');
+  const text = el('div', 'r-text');
+  text.append(factLink(f), el('div', 'r-meta', meta));
+  li.append(emoji, text);
+  return li;
+}
+function hbar(name: string, share: number, value: string, fillCls: string, title: string) {
+  const li = el('li');
+  li.title = title;
+  const track = el('span', 'hb-track');
+  const fill = el('span', `hb-fill ${fillCls}`);
+  fill.style.width = `${Math.max(0, Math.min(1, share)) * 100}%`;
+  track.append(fill);
+  const val = el('span', 'hb-val');
+  val.innerHTML = value;
+  li.append(el('span', 'hb-name', name), track, val);
+  return li;
+}
+/** Säulen mit Beschriftung darunter; Zahl über der Säule nur am höchsten Wert, sonst im Tooltip. */
+function columns(box: HTMLElement, items: { label: string; value: number; title: string }[]) {
+  const max = Math.max(1, ...items.map((i) => i.value));
+  const top = items.reduce((m, i, k) => (i.value > items[m].value ? k : m), 0);
+  box.replaceChildren(
+    ...items.map((i, k) => {
+      const col = el('div', 'col');
+      col.title = i.title;
+      const bar = el('div', `col-bar${i.value ? '' : ' empty'}`);
+      bar.style.height = `${(i.value / max) * 82}%`;
+      col.append(el('span', 'col-val', k === top && i.value ? n0.format(i.value) : ''), bar);
+      return col;
+    }),
+  );
+  const axis = el('div', 'axis');
+  axis.append(...items.map((i) => el('span', 'axis-label', i.label)));
+  box.nextElementSibling?.classList.contains('axis') ? box.nextElementSibling.replaceWith(axis) : box.after(axis);
+  box.setAttribute('aria-label', items.map((i) => i.title).join('; '));
+}
+
+let nextAt: number | null = null;
+function tick() {
+  const c = $('[data-next-clock]');
+  if (nextAt === null) {
+    c.textContent = '–';
+    return;
+  }
+  const left = Math.max(0, nextAt - Date.now());
+  const d = Math.floor(left / 86_400_000);
+  const hms = new Date(left).toISOString().slice(11, 19);
+  c.textContent = d ? `${d} T ${hms}` : hms;
+}
+
+function renderHome() {
+  const st = state!;
+  const now = new Date(st.now);
+  const nowMs = now.getTime();
+  const today = berlinDay(now);
+  const facts = st.facts;
+  const live = facts.filter(isLive);
+  const pool = facts.filter((f) => f.status === 'pool');
+  const planned = facts.filter((f) => f.status === 'planned' && f.at).sort((a, b) => a.at!.localeCompare(b.at!));
+  const stats = st.stats;
+
+  // Begrüßung nach deutscher Uhrzeit
+  const hour = Number(new Intl.DateTimeFormat('de-DE', { timeZone: TZ, hour: '2-digit', hourCycle: 'h23' }).format(now));
+  $('[data-hello]').textContent = `${hour < 11 ? 'Guten Morgen' : hour < 18 ? 'Hallo' : 'Guten Abend'}, Eric`;
+
+  // Nächster geplanter Fakt
+  const next = planned.find((f) => Date.parse(f.at!) > nowMs);
+  nextAt = next ? Date.parse(next.at!) : null;
+  $('[data-next-title]').textContent = next ? `${dayLabel(dayOf(next)!)}, ${timeFmt.format(new Date(next.at!))} Uhr: ${next.title}` : 'Nichts eingeplant. Zieh Fakten aus dem Pool in die Wochenplanung.';
+  tick();
+
+  // Wie lange reicht der Vorrat? Ab dem nächsten Slot jeden Slot füllen: erst mit Geplantem, sonst aus dem Pool.
+  const taken = new Set(planned.map((f) => `${dayOf(f)}|${f.slot}`));
+  const lastPlanned = planned.length ? dayOf(planned[planned.length - 1])! : today;
+  let left = pool.length;
+  let lastDay: string | null = null;
+  for (let i = 0; i < 400; i++) {
+    const day = addDays(today, i);
+    if (left === 0 && day > lastPlanned) break;
+    st.slots.forEach((time, k) => {
+      if (slotDate(day, time).getTime() <= nowMs) return;
+      if (taken.has(`${day}|${k + 1}`)) lastDay = day;
+      else if (left > 0) {
+        left--;
+        lastDay = day;
+      }
+    });
+  }
+  const until = $('[data-pool-until]');
+  const untilNote = $('[data-pool-note]');
+  if (!lastDay) {
+    until.textContent = 'leer';
+    untilNote.textContent = 'Keine Fakten mehr im Pool oder eingeplant.';
+  } else {
+    const days = Math.round((noon(lastDay).getTime() - noon(today).getTime()) / 86_400_000);
+    until.textContent = dayLabel(lastDay);
+    untilNote.textContent = `${days === 0 ? 'Nur noch heute' : `Noch ${days} ${days === 1 ? 'Tag' : 'Tage'}`} bei ${st.slots.length} Fakten am Tag (${pool.length} im Pool, ${planned.length} eingeplant).`;
+  }
+
+  // Diese Woche
+  const mon = mondayOf(today);
+  const sun = addDays(mon, 6);
+  const inWeek = facts.filter((f) => {
+    const d = dayOf(f);
+    return d && d >= mon && d <= sun && f.slot && f.slot > 0 && !f.draft;
+  }).length;
+  const weekSlots = 7 * st.slots.length;
+
+  const likes = live.reduce((a, f) => a + f.like, 0);
+  const mehs = live.reduce((a, f) => a + f.meh, 0);
+  const share = pct(likes, mehs);
+  const summary = [`${n0.format(live.length)} Fakten sind online, ${n0.format(pool.length)} warten im Pool.`];
+  summary.push(inWeek >= weekSlots ? 'Diese Woche ist komplett verplant.' : `Diese Woche sind ${inWeek} von ${weekSlots} Slots belegt.`);
+  if (st.ratings && likes + mehs) summary.push(`${share} % der Bewertungen sind Daumen hoch.`);
+  $('[data-summary]').textContent = summary.join(' ');
+
+  const tiles: { label: string; value: string; note: string; cls?: string }[] = [
+    { label: 'Online', value: n0.format(live.length), note: `${facts.filter((f) => f.status === 'offline').length} offline genommen` },
+    { label: 'Im Pool', value: n0.format(pool.length), note: pool.length < weekSlots ? 'Reicht keine Woche mehr' : `Reicht für ${Math.floor(pool.length / st.slots.length)} Tage`, cls: pool.length < st.slots.length * 3 ? 'accent' : '' },
+    { label: 'Diese Woche', value: `${inWeek}/${weekSlots}`, note: 'Slots belegt' },
+  ];
+  if (st.ratings) {
+    tiles.push({ label: 'Bewertungen', value: n0.format(stats?.ratings ?? likes + mehs), note: `👍 ${n0.format(likes)} · 👎 ${n0.format(mehs)}` });
+    tiles.push({ label: 'Daumen hoch', value: share === null ? '–' : `${share} %`, note: 'Anteil aller Bewertungen' });
+  }
+  if (stats) {
+    tiles.push({ label: 'Bewertende', value: n0.format(stats.voters), note: `${n0.format(stats.voters7)} in den letzten 7 Tagen` });
+    const last = stats.polls[0];
+    if (last) tiles.push({ label: 'Letzte Abstimmung', value: n0.format(last.n), note: `Stimmen, Woche ab ${dayLabel(last.poll)}` });
+  }
+  $('[data-tiles]').replaceChildren(
+    ...tiles.map((t) => {
+      const li = el('li', `card tile ${t.cls ?? ''}`.trim());
+      li.append(el('span', 'tile-label', t.label), el('span', 'tile-value', t.value), el('span', 'tile-note', t.note));
+      return li;
+    }),
+  );
+
+  // Bewertungen der letzten 14 Tage (Tag nach UTC wie in der Datenbank)
+  const dayBox = $('[data-day-chart]');
+  const dayItems = Array.from({ length: 14 }, (_, i) => addDays(today, i - 13)).map((d) => {
+    const r = stats?.days[d] ?? { like: 0, meh: 0 };
+    const total = r.like + r.meh;
+    return { label: d === today ? 'heute' : d.slice(8, 10) + '.', value: total, title: `${dayLabel(d)}: ${total} Bewertungen (👍 ${r.like} · 👎 ${r.meh})` };
+  });
+  const anyDay = dayItems.some((i) => i.value);
+  dayBox.hidden = !anyDay;
+  if (anyDay) columns(dayBox, dayItems);
+  else dayBox.nextElementSibling?.classList.contains('axis') && dayBox.nextElementSibling.remove();
+  $('[data-day-empty]').hidden = anyDay;
+
+  // Die nächsten 7 Tage
+  $('[data-coming]').replaceChildren(
+    ...Array.from({ length: 7 }, (_, i) => addDays(today, i)).map((day, i) => {
+      const here = facts.filter((f) => dayOf(f) === day && !f.draft);
+      const li = el('li');
+      const b = el('button');
+      b.type = 'button';
+      const dots = el('span', 'c-slots');
+      st.slots.forEach((time, k) => {
+        const f = here.find((x) => x.slot === k + 1);
+        const past = slotDate(day, time).getTime() <= nowMs;
+        const dot = el('span', `c-dot${f ? ' on' : ''}${past && !f ? ' past' : ''}`, f ? '✓' : '');
+        dot.title = `${time} Uhr: ${f ? f.title : past ? 'leer geblieben' : 'frei'}`;
+        dots.append(dot);
+      });
+      const extra = here.filter((f) => !f.slot).length;
+      const free = st.slots.filter((time, k) => !here.some((x) => x.slot === k + 1) && slotDate(day, time).getTime() > nowMs).length;
+      b.append(el('span', 'c-day', i === 0 ? 'Heute' : i === 1 ? 'Morgen' : dayLabel(day)), dots, el('span', 'c-extra', [free ? `${free} frei` : 'voll', extra ? `+${extra} Sonder` : ''].filter(Boolean).join(' · ')));
+      b.setAttribute('aria-label', `${dayLabel(day)}: ${dots.childElementCount - free} von ${st.slots.length} Slots belegt. Wochenplanung öffnen.`);
+      b.addEventListener('click', () => {
+        weekStart = mondayOf(day);
+        renderWeek();
+        showTab('plan');
+      });
+      li.append(b);
+      return li;
+    }),
+  );
+
+  // Kategorien: Anzahl online, Balkenlänge = Anzahl, dahinter Anteil Daumen hoch
+  const byCat = Object.keys(CATS)
+    .map((c) => {
+      const fs = live.filter((f) => f.category === c);
+      return { c, n: fs.length, like: fs.reduce((a, f) => a + f.like, 0), meh: fs.reduce((a, f) => a + f.meh, 0), pool: pool.filter((f) => f.category === c).length };
+    })
+    .filter((x) => x.n || x.pool)
+    .sort((a, b) => b.n - a.n);
+  const maxCat = Math.max(1, ...byCat.map((x) => x.n));
+  $('[data-cat-chart]').replaceChildren(
+    ...byCat.map((x) => {
+      const p = pct(x.like, x.meh);
+      return hbar(CATS[x.c], x.n / maxCat, `<b>${x.n}</b>${p === null ? '' : ` · ${p} % 👍`}`, `cat-${x.c}`, `${CATS[x.c]}: ${x.n} online, ${x.pool} im Pool${p === null ? '' : `, ${p} % Daumen hoch aus ${x.like + x.meh} Bewertungen`}`);
+    }),
+  );
+
+  // Uhrzeiten: Bewertungen je Fakt nach Slot
+  // Fakten von vor dem Dashboard haben keinen Slot: eigene Zeile, damit sie die Uhrzeiten nicht verfälschen.
+  const groups = [...st.slots.map((t, k) => ({ name: `${t} Uhr`, slot: (k + 1) as number | null })), { name: 'Sonder', slot: 0 }, { name: 'Ältere', slot: null }]
+    .map((g) => {
+      const fs = live.filter((f) => f.slot === g.slot);
+      const like = fs.reduce((a, f) => a + f.like, 0);
+      const meh = fs.reduce((a, f) => a + f.meh, 0);
+      return { ...g, n: fs.length, like, meh, per: fs.length ? (like + meh) / fs.length : 0 };
+    })
+    .filter((g) => g.n);
+  const maxPer = Math.max(0.0001, ...groups.map((g) => g.per));
+  const per1 = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 1 });
+  $('[data-slot-chart]').replaceChildren(
+    ...groups.map((g) => {
+      const p = pct(g.like, g.meh);
+      return hbar(g.name, g.per / maxPer, `<b>${per1.format(g.per)}</b> je Fakt${p === null ? '' : ` · ${p} % 👍`}`, 'accent', `${g.slot === null ? 'Ältere Fakten ohne feste Uhrzeit' : g.name}: ${g.n} Fakten, ${g.like + g.meh} Bewertungen`);
+    }),
+  );
+  $('[data-slot-empty]').hidden = groups.some((g) => g.slot) && st.ratings;
+  $('[data-slot-chart]').hidden = !groups.length || !st.ratings;
+
+  // Ranglisten
+  const rated = live.filter((f) => f.like + f.meh > 0);
+  const top = [...rated].sort((a, b) => b.like - b.meh - (a.like - a.meh) || b.like - a.like).slice(0, 5);
+  $('[data-top]').replaceChildren(...top.map((f) => rankItem(f, `👍 ${f.like} · 👎 ${f.meh} · ${CATS[f.category] ?? f.category}`)));
+  $('[data-top-empty]').hidden = top.length > 0;
+  const flop = live
+    .filter((f) => f.like + f.meh >= 3)
+    .sort((a, b) => b.meh / (b.like + b.meh) - a.meh / (a.like + a.meh) || b.meh - a.meh)
+    .filter((f) => f.meh > 0)
+    .slice(0, 5);
+  $('[data-flop]').replaceChildren(...flop.map((f) => rankItem(f, `${pct(f.like, f.meh)} % 👍 aus ${f.like + f.meh} · ${CATS[f.category] ?? f.category}`)));
+  $('[data-flop-empty]').hidden = flop.length > 0;
+  const latest = [...live].filter((f) => f.at).sort((a, b) => b.at!.localeCompare(a.at!)).slice(0, 5);
+  $('[data-latest]').replaceChildren(...latest.map((f) => rankItem(f, `${dayLabel(dayOf(f)!)}, ${timeFmt.format(new Date(f.at!))} Uhr · 👍 ${f.like} · 👎 ${f.meh}`)));
+
+  // Montags-Abstimmungen, älteste links
+  const polls = [...(stats?.polls ?? [])].reverse();
+  const pollBox = $('[data-poll-chart]');
+  pollBox.hidden = !polls.length;
+  if (polls.length) columns(pollBox, polls.map((p) => ({ label: `KW ${isoWeek(p.poll)}`, value: p.n, title: `Abstimmung ab ${dayLabel(p.poll)}: ${p.n} Stimmen` })));
+  $('[data-poll-empty]').hidden = polls.length > 0;
+  $('[data-stats-note]').hidden = !!stats;
+}
+
 let statusFilter = '';
 function renderAll() {
   const q = $<HTMLInputElement>('[data-all-search]').value.trim().toLowerCase();
@@ -496,12 +759,45 @@ $('[data-logout]').addEventListener('click', async () => {
 
 $('[data-refresh]').addEventListener('click', () => load(true));
 
-for (const b of $$<HTMLButtonElement>('[data-tab-btn]')) {
-  b.addEventListener('click', () => {
-    for (const o of $$<HTMLButtonElement>('[data-tab-btn]')) o.setAttribute('aria-pressed', String(o === b));
-    for (const s of $$('[data-tab]')) s.hidden = s.dataset.tab !== b.dataset.tabBtn;
+// Bereiche: Übersicht, Veröffentlichungen, Alle Fakten. Der gewählte Bereich steht in der Adresse (#planung …).
+const TABS: Record<string, string> = { home: 'uebersicht', plan: 'planung', all: 'fakten' };
+function showTab(tab: string, push = true) {
+  if (!TABS[tab]) tab = 'home';
+  for (const o of $$<HTMLButtonElement>('[data-tab-btn]')) o.setAttribute('aria-pressed', String(o.dataset.tabBtn === tab));
+  for (const s of $$('[data-tab]')) s.hidden = s.dataset.tab !== tab;
+  if (push && location.hash !== `#${TABS[tab]}`) history.pushState(null, '', `#${TABS[tab]}`);
+  scrollTo({ top: 0 });
+}
+const tabFromHash = () => Object.keys(TABS).find((k) => `#${TABS[k]}` === location.hash) ?? 'home';
+for (const b of $$<HTMLElement>('[data-tab-btn], [data-goto]')) {
+  b.addEventListener('click', (e) => {
+    e.preventDefault();
+    showTab(b.dataset.tabBtn ?? b.dataset.goto!);
   });
 }
+addEventListener('popstate', () => showTab(tabFromHash(), false));
+showTab(tabFromHash(), false);
+
+// Hell/dunkel wie auf der Hauptseite (gleicher Speicher wtfact-theme)
+const themeBtn = $<HTMLButtonElement>('[data-theme-toggle]');
+const isDark = () => (document.documentElement.dataset.theme ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')) === 'dark';
+const syncTheme = () => {
+  const dark = isDark();
+  themeBtn.setAttribute('aria-pressed', String(dark));
+  themeBtn.title = themeBtn.ariaLabel = dark ? 'Heller Modus' : 'Dunkler Modus';
+};
+themeBtn.addEventListener('click', () => {
+  const next = isDark() ? 'light' : 'dark';
+  document.documentElement.dataset.theme = next;
+  try {
+    localStorage.setItem('wtfact-theme', next);
+  } catch {
+    /* privates Fenster: gilt nur bis zum Neuladen */
+  }
+  dispatchEvent(new Event('wtfact-theme'));
+  syncTheme();
+});
+syncTheme();
 
 for (const b of $$<HTMLButtonElement>('[data-week]')) {
   b.addEventListener('click', () => {
@@ -555,6 +851,8 @@ $('[data-special-cancel]').addEventListener('click', () => dialog.close());
 addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && selected && !dialog.open) select(null);
 });
+
+setInterval(tick, 1000);
 
 // Alle 60 Sekunden auffrischen (Zustand „Wird veröffentlicht“ → „Live“), nicht während einer Änderung.
 setInterval(() => {
