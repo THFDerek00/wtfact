@@ -5,5 +5,6 @@ import sitemap from '@astrojs/sitemap';
 export default defineConfig({
   site: 'https://wtfact.example',
   trailingSlash: 'ignore',
-  integrations: [sitemap()],
+  // Die Oberfläche des Dashboards (src/pages/steuerung/) gehört nicht in die Sitemap, siehe scripts/bundle-steuerung.mjs.
+  integrations: [sitemap({ filter: (page) => !page.includes('/steuerung/') })],
 });

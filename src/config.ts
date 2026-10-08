@@ -24,5 +24,6 @@ export const CATEGORIES = ['science', 'history', 'tech', 'nature', 'body', 'weir
 export type Category = (typeof CATEGORIES)[number];
 
 // So viele neue Fakten schreibt Claude jeden Morgen (je als eigener PR, Eric führt sie selbst zusammen).
+// Mit dem Dashboard (README „Dashboard“) gibt es stattdessen 3 feste Zeiten pro Tag; die stehen dort (STEUERUNG_SLOTS).
 // Jeder aus einer anderen Kategorie, keiner aus einer Kategorie vom Vortag. Gelesen von scripts/generate-post.mjs.
 export const FACTS_PER_DAY = 3;

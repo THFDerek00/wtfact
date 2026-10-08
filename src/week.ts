@@ -155,3 +155,17 @@ export const nextDayStart = (day: string) => Date.parse(`${dayStartUtc(addDays(d
 
 export type DayPick = { day: string; key: string; like: number; meh: number };
 export type WeekPick = { poll: string; key: string; votes: number; total: number };
+
+/** Top 10 der Hall of Fame: Daumen hoch minus runter, dann mehr Daumen hoch, dann der neuere Fakt.
+ * Nur mit mindestens einem Daumen hoch. Gleiche Rechnung wie ?r=top in public/api/index.php. */
+export function topTen(facts: FactMeta[], ratings: Ratings) {
+  const dateOf = new Map(facts.map((f) => [f.key, f.date]));
+  return Object.entries(ratings)
+    .filter(([k, r]) => dateOf.has(k) && r.like > 0)
+    .map(([key, r]) => ({ key, like: r.like, meh: r.meh }))
+    .sort(
+      (a, b) =>
+        b.like - b.meh - (a.like - a.meh) || b.like - a.like || (dateOf.get(b.key) ?? '').localeCompare(dateOf.get(a.key) ?? '') || a.key.localeCompare(b.key),
+    )
+    .slice(0, 10);
+}

@@ -30,7 +30,7 @@ const sqlFiles = (dir) => (fs.existsSync(dir) ? fs.readdirSync(dir).filter((f) =
 
 // ---------- SQL-Text ----------
 
-const lit = (v) => (typeof v === 'number' ? String(v) : `'${String(v).replaceAll("'", "''")}'`);
+const lit = (v) => (v === null || v === undefined ? 'NULL' : typeof v === 'number' ? String(v) : `'${String(v).replaceAll("'", "''")}'`);
 const row = (vals) => `(${vals.map(lit).join(', ')})`;
 const insert = (table, cols, rows) =>
   rows.length ? `INSERT INTO ${table} (${cols.join(', ')}) VALUES\n  ${rows.map(row).join(',\n  ')};\n` : '';
@@ -41,7 +41,10 @@ export function factSql(f) {
     `-- WTFact-Fakt „${f.de?.title ?? f.key}“`,
     '-- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).',
     '',
-    insert('facts', ['key', 'date', 'category', 'emoji', 'draft'], [[f.key, f.date, f.category, f.emoji, f.draft ? 1 : 0]]),
+    // slot steht nur in Fakten, die im Dashboard eingeplant wurden (gleiches Format in steuerung/lib/facts.php).
+    f.slot == null
+      ? insert('facts', ['key', 'date', 'category', 'emoji', 'draft'], [[f.key, f.date ?? null, f.category, f.emoji, f.draft ? 1 : 0]])
+      : insert('facts', ['key', 'date', 'category', 'emoji', 'draft', 'slot'], [[f.key, f.date ?? null, f.category, f.emoji, f.draft ? 1 : 0, f.slot]]),
   ];
   for (const lang of LANGS) {
     const t = f[lang];
@@ -70,7 +73,7 @@ export function goldSql(g) {
 
 // ---------- Lesen ----------
 
-/** Alle Fakten mit beiden Sprachen: [{ key, date, category, emoji, draft, de: {...}, en: {...} }]. */
+/** Alle Fakten mit beiden Sprachen: [{ key, date, category, emoji, draft, slot, de: {...}, en: {...} }]. date ist null für Fakten im Pool. */
 export function readFacts(db) {
   const facts = new Map(db.prepare('SELECT * FROM facts ORDER BY key').all().map((f) => [f.key, { ...f, draft: !!f.draft }]));
   for (const t of db.prepare('SELECT * FROM texts').all()) facts.get(t.fact)[t.lang] = { slug: t.slug, title: t.title, teaser: t.teaser, hook: t.hook, body: t.body, products: [], sources: [] };
@@ -79,9 +82,10 @@ export function readFacts(db) {
   return [...facts.values()];
 }
 
-/** Ein Eintrag pro Sprachversion, im Format der früheren Markdown-Beiträge (für Seite und Prüfungen). */
+/** Ein Eintrag pro Sprachversion, im Format der früheren Markdown-Beiträge (für die Seite).
+ * Fakten im Pool (noch ohne Termin) fehlen hier, sie kommen gar nicht erst in den Build. */
 export function readPosts(db) {
-  return readFacts(db).flatMap((f) =>
+  return readFacts(db).filter((f) => f.date).flatMap((f) =>
     LANGS.filter((l) => f[l]).map((lang) => ({
       lang,
       translationKey: f.key,

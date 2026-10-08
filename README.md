@@ -8,19 +8,66 @@ Zweisprachige Fakten-Website (Deutsch/Englisch), gebaut mit Astro.
 - Amazon-Tags, Impressumsangaben: `src/config.ts`.
 - Domain: `astro.config.mjs` (`site`).
 
-## Tägliche Beiträge
+## Dashboard (steuerung.wtfact.xyz)
 
-Claude schreibt jeden Morgen drei neue Fakten (`FACTS_PER_DAY` in `src/config.ts`), veröffentlicht sie aber
-nicht selbst: Jeder Fakt kommt als Pull Request, und Eric entscheidet, welche er mergt. Die drei stammen aus
-drei verschiedenen Kategorien, und keine davon war am Vortag dran. Von den übrigen Kategorien kommt jeweils
-die dran, die am längsten Pause hatte. Fakten aus noch offenen PRs zählen dabei mit.
+Zentrale Stelle für alle Fakten (Wunsch von Eric, 2026-10-08): Login, Wochenplanung per Drag & Drop, automatisches
+Freischalten zur geplanten Uhrzeit, Offline-Nehmen und Löschen.
 
-Geschrieben werden sie von einer wiederkehrenden Claude-Aufgabe (Routine „WTFact: drei Fakten am Morgen“),
-die jeden Morgen um 3:52 Uhr deutscher Zeit in Claude Code startet. Sie folgt denselben Schritten und Regeln wie
-das Skript unten und legt die PRs an. Gibt es für den Tag schon `beitrag/JJJJ-MM-TT-*`-Zweige, tut sie nichts.
+- **Reiter „Veröffentlichungen“:** links der Pool (geschrieben, noch ohne Termin), rechts die Woche mit drei festen
+  Zeiten pro Tag (Standard 7:00, 12:00 und 19:00 Uhr) und einem Feld „Sonder“ für zusätzliche Fakten zu einer frei
+  gewählten Uhrzeit. Fakt in einen Slot ziehen (oder antippen und „Hierher“), zurück in den Pool ziehen oder auf × tippen.
+  Ziehen in einen belegten Slot tauscht die beiden Fakten. Vergangene Slots sind gesperrt.
+- **Reiter „Alle Fakten“:** Liste mit Zustand (Pool, Geplant, Live, Offline), Termin und Daumen hoch/runter,
+  Suche, Filter, Sortierung nach Beliebtheit. Aktionen: sofort veröffentlichen, offline nehmen, wieder online, löschen.
+- **Neue Fakten:** Der Wochenlauf legt einen PR `woche/…` an. Das Dashboard zeigt ihn oben an, „In den Pool übernehmen“ mergt ihn.
+
+So funktioniert es:
+
+- Die Fakten bleiben in git (`db/facts/<key>.sql`). Das Dashboard ändert über die GitHub-API nur die Zeile
+  `INSERT INTO facts` (Spalten `date`, `draft`, `slot`) und committet direkt auf `main` (Commit-Text „Steuerung: …“).
+  `date` = NULL heißt „im Pool“, `slot` 1–3 = feste Zeit, 0 = Sonderveröffentlichung (`db/facts-schema.sql`).
+- Die Seite zeigt nur Fakten, deren `date` beim Bauen erreicht ist. Damit ein Fakt pünktlich erscheint, muss die Seite
+  zur Slotzeit neu gebaut werden. Das passiert auf zwei Wegen:
+  1. **Geplante Aufgabe in Plesk (empfohlen, pünktlich):** ruft alle 5 Minuten
+     `https://steuerung.wtfact.xyz/api.php?r=cron&token=<STEUERUNG_CRON_TOKEN>` auf. Ist ein Fakt fällig, startet das
+     Dashboard „Hochladen zu IONOS“. Der Fakt ist dann nach etwa 3 Minuten online.
+  2. **Rückfallebene:** `.github/workflows/deploy.yml` prüft zusätzlich jede Stunde (Minute 3) mit `scripts/due-check.mjs`,
+     ob etwas fällig ist, und baut nur dann.
+  Auch beim Öffnen des Dashboards wird ein fälliger Fakt angestoßen.
+- Planungs-Commits („Eingeplant“, „Zurück in den Pool“) lösen keinen Build und keinen Upload aus, sie ändern nichts Sichtbares.
+- Code: `steuerung/` (PHP: `api.php`, `lib/`), Oberfläche `src/pages/steuerung/index.astro` + `src/scripts/steuerung.ts`.
+  `npm run build` packt beides nach `dist-steuerung/` (`scripts/bundle-steuerung.mjs`), der Upload lädt es in den Ordner der Subdomain.
+
+Einmalig einrichten:
+
+1. **Subdomain:** Plesk > Websites & Domains > *Subdomain hinzufügen*: `steuerung.wtfact.xyz`, Dokumentenstamm wie
+   vorgeschlagen (`steuerung.wtfact.xyz`), danach unter *SSL/TLS-Zertifikate* Let's Encrypt einschalten.
+2. **GitHub-Token:** github.com > Settings > Developer settings > *Fine-grained tokens* > *Generate new token*.
+   Repository access: *Only select repositories* > `wtfact`. Permissions: *Contents*, *Pull requests* und *Actions*
+   jeweils *Read and write*. Ablaufdatum möglichst lang.
+3. **Secrets** in GitHub (Settings > Secrets and variables > Actions > Secrets): `STEUERUNG_PASSWORD` (dein Passwort fürs
+   Dashboard), `STEUERUNG_GITHUB_TOKEN` (der Token aus Schritt 2), `STEUERUNG_CRON_TOKEN` (eine lange zufällige
+   Zeichenfolge). Benutzername ist `eric` (änderbar über die Variable `STEUERUNG_USER`), die festen Zeiten über
+   `STEUERUNG_SLOTS` (z. B. `07:00,12:00,19:00`).
+4. **Actions > Hochladen zu IONOS > Run workflow.** Danach `https://steuerung.wtfact.xyz` öffnen und anmelden.
+5. **Geplante Aufgabe:** Plesk > Websites & Domains > *Geplante Aufgaben* > *Aufgabe hinzufügen* > *URL abrufen*:
+   die Cron-Adresse von oben, Ausführen: *Benutzerdefiniert* `*/5 * * * *`.
+
+Ohne Secrets geht es auch von Hand: `steuerung/config.example.php` als `config.local.php` in den Ordner der Subdomain legen.
+Lokal testen: `npm run build`, dann `php -S localhost:8081 -t dist-steuerung` (braucht eine `config.local.php`).
+
+## Neue Fakten schreiben
+
+**Bis das Dashboard läuft (Stand 2026-10-08):** Claude schreibt jeden Morgen drei neue Fakten als PRs
+(Routine „WTFact: drei Fakten am Morgen“, 3:52 Uhr). Eric mergt, was erscheinen soll.
+
+**Danach (Wochenlauf):** Einmal pro Woche schreibt eine Claude-Routine die Fakten für die ganze nächste Woche
+(3 pro Tag, also 21) ohne Termin, legt sie gesammelt als PR `woche/<JJJJ>-KW<NN>` an und meldet sich im Projekt.
+Eric übernimmt den PR im Dashboard in den Pool und verteilt die Fakten auf die Slots. Nichts erscheint, ohne dass Eric es einplant.
 
 Alternativ, von Hand: `.github/workflows/daily-post.yml` (Actions > Tägliche Beiträge > Run workflow, braucht das
-Secret `ANTHROPIC_API_KEY`) ruft `scripts/generate-post.mjs` bis zu dreimal auf. Jeder Aufruf schreibt den nächsten Fakt des Tages:
+Secret `ANTHROPIC_API_KEY`) ruft `scripts/generate-post.mjs` auf. Mit `node scripts/generate-post.mjs --pool` landet der
+Fakt ohne Termin im Pool (Kategorie = die mit den wenigsten Fakten im Pool). Jeder Aufruf schreibt einen Fakt:
 
 1. Claude recherchiert per Websuche einen belegbaren, überraschenden Fakt in der gewählten Kategorie
    und schreibt einen Entwurf.
@@ -29,15 +76,6 @@ Secret `ANTHROPIC_API_KEY`) ruft `scripts/generate-post.mjs` bis zu dreimal auf.
    mindestens zwei unabhängige Quellen und keine Zahlen in der Überschrift, die nicht im Text stehen.
 4. Ein Faktencheck-Durchgang öffnet jede Quelle und prüft jede Aussage, die Überschrift und die Quellentitel.
 5. Nur wenn alles passt, wird der Beitrag in der Datenbank gespeichert (Datei `db/facts/<key>.sql`).
-   Sein `date` ist der Zeitpunkt, zu dem er geschrieben wurde (z. B. `2026-10-03T04:12:30+02:00`).
-
-Jeder Fakt bekommt einen zweiten Versuch. Fällt er trotzdem durch, gibt es an dem Tag eben nur zwei.
-Danach wird die Seite testweise gebaut, und jeder Fakt kommt als eigener Pull Request (Zweig `beitrag/JJJJ-MM-TT-N`).
-
-**Veröffentlichen:** den PR mergen. Der Fakt ist dann sofort sichtbar, sobald die Seite nach dem Merge neu
-gebaut und hochgeladen ist. **Nicht veröffentlichen:** den PR schließen. Nichts wird automatisch gemergt.
-`.github/workflows/publish-posts.yml` führt jeden PR zu seiner Uhrzeit nach `main` zusammen, danach baut
-`.github/workflows/deploy.yml` die Seite neu und lädt sie zu IONOS hoch (siehe „Hosting“). Wer einen Fakt stoppen will, schließt seinen PR vorher.
 
 ## Fakten-Datenbank
 
@@ -57,7 +95,8 @@ Befehle:
   Das schreibt die Änderungen zurück in `db/facts/` und `db/gold/` (gelöschte Fakten verschwinden dort auch).
   Vergessen ist kein Problem: `db:build` merkt, dass die Datenbank Änderungen hat, und bricht ab, statt sie zu überschreiben.
 - `npm run db:stats` zeigt, wie viele Fakten es je Kategorie gibt.
-- Einen Fakt von der Seite nehmen, ohne ihn zu löschen: `draft` auf `1`.
+- Einen Fakt von der Seite nehmen, ohne ihn zu löschen: `draft` auf `1` (oder im Dashboard „Offline nehmen“).
+- `date` leer (NULL) = Fakt im Pool, erscheint erst, wenn er im Dashboard einen Termin bekommt.
 
 Braucht Node 22.13 oder neuer (eingebautes `node:sqlite`, kein Zusatzpaket).
 Alte Markdown-Beiträge in `src/content/posts/` (etwa aus einem PR von vor der Umstellung) werden beim Bauen noch mitgelesen;
@@ -89,6 +128,10 @@ Farben, Schrift, Abstände und Bausteine sind in `docs/design-system.md` beschri
   letzten 7 Tage der beste war. Der Gewinner ist ab Dienstag eine Woche lang „Fakt der Woche“.
   Gleichstand: mehr „Gefällt mir“ beim Wischen gewinnt, danach der neuere Fakt. Ohne Stimmen gibt es keinen
   Fakt der Woche. Komponente: `src/components/Vote.astro` (auf der Hall of Fame), Kalender: `src/week.ts`.
+- **Daumen unter jedem Fakt** (`src/components/Thumbs.astro`): dieselbe Bewertung wie auf der Wisch-Karte, mit Zahlen
+  aller Besucher (`GET /api/index.php?r=rating&key=…`).
+- **Top 10** (`src/components/TopTen.astro`, auf der Hall of Fame): meiste Daumen hoch minus Daumen runter
+  (`GET /api/index.php?r=top`, ohne Server `topTen` in `src/week.ts`).
 - **Hall of Fame** (`/de/hall-of-fame/`, `src/pages/[lang]/hall-of-fame.astro`): eigene Seite für Fakt des
   Tages, Fakt der Woche und die Montags-Abstimmung. Dazu Countdowns (nächster Fakt des Tages, nächste
   Abstimmung), Tippspiel „Wer wird morgen Fakt des Tages?“ mit Trefferserie, Verlauf (30 Tage, 12 Wochen)
@@ -103,7 +146,7 @@ Stimmen und Bewertungen speichert die PHP-API in `public/api/` (landet beim Baue
 Ohne erreichbare API (lokal mit `npm run dev`, in der Vorschau) funktioniert alles weiter, wird aber nur im
 jeweiligen Browser gespeichert.
 
-- `public/api/index.php`: Routen `?r=week`, `?r=history`, `?r=vote`, `?r=rate`. Braucht keine `.htaccess`-Regeln.
+- `public/api/index.php`: Routen `?r=week`, `?r=history`, `?r=vote`, `?r=rate`, `?r=rating`, `?r=top`. Braucht keine `.htaccess`-Regeln.
 - `public/api/week.php`: Kalender und Gewinner, gleiche Rechnung wie `src/week.ts`. Wer eins ändert, ändert beide.
 - Gespeichert wird in SQLite (`pdo_sqlite`, bei Plesk dabei). Die Datei `community.sqlite` liegt im Ordner
   `wtfact-data/` neben `httpdocs/` und ist damit nicht aus dem Netz abrufbar. Geht das nicht, nimmt die API
@@ -117,8 +160,9 @@ jeweiligen Browser gespeichert.
 
 ## Hosting (IONOS mit Plesk)
 
-Die Seite ist statisch (`dist/`), dazu kommt die PHP-API. `.github/workflows/deploy.yml` baut nach jedem Merge
-nach `main` und nach jedem Veröffentlichen eines Fakts und lädt per SFTP nur geänderte Dateien hoch. Gelöscht werden
+Die Seite ist statisch (`dist/`), dazu kommt die PHP-API. `.github/workflows/deploy.yml` baut nach jedem Commit
+auf `main` und wenn ein eingeplanter Fakt fällig ist (siehe „Dashboard“) und lädt per SFTP nur geänderte Dateien hoch,
+die Seite nach `httpdocs`, das Dashboard nach `steuerung.wtfact.xyz`. Gelöscht werden
 nur Dateien, die ein früherer Upload angelegt hat (Liste: `.deploy-manifest.json` im Webordner, Logik:
 `scripts/deploy-plan.mjs`). Datenbank, `config.local.php` und alles andere auf dem Server bleiben.
 

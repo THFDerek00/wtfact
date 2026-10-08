@@ -80,6 +80,19 @@ export async function rate(key: string, verdict: Verdict) {
   return r.ok ? r.data : null;
 }
 
+/** Daumen aller Besucher für einen Fakt, oder null ohne Server. */
+export async function ratingOf(key: string) {
+  const r = await api<{ like: number; meh: number }>(`rating&key=${encodeURIComponent(key)}`);
+  return r.ok ? r.data : null;
+}
+
+export type TopEntry = { key: string; like: number; meh: number };
+/** Die 10 beliebtesten Fakten (Daumen hoch minus runter), oder null ohne Server. */
+export async function topFacts() {
+  const r = await api<TopEntry[]>('top');
+  return r.ok ? r.data : null;
+}
+
 export function forgetRatings(keys: string[]) {
   const s = load();
   keys.forEach((k) => delete s.ratings[k]);

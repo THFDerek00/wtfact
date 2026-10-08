@@ -7,6 +7,11 @@ on:
 
 jobs:
   build:
+    # Planungs-Commits aus dem Dashboard (einplanen, zurück in den Pool) ändern nur Termine, kein Bauen nötig.
+    if: >-
+      github.event_name != 'push' || (
+        !startsWith(github.event.head_commit.message, 'Steuerung: Eingeplant') &&
+        !startsWith(github.event.head_commit.message, 'Steuerung: Zurück in den Pool'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
