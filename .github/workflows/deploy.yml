@@ -119,7 +119,8 @@ jobs:
           LFTP_PASSWORD: ${{ secrets.DEPLOY_PASSWORD }}
           DIR: ${{ vars.DEPLOY_PATH || 'httpdocs' }}
           SDIR: ${{ vars.STEUERUNG_PATH || 'steuerung.wtfact.xyz' }}
-          PORT: ${{ vars.DEPLOY_PORT || '22' }}
+          PROTO: ${{ vars.DEPLOY_PROTOCOL || 'sftp' }}
+          PORT: ${{ vars.DEPLOY_PORT }}
         run: |
           if [ -z "$HOST" ]; then
             echo "::notice::DEPLOY_HOST fehlt, nichts hochgeladen. Einrichtung: README.md, Abschnitt Hosting."
@@ -127,14 +128,26 @@ jobs:
           fi
           sudo apt-get install -y -qq lftp >/dev/null
           T="$RUNNER_TEMP"
-          base="set sftp:auto-confirm yes; set xfer:clobber on; set net:max-retries 3; set net:timeout 30; set net:reconnect-interval-base 5; open --env-password -u $DUSER -p $PORT sftp://$HOST"
+          # SFTP (Port 22) braucht SSH-Zugriff mit Passwort. Erlaubt der Server per SSH nur Schlüssel, geht FTP mit
+          # TLS (Variable DEPLOY_PROTOCOL = ftp, Port 21), wie in FileZilla „FTP – explizites FTP über TLS“.
+          case "$PROTO" in
+            sftp) PORT="${PORT:-22}"; opts="set sftp:auto-confirm yes" ;;
+            ftp) PORT="${PORT:-21}"; opts="set ftp:ssl-force yes; set ftp:ssl-protect-data yes; set ssl:verify-certificate no; set ftp:passive-mode yes" ;;
+            *) echo "::error::DEPLOY_PROTOCOL muss sftp oder ftp sein, nicht $PROTO."; exit 1 ;;
+          esac
+          base="$opts; set xfer:clobber on; set net:max-retries 3; set net:timeout 30; set net:reconnect-interval-base 5; open --env-password -u $DUSER -p $PORT $PROTO://$HOST"
           # Verbindung vorab prüfen, damit ein Fehler sofort und verständlich gemeldet wird.
           if ! timeout 15 bash -c "exec 3<>/dev/tcp/$HOST/$PORT" 2>/dev/null; then
-            echo "::error::$HOST ist auf Port $PORT nicht erreichbar. DEPLOY_HOST prüfen (nur die Domain, ohne https:// und /) und in Plesk beim Systembenutzer SSH-Zugriff einschalten."
+            echo "::error::$HOST ist auf Port $PORT nicht erreichbar. DEPLOY_HOST prüfen (nur die Domain, ohne https:// und /)."
             exit 1
           fi
-          if ! lftp -c "$base; set net:max-retries 1; ls > /dev/null"; then
-            echo "::error::Anmeldung per SFTP an $HOST fehlgeschlagen. DEPLOY_USER und DEPLOY_PASSWORD prüfen und in Plesk beim Systembenutzer SSH-Zugriff auf /bin/bash (chrooted) stellen."
+          if ! lftp -c "$base; set net:max-retries 1; ls > /dev/null" 2> "$T/login.err"; then
+            cat "$T/login.err"
+            if [ "$PROTO" = sftp ] && grep -q 'Permission denied (publickey' "$T/login.err"; then
+              echo "::error::Der Server erlaubt per SSH keine Anmeldung mit Passwort. In GitHub unter Settings > Secrets and variables > Actions > Variables die Variable DEPLOY_PROTOCOL mit dem Wert ftp anlegen (Upload per FTP mit TLS, wie in FileZilla)."
+            else
+              echo "::error::Anmeldung per $PROTO an $HOST fehlgeschlagen. DEPLOY_USER und DEPLOY_PASSWORD prüfen."
+            fi
             exit 1
           fi
           # Erst die Seite, dann das Dashboard. Je Ordner die Liste vom letzten Upload holen (fehlt beim ersten Mal,
