@@ -173,7 +173,9 @@ Einmalig einrichten:
    `/bin/bash (chrooted)` stellen, sonst geht kein SFTP. Benutzername und Passwort stehen dort ebenfalls.
 2. In GitHub unter **Settings > Secrets and variables > Actions > Secrets** anlegen:
    `DEPLOY_HOST` (Domain oder IP des Plesk-Servers), `DEPLOY_USER` (Systembenutzer), `DEPLOY_PASSWORD`.
-   Optional unter **Variables**: `DEPLOY_PATH` (Standard `httpdocs`), `DEPLOY_PORT` (Standard `22`).
+   Optional unter **Variables**: `DEPLOY_PATH` (Standard `httpdocs`), `DEPLOY_PORT` (Standard `22`, bei FTP `21`),
+   `DEPLOY_PROTOCOL` (`sftp` oder `ftp`, Standard `sftp`). Erlaubt der Server per SSH nur Schlüssel
+   („Permission denied (publickey)“), `DEPLOY_PROTOCOL` = `ftp` setzen: Upload per FTP mit TLS, wie in FileZilla.
 3. **Actions > Hochladen zu IONOS > Run workflow**. Danach muss `https://<domain>/api/index.php?r=week`
    JSON zeigen. Steht dort `not-configured`, sagt `reason`, was fehlt (z. B. `no-pdo-sqlite`: in Plesk unter
    PHP-Einstellungen die Erweiterung `pdo_sqlite` aktivieren oder MySQL nehmen, siehe oben).
