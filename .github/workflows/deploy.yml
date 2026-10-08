@@ -74,6 +74,8 @@ jobs:
           !startsWith(github.event.head_commit.message, 'Steuerung: Zurück in den Pool'))
       )
     runs-on: ubuntu-latest
+    # Ein hängender Upload blockiert sonst bis zu 6 Stunden alle weiteren (concurrency: deploy).
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
