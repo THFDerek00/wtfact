@@ -119,8 +119,10 @@ const no = String(factNumber(post, all)).padStart(3, '0');
     font-size: var(--fs-emoji-2xl); transform: rotate(12deg); filter: var(--emoji-shadow); opacity: 0.9;
   }
 
-  /* Breites Layout (Wunsch von Eric, 2026-10-02): Fakt links, „Noch ein Fakt“ und Verwandtes rechts daneben */
-  .fact-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 380px); gap: var(--space-11); align-items: start; }
+  /* Breites Layout (Wunsch von Eric, 2026-10-02): Fakt links, „Noch ein Fakt“ und Verwandtes rechts daneben.
+     Der Text bleibt höchstens 54rem breit (lesbare Zeilen), auf breiten Bildschirmen wächst die rechte Spalte
+     und zeigt die verwandten Fakten nebeneinander (Wunsch von Eric, 2026-10-09). */
+  .fact-layout { display: grid; grid-template-columns: minmax(0, 54rem) minmax(280px, 1fr); gap: var(--space-11); align-items: start; }
   .fact-main { font-size: var(--fs-lg); }
   .fact-side { position: sticky; top: var(--space-12); display: flex; flex-direction: column; gap: var(--space-8); margin-top: var(--space-8); }
 
@@ -164,7 +166,7 @@ const no = String(factNumber(post, all)).padStart(3, '0');
   .next-title { font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 700; line-height: 1.1; }
 
   .related h2 { font-size: var(--fs-2xl); margin: 0 0 var(--space-5); }
-  .related-grid { display: grid; gap: var(--space-6); }
+  .related-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: var(--space-6); }
 
   @media (max-width: 960px) {
     .fact-layout { grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }

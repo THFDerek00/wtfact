@@ -1,0 +1,80 @@
+---
+// Werbe-Karte im Raster „Neueste Fakten“ auf der Startseite (Wunsch von Eric, 2026-10-09): sieht aus wie eine
+// Fakten-Karte (PostCard.astro), damit sie ins Raster passt, ist aber klar als Werbung gekennzeichnet.
+// Das Produkt gehört immer zum neuesten veröffentlichten Fakt: Die Startseite wird bei jeder Veröffentlichung neu
+// gebaut, wer die Reihenfolge im Dashboard ändert, bekommt also automatisch das passende Produkt.
+import type { Lang, Category } from '../config';
+import { amazonUrl } from '../lib';
+import { t } from '../i18n/ui';
+import Icon from './Icon.astro';
+import { productArt } from '../product-art';
+interface Props {
+  lang: Lang;
+  product: { name: string; query: string; why: string };
+  category: Category;
+  factKey: string;
+  factTitle: string;
+}
+const { lang, product, category, factKey, factTitle } = Astro.props;
+const ui = t(lang);
+const art = productArt(product.name);
+const host = new URL(amazonUrl(lang, '')).host.replace(/^www\./, '');
+---
+<a
+  class="card ad" href={amazonUrl(lang, product.query)} rel="sponsored nofollow noopener" target="_blank"
+  data-umami-event="amazon" data-umami-event-fact={factKey} data-umami-event-place="home"
+>
+  <div class:list={['art', `cat-${category}`]} aria-hidden="true">
+    <span class="ad-tag">{ui.adLabel}</span>
+    <span class="emoji">{art.main}</span>
+    {art.topic && <span class="topic">{art.topic}</span>}
+    <span class="host">{host}</span>
+  </div>
+  <div class="body">
+    <span class="for">{ui.teaserHome}: {factTitle}</span>
+    <h3>{product.name}</h3>
+    <p>{product.why}</p>
+    <span class="cta btn btn--orange">{ui.productsCta} <Icon name="external-link" /></span>
+  </div>
+  <span class="sr-only">({ui.adLabel})</span>
+</a>
+
+<style>
+  .ad {
+    position: relative; display: flex; flex-direction: column; overflow: hidden; text-decoration: none; color: var(--ink);
+    transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  }
+  .ad:hover { transform: translate(-3px, -3px) rotate(-0.5deg); box-shadow: var(--shadow-xl); }
+  .art { position: relative; display: grid; place-items: center; aspect-ratio: 16 / 9; border-bottom: var(--bw) solid var(--line); }
+  .emoji { font-size: var(--fs-emoji-md); transform: rotate(-8deg); filter: var(--emoji-shadow); transition: transform var(--dur) var(--ease-pop); }
+  .ad:hover .emoji { transform: rotate(8deg) scale(1.15); }
+  .ad-tag, .host {
+    position: absolute; padding: 0 var(--space-2); border-radius: var(--radius-sm);
+    background: var(--night); color: var(--on-night);
+    font-family: var(--font-display); font-size: var(--fs-xs); font-weight: 800; letter-spacing: 0.06em;
+  }
+  .ad-tag { top: var(--space-3); left: var(--space-3); text-transform: uppercase; }
+  .host { bottom: var(--space-3); left: var(--space-3); font-weight: 700; letter-spacing: 0; }
+  .topic {
+    position: absolute; right: var(--space-3); top: var(--space-3);
+    display: grid; place-items: center; width: var(--space-11); aspect-ratio: 1;
+    border: var(--bw-sm) solid var(--line); border-radius: 50%; background: var(--surface);
+    font-size: var(--fs-2xl); line-height: 1; box-shadow: var(--shadow-xs); transform: rotate(8deg);
+  }
+  .body { padding: var(--space-4) var(--space-5) var(--space-5); display: flex; flex-direction: column; gap: var(--space-2); flex: 1; }
+  .for { font-size: var(--fs-sm); font-weight: 600; color: var(--muted); }
+  h3 { margin: var(--space-1) 0 0; font-size: var(--fs-xl); }
+  p { margin: 0; color: var(--muted); font-size: var(--fs-md); }
+  .cta { align-self: flex-start; margin-top: auto; }
+  @media (max-width: 560px) {
+    .ad { flex-direction: row; }
+    .art { flex: 0 0 104px; aspect-ratio: auto; border-bottom: 0; border-right: var(--bw) solid var(--line); }
+    .emoji { font-size: var(--fs-emoji-sm); }
+    .topic, .host { display: none; }
+    .ad-tag { top: var(--space-2); left: var(--space-2); }
+    .body { padding: var(--space-3) var(--space-4) var(--space-4); }
+    h3 { font-size: var(--fs-lg); }
+    p { font-size: var(--fs-sm); }
+    .cta { align-self: stretch; }
+  }
+</style>

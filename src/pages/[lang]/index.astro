@@ -3,7 +3,7 @@ import Base from '../../layouts/Base.astro';
 import PostCard from '../../components/PostCard.astro';
 import SwipeDeck from '../../components/SwipeDeck.astro';
 import FamePointer from '../../components/FamePointer.astro';
-import ProductTeaser from '../../components/ProductTeaser.astro';
+import AdCard from '../../components/AdCard.astro';
 import Icon from '../../components/Icon.astro';
 import { LANGS, CATEGORIES, type Lang } from '../../config';
 import { t } from '../../i18n/ui';
@@ -60,14 +60,6 @@ const ticker = rest.slice(0, 12);
 
   <FamePointer lang={lang} posts={posts} />
 
-  {hero?.data.products[0] && (
-    <section class="wrap shop-home">
-      <ProductTeaser
-        lang={lang} product={hero.data.products[0]} category={hero.data.category} place="home"
-        factKey={hero.data.translationKey} fact={{ title: hero.data.title, url: postUrl(hero) }}
-      />
-    </section>
-  )}
 
   <section class="wrap holes">
     <h2>{ui.rabbitHole}</h2>
@@ -93,7 +85,17 @@ const ticker = rest.slice(0, 12);
       </div>
     </div>
     <div class="grid">
-      {rest.map((p, i) => <PostCard post={p} no={factNumber(p, posts)} hidden={i >= PAGE} />)}
+      {rest.map((p, i) => (
+        <>
+          <PostCard post={p} no={factNumber(p, posts)} hidden={i >= PAGE} />
+          {i === 1 && hero?.data.products[0] && (
+            <AdCard
+              lang={lang} product={hero.data.products[0]} category={hero.data.category}
+              factKey={hero.data.translationKey} factTitle={hero.data.title}
+            />
+          )}
+        </>
+      ))}
     </div>
     {rest.length > PAGE && (
       <div class="loadmore">
@@ -158,7 +160,6 @@ const ticker = rest.slice(0, 12);
   }
 
   /* Rabbit Holes */
-  .shop-home { margin-top: var(--space-9); display: grid; grid-template-columns: minmax(0, 40rem); }
   .holes { margin-top: var(--space-11); }
   .holes h2, .head h2 { margin: 0 0 var(--space-6); font-size: var(--fs-display-sm); }
   .tiles { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--space-5); }

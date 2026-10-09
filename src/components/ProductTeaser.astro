@@ -3,7 +3,6 @@
 // Die große Box „Passend dazu“ steht ganz unten im Artikel, wo viele schon weg sind. Diese Kachel steht weiter oben:
 // place="side"   Desktop, rechte Spalte unter den Daumen (läuft beim Lesen mit),
 // place="inline" Handy, im Text vor der zweiten Zwischenüberschrift (Skript unten verschiebt sie dorthin),
-// place="home"   Startseite, passend zum neuesten Fakt.
 // Kennzeichnung wie in ProductBox.astro: Etikett „Werbung“, rel="sponsored".
 import type { Lang, Category } from '../config';
 import { amazonUrl } from '../lib';
@@ -14,21 +13,18 @@ interface Props {
   lang: Lang;
   product: { name: string; query: string; why: string };
   category: Category;
-  place: 'side' | 'inline' | 'home';
+  place: 'side' | 'inline';
   factKey: string;
-  // Startseite: Titel und Link des Fakts, zu dem das Produkt gehört
-  fact?: { title: string; url: string };
 }
-const { lang, product, category, place, factKey, fact } = Astro.props;
+const { lang, product, category, place, factKey } = Astro.props;
 const ui = t(lang);
 const art = productArt(product.name);
 ---
 <aside class="teaser card" data-place={place} data-product-teaser={place}>
   <div class="head">
-    <span class="label"><Icon name="shopping-cart" /> {fact ? ui.teaserHome : ui.productsTitle}</span>
+    <span class="label"><Icon name="shopping-cart" /> {ui.productsTitle}</span>
     <span class="ad-tag">{ui.adLabel}</span>
   </div>
-  {fact && <a class="fact" href={fact.url}>{fact.title}</a>}
   <a
     class="prod" href={amazonUrl(lang, product.query)} rel="sponsored nofollow noopener" target="_blank"
     data-umami-event="amazon" data-umami-event-fact={factKey} data-umami-event-place={place}
@@ -63,7 +59,6 @@ const art = productArt(product.name);
     background: var(--night); color: var(--on-night);
     font-family: var(--font-display); font-size: var(--fs-xs); font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em;
   }
-  .fact { display: block; margin: 0 0 var(--space-3); font-size: var(--fs-md); color: var(--muted); }
 
   .prod {
     display: flex; align-items: stretch; overflow: hidden; text-decoration: none; color: var(--ink);
