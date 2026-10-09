@@ -139,9 +139,11 @@
   --fs-emoji-2xl: 168px;
 
   /* Inhaltsbreite: EINE Breite für alle Bereiche (Wunsch von Eric, 2026-10-02).
-     .wrap nutzt sie; Fließtext bleibt mit --measure trotzdem gut lesbar. */
-  --content-width: 1280px;
-  --gutter: 16px;
+     .wrap nutzt sie; Fließtext bleibt mit --measure trotzdem gut lesbar.
+     1600px statt 1280px (Wunsch von Eric, 2026-10-09): auf großen Bildschirmen blieb links und rechts zu viel leer.
+     Der Rand wächst mit dem Bildschirm, damit es auf Laptops nicht an den Kanten klebt. */
+  --content-width: 1600px;
+  --gutter: clamp(16px, 4vw, 56px);
   --measure: 72ch;
 
   /* Icons (Lucide, Komponente Icon.astro): wachsen mit der Schrift */
