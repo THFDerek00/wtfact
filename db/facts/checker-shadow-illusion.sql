@@ -1,8 +1,8 @@
 -- WTFact-Fakt „Die Felder A und B in dieser Täuschung haben genau dasselbe Grau“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
 
-INSERT INTO facts (key, date, category, emoji, draft) VALUES
-  ('checker-shadow-illusion', NULL, 'mind', '🏁', 0);
+INSERT INTO facts (key, date, category, emoji, draft, slot) VALUES
+  ('checker-shadow-illusion', '2026-10-10T05:00:00+02:00', 'mind', '🏁', 0, 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (
