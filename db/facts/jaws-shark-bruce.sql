@@ -1,7 +1,7 @@
 -- WTFact-Fakt „Der weiße Hai hieß Bruce, nach Spielbergs Anwalt“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
-INSERT INTO facts (key, date, category, emoji, draft) VALUES
-  ('jaws-shark-bruce', NULL, 'popculture', '🦈', 0);
+INSERT INTO facts (key, date, category, emoji, draft, slot) VALUES
+  ('jaws-shark-bruce', '2026-10-11T14:00:00+02:00', 'popculture', '🦈', 0, 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (
