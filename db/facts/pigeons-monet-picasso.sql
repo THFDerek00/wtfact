@@ -1,6 +1,7 @@
 -- WTFact-Fakt „Tauben können Monet von Picasso unterscheiden“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
-INSERT INTO facts (key, date, category, emoji, draft) VALUES ('pigeons-monet-picasso', NULL, 'animals', '🎨', 0);
+INSERT INTO facts (key, date, category, emoji, draft) VALUES
+  ('pigeons-monet-picasso', NULL, 'animals', '🎨', 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (

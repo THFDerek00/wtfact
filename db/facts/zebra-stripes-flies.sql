@@ -1,6 +1,7 @@
 -- WTFact-Fakt „Forschende steckten Pferde in Zebrakostüme, um das Rätsel der Streifen zu lösen“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
-INSERT INTO facts (key, date, category, emoji, draft) VALUES ('zebra-stripes-flies', NULL, 'animals', '🦓', 0);
+INSERT INTO facts (key, date, category, emoji, draft) VALUES
+  ('zebra-stripes-flies', NULL, 'animals', '🦓', 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (

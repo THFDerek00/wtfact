@@ -1,6 +1,7 @@
 -- WTFact-Fakt „Haribo begann 1920 mit einem Sack Zucker, einem Kupferkessel und einem Fahrrad“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
-INSERT INTO facts (key, date, category, emoji, draft) VALUES ('haribo-sugar-sack', NULL, 'brands', '🐻', 0);
+INSERT INTO facts (key, date, category, emoji, draft) VALUES
+  ('haribo-sugar-sack', NULL, 'brands', '🐻', 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (
