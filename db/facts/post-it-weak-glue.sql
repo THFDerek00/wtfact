@@ -1,7 +1,7 @@
 -- WTFact-Fakt „Post-its begannen 1968 mit einem Kleber, der zu schwach war“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
-INSERT INTO facts (key, date, category, emoji, draft) VALUES
-  ('post-it-weak-glue', NULL, 'brands', '📝', 0);
+INSERT INTO facts (key, date, category, emoji, draft, slot) VALUES
+  ('post-it-weak-glue', '2026-10-11T21:00:00+02:00', 'brands', '📝', 0, 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (
