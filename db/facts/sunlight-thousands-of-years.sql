@@ -1,7 +1,7 @@
 -- WTFact-Fakt „Sonnenlicht braucht 8 Minuten zu dir, aber Jahrtausende aus der Sonne heraus“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
-INSERT INTO facts (key, date, category, emoji, draft) VALUES
-  ('sunlight-thousands-of-years', NULL, 'space', '☀️', 0);
+INSERT INTO facts (key, date, category, emoji, draft, slot) VALUES
+  ('sunlight-thousands-of-years', '2026-10-10T19:00:00+02:00', 'space', '☀️', 0, 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (
