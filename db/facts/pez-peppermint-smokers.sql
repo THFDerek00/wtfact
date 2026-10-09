@@ -1,7 +1,7 @@
 -- WTFact-Fakt „PEZ war 1927 ein Pfefferminz für Erwachsene, die weniger rauchen sollten“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
-INSERT INTO facts (key, date, category, emoji, draft) VALUES
-  ('pez-peppermint-smokers', NULL, 'brands', '🍬', 0);
+INSERT INTO facts (key, date, category, emoji, draft, slot) VALUES
+  ('pez-peppermint-smokers', '2026-10-11T18:00:00+02:00', 'brands', '🍬', 0, 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (
