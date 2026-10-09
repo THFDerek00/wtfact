@@ -1,7 +1,7 @@
 -- WTFact-Fakt „Uranus rollt auf der Seite um die Sonne: 42 Jahre Tag, 42 Jahre Nacht“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
-INSERT INTO facts (key, date, category, emoji, draft) VALUES
-  ('uranus-sideways', NULL, 'space', '🪐', 0);
+INSERT INTO facts (key, date, category, emoji, draft, slot) VALUES
+  ('uranus-sideways', '2026-10-11T01:00:00+02:00', 'space', '🪐', 0, 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (
