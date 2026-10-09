@@ -1,8 +1,8 @@
 -- WTFact-Fakt „Dein Gehirn macht 2 Prozent deines Gewichts aus, verbraucht aber rund 20 Prozent deiner Energie“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
 
-INSERT INTO facts (key, date, category, emoji, draft) VALUES
-  ('brain-20-percent-energy', NULL, 'mind', '🧠', 0);
+INSERT INTO facts (key, date, category, emoji, draft, slot) VALUES
+  ('brain-20-percent-energy', '2026-10-10T03:00:00+02:00', 'mind', '🧠', 0, 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (
