@@ -1,8 +1,8 @@
 -- WTFact-Fakt „Deine Augen verändern, was du hörst: der McGurk-Effekt“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
 
-INSERT INTO facts (key, date, category, emoji, draft) VALUES
-  ('mcgurk-effect', NULL, 'mind', '👄', 0);
+INSERT INTO facts (key, date, category, emoji, draft, slot) VALUES
+  ('mcgurk-effect', '2026-10-10T13:00:00+02:00', 'mind', '👄', 0, 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (
