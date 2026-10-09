@@ -1,7 +1,7 @@
 -- WTFact-Fakt „Toy Story 2 war fast komplett gelöscht, gerettet hat ihn ein Computer bei jemandem zu Hause“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
-INSERT INTO facts (key, date, category, emoji, draft) VALUES
-  ('toy-story-2-deleted', NULL, 'popculture', '🤠', 0);
+INSERT INTO facts (key, date, category, emoji, draft, slot) VALUES
+  ('toy-story-2-deleted', '2026-10-10T22:00:00+02:00', 'popculture', '🤠', 0, 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (
