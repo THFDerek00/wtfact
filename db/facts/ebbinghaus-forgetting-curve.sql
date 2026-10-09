@@ -1,8 +1,8 @@
 -- WTFact-Fakt „Ein Psychologe erfand 2.300 sinnlose Silben, um das Vergessen zu messen, und seine Kurve hält bis heute“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
 
-INSERT INTO facts (key, date, category, emoji, draft) VALUES
-  ('ebbinghaus-forgetting-curve', NULL, 'mind', '📝', 0);
+INSERT INTO facts (key, date, category, emoji, draft, slot) VALUES
+  ('ebbinghaus-forgetting-curve', '2026-10-10T07:00:00+02:00', 'mind', '📝', 0, 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (
