@@ -1,7 +1,7 @@
 -- WTFact-Fakt „Diese Schildkröte atmet unter Wasser durch den Hintern“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
-INSERT INTO facts (key, date, category, emoji, draft) VALUES
-  ('bum-breathing-turtle', NULL, 'animals', '🐢', 0);
+INSERT INTO facts (key, date, category, emoji, draft, slot) VALUES
+  ('bum-breathing-turtle', '2026-10-11T07:00:00+02:00', 'animals', '🐢', 0, 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (
