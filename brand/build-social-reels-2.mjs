@@ -1,4 +1,4 @@
-// Reels / TikToks, zweite Runde (1080×1920, MP4, 11–12 Sekunden, ohne Ton). Mutiger als die erste Runde:
+// Reels / TikToks, zweite Runde (1080×1920, MP4, 12–20 Sekunden je nach Textmenge, ohne Ton). Mutiger als die erste Runde:
 // schräge Hell/Dunkel-Teilung, Riesenschrift über den Rand, laufende Bänder, Wackler beim Aufprall.
 // Formate: Wort-Schlag (Fakt), Wahr oder Fake, Was war zuerst, Emoji-Rätsel, 3 Fakten am Tag
 // und WTFact selbst (Wischen, Montags-Abstimmung, Science Jumper, Tippspiel und Sammelalbum).
@@ -31,14 +31,14 @@ const mv = (dx, dy, body) => `<g transform="translate(${r2(dx)} ${r2(dy)})">${bo
 const fade = (o, body) => (o >= 1 ? body : o <= 0 ? '' : `<g opacity="${o.toFixed(3)}">${body}</g>`);
 // Aufprall: Text knallt von groß auf normal
 const slamS = (t, t0, d = 0.24, from = 2.4) => 1 + (1 - outBack(seg(t, t0, t0 + d))) * (from - 1);
-// Wackler kurz nach jedem Aufprall
-function shake(t, hits, amp = 16) {
+// Kleiner Ruck kurz nach jedem Aufprall (bewusst dezent)
+function shake(t, hits, amp = 4) {
   let dx = 0, dy = 0;
-  for (const h of hits) if (t >= h && t < h + 0.25) { const k = 1 - (t - h) / 0.25; dx += Math.sin(t * 95) * amp * k; dy += Math.cos(t * 77) * amp * k; }
+  for (const h of hits) if (t >= h && t < h + 0.15) { const k = 1 - (t - h) / 0.15; dx += Math.sin(t * 60) * amp * k; dy += Math.cos(t * 50) * amp * k; }
   return [dx, dy];
 }
-// Blitz nach dem Aufprall
-const flash = (t, hits, color = CREAM) => hits.filter((h) => t >= h && t < h + 0.12).map((h) => `<rect width="${W}" height="${H}" fill="${color}" opacity="${(0.55 * (1 - (t - h) / 0.12)).toFixed(3)}"/>`).join('');
+// Leichtes Aufhellen nach dem Aufprall
+const flash = (t, hits, color = CREAM) => hits.filter((h) => t >= h && t < h + 0.1).map((h) => `<rect width="${W}" height="${H}" fill="${color}" opacity="${(0.12 * (1 - (t - h) / 0.1)).toFixed(3)}"/>`).join('');
 
 // ---------- Flächen ----------
 // Hintergrund mit wanderndem Punktraster
@@ -262,7 +262,7 @@ function raetsel(r, f, t, doc) {
 
 // ---------- Format: 3 Fakten am Tag ----------
 function dreiAmTag(r, f, t, doc) {
-  const D = r.dur, T1 = 2.3, T2 = D - 3.2, fs3 = r.keys.map(fact);
+  const D = r.dur, T1 = 2.3, T2 = D - 3.6, fs3 = r.keys.map(fact);
   if (t < T1) {
     doc.add(split(doc, NIGHT, C.pink, 1350, -10, t));
     doc.add(fade(seg(t, 0.05, 0.1), at(slamS(t, 0.05), 540, 330, rot(-4, 540, 330, bigWord('Jeden Tag', 90, 380, 140, { shadow: C.pink })))));
@@ -505,7 +505,8 @@ const REELS = [
   { n: 20, key: 'tippspiel', type: 'tippspiel', keys: ['immortal-jellyfish', 'swiss-guinea-pig-rental', 'isner-mahut-longest-match', 'bamboo-91-cm-day', 'apollo-13-co2-mailbox', 'cant-tickle-yourself', 'honey-forever'], q: 'Tipp, welcher Fakt morgen Fakt des Tages wird, bau deine Trefferserie aus und sammle alle Sieger im Album 🔥' },
 ];
 const FORMATS = { slam, wf: wahrFake, wz: zuerst, er: raetsel, drei: dreiAmTag, wischen, abstimmung, jumper, tippspiel };
-const DUR = { slam: 11, wf: 12, wz: 12, er: 12, drei: 12.5, wischen: 11.5, abstimmung: 11.5, jumper: 11.5, tippspiel: 12.5 };
+const DUR = { slam: 11, wf: 12, wz: 12, er: 12, drei: 12.5, wischen: 12.5, abstimmung: 13, jumper: 12, tippspiel: 14 };
+const READ = 15, MAX_DUR = 20;
 const NAMES = { slam: 'Wort-Schlag', wf: 'Wahr oder Fake?', wz: 'Was war zuerst?', er: 'Emoji-Rätsel', drei: '3 Fakten am Tag', wischen: 'WTFact: Wischen', abstimmung: 'WTFact: Montags-Abstimmung', jumper: 'WTFact: Science Jumper', tippspiel: 'WTFact: Tippspiel und Sammelalbum' };
 
 function prep(r) {
@@ -518,6 +519,15 @@ function prep(r) {
     if (![p.f.title, p.f.hook, p.f.body].some((s) => s.includes(String(p.year)))) throw new Error(`Jahr ${p.year} steht nicht in ${p.key}`);
   }
   for (const k of r.keys ?? []) fact(k);
+  // Länger, wenn viel Text zu lesen ist (READ Zeichen pro Sekunde), höchstens MAX_DUR
+  const read = (str) => str.length / READ;
+  const need = {
+    slam: () => 3.2 + 0.35 + Math.ceil(f.title.length / 22) * 0.22 + 0.3 + read(f.hook) + 1.2 + 2.3,
+    wf: () => 5.6 + 1.2 + read(f.title) + 1.5 + 2.3,
+    er: () => 5.6 + 0.4 + Math.ceil(f.title.length / 22) * 0.2 + 0.3 + read(f.hook) + 1.2 + 2.3,
+    drei: () => 2.3 + 3 * Math.max(...r.keys.map((k) => read(fact(k).title) + 1.2)) + 3.6,
+  }[r.type];
+  if (need) r.dur = Math.min(MAX_DUR, Math.max(r.dur, Math.ceil(need() * 2) / 2));
   return f;
 }
 function frame(r, f, t) {
@@ -553,12 +563,13 @@ if (process.env.REEL_PREVIEW) {
   fs.mkdirSync(dir, { recursive: true });
   for (const r of list) {
     const f = prep(r);
+    console.log(`${r.n}: ${r.dur} s`);
     for (const t of process.env.REEL_PREVIEW.split(',').map(Number)) fs.writeFileSync(path.join(dir, `${r.n}-${t}.png`), new Resvg(frame(r, f, t)).render().asPng());
   }
   process.exit(0);
 }
 for (const r of list) await render(r);
-const md = ['# Reels / TikToks, Runde 2', '', 'Je 11 bis 12,5 Sekunden, 1080×1920, ohne Ton. Musik direkt in Instagram oder TikTok aus der App-Bibliothek drunterlegen (lizenziert). Das passende Titelbild liegt jeweils als `-cover.png` daneben.', ''];
+const md = ['# Reels / TikToks, Runde 2', '', 'Je 12 bis 20 Sekunden (länger bei viel Text), 1080×1920, ohne Ton. Musik direkt in Instagram oder TikTok aus der App-Bibliothek drunterlegen (lizenziert). Das passende Titelbild liegt jeweils als `-cover.png` daneben.', ''];
 for (const r of REELS) {
   const f = ['slam', 'wf', 'wz', 'er'].includes(r.type) ? fact(r.key) : null;
   const body = r.type === 'slam' ? [r.q, '', f.hook, '', `${CTA}.`] : f ? [r.q, '', `${CTA}.`] : [r.q, '', 'Link in Bio.'];
