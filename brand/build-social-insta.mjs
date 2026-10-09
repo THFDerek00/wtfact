@@ -833,4 +833,7 @@ function writePlan(posts, stories, extras) {
   out(`${OUT}/PLAN.md`, lines.join('\n'));
 }
 
-main();
+// Nur beim direkten Aufruf erzeugen; build-social-reels.mjs nutzt die Bausteine ohne die Bilder neu zu bauen.
+if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(ROOT, 'brand/build-social-insta.mjs')) main();
+
+export { Doc, fit, para, emoji, box, pill, chev, logo, logoPlate, rot, poly, rectD, textStroke, tag, tape, fact, NIGHT, CREAM, NIGHT_MUTED, CTA, SLOGAN, CAT };
