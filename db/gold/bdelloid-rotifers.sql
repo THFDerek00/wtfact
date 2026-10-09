@@ -10,3 +10,7 @@ INSERT INTO gold_sources (gold, pos, label, url) VALUES
   ('bdelloid-rotifers', 1, 'ScienceDaily: Arctic rotifer lives after 24,000 years in a frozen state', 'https://www.sciencedaily.com/releases/2021/06/210607161159.htm'),
   ('bdelloid-rotifers', 2, 'Sci.News: Frozen Microscopic Animals Brought Back to Life after 24,000 Years', 'https://www.sci.news/biology/frozen-bdelloid-rotifers-siberian-permafrost-09745.html'),
   ('bdelloid-rotifers', 3, 'Current Biology: A living bdelloid rotifer from 24,000-year-old Arctic permafrost', 'https://www.cell.com/current-biology/fulltext/S0960-9822(21)00624-2');
+
+INSERT INTO gold_products (gold, lang, name, query, why, emoji) VALUES
+  ('bdelloid-rotifers', 'de', 'Bresser Biolux NV Mikroskop mit Kamera', 'Bresser Biolux NV Mikroskop', 'Rädertierchen leben in jeder Pfütze und jedem Moospolster. Mit diesem Mikroskop aus Deutschland siehst du sie selbst, bis 1280-fach und mit USB-Kamera.', '🔬'),
+  ('bdelloid-rotifers', 'en', 'AmScope M150C compound microscope', 'AmScope M150C microscope', 'Rotifers live in every puddle and patch of moss. This sturdy microscope magnifies up to 1000x, so you can watch them yourself.', '🔬');

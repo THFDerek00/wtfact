@@ -75,6 +75,18 @@ CREATE TABLE gold_sources (
   PRIMARY KEY (gold, pos)
 );
 
+-- Ein ausgesuchtes Produkt pro Gold-Fakt und Sprache (Amazon-Partnerlink, Wunsch von Eric, 2026-10-09):
+-- besonders passend und hochwertig, mit eigenem Emoji für die Werbefläche auf der Gold-Fakt-Seite.
+CREATE TABLE gold_products (
+  gold  TEXT NOT NULL REFERENCES gold_facts (id) ON DELETE CASCADE,
+  lang  TEXT NOT NULL CHECK (lang IN ('de', 'en')),
+  name  TEXT NOT NULL,
+  query TEXT NOT NULL,
+  why   TEXT NOT NULL,
+  emoji TEXT NOT NULL,
+  PRIMARY KEY (gold, lang)
+);
+
 -- Prüfsumme der SQL-Dateien beim letzten Aufbau. So merkt db:build, wenn jemand die
 -- Datenbank direkt bearbeitet und noch nicht mit db:dump zurückgeschrieben hat.
 CREATE TABLE meta (

@@ -10,3 +10,7 @@ INSERT INTO gold_sources (gold, pos, label, url) VALUES
   ('lyrebird-chainsaw', 1, 'The Australian Museum: Superb Lyrebird', 'https://australian.museum/learn/animals/birds/superb-lyrebird/'),
   ('lyrebird-chainsaw', 2, 'Mental Floss: This Australian Bird Can Mimic the Sounds of Cameras, Chainsaws, and Car Alarms', 'https://www.mentalfloss.com/article/653848/lyrebird-best-impressionist-animal-kingdom'),
   ('lyrebird-chainsaw', 3, 'NSW National Parks: Superb lyrebird | Australian animals | NSW National Parks', 'https://www.nationalparks.nsw.gov.au/plants-and-animals/superb-lyrebird');
+
+INSERT INTO gold_products (gold, lang, name, query, why, emoji) VALUES
+  ('lyrebird-chainsaw', 'de', 'ZEISS Terra ED 8x42 Fernglas', 'Zeiss Terra ED 8x42', 'Ein Fernglas von Zeiss für Vogelbeobachtung: wasserdicht, scharf bis an den Rand. Ideal, um Leierschwänze und alle anderen Imitatoren zu entdecken.', '🐦'),
+  ('lyrebird-chainsaw', 'en', 'ZEISS Terra ED 8x42 binoculars', 'Zeiss Terra ED 8x42', 'Zeiss binoculars built for birdwatching: waterproof and sharp to the edge. Ideal for spotting lyrebirds and every other mimic.', '🐦');

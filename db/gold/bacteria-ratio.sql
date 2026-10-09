@@ -9,3 +9,7 @@ INSERT INTO gold_texts (gold, lang, title, text) VALUES
 INSERT INTO gold_sources (gold, pos, label, url) VALUES
   ('bacteria-ratio', 1, 'PLOS Biology: Revised Estimates for the Number of Human and Bacteria Cells in the Body', 'https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.1002533'),
   ('bacteria-ratio', 2, 'American Council on Science and Health: Commonly Cited Stat — 10 Bacteria For Every 1 Human Cell — Is Wrong', 'https://www.acsh.org/news/2016/08/26/commonly-cited-stat-of-10-bacteria-for-every-1-human-cell-is-wrong');
+
+INSERT INTO gold_products (gold, lang, name, query, why, emoji) VALUES
+  ('bacteria-ratio', 'de', '„Winzige Gefährten“ von Ed Yong', 'Ed Yong Winzige Gefährten', 'Das Buch, das die Mikroben in uns endlich richtig zählt. Ed Yong erzählt, warum wir ohne sie gar nicht wir wären, und räumt mit genau diesem Mythos auf.', '🦠'),
+  ('bacteria-ratio', 'en', 'I Contain Multitudes by Ed Yong', 'Ed Yong I Contain Multitudes', 'The book that finally counts the microbes inside us properly. Ed Yong explains why we would not be us without them, and takes this exact myth apart.', '🦠');

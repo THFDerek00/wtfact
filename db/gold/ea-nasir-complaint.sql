@@ -10,3 +10,7 @@ INSERT INTO gold_sources (gold, pos, label, url) VALUES
   ('ea-nasir-complaint', 1, 'British Museum: Collections Online | British Museum', 'https://www.britishmuseum.org/collection/object/W_1953-0411-71'),
   ('ea-nasir-complaint', 2, 'Guinness World Records: Oldest written customer complaint', 'https://www.guinnessworldrecords.com/world-records/537889-oldest-written-customer-complaint'),
   ('ea-nasir-complaint', 3, 'University of Liverpool: The oldest complaint in the world: a trip to the British Museum', 'https://www.liverpool.ac.uk/archaeology-classics-and-egyptology/blog/2025/oldest-complaint-in-the-world-british-museum/');
+
+INSERT INTO gold_products (gold, lang, name, query, why, emoji) VALUES
+  ('ea-nasir-complaint', 'de', '„Cuneiform“ von Irving Finkel (British Museum)', 'Irving Finkel Cuneiform British Museum', 'Der Kurator, der die Keilschrift-Sammlung im British Museum betreut, in der auch Nannis Beschwerde liegt, erklärt die älteste Schrift der Welt. Auf Englisch.', '🏺'),
+  ('ea-nasir-complaint', 'en', 'Cuneiform by Irving Finkel and Jonathan Taylor (British Museum)', 'Irving Finkel Cuneiform British Museum', 'Written by the curator in charge of the British Museum''s cuneiform collection, where Nanni''s complaint lives. A guide to the world''s oldest writing.', '🏺');

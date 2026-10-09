@@ -10,3 +10,7 @@ INSERT INTO gold_sources (gold, pos, label, url) VALUES
   ('first-password-theft', 1, 'Gizmodo: The World''s First Computer Password? It Was Useless Too', 'https://gizmodo.com/the-world-s-first-computer-password-it-was-useless-too-5879856'),
   ('first-password-theft', 2, 'Purdue cyberTAP: How much do you know about the history of cybersecurity?', 'https://cyber.tap.purdue.edu/blog/articles/how-much-do-you-know-about-the-history-of-cybersecurity/'),
   ('first-password-theft', 3, 'UNC School of Government: Hacking Hacked: Password Security in the Digital Age', 'https://itd.sog.unc.edu/knowledge-base/article/hacking-hacked-password-security-digital-age');
+
+INSERT INTO gold_products (gold, lang, name, query, why, emoji) VALUES
+  ('first-password-theft', 'de', 'YubiKey 5 NFC Sicherheitsschlüssel', 'YubiKey 5 NFC', 'Damit ein gestohlenes Passwort allein nicht mehr reicht: Der Schlüssel von Yubico schützt Google, Microsoft, Apple und Co. per USB oder Antippen am Handy.', '🔑'),
+  ('first-password-theft', 'en', 'YubiKey 5 NFC security key', 'YubiKey 5 NFC', 'So a stolen password is no longer enough on its own. Yubico''s key protects Google, Microsoft, Apple and more via USB or a tap on your phone.', '🔑');

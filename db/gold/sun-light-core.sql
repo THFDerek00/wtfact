@@ -10,3 +10,7 @@ INSERT INTO gold_sources (gold, pos, label, url) VALUES
   ('sun-light-core', 1, 'NASA Scientific Visualization Studio: Journey Of Light', 'https://svs.gsfc.nasa.gov/11537'),
   ('sun-light-core', 2, 'ScienceAlert: The Longest Journey Sunlight Ever Takes Happens Before It Leaves The Sun', 'https://www.sciencealert.com/the-sunlight-on-your-face-took-8-minutes-to-reach-earth-but-first-it-spent-170000-years-escaping-the-sun'),
   ('sun-light-core', 3, 'Astronomy: I heard that the light from nuclear fusion reactions in the Sun''s core takes about 200,000 years to reach its surface. I thought the speed of light is constant. Why does it take so long?', 'https://www.astronomy.com/science/i-heard-that-the-light-from-nuclear-fusion-reactions-in-the-suns-core-takes-about-200000-years-to-reach-its-surface-i-thought-the-speed-of-light-is-constant-why-does-it-take-so-long/');
+
+INSERT INTO gold_products (gold, lang, name, query, why, emoji) VALUES
+  ('sun-light-core', 'de', 'Coronado PST Sonnenteleskop', 'Coronado PST Sonnenteleskop', 'Ein Teleskop nur für die Sonne, mit eingebautem Schutzfilter. Zeigt Sonnenflecken und Protuberanzen, das Licht, das so lange unterwegs war.', '☀️'),
+  ('sun-light-core', 'en', 'Coronado PST solar telescope', 'Coronado PST solar telescope', 'A telescope made only for the Sun, with a built-in safety filter. Shows sunspots and solar prominences, the light that took so long to reach you.', '☀️');

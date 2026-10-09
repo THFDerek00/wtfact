@@ -9,3 +9,7 @@ INSERT INTO gold_texts (gold, lang, title, text) VALUES
 INSERT INTO gold_sources (gold, pos, label, url) VALUES
   ('space-invaders-speed', 1, 'The Register: Thirty-five years ago today: Space Invaders conquer the Earth', 'https://www.theregister.com/on-prem/2013/06/05/thirty-five-years-ago-today-space-invaders-conquer-the-earth/510549?page=3'),
   ('space-invaders-speed', 2, 'SVG: Details You Didn''t Know About Space Invaders', 'https://www.svg.com/293293/details-you-didnt-know-about-space-invaders/');
+
+INSERT INTO gold_products (gold, lang, name, query, why, emoji) VALUES
+  ('space-invaders-speed', 'de', 'TAITO Egret II mini Arcade-Automat', 'Taito Egret II mini', 'Der Mini-Automat vom Erfinder selbst: TAITO baut Space Invaders mit drehbarem Bildschirm nach, dazu 40 weitere Klassiker. Original, nicht nachgemacht.', '🕹️'),
+  ('space-invaders-speed', 'en', 'TAITO Egret II mini arcade cabinet', 'Taito Egret II mini', 'The mini cabinet from the people who made it: TAITO recreates Space Invaders with a rotating screen, plus 40 more classics. The real thing.', '🕹️');

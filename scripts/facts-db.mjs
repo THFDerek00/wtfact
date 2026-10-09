@@ -66,6 +66,7 @@ export function goldSql(g) {
     insert('gold_facts', ['id', 'points', 'category', 'emoji'], [[g.id, g.points, g.category, g.emoji]]),
     insert('gold_texts', ['gold', 'lang', 'title', 'text'], LANGS.filter((l) => g[l]).map((l) => [g.id, l, g[l].title, g[l].text])),
     insert('gold_sources', ['gold', 'pos', 'label', 'url'], g.sources.map((s, i) => [g.id, i + 1, s.label, s.url])),
+    insert('gold_products', ['gold', 'lang', 'name', 'query', 'why', 'emoji'], LANGS.filter((l) => g[l]?.product).map((l) => [g.id, l, g[l].product.name, g[l].product.query, g[l].product.why, g[l].product.emoji])),
   ]
     .filter(Boolean)
     .join('\n');
@@ -103,6 +104,7 @@ export function readGold(db) {
   const gold = new Map(db.prepare('SELECT * FROM gold_facts ORDER BY points').all().map((g) => [g.id, { ...g, sources: [] }]));
   for (const t of db.prepare('SELECT * FROM gold_texts').all()) gold.get(t.gold)[t.lang] = { title: t.title, text: t.text };
   for (const s of db.prepare('SELECT * FROM gold_sources ORDER BY pos').all()) gold.get(s.gold).sources.push({ label: s.label, url: s.url });
+  for (const p of db.prepare('SELECT * FROM gold_products').all()) gold.get(p.gold)[p.lang].product = { name: p.name, query: p.query, why: p.why, emoji: p.emoji };
   return [...gold.values()];
 }
 

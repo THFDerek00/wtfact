@@ -92,6 +92,12 @@
   --medal-size-lg: 112px;
   --dur-rays: 40s;
   --dur-shine: 4.5s;
+  /* Gold-Fakt-Seite als Schatzkammer (Eric, 2026-10-09): Pergament-Tafel für den Fakt, Münzen für die Sammlung */
+  --parchment: #fff4dc;
+  --parchment-muted: #5e4b25;
+  --coin-size: 52px;
+  --dur-reveal: 0.9s;
+  --dur-bob: 6s;
 
   /* Spiel (Science Jumper): Flüssigkeit in den Reagenzgläsern */
   --flask: #2f7bff;

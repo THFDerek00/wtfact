@@ -9,3 +9,7 @@ INSERT INTO gold_texts (gold, lang, title, text) VALUES
 INSERT INTO gold_sources (gold, pos, label, url) VALUES
   ('bir-tawil', 1, 'ZME Science: Bir Tawil: The World''s Only Unclaimed Habitable Land Is a Battleground for Gold Miners, Tribes, and Fake Kings', 'https://www.zmescience.com/feature-post/natural-sciences/geography/bir-tawil-the-worlds-only-unclaimed-habitable-land-is-a-battleground-for-gold-miners-tribes-and-fake-kings/'),
   ('bir-tawil', 2, 'Egyptian Streets: Bir Tawil: the Stateless Land of Many and No Rulers', 'https://egyptianstreets.com/2023/07/20/bir-tawil-the-stateless-land-of-many-and-no-rulers/');
+
+INSERT INTO gold_products (gold, lang, name, query, why, emoji) VALUES
+  ('bir-tawil', 'de', '„Atlas of Unusual Borders“ von Zoran Nikolić', 'Atlas of Unusual Borders Zoran Nikolic', 'Ein ganzer Atlas voller Grenzen, die keinen Sinn ergeben: Enklaven, Niemandsland und natürlich Bir Tawil. Liebevoll gezeichnet, auf Englisch.', '🧭'),
+  ('bir-tawil', 'en', 'The Atlas of Unusual Borders by Zoran Nikolić', 'Atlas of Unusual Borders Zoran Nikolic', 'A whole atlas of borders that make no sense: enclaves, no-man''s-lands and, of course, Bir Tawil. Beautifully drawn.', '🧭');

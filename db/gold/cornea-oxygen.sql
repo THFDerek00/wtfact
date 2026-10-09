@@ -9,3 +9,7 @@ INSERT INTO gold_texts (gold, lang, title, text) VALUES
 INSERT INTO gold_sources (gold, pos, label, url) VALUES
   ('cornea-oxygen', 1, 'Britannica: Cornea | Structure, Function & Disease', 'https://www.britannica.com/science/cornea'),
   ('cornea-oxygen', 2, 'Africa Check: Yes, the eye''s cornea doesn''t have blood and gets its oxygen from the air', 'https://africacheck.org/fact-checks/meta-programme-fact-checks/yes-eyes-cornea-doesnt-have-blood-and-gets-its-oxygen-air');
+
+INSERT INTO gold_products (gold, lang, name, query, why, emoji) VALUES
+  ('cornea-oxygen', 'de', '3B Scientific Augenmodell, 5-fach vergrößert', '3B Scientific Augenmodell', 'Ein Augenmodell vom Hersteller, den auch Unis und Arztpraxen nutzen. Hornhaut, Linse und Netzhaut lassen sich einzeln abnehmen.', '👁️'),
+  ('cornea-oxygen', 'en', '3B Scientific human eye model, 5x enlarged', '3B Scientific eye model', 'An eye model from the maker used by universities and doctors'' offices. Cornea, lens and retina come apart piece by piece.', '👁️');
