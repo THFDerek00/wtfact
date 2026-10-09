@@ -1,7 +1,7 @@
 -- WTFact-Fakt „Auf dem Weg aus dem Sonnensystem: Chuck Berrys „Johnny B. Goode““
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
-INSERT INTO facts (key, date, category, emoji, draft) VALUES
-  ('voyager-chuck-berry', NULL, 'space', '📀', 0);
+INSERT INTO facts (key, date, category, emoji, draft, slot) VALUES
+  ('voyager-chuck-berry', '2026-10-11T03:00:00+02:00', 'space', '📀', 0, 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (
