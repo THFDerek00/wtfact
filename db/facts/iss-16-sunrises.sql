@@ -1,7 +1,7 @@
 -- WTFact-Fakt „Auf der ISS geht die Sonne 16-mal am Tag auf“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
-INSERT INTO facts (key, date, category, emoji, draft) VALUES
-  ('iss-16-sunrises', NULL, 'space', '🛰️', 0);
+INSERT INTO facts (key, date, category, emoji, draft, slot) VALUES
+  ('iss-16-sunrises', '2026-10-10T08:00:00+02:00', 'space', '🛰️', 0, 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (
