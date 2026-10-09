@@ -1,7 +1,7 @@
 -- WTFact-Fakt „Mark Twain kam 1835 mit dem Halleyschen Kometen und ging 1910 mit ihm“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
-INSERT INTO facts (key, date, category, emoji, draft) VALUES
-  ('twain-halleys-comet', NULL, 'space', '☄️', 0);
+INSERT INTO facts (key, date, category, emoji, draft, slot) VALUES
+  ('twain-halleys-comet', '2026-10-10T23:00:00+02:00', 'space', '☄️', 0, 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (
