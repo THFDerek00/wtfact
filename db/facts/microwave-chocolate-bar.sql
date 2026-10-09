@@ -1,6 +1,7 @@
 -- WTFact-Fakt „Die Mikrowelle begann mit einem geschmolzenen Schokoriegel in der Hosentasche“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
-INSERT INTO facts (key, date, category, emoji, draft) VALUES ('microwave-chocolate-bar', NULL, 'brands', '🍫', 0);
+INSERT INTO facts (key, date, category, emoji, draft) VALUES
+  ('microwave-chocolate-bar', NULL, 'brands', '🍫', 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (

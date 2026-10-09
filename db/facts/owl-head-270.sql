@@ -1,6 +1,7 @@
 -- WTFact-Fakt „Eulen drehen ihren Kopf um bis zu 270 Grad, ohne sich die Blutzufuhr abzuklemmen“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
-INSERT INTO facts (key, date, category, emoji, draft) VALUES ('owl-head-270', NULL, 'animals', '🦉', 0);
+INSERT INTO facts (key, date, category, emoji, draft) VALUES
+  ('owl-head-270', NULL, 'animals', '🦉', 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (

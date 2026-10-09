@@ -187,7 +187,7 @@ function facts_insert_sql(array $f): string
 function rewrite_fact_file(string $content, array $f): string
 {
     $n = 0;
-    $new = preg_replace_callback('/INSERT INTO facts \([^)]*\) VALUES\n  \(.*?\);\n/s', function () use ($f) { return facts_insert_sql($f); }, $content, 1, $n);
+    $new = preg_replace_callback('/INSERT INTO facts \([^)]*\) VALUES\s*\(.*?\);\n/s', function () use ($f) { return facts_insert_sql($f); }, $content, 1, $n);
     if ($n !== 1 || $new === null) fail('bad-fact-file', 500, ['key' => $f['key']]);
     return $new;
 }

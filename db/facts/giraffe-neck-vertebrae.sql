@@ -1,6 +1,7 @@
 -- WTFact-Fakt „Eine Giraffe hat genauso viele Halswirbel wie du: 7“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
-INSERT INTO facts (key, date, category, emoji, draft) VALUES ('giraffe-neck-vertebrae', NULL, 'animals', '🦒', 0);
+INSERT INTO facts (key, date, category, emoji, draft) VALUES
+  ('giraffe-neck-vertebrae', NULL, 'animals', '🦒', 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (
