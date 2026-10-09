@@ -31,6 +31,7 @@ node brand/build-social-kit.mjs   # Social-Kit; Titel, Hooks und Quellen kommen 
 node brand/build-social-reichweite.mjs   # Reichweiten-Paket (15 Tage + Partner-Paket), Domain steht in DOMAIN
 npm i --no-save @iconify-json/fluent-emoji-flat   # Emojis für das Instagram-Paket (Fluent Emoji Flat, MIT)
 node brand/build-social-insta.mjs   # Instagram-Paket Oktober 2026: 50 Posts, 10 Stories, 25 Extras, PLAN.md
+node brand/build-social-reels.mjs   # 5 Reels/TikToks (MP4, ca. 10 s, braucht ffmpeg), Captions in reels/REELS.md
 ```
 
 Gemeinsame Bausteine (Farben, Logo, Chips, Punktmuster) stehen in `brand-lib.mjs`. Alle Flächen tragen das Punktmuster der Seite (Raster 44 px, entspricht den 16 px auf dem Handy). Social-Grafiken mit Inhalt tragen unten rechts dezent „KI-generiert“ / „AI-generated“ (Transparenz nach EU-KI-Verordnung).
