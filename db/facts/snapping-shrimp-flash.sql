@@ -1,7 +1,7 @@
 -- WTFact-Fakt „Dieser Krebs schnappt so heftig zu, dass das Wasser kurz aufleuchtet“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
-INSERT INTO facts (key, date, category, emoji, draft) VALUES
-  ('snapping-shrimp-flash', NULL, 'animals', '🦐', 0);
+INSERT INTO facts (key, date, category, emoji, draft, slot) VALUES
+  ('snapping-shrimp-flash', '2026-10-11T23:00:00+02:00', 'animals', '🦐', 0, 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (
