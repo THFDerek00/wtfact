@@ -11,8 +11,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { Resvg } from '@resvg/resvg-js';
-import { ROOT, C, TEXT, CAT_COLOR, text, measure, chip, aiTag, r2 } from './brand-lib.mjs';
-import { Doc, fit, para, emoji, box, pill, logoPlate, rot, poly, rectD, textStroke, fact, NIGHT, CREAM, NIGHT_MUTED, CTA, SLOGAN, CAT } from './build-social-insta.mjs';
+import { ROOT, C, DISPLAY, TEXT, CAT_COLOR, text, measure, wrap, chip, aiTag, r2 } from './brand-lib.mjs';
+import { Doc, para, emoji, box, pill, logoPlate, rot, poly, rectD, textStroke, fact, NIGHT, CREAM, NIGHT_MUTED, CTA, SLOGAN, CAT } from './build-social-insta.mjs';
 
 const OUT = 'brand/social/insta-2026-10/reels';
 const W = 1080, H = 1920, FPS = 30;
@@ -31,14 +31,46 @@ const mv = (dx, dy, body) => `<g transform="translate(${r2(dx)} ${r2(dy)})">${bo
 const fade = (o, body) => (o >= 1 ? body : o <= 0 ? '' : `<g opacity="${o.toFixed(3)}">${body}</g>`);
 // Aufprall: Text knallt von groß auf normal
 const slamS = (t, t0, d = 0.24, from = 2.4) => 1 + (1 - outBack(seg(t, t0, t0 + d))) * (from - 1);
-// Kleiner Ruck kurz nach jedem Aufprall (bewusst dezent)
+// Kleiner Ruck nach einem Aufprall; jedes Format meldet höchstens zwei davon pro Video
 function shake(t, hits, amp = 4) {
   let dx = 0, dy = 0;
   for (const h of hits) if (t >= h && t < h + 0.15) { const k = 1 - (t - h) / 0.15; dx += Math.sin(t * 60) * amp * k; dy += Math.cos(t * 50) * amp * k; }
   return [dx, dy];
 }
-// Leichtes Aufhellen nach dem Aufprall
-const flash = (t, hits, color = CREAM) => hits.filter((h) => t >= h && t < h + 0.1).map((h) => `<rect width="${W}" height="${H}" fill="${color}" opacity="${(0.12 * (1 - (t - h) / 0.1)).toFixed(3)}"/>`).join('');
+
+// ---------- Umbruch ----------
+// Wie brand-lib wrap, aber typografisch sauberer: Beginnt nach einem Satzende nur noch ein Wort,
+// rutscht es in die nächste Zeile. Steht in der letzten Zeile nur ein Wort, kommt eins aus der Zeile davor dazu.
+function wrapNice(str, size, maxW, font, track) {
+  const fits = (l) => measure(l, size, font, track) <= maxW;
+  let lines = wrap(str, size, maxW, font, track);
+  for (let i = 0; i < lines.length - 1; i++) {
+    const w = lines[i].split(' ');
+    if (w.length > 2 && /[.?!:]$/.test(w[w.length - 2])) {
+      const rest = [w.pop(), ...lines.slice(i + 1)].join(' ');
+      lines = [...lines.slice(0, i), w.join(' '), ...wrap(rest, size, maxW, font, track)];
+    }
+  }
+  const n = lines.length;
+  if (n > 1 && !lines[n - 1].includes(' ')) {
+    const w = lines[n - 2].split(' ');
+    if (w.length > 2 && !/[.?!:]$/.test(w[w.length - 1])) {
+      const moved = `${w.pop()} ${lines[n - 1]}`;
+      if (fits(moved)) lines = [...lines.slice(0, n - 2), w.join(' '), moved];
+    }
+  }
+  return lines;
+}
+const tryFit = (str, o) => { try { return fit(str, o); } catch { return null; } };
+function fit(str, { maxW, maxH = 9999, max, min = 30, lh = 1.06, font = DISPLAY, maxLines = 8, track = 0 }) {
+  for (let s = max; s >= min; s -= 2) {
+    const lines = wrapNice(str, s, maxW, font, track);
+    const lonely = lines.length > 1 && lines.some((l) => !l.includes(' ') && l.length <= 4);
+    if (lonely && s > min) continue;
+    if (lines.length <= maxLines && lines.length * s * lh <= maxH && lines.every((l) => measure(l, s, font, track) <= maxW)) return { size: s, lines, lh, font, h: lines.length * s * lh, track };
+  }
+  throw new Error(`Text passt nicht: „${str}“`);
+}
 
 // ---------- Flächen ----------
 // Hintergrund mit wanderndem Punktraster
@@ -115,28 +147,39 @@ function slam(r, f, t, doc) {
     const i = P.filter((p) => t >= p).length - 1;
     const looks = [[col, NIGHT, -10], [NIGHT, CREAM, 8], [CREAM, col, -6]];
     const [a, b, ang] = looks[Math.max(0, i)];
-    doc.add(split(doc, a, b, 960 + Math.sin(t * 2) * 40, ang + Math.sin(t * 1.3) * 2, t));
+    doc.add(split(doc, a, b, 1460 + Math.sin(t * 2) * 30, ang + Math.sin(t * 1.3) * 2, t));
     doc.add(band(doc, CAT[f.cat], 230, -6, C.yellow, t, { size: 40, h: 82 }));
     // Emoji fliegt quer durchs Bild
-    const ex = 1200 - outCubic(seg(t, 0, T1)) * 1500, ey = 1180 - Math.sin(t * 1.6) * 120;
+    const ex = 1200 - outCubic(seg(t, 0, T1)) * 1500, ey = 1300 - Math.sin(t * 1.6) * 100;
     doc.add(emoji(doc, f.emoji, ex, ey, 420, { rot: t * 60 - 30, shadow: col === NIGHT ? C.pink : C.ink }));
     if (i >= 0) {
-      const tt = fit(r.punch[i], { maxW: 900, max: 240, min: 90, maxLines: 3, lh: 1.0 });
+      const tt = fit(r.punch[i], { maxW: 900, max: 260, min: 90, maxLines: 3, lh: 1.0 });
       const s = slamS(t, P[i]);
-      const y0 = 960 - tt.h / 2;
-      doc.add(at(s, 540, 960, rot(-5 + i * 4, 540, 960, paraBold(tt, 90, y0, [CREAM, C.yellow, CREAM][i], [col, col, C.pink][i]))));
+      const y0 = 840 - tt.h / 2;
+      doc.add(at(s, 540, 840, rot(-5 + i * 4, 540, 840, paraBold(tt, 90, y0, [CREAM, C.yellow, CREAM][i], [col, col, C.pink][i]))));
     }
-    return { hits: P };
+    return { hits: [P[0]] };
   }
   if (t < T2) {
+    // Naht unter dem Titel, mit Luft zu Titel und Hook (die Naht steigt nach rechts um ca. 76 px)
+    // Titel so groß wie möglich, solange der Hook darunter noch passt
+    let head, hook, seamY, hookTop;
+    for (const hmin of [42, 32]) {
+      for (let tmax = 100; tmax >= 50 && !hook; tmax -= 6) {
+        head = fit(f.title, { maxW: 880, max: tmax, min: 50, maxH: 440, maxLines: 5 });
+        seamY = 740 + head.h + 160; hookTop = seamY + 160;
+        hook = tryFit(f.hook, { maxW: 840, max: 48, min: hmin, font: TEXT, lh: 1.4, maxH: 1680 - hookTop, maxLines: 7 });
+      }
+      if (hook) break;
+    }
+    if (!hook) throw new Error(`Hook passt nicht: ${r.key}`);
     const e = outCubic(seg(t, T1, T1 + 0.45));
-    const cy = 1900 - e * 710;
+    const cy = 1900 - e * (1900 - seamY);
     doc.add(split(doc, CREAM, NIGHT, cy, -8, t));
     doc.add(band(doc, `${CAT[f.cat]}  WTF?!`, cy, -8, col, t, { size: 38, h: 78 }));
     const es = outBack(seg(t, T1 + 0.1, T1 + 0.5));
     doc.add(at(Math.max(0.01, es), 900, 420, emoji(doc, f.emoji, 600, 110, 600, { rot: -12 + Math.sin(t * 1.5) * 8, shadow: col })));
     doc.add(fade(seg(t, T1 + 0.2, T1 + 0.4), chip(CAT[f.cat], 90, 250, col, 36).svg));
-    const head = fit(f.title, { maxW: 860, max: 84, min: 50, maxH: 1080 - 740, maxLines: 5 });
     const s0 = T1 + 0.35;
     head.lines.forEach((l, i) => {
       const a = seg(t, s0 + i * 0.22, s0 + i * 0.22 + 0.28);
@@ -145,13 +188,12 @@ function slam(r, f, t, doc) {
       doc.add(mv((1 - outCubic(a)) * -700, 0, text(l, { x: 90, y, size: head.size, fill: C.ink })));
     });
     const hs = s0 + head.lines.length * 0.22 + 0.3;
-    const hook = fit(f.hook, { maxW: 820, max: 40, min: 30, font: TEXT, lh: 1.4, maxLines: 4 });
-    doc.add(fade(seg(t, hs, hs + 0.4), para(hook, 90, 1290, CREAM)));
+    doc.add(fade(seg(t, hs, hs + 0.4), para(hook, 90, hookTop, CREAM)));
     doc.add(stamp(doc, 'WTF?!', 780, 620, t, T2 - 1.6));
-    return { hits: [T1 + 0.45, T2 - 1.6 + 0.3] };
+    return { hits: [T2 - 1.6 + 0.3] };
   }
   endCard(doc, t, T2, col);
-  return { hits: [T2 + 0.45] };
+  return { hits: [] };
 }
 
 // ---------- Format: Wahr oder Fake? ----------
@@ -165,13 +207,13 @@ function wahrFake(r, f, t, doc) {
     doc.add(mv((1 - sl) * 900, 0, rot(-12, 700, 1460, bigWord('FAKE', 1010, 1560, 220, { anchor: 'end', shadow: C.ink }))));
     doc.add(fade(seg(t, 0.35, 0.5), at(slamS(t, 0.35), 540, 640, pill(doc, 'oder?', 760, 600, { fill: NIGHT, ink: CREAM, size: 44, a: 6 }))));
     // Behauptung
-    const claim = fit(r.claim, { maxW: 760, max: 66, min: 40, maxLines: 6 });
+    const claim = fit(r.claim, { maxW: 760, max: 78, min: 40, maxLines: 6 });
     const ch = claim.h + 120, cyy = 1000;
     const k = outBack(seg(t, 0.7, 1.15));
     doc.add(mv(0, (1 - k) * 1200, rot(-3 + Math.sin(t * 2) * 0.8, 540, cyy, box(doc, 110, cyy - ch / 2, 860, ch, CREAM, { rx: 40, sw: 8, off: 18 }) + para(claim, 160, cyy - ch / 2 + 60, C.ink))));
     doc.add(countdown(doc, 190, 1480, t, 2.5, { r: 95 }));
     doc.add(fade(seg(t, 1.4, 1.7), pill(doc, 'Tipp in die Kommentare', 540, cyy + ch / 2 + 50, { fill: C.yellow, size: 34, a: 2 })));
-    return { hits: [0.45, 1.15] };
+    return { hits: [] };
   }
   if (t < T2) {
     const w = outCubic(seg(t, T1, T1 + 0.35));
@@ -181,7 +223,7 @@ function wahrFake(r, f, t, doc) {
     doc.add(at(slamS(t, T1 + 0.15, 0.3, 3), 540, 560, rot(-9, 540, 560, bigWord(verdict, 540, 650, 300, { anchor: 'middle', shadow: NIGHT }))));
     doc.add(emoji(doc, r.ok ? '✅' : '❌', 780, 100, 190, { rot: 14 }));
     const a = seg(t, T1 + 0.8, T1 + 1.2);
-    const head = fit(f.title, { maxW: 780, max: 66, min: 44, maxLines: 5 });
+    const head = fit(f.title, { maxW: 780, max: 76, min: 44, maxLines: 5 });
     const top = 920, ch = head.h + 150;
     doc.add(mv(0, (1 - outCubic(a)) * 900, rot(2, 540, top + ch / 2, box(doc, 110, top, 860, ch, CREAM, { rx: 40, sw: 8, off: 18 }) +
       text(r.ok ? 'Stimmt wirklich:' : 'Die Wahrheit:', { x: 160, y: top + 70, size: 34, font: TEXT, fill: C.muted }) + para(head, 160, top + 100, C.ink))));
@@ -211,7 +253,7 @@ function zuerst(r, f, t, doc) {
     if (t < 2.5) doc.add(at(slamS(t, 0.5, 0.3, 3), 540, 960, rot(t * 40, 540, 960, `<circle cx="552" cy="972" r="110" fill="${C.ink}"/><circle cx="540" cy="960" r="110" fill="${C.yellow}" stroke="${C.ink}" stroke-width="8"/>` + text('VS', { x: 540, y: 1000, size: 110, anchor: 'middle' }))));
     doc.add(countdown(doc, 540, 960, t, 2.5, { r: 110 }));
     doc.add(fade(seg(t, 1.2, 1.5), pill(doc, 'Tipp in die Kommentare', 540, 1560, { fill: CREAM, size: 32, a: 2 })));
-    return { hits: [0.45, 0.8] };
+    return { hits: [] };
   }
   // Auflösung: Jahre knallen rein, Verlierer wird abgedunkelt
   const cyA = 820, cyB = 1060;
@@ -223,7 +265,7 @@ function zuerst(r, f, t, doc) {
   const [sx, sy] = first === 0 ? [800, 330] : [270, 1540];
   doc.add(stamp(doc, 'ZUERST!', sx, sy, t, T1 + 0.9, { size: 80, a: 8 }));
   doc.add(fade(seg(t, T1 + 1.0, T1 + 1.2), emoji(doc, '👑', first === 0 ? 560 : 120, first === 0 ? 230 : 1360, 150, { rot: -14 })));
-  return { hits: [T1 + 0.25, T1 + 0.55, T1 + 1.2] };
+  return { hits: [T1 + 0.25, T1 + 1.2] };
 }
 
 // ---------- Format: Emoji-Rätsel ----------
@@ -243,20 +285,20 @@ function raetsel(r, f, t, doc) {
     const q = fit('Welcher Fakt steckt dahinter?', { maxW: 860, max: 92, min: 60, maxLines: 3 });
     doc.add(fade(seg(t, 1.5, 1.7), at(slamS(t, 1.5), 540, 1150, rot(-3, 540, 1150, paraBold(q, 90, 1080, CREAM, C.pink)))));
     doc.add(countdown(doc, 740, 1600, t, 2.5, { r: 100 }));
-    return { hits: [0.5, 0.9, 1.3, 1.74] };
+    return { hits: [] };
   }
   // Auflösung: Emojis rücken klein nach oben, Titel kommt
   r.emojis.forEach((e, i) => doc.add(emoji(doc, e, 110 + i * 190, 330, 170, { rot: [-12, 8, -6][i] })));
   doc.add(stamp(doc, 'Gelöst!', 840, 420, t, T1 + 0.1, { size: 64, a: 10, fill: C.lime }));
-  const head = fit(f.title, { maxW: 860, max: 80, min: 50, maxLines: 5 });
+  const head = fit(f.title, { maxW: 880, max: 96, min: 50, maxLines: 5 });
   const s0 = T1 + 0.4;
   head.lines.forEach((l, i) => {
     const a = seg(t, s0 + i * 0.2, s0 + i * 0.2 + 0.28);
-    if (a > 0) doc.add(mv((1 - outCubic(a)) * 800, 0, text(l, { x: 90, y: 930 + head.size * 0.8 + i * head.size * head.lh, size: head.size, fill: CREAM })));
+    if (a > 0) doc.add(mv((1 - outCubic(a)) * 800, 0, text(l, { x: 90, y: 980 + head.size * 0.8 + i * head.size * head.lh, size: head.size, fill: CREAM })));
   });
-  const hook = fit(f.hook, { maxW: 820, max: 38, min: 30, font: TEXT, lh: 1.4, maxLines: 4 });
+  const hook = fit(f.hook, { maxW: 840, max: 46, min: 30, font: TEXT, lh: 1.4, maxH: 1660 - (1040 + head.h), maxLines: 6 });
   const hs = s0 + head.lines.length * 0.2 + 0.3;
-  doc.add(fade(seg(t, hs, hs + 0.4), para(hook, 90, 960 + head.h + 30, NIGHT_MUTED)));
+  doc.add(fade(seg(t, hs, hs + 0.4), para(hook, 90, 1040 + head.h, NIGHT_MUTED)));
   return { hits: [T1 + 0.4] };
 }
 
@@ -272,7 +314,7 @@ function dreiAmTag(r, f, t, doc) {
       if (t >= t0) doc.add(at(slamS(t, t0, 0.2, 2), 0, 0, pill(doc, s, [800, 830, 790][i], [640, 860, 1080][i], { fill: [C.cyan, C.lime, C.yellow][i], size: 52, a: [8, -6, 4][i] })));
     });
     doc.add(fade(seg(t, 1.4, 1.45), at(slamS(t, 1.4), 540, 1500, rot(-4, 540, 1500, bigWord('neue Fakten', 90, 1560, 130, { fill: C.yellow, shadow: C.ink })))));
-    return { hits: [0.29, 0.8, 1.64] };
+    return { hits: [0.8] };
   }
   if (t < T2) {
     const step = (T2 - T1) / 3, i = Math.min(2, Math.floor((t - T1) / step)), f3 = fs3[i], col = CAT_COLOR[f3.cat];
@@ -282,12 +324,12 @@ function dreiAmTag(r, f, t, doc) {
     // Vorige Karte fliegt raus, neue rein
     const k = outBack(seg(t, t0, t0 + 0.35));
     const a = [-4, 3, -2][i];
-    const head = fit(f3.title, { maxW: 760, max: 84, min: 44, maxLines: 6 });
-    const ch = head.h + 420, top = 440;
+    const head = fit(f3.title, { maxW: 760, max: 96, min: 44, maxLines: 6 });
+    const ch = head.h + 420, top = Math.max(360, 930 - ch / 2);
     doc.add(mv((1 - k) * 1300, 0, rot(a, 540, top + ch / 2, box(doc, 90, top, 900, ch, CREAM, { rx: 44, sw: 9, off: 20 }) +
       chip(CAT[f3.cat], 150, top + 60, col, 34).svg + emoji(doc, f3.emoji, 650, top - 80, 300, { rot: 12, shadow: col }) + para(head, 150, top + 330, C.ink))));
     if (t > t0 + step - 0.3 && i < 2) { const o = outCubic(seg(t, t0 + step - 0.3, t0 + step)); doc.add(`<rect width="${W}" height="${H}" fill="${NIGHT}" opacity="${o.toFixed(3)}"/>`); }
-    return { hits: [t0 + 0.35] };
+    return { hits: [] };
   }
   const t3 = T2;
   if (t < t3 + 1) {
@@ -297,7 +339,7 @@ function dreiAmTag(r, f, t, doc) {
     doc.add(at(slamS(t, t3), 540, 760, rot(-4, 540, 760, paraBold(l1, 90, 600, C.yellow, C.pink))));
     doc.add(fade(seg(t, t3 + 0.4, t3 + 0.45), at(slamS(t, t3 + 0.4), 540, 1100, rot(-4, 540, 1100, paraBold(l2, 90, 1040, CREAM, C.cyan)))));
     doc.add(emoji(doc, '📚', 700, 230, 260, { rot: 12, shadow: C.pink }));
-    return { hits: [t3 + 0.24, t3 + 0.64] };
+    return { hits: [t3 + 0.24] };
   }
   endCard(doc, t, t3 + 1, C.cyan, { slogan: false });
   return { hits: [] };
@@ -307,11 +349,11 @@ function dreiAmTag(r, f, t, doc) {
 function wischen(r, f, t, doc) {
   const D = r.dur, T2 = D - 2.3, cards = r.keys.map(fact);
   if (t >= T2) { endCard(doc, t, T2, C.lime, { slogan: false, cta: 'Wischen: Link in Bio' }); return { hits: [] }; }
-  doc.add(split(doc, C.lime, NIGHT, 420, -8, t));
+  doc.add(split(doc, C.lime, NIGHT, 560, -8, t));
   doc.add(at(slamS(t, 0.1), 540, 230, rot(-5, 540, 230, bigWord('Wisch dich', 80, 270, 130, { shadow: C.pink }))));
   doc.add(fade(seg(t, 0.5, 0.55), at(slamS(t, 0.5), 540, 400, rot(-5, 540, 400, bigWord('durch die Fakten.', 80, 430, 100, { fill: C.yellow, shadow: C.ink })))));
   // Handy
-  const px = 230, py = 600, pw = 620, ph = 1000;
+  const px = 180, py = 640, pw = 720, ph = 1080;
   const phone = box(doc, px, py, pw, ph, C.ink, { rx: 70, sw: 8, off: 22, shadow: C.pink, dots: false }) + `<path d="${rectD(px + 26, py + 26, pw - 52, ph - 52, 48)}" fill="${CREAM}"/>` +
     `<path d="${rectD(px + pw / 2 - 70, py + 44, 140, 30, 15)}" fill="${C.ink}"/>`;
   // Wischfolge: rechts (gefällt), links (weniger), rechts
@@ -322,30 +364,27 @@ function wischen(r, f, t, doc) {
     const p = inOut(seg(t, m0, m0 + 0.7));
     if (p >= 1) continue;
     const dx = dir * p * 900, ang = dir * p * 24, lift = i > 0 && t < (moves[i - 1]?.[0] ?? 0) + 0.7 ? 18 : 0;
-    const cx = px + 70, cy = py + 140 + lift, cw = pw - 140, chh = 640;
-    const head = fit(c.title, { maxW: cw - 80, max: 44, min: 30, maxLines: 6 });
+    const cx = px + 60, cy = py + 130 + lift, cw = pw - 120, chh = 760;
+    const head = fit(c.title, { maxW: cw - 80, max: 54, min: 30, maxLines: 6 });
     cardsSvg += mv(dx, -p * 120, rot(ang, cx + cw / 2, cy + chh, box(doc, cx, cy, cw, chh, CAT_COLOR[c.cat], { rx: 34, sw: 7, off: 12 }) +
-      emoji(doc, c.emoji, cx + cw / 2 - 110, cy + 40, 220, { rot: -8 }) + para(head, cx + 40, cy + 300, C.ink) +
+      emoji(doc, c.emoji, cx + cw / 2 - 120, cy + 50, 240, { rot: -8 }) + para(head, cx + 40, cy + 340, C.ink) +
       (p > 0.05 ? fade(clamp(p * 4), stamp(doc, dir > 0 ? 'Gefällt mir' : 'Weniger', cx + cw / 2, cy + 160, 1, 0, { size: 46, a: dir > 0 ? -12 : 12, fill: dir > 0 ? C.lime : C.pink })) : '')));
   }
   // Fakt des Tages
   const T3 = 5.6;
-  const crown = t >= T3 ? fade(seg(t, T3, T3 + 0.2), at(slamS(t, T3), 540, 900, emoji(doc, '👑', 430, 760, 220, { rot: -10 }))) : '';
-  doc.add(rot(-4, 540, 1100, phone + cardsSvg + (t >= T3 ? `<path d="${rectD(px + 70, py + 140, pw - 140, 640, 34)}" fill="${C.yellow}" stroke="${C.ink}" stroke-width="7"/>` + text('Fakt des Tages', { x: 540, y: py + 520, size: 50, anchor: 'middle' }) : '')));
+  const crown = t >= T3 ? fade(seg(t, T3, T3 + 0.2), at(slamS(t, T3), 540, 920, emoji(doc, '👑', 420, 800, 240, { rot: -10 }))) : '';
+  doc.add(rot(-4, 540, 1100, phone + cardsSvg + (t >= T3 ? `<path d="${rectD(px + 60, py + 130, pw - 120, 760, 34)}" fill="${C.yellow}" stroke="${C.ink}" stroke-width="7"/>` + text('Fakt des Tages', { x: 540, y: py + 520, size: 70, anchor: 'middle' }) +
+    fade(seg(t, T3 + 0.4, T3 + 0.7), para(fit('Der beliebteste Fakt von gestern wird Fakt des Tages.', { maxW: 500, max: 40, min: 30, font: TEXT, lh: 1.35, maxLines: 4 }), 540, py + 580, C.ink, 'middle')) : '')));
   doc.add(crown);
   // Finger
   if (t < T3) {
     const cur = moves.find(([m0]) => t < m0 + 0.7) ?? moves[2];
     const p = inOut(seg(t, cur[0], cur[0] + 0.7));
-    doc.add(emoji(doc, '👆', 470 + cur[1] * p * 420, 1200 - p * 60, 200, { rot: cur[1] * p * 20, shadow: C.ink }));
-    const thumbs = moves.map(([m0, d], i) => (t >= m0 + 0.35 ? emoji(doc, d > 0 ? '👍' : '👎', d > 0 ? 830 : 30, 900 + i * 60, 220 * outBack(seg(t, m0 + 0.35, m0 + 0.6)), { rot: d * 14 }) : '')).join('');
+    doc.add(emoji(doc, '👆', 470 + cur[1] * p * 420, 1440 - p * 60, 220, { rot: cur[1] * p * 20, shadow: C.ink }));
+    const thumbs = moves.map(([m0, d], i) => (t >= m0 + 0.35 ? emoji(doc, d > 0 ? '👍' : '👎', d > 0 ? 850 : 20, 960 + i * 60, 220 * outBack(seg(t, m0 + 0.35, m0 + 0.6)), { rot: d * 14 }) : '')).join('');
     doc.add(thumbs);
   }
-  if (t >= T3) {
-    const l = fit('Der beliebteste Fakt von gestern wird Fakt des Tages.', { maxW: 880, max: 56, min: 40, maxLines: 3 });
-    doc.add(fade(seg(t, T3 + 0.4, T3 + 0.7), mv(0, 0, `<path d="${rectD(60, 1540, 960, l.h + 70, 30)}" fill="${NIGHT}" stroke="${C.ink}" stroke-width="6"/>` + para(l, 100, 1575, CREAM))));
-  }
-  return { hits: [0.34, 0.74, ...moves.map(([m]) => m + 0.6), T3 + 0.24] };
+  return { hits: [T3 + 0.24] };
 }
 
 // ---------- WTFact: Montags-Abstimmung ----------
@@ -360,28 +399,28 @@ function abstimmung(r, f, t, doc) {
   if (t < T1) {
     doc.add(fade(seg(t, 0.9, 1.1), text('Welcher Fakt der letzten 7 Tage war der beste?', { x: 80, y: 690, size: 36, font: TEXT, fill: CREAM })));
     rows.forEach((rf, i) => {
-      const y = 760 + i * 190, a = seg(t, 1.1 + i * 0.12, 1.4 + i * 0.12);
+      const y = 780 + i * 220, a = seg(t, 1.1 + i * 0.12, 1.4 + i * 0.12);
       const target = r.bars[i], race = seg(t, 1.5, 4.6);
       const wv = clamp(target * outCubic(race) + Math.sin(t * 5 + i * 1.7) * 0.06 * (1 - race));
-      const head = fit(rf.title, { maxW: 720, max: 30, min: 22, font: TEXT, lh: 1.25, maxLines: 2 });
-      doc.add(mv((1 - outCubic(a)) * -1100, 0, emoji(doc, rf.emoji, 70, y, 110, { shadow: CAT_COLOR[rf.cat] }) +
-        `<path d="${rectD(200, y + 64, 760, 46, 23)}" fill="#ffffff22"/><path d="${rectD(200, y + 64, Math.max(46, 760 * wv), 46, 23)}" fill="${CAT_COLOR[rf.cat]}" stroke="${C.ink}" stroke-width="5"/>` +
-        para(head, 200, y - 6, CREAM)));
+      const head = fit(rf.title, { maxW: 740, max: 38, min: 26, font: TEXT, lh: 1.25, maxLines: 2 });
+      doc.add(mv((1 - outCubic(a)) * -1100, 0, emoji(doc, rf.emoji, 60, y + 10, 130, { shadow: CAT_COLOR[rf.cat] }) +
+        `<path d="${rectD(220, y + 100, 760, 58, 29)}" fill="#ffffff22"/><path d="${rectD(220, y + 100, Math.max(58, 760 * wv), 58, 29)}" fill="${CAT_COLOR[rf.cat]}" stroke="${C.ink}" stroke-width="5"/>` +
+        para(head, 220, y - 4, CREAM)));
     });
     doc.add(fade(seg(t, 1.6, 1.8), text('Beispiel', { x: 960, y: 1560, size: 28, font: TEXT, fill: NIGHT_MUTED, anchor: 'end' })));
-    return { hits: [0.34] };
+    return { hits: [] };
   }
   // Sieger
   const wf = rows[win], col = CAT_COLOR[wf.cat];
   const k = outBack(seg(t, T1, T1 + 0.35));
-  const head = fit(wf.title, { maxW: 740, max: 56, min: 38, maxLines: 4 });
-  const ch = head.h + 300, top = 1020;
-  doc.add(at(Math.max(0.01, k), 540, top + ch / 2, rot(-3, 540, top + ch / 2, box(doc, 110, top, 860, ch, col, { rx: 40, sw: 8, off: 18 }) + emoji(doc, wf.emoji, 160, top + 40, 170, { rot: -8 }) + para(head, 160, top + 230, C.ink))));
+  const head = fit(wf.title, { maxW: 760, max: 72, min: 38, maxLines: 4 });
+  const ch = head.h + 330, top = 1010;
+  doc.add(at(Math.max(0.01, k), 540, top + ch / 2, rot(-3, 540, top + ch / 2, box(doc, 110, top, 860, ch, col, { rx: 40, sw: 8, off: 18 }) + emoji(doc, wf.emoji, 150, top + 40, 200, { rot: -8 }) + para(head, 150, top + 260, C.ink))));
   doc.add(stamp(doc, 'Fakt der Woche', 540, 760, t, T1 + 0.5, { size: 74, a: -6, fill: CREAM }));
   doc.add(fade(seg(t, T1 + 0.7, T1 + 0.9), emoji(doc, '👑', 760, top - 140, 200, { rot: 16 })));
   const l = fit('Ab Dienstag eine Woche lang. Alle Sieger landen in der Hall of Fame.', { maxW: 860, max: 38, min: 30, font: TEXT, lh: 1.35, maxLines: 3 });
   doc.add(fade(seg(t, T1 + 1.1, T1 + 1.4), para(l, 110, top + ch + 70, CREAM)));
-  return { hits: [T1 + 0.35, T1 + 0.8] };
+  return { hits: [T1 + 0.35] };
 }
 
 // ---------- WTFact: Science Jumper ----------
@@ -417,7 +456,7 @@ function jumper(r, f, t, doc) {
   if (t < T1) {
     const l = fit('Spring über die Flammen, sammle Reagenzgläser.', { maxW: 860, max: 52, min: 36, maxLines: 3 });
     doc.add(fade(seg(t, 0.7, 1.0), para(l, 80, 760, CREAM)));
-    return { hits: [0.34, ...tubes.map((x) => x + 0.05)] };
+    return { hits: [] };
   }
   // Gold-Fakt
   doc.add(`<rect width="${W}" height="${H}" fill="${NIGHT}" opacity="${(0.7 * seg(t, T1, T1 + 0.3)).toFixed(3)}"/>`);
@@ -447,42 +486,42 @@ function tippspiel(r, f, t, doc) {
   if (t < T1) {
     const pick = 1, tap = 2.2;
     cards.slice(0, 3).forEach((c, i) => {
-      const y = 640 + i * 270, a = outBack(seg(t, 0.8 + i * 0.15, 1.15 + i * 0.15));
+      const y = 640 + i * 300, a = outBack(seg(t, 0.8 + i * 0.15, 1.15 + i * 0.15));
       const chosen = i === pick && t >= tap;
-      const head = fit(c.title, { maxW: 600, max: 36, min: 26, maxLines: 3 });
-      doc.add(mv((1 - a) * 1200, 0, rot([-2, 2, -1][i], 540, y + 110, box(doc, 90, y, 900, 220, chosen ? C.yellow : CREAM, { rx: 34, sw: chosen ? 10 : 7, off: 14, shadow: chosen ? C.pink : C.ink }) +
-        emoji(doc, c.emoji, 130, y + 35, 150, { shadow: CAT_COLOR[c.cat] }) + para(head, 320, y + 110 - head.h / 2, C.ink))));
+      const head = fit(c.title, { maxW: 620, max: 46, min: 28, maxLines: 4 });
+      doc.add(mv((1 - a) * 1200, 0, rot([-2, 2, -1][i], 540, y + 125, box(doc, 80, y, 920, 250, chosen ? C.yellow : CREAM, { rx: 34, sw: chosen ? 10 : 7, off: 14, shadow: chosen ? C.pink : C.ink }) +
+        emoji(doc, c.emoji, 115, y + 45, 160, { shadow: CAT_COLOR[c.cat] }) + para(head, 320, y + 125 - head.h / 2, C.ink))));
     });
-    if (t > 1.4) { const p = inOut(seg(t, 1.4, tap)); doc.add(emoji(doc, '👆', 800 - p * 120, 1500 - p * 520 + (t > tap && t < tap + 0.15 ? 20 : 0), 190, { rot: -10 })); }
-    doc.add(stamp(doc, 'Dein Tipp steht.', 540, 1560, t, tap + 0.2, { size: 54, a: 3, fill: C.lime }));
-    return { hits: [0.34, 0.69, tap] };
+    if (t > 1.4) { const p = inOut(seg(t, 1.4, tap)); doc.add(emoji(doc, '👆', 800 - p * 120, 1560 - p * 560 + (t > tap && t < tap + 0.15 ? 20 : 0), 190, { rot: -10 })); }
+    doc.add(stamp(doc, 'Dein Tipp steht.', 540, 1620, t, tap + 0.2, { size: 54, a: 3, fill: C.lime }));
+    return { hits: [] };
   }
   if (t < T3) {
     // Mitternacht, dann Treffer und Serie
     const roll = seg(t, T1, T1 + 0.9);
     const sec = Math.max(0, Math.round(3 - roll * 3));
     const clock = sec ? `23:59:5${7 + (3 - sec)}` : '00:00:00';
-    doc.add(emoji(doc, '🕛', 90, 600, 220, { rot: Math.sin(t * 20) * (sec ? 6 : 0) }));
-    doc.add(bigWord(clock, 340, 790, 120, { fill: CREAM, shadow: C.violet }));
-    doc.add(stamp(doc, 'Richtig getippt!', 540, 1010, t, T1 + 1.0, { size: 70, a: -5, fill: C.yellow }));
+    doc.add(emoji(doc, '🕛', 80, 660, 240, { rot: Math.sin(t * 20) * (sec ? 6 : 0) }));
+    doc.add(bigWord(clock, 340, 860, 136, { fill: CREAM, shadow: C.violet }));
+    doc.add(stamp(doc, 'Richtig getippt!', 540, 1120, t, T1 + 1.0, { size: 70, a: -5, fill: C.yellow }));
     const sk = seg(t, T1 + 1.4, T1 + 2.2), n = 1 + Math.floor(sk * 2.99);
-    doc.add(fade(seg(t, T1 + 1.3, T1 + 1.5), emoji(doc, '🔥', 120, 1170, 230, { rot: -8, shadow: C.pink }) + text('Trefferserie', { x: 380, y: 1260, size: 60, fill: CREAM }) +
-      at(1 + (sk > 0 && sk < 1 ? Math.abs(Math.sin(sk * Math.PI * 3)) * 0.25 : 0), 450, 1340, bigWord(String(n), 380, 1420, 150, { fill: C.yellow, shadow: C.pink }))));
+    doc.add(fade(seg(t, T1 + 1.3, T1 + 1.5), emoji(doc, '🔥', 110, 1300, 260, { rot: -8, shadow: C.pink }) + text('Trefferserie', { x: 400, y: 1400, size: 70, fill: CREAM }) +
+      at(1 + (sk > 0 && sk < 1 ? Math.abs(Math.sin(sk * Math.PI * 3)) * 0.25 : 0), 470, 1500, bigWord(String(n), 400, 1580, 170, { fill: C.yellow, shadow: C.pink }))));
     return { hits: [T1 + 1.3] };
   }
   // Sammelalbum
   doc.add(at(slamS(t, T3), 540, 260, rot(-4, 540, 260, bigWord('Dein', 80, 230, 110, { shadow: C.violet }) + bigWord('Sammelalbum', 80, 360, 110, { fill: C.yellow, shadow: C.violet }))));
-  const g = 290, x0 = 105, y0 = 520;
+  const g = 310, x0 = 85, y0 = 540;
   for (let i = 0; i < 9; i++) {
     const x = x0 + (i % 3) * g, y = y0 + Math.floor(i / 3) * g, c = cards[i % cards.length];
     const on = i < 7 && t >= T3 + 0.4 + i * 0.16;
     const s = on ? slamS(t, T3 + 0.4 + i * 0.16, 0.2, 1.8) : 1;
-    doc.add(at(s, x + 125, y + 125, box(doc, x, y, 250, 250, on ? CAT_COLOR[c.cat] : '#2a2533', { rx: 30, sw: 6, off: 10, line: on ? C.ink : '#4a4456' }) +
-      (on ? emoji(doc, c.emoji, x + 45, y + 45, 160, { rot: [-8, 6, -4][i % 3] }) : text('?', { x: x + 125, y: y + 160, size: 120, anchor: 'middle', fill: '#4a4456' }))));
+    doc.add(at(s, x + 140, y + 140, box(doc, x, y, 280, 280, on ? CAT_COLOR[c.cat] : '#2a2533', { rx: 30, sw: 6, off: 10, line: on ? C.ink : '#4a4456' }) +
+      (on ? emoji(doc, c.emoji, x + 50, y + 50, 180, { rot: [-8, 6, -4][i % 3] }) : text('?', { x: x + 140, y: y + 180, size: 130, anchor: 'middle', fill: '#4a4456' }))));
   }
   const l = fit('Jeder Sieger, den du liest, kommt in dein Album.', { maxW: 880, max: 44, min: 32, font: TEXT, lh: 1.35, maxLines: 2 });
-  doc.add(fade(seg(t, T3 + 1.6, T3 + 1.9), para(l, 100, 1440, CREAM)));
-  return { hits: Array.from({ length: 7 }, (_, i) => T3 + 0.6 + i * 0.16) };
+  doc.add(fade(seg(t, T3 + 1.6, T3 + 1.9), para(l, 100, 1520, CREAM)));
+  return { hits: [] };
 }
 
 // ---------- Inhalte ----------
@@ -534,7 +573,7 @@ function frame(r, f, t) {
   const doc = new Doc(W, H);
   const { hits } = FORMATS[r.type](r, f, t, doc);
   const [dx, dy] = shake(t, hits);
-  doc.b = `<g transform="translate(${r2(dx)} ${r2(dy)})">${doc.b}</g>` + flash(t, hits);
+  doc.b = `<g transform="translate(${r2(dx)} ${r2(dy)})">${doc.b}</g>`;
   doc.add(aiTag(W, H, 'de', { fill: '#14141499', inset: 40 }));
   return doc.render();
 }
