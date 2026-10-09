@@ -6,6 +6,10 @@ export const SITE = {
     de: { host: 'www.amazon.de', tag: 'wtfact-21' },
     en: { host: 'www.amazon.com', tag: '' },
   } as Record<'de' | 'en', { host: string; tag: string }>,
+  // Besucherstatistik mit Umami (cookielos, Wunsch von Eric, 2026-10-09). Leer = keine Statistik, kein Skript.
+  // Einrichten: cloud.umami.is > Add website > wtfact.xyz, die „Website ID“ hier eintragen.
+  // Klicks auf Amazon-Links zählen als Ereignis „amazon“ (mit Fakt und Platz), siehe ProductBox und ProductTeaser.
+  umami: { websiteId: '', script: 'https://cloud.umami.is/script.js' },
   // Angaben für das Impressum (Pflicht in Deutschland, § 5 DDG).
   owner: {
     name: 'Eric Steingröver',

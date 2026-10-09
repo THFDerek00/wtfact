@@ -6,6 +6,7 @@ Zweisprachige Fakten-Website (Deutsch/Englisch), gebaut mit Astro.
 - Fakten und Gold-Fakten liegen in einer SQLite-Datenbank (siehe „Fakten-Datenbank“ unten).
   Ein Fakt hat einen `key`, der die deutsche und englische Version verbindet.
 - Amazon-Tags, Impressumsangaben: `src/config.ts`.
+- Besucherstatistik (Umami, cookielos): Website-ID in `src/config.ts` (`umami.websiteId`) eintragen, leer = aus. Klicks auf Amazon-Links zählen als Ereignis `amazon`.
 - Domain: `astro.config.mjs` (`site`).
 
 ## Dashboard (steuerung.wtfact.xyz)

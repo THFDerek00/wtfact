@@ -35,7 +35,9 @@ const allUrls = (await postsFor(lang)).map(postUrl);
     <title>{SITE.name}</title>
     <meta name="description" content={desc} />
     <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang={lang} href={canonical} />
     <link rel="alternate" hreflang={other} href={new URL(otherUrl, Astro.site)} />
+    <link rel="alternate" hreflang="x-default" href={lang === 'de' ? canonical : new URL(otherUrl, Astro.site)} />
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -52,6 +54,8 @@ const allUrls = (await postsFor(lang)).map(postUrl);
     {image && <meta property="og:image:width" content="1200" />}
     {image && <meta property="og:image:height" content="630" />}
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="robots" content="max-image-preview:large" />
+    {SITE.umami.websiteId && <script is:inline defer src={SITE.umami.script} data-website-id={SITE.umami.websiteId} data-domains="wtfact.xyz"></script>}
   </head>
   <body>
     <NightSky />

@@ -1,0 +1,81 @@
+---
+// Ein einzelnes Produkt als schmale Werbe-Kachel (Wunsch von Eric, 2026-10-09, Website-Kritik Punkt 3):
+// Die große Box „Passend dazu“ steht ganz unten im Artikel, wo viele schon weg sind. Diese Kachel steht weiter oben:
+// place="side"   Desktop, rechte Spalte unter den Daumen (läuft beim Lesen mit),
+// place="inline" Handy, im Text vor der zweiten Zwischenüberschrift (Skript unten verschiebt sie dorthin),
+// place="home"   Startseite, passend zum neuesten Fakt.
+// Kennzeichnung wie in ProductBox.astro: Etikett „Werbung“, rel="sponsored".
+import type { Lang, Category } from '../config';
+import { amazonUrl } from '../lib';
+import { t } from '../i18n/ui';
+import Icon from './Icon.astro';
+import { productArt } from '../product-art';
+interface Props {
+  lang: Lang;
+  product: { name: string; query: string; why: string };
+  category: Category;
+  place: 'side' | 'inline' | 'home';
+  factKey: string;
+  // Startseite: Titel und Link des Fakts, zu dem das Produkt gehört
+  fact?: { title: string; url: string };
+}
+const { lang, product, category, place, factKey, fact } = Astro.props;
+const ui = t(lang);
+const art = productArt(product.name);
+---
+<aside class="teaser card" data-place={place} data-product-teaser={place}>
+  <div class="head">
+    <span class="label"><Icon name="shopping-cart" /> {fact ? ui.teaserHome : ui.productsTitle}</span>
+    <span class="ad-tag">{ui.adLabel}</span>
+  </div>
+  {fact && <a class="fact" href={fact.url}>{fact.title}</a>}
+  <a
+    class="prod" href={amazonUrl(lang, product.query)} rel="sponsored nofollow noopener" target="_blank"
+    data-umami-event="amazon" data-umami-event-fact={factKey} data-umami-event-place={place}
+  >
+    <span class:list={['art', `cat-${category}`]} aria-hidden="true">{art.main}</span>
+    <span class="body">
+      <span class="name">{product.name}</span>
+      <span class="cta">{ui.productsCta} <Icon name="external-link" /></span>
+    </span>
+  </a>
+</aside>
+
+{place === 'inline' && (
+  <script>
+    // Auf dem Handy mitten in den Text: vor die zweite Zwischenüberschrift (ohne JavaScript bleibt sie unter den Daumen).
+    const teaser = document.querySelector<HTMLElement>('[data-product-teaser="inline"]');
+    const h2 = document.querySelectorAll('.content h2')[1];
+    if (teaser && h2) h2.before(teaser);
+  </script>
+)}
+
+<style>
+  .teaser { padding: var(--space-4) var(--space-5) var(--space-5); box-shadow: var(--shadow-md); }
+  .teaser[data-place='inline'] { margin: var(--space-8) 0; font-size: var(--fs-base); }
+  @media (max-width: 960px) { .teaser[data-place='side'] { display: none; } }
+  @media (min-width: 961px) { .teaser[data-place='inline'] { display: none; } }
+
+  .head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-3); }
+  .label { display: inline-flex; align-items: center; gap: var(--space-1); font-family: var(--font-display); font-size: var(--fs-md); font-weight: 700; }
+  .ad-tag {
+    padding: 0 var(--space-2); border: var(--bw-sm) solid var(--line); border-radius: var(--radius-sm);
+    background: var(--night); color: var(--on-night);
+    font-family: var(--font-display); font-size: var(--fs-xs); font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .fact { display: block; margin: 0 0 var(--space-3); font-size: var(--fs-md); color: var(--muted); }
+
+  .prod {
+    display: flex; align-items: stretch; overflow: hidden; text-decoration: none; color: var(--ink);
+    background: var(--surface); border: var(--bw) solid var(--line); border-radius: var(--radius-md); box-shadow: var(--shadow-xs);
+    transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  }
+  .prod:hover { transform: translate(-2px, -2px); box-shadow: var(--shadow-md); }
+  .art {
+    display: grid; place-items: center; flex: 0 0 auto; padding: 0 var(--space-4);
+    border-right: var(--bw) solid var(--line); font-size: var(--fs-emoji-sm); line-height: 1; filter: var(--emoji-shadow);
+  }
+  .body { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-3) var(--space-4); }
+  .name { font-family: var(--font-display); font-size: var(--fs-lg); font-weight: 700; line-height: 1.2; }
+  .cta { display: inline-flex; align-items: center; gap: var(--space-1); font-size: var(--fs-sm); font-weight: 700; color: var(--pink-text); }
+</style>
