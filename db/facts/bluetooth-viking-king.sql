@@ -1,7 +1,7 @@
 -- WTFact-Fakt „Bluetooth ist nach einem Wikingerkönig benannt und war nur als Platzhalter gedacht“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
-INSERT INTO facts (key, date, category, emoji, draft) VALUES
-  ('bluetooth-viking-king', NULL, 'brands', '🦷', 0);
+INSERT INTO facts (key, date, category, emoji, draft, slot) VALUES
+  ('bluetooth-viking-king', '2026-10-11T06:00:00+02:00', 'brands', '🦷', 0, 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (
