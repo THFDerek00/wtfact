@@ -29,8 +29,12 @@ npm i --no-save opentype.js @resvg/resvg-js @fontsource/space-grotesk @fontsourc
 node brand/build-brand.mjs
 node brand/build-social-kit.mjs   # Social-Kit; Titel, Hooks und Quellen kommen aus src/content/posts
 node brand/build-social-reichweite.mjs   # Reichweiten-Paket (15 Tage + Partner-Paket), Domain steht in DOMAIN
+npm i --no-save @iconify-json/fluent-emoji-flat   # Emojis für das Instagram-Paket (Fluent Emoji Flat, MIT)
+node brand/build-social-insta.mjs   # Instagram-Paket Oktober 2026: 50 Posts, 10 Stories, 25 Extras, PLAN.md
 ```
 
 Gemeinsame Bausteine (Farben, Logo, Chips, Punktmuster) stehen in `brand-lib.mjs`. Alle Flächen tragen das Punktmuster der Seite (Raster 44 px, entspricht den 16 px auf dem Handy). Social-Grafiken mit Inhalt tragen unten rechts dezent „KI-generiert“ / „AI-generated“ (Transparenz nach EU-KI-Verordnung).
 
 `social/reichweite/` ergänzt das Kit: Themen-Karussells, Zahlen-Hammer, Rate mal, Teilen, Bingo, Duell, Science-Jumper-Challenge und ein Partner-Paket, das andere Accounts mit Quellenangabe posten dürfen. Plan, Captions und Reel-Skripte in `texte-de.md` / `texte-en.md`, Nutzungsregeln für Partner in `partner/LIES-MICH.md` / `README-EN.md`.
+
+`social/insta-2026-10/` ist das Instagram-Paket für wenig Aufwand (nur Deutsch): 50 Fakten-Posts, 10 Stories (vier Montags-Abstimmungen im Wechsel, Fakt der Woche, Neuer Fakt, WTF-Skala, Umfrage), 25 Extras (3 Posts zum Anpinnen, Wahr oder Fake?, Was war zuerst?, Emoji-Rätsel, 3 Karussells). Mutiger als das Kit: Emojis und Zahlen laufen über den Rand, Hell und Dunkel schräg gemischt. Reihenfolge, Termine (Di + Fr Feed, Mo Story) und Captions stehen in `PLAN.md`, Übersichtsbilder in `uebersicht-*.png`.
