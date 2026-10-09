@@ -1,4 +1,4 @@
-// Reels / TikToks, zweite Runde (1080×1920, MP4, 11–12 Sekunden, ohne Ton). Mutiger als die erste Runde:
+// Reels / TikToks, zweite Runde (1080×1920, MP4, 12–20 Sekunden je nach Textmenge, ohne Ton). Mutiger als die erste Runde:
 // schräge Hell/Dunkel-Teilung, Riesenschrift über den Rand, laufende Bänder, Wackler beim Aufprall.
 // Formate: Wort-Schlag (Fakt), Wahr oder Fake, Was war zuerst, Emoji-Rätsel, 3 Fakten am Tag
 // und WTFact selbst (Wischen, Montags-Abstimmung, Science Jumper, Tippspiel und Sammelalbum).
@@ -569,7 +569,7 @@ if (process.env.REEL_PREVIEW) {
   process.exit(0);
 }
 for (const r of list) await render(r);
-const md = ['# Reels / TikToks, Runde 2', '', 'Je 11 bis 12,5 Sekunden, 1080×1920, ohne Ton. Musik direkt in Instagram oder TikTok aus der App-Bibliothek drunterlegen (lizenziert). Das passende Titelbild liegt jeweils als `-cover.png` daneben.', ''];
+const md = ['# Reels / TikToks, Runde 2', '', 'Je 12 bis 20 Sekunden (länger bei viel Text), 1080×1920, ohne Ton. Musik direkt in Instagram oder TikTok aus der App-Bibliothek drunterlegen (lizenziert). Das passende Titelbild liegt jeweils als `-cover.png` daneben.', ''];
 for (const r of REELS) {
   const f = ['slam', 'wf', 'wz', 'er'].includes(r.type) ? fact(r.key) : null;
   const body = r.type === 'slam' ? [r.q, '', f.hook, '', `${CTA}.`] : f ? [r.q, '', `${CTA}.`] : [r.q, '', 'Link in Bio.'];

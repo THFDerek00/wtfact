@@ -1,6 +1,6 @@
 # Reels / TikToks, Runde 2
 
-Je 11 bis 12,5 Sekunden, 1080×1920, ohne Ton. Musik direkt in Instagram oder TikTok aus der App-Bibliothek drunterlegen (lizenziert). Das passende Titelbild liegt jeweils als `-cover.png` daneben.
+Je 12 bis 20 Sekunden (länger bei viel Text), 1080×1920, ohne Ton. Musik direkt in Instagram oder TikTok aus der App-Bibliothek drunterlegen (lizenziert). Das passende Titelbild liegt jeweils als `-cover.png` daneben.
 
 ## 6. Wort-Schlag: Dieser Krebs boxt mit 83 km/h und hat bis zu 16 Farbkanäle
 
