@@ -415,15 +415,12 @@ function wfQuestion(claim) {
   doc.add(doc.area(poly([0, 0], [600, 0], [480, PH], [0, PH]), C.pink));
   doc.add(doc.area(poly([600, 0], [W, 0], [W, PH], [480, PH]), C.lime));
   doc.add(`<path d="M600 0L480 ${PH}" stroke="${C.ink}" stroke-width="10"/>`);
-  const fk = text('FAKE', { x: -40, y: 1330, size: 300, fill: '#14141422', track: -0.04 });
-  const wh = text('WAHR', { x: W + 40, y: 1330, size: 300, fill: '#14141422', track: -0.04, anchor: 'end' });
-  doc.add(fk + wh);
   doc.add(rot(-3, W / 2, 150, box(doc, 200, 90, 680, 120, NIGHT, { rx: 60, sw: 6, off: 12 }) + text('Wahr oder Fake?', { x: W / 2, y: 172, size: 62, anchor: 'middle', fill: CREAM })));
   const c = fit(`„${claim}“`, { maxW: 780, max: 80, min: 48, maxLines: 6 });
   const ch = c.h + 140, cy = 640 - ch / 2;
   doc.add(rot(-2, W / 2, 640, box(doc, 90, cy, 900, ch, CREAM, { rx: 40, off: 20 }) + para(c, 150, cy + 70, C.ink)));
   doc.add(pill(doc, 'Fake', 250, 1040, { fill: CREAM, size: 44, a: -6 }) + pill(doc, 'Wahr', 830, 1040, { fill: CREAM, size: 44, a: 6 }));
-  doc.add(rot(0, 0, 0, text('Tipp in die Kommentare', { x: W / 2, y: 1220, size: 36, anchor: 'middle' })));
+  doc.add(pill(doc, 'Tipp in die Kommentare', W / 2, 1150, { fill: NIGHT, ink: CREAM, size: 34, shadow: C.ink }));
   doc.add(swipeHint(doc, 'Auflösung', 1290, false));
   doc.add(tag(doc, false));
   return doc.render();
@@ -460,7 +457,7 @@ function wzSlide(a, b, reveal) {
   doc.add(card(a, 50, 280, -4, false));
   doc.add(card(b, 370, 760, 3, true));
   if (!reveal) {
-    doc.add(rot(-12, 300, 980, box(doc, 170, 900, 230, 150, C.yellow, { rx: 30, sw: 7, off: 12 }) + text('VS', { x: 285, y: 1005, size: 90, anchor: 'middle' })));
+    doc.add(rot(-12, 175, 900, box(doc, 70, 830, 210, 140, C.yellow, { rx: 30, sw: 7, off: 12 }) + text('VS', { x: 175, y: 932, size: 86, anchor: 'middle' })));
     doc.add(swipeHint(doc, 'Auflösung', 1290, true));
   } else {
     doc.add(text(CTA, { x: W / 2, y: 1290, size: 32, anchor: 'middle', fill: CREAM }));
@@ -479,8 +476,8 @@ function erQuestion(emojis) {
     const [x, y, a] = pos[i];
     doc.add(rot(a, x + 210, y + 210, box(doc, x, y, 420, 420, cols[i], { rx: 60, off: 18 }) + emoji(doc, e, x + 60, y + 60, 300, { shadow: null })));
   });
-  const q = fit('Welcher Fakt steckt hier drin?', { maxW: 900, max: 80, min: 50, maxLines: 2 });
-  doc.add(rot(-2, W / 2, 1060, box(doc, 60, 980, 960, q.h + 90, NIGHT, { rx: 36 }) + para(q, 110, 1025, CREAM)));
+  const q = fit('Welcher Fakt steckt hier drin?', { maxW: 900, max: 70, min: 50, maxLines: 2 });
+  doc.add(rot(-2, W / 2, 1030, box(doc, 60, 940, 960, q.h + 80, NIGHT, { rx: 36 }) + para(q, 110, 980, CREAM)));
   doc.add(text('Rate in den Kommentaren', { x: 80, y: 1290, size: 34 }));
   doc.add(swipeHint(doc, 'Lösung', 1290, false));
   doc.add(tag(doc, false));
