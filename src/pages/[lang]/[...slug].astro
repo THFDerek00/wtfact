@@ -2,6 +2,7 @@
 import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import ProductBox from '../../components/ProductBox.astro';
+import ProductTeaser from '../../components/ProductTeaser.astro';
 import ShareBar from '../../components/ShareBar.astro';
 import PostCard from '../../components/PostCard.astro';
 import NewBadge from '../../components/NewBadge.astro';
@@ -50,9 +51,11 @@ const no = String(factNumber(post, all)).padStart(3, '0');
 
     <Thumbs lang={lang} factKey={d.translationKey} place="inline" />
 
+    {d.products[0] && <ProductTeaser lang={lang} product={d.products[0]} category={d.category} place="inline" factKey={d.translationKey} />}
+
     <div class="content"><Content /></div>
 
-    <ProductBox lang={lang} products={d.products} category={d.category} />
+    <ProductBox lang={lang} products={d.products} category={d.category} factKey={d.translationKey} />
 
 
     {d.sources.length > 0 && (
@@ -67,6 +70,7 @@ const no = String(factNumber(post, all)).padStart(3, '0');
 
   <aside class="fact-side">
   <Thumbs lang={lang} factKey={d.translationKey} place="side" />
+  {d.products[0] && <ProductTeaser lang={lang} product={d.products[0]} category={d.category} place="side" factKey={d.translationKey} />}
   {next && (
     <section class="nextup">
       <a class="next card" href={postUrl(next)}>
