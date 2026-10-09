@@ -110,12 +110,15 @@ const STARS = 9;
     <!-- Kurze Vorschau wie die Faktenkarten auf der Startseite; der ganze Fakt steht auf seiner eigenen Seite -->
     <template data-card>
       <a class="card goldcard">
-        <span class="gc-art gold" aria-hidden="true">
+        <span class="gc-art" aria-hidden="true">
+          <span class="rays"></span>
           <span class="stars">
             {Array.from({ length: STARS }, () => <span class="star"><span class="star-core"></span></span>)}
           </span>
-          <span class="gc-pts" data-f="badge"></span>
+          <span class="gc-ribbon">{g.goldBadge}</span>
+          <span class="medal"><Icon name="flask-conical" /><span class="medal-pts" data-f="badge"></span></span>
           <span class="gc-emoji" data-f="emoji"></span>
+          <span class="shine"></span>
         </span>
         <span class="gc-body">
           <span class="gc-tags">
@@ -148,7 +151,7 @@ const STARS = 9;
     runResult: (n: number, best: number) =>
       de ? `Lauf vorbei: ${n} ${n === 1 ? 'Reagenzglas' : 'Reagenzgläser'}. Dein Highscore: ${best}.` : `Run over: ${n} test ${n === 1 ? 'tube' : 'tubes'}. Your high score: ${best}.`,
     unlocked: (n: number) => (de ? (n === 1 ? 'Neuer Gold-Fakt freigeschaltet!' : `${n} neue Gold-Fakten freigeschaltet!`) : n === 1 ? 'New golden fact unlocked!' : `${n} new golden facts unlocked!`),
-    badge: (pts: number) => `${T.goldBadge} · ${pts}`,
+    badge: (pts: number) => String(pts),
   };
 
   const store = loadStore();
@@ -303,54 +306,86 @@ const STARS = 9;
     height: 100%; min-height: 180px;
     display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2);
     padding: var(--space-5);
-    border: var(--bw) dashed var(--line); border-radius: var(--radius-md);
+    border: var(--bw) dashed var(--gold-deep); border-radius: var(--radius-md);
     background: var(--locked); color: var(--ink);
     font-family: var(--font-display);
   }
-  .lock { font-size: var(--fs-2xl); line-height: 1; }
+  .lock {
+    display: grid; place-items: center; width: var(--space-10); aspect-ratio: 1;
+    border: var(--bw-sm) solid var(--on-accent); border-radius: 50%;
+    background: var(--gold-foil); color: var(--on-accent); font-size: var(--fs-xl); line-height: 1;
+  }
   .pts { font-size: var(--fs-display-sm); font-weight: 700; line-height: 1; }
   .at { font-size: var(--fs-sm); font-weight: 600; margin-top: auto; }
 
-  /* Gold-Fakt als Vorschaukarte (wie PostCard): goldene Bildfläche oben, Titel und erster Satz darunter */
+  /* Gold-Fakt als Schatzkarte (neu gestaltet auf Wunsch von Eric, 2026-10-09): dunkle Bühne mit Goldrahmen,
+     drehenden Strahlen, Medaille mit dem Highscore und einem Glanz, der über die Karte zieht.
+     In beiden Modi dunkel, damit das Gold leuchtet. */
   .goldcard {
     position: relative; overflow: hidden; height: 100%;
     display: flex; flex-direction: column; text-decoration: none;
+    background: var(--night); color: var(--on-night); --focus: var(--yellow);
+    border-color: var(--gold); box-shadow: var(--shadow-gold);
     transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
   }
-  .goldcard:hover { transform: translate(-3px, -3px) rotate(-0.5deg); box-shadow: var(--shadow-xl); }
-  .gc-art { position: relative; display: grid; place-items: center; aspect-ratio: 16 / 9; overflow: hidden; border-bottom: var(--bw) solid var(--line); }
-  .gc-emoji { position: relative; font-size: var(--fs-emoji-md); transform: rotate(-8deg); filter: var(--emoji-shadow); transition: transform var(--dur) var(--ease-pop); }
-  .goldcard:hover .gc-emoji { transform: rotate(8deg) scale(1.15); }
-  .gc-pts {
-    position: absolute; top: var(--space-3); left: var(--space-3); z-index: 1;
-    padding: 0 var(--space-2); border-radius: var(--radius-sm);
-    background: var(--night); color: var(--on-night);
-    font-family: var(--font-display); font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.04em;
+  .goldcard:hover { transform: translate(-3px, -3px) rotate(-0.5deg); box-shadow: var(--shadow-gold-xl); }
+  .gc-art {
+    position: relative; display: grid; place-items: center; aspect-ratio: 16 / 9; overflow: hidden;
+    background: var(--gold-glow), var(--night);
+    border-bottom: var(--bw) solid var(--gold);
   }
+  .rays { position: absolute; inset: -60%; background: var(--gold-rays); animation: spin var(--dur-rays) linear infinite; }
+  .gc-emoji { position: relative; font-size: var(--fs-emoji-lg); line-height: 1; transform: rotate(-8deg); filter: var(--emoji-shadow); transition: transform var(--dur) var(--ease-pop); }
+  .goldcard:hover .gc-emoji { transform: rotate(8deg) scale(1.15); }
+  .gc-ribbon {
+    position: absolute; top: var(--space-3); left: var(--space-3); z-index: 1;
+    padding: 0 var(--space-2); border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-sm);
+    background: var(--gold-foil); color: var(--on-accent); transform: rotate(-4deg);
+    font-family: var(--font-display); font-size: var(--fs-xs); font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  /* Medaille: Reagenzglas und Highscore, ab dem der Fakt aufgeht */
+  .medal {
+    position: absolute; right: var(--space-3); bottom: var(--space-3); z-index: 1;
+    display: grid; place-items: center; align-content: center; width: var(--medal-size); aspect-ratio: 1;
+    border: var(--bw) solid var(--on-accent); border-radius: 50%;
+    background: var(--gold-foil); color: var(--on-accent); box-shadow: var(--shadow-new);
+    font-family: var(--font-display); font-weight: 800; line-height: 1; transform: rotate(10deg);
+    --icon-size: 1em; font-size: var(--fs-sm);
+  }
+  .medal-pts { font-size: var(--fs-lg); letter-spacing: -0.02em; }
+  /* Glanz, der in Abständen über die Bildfläche zieht */
+  .shine { position: absolute; inset: 0; background: var(--gold-shine); transform: translateX(-120%); animation: shine var(--dur-shine) var(--ease) infinite; pointer-events: none; }
+  .goldcard:hover .shine { animation-duration: var(--dur-twinkle); }
+  @keyframes shine {
+    0%, 55% { transform: translateX(-120%); }
+    100% { transform: translateX(120%); }
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
   .gc-body { display: flex; flex-direction: column; gap: var(--space-2); flex: 1; padding: var(--space-4) var(--space-5) var(--space-5); }
   .gc-tags { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .gc-tags .chip { border-color: var(--on-accent); }
   .gc-title { margin-top: var(--space-1); font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 700; line-height: 1.15; letter-spacing: -0.02em; }
-  .gc-teaser { color: var(--muted); font-size: var(--fs-md); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }
-  .goldcard .more { display: inline-flex; align-items: center; gap: var(--space-1); margin-top: auto; padding-top: var(--space-2); font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; color: var(--pink-text); }
+  .gc-teaser { color: var(--on-night-muted); font-size: var(--fs-md); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }
+  .goldcard .more { display: inline-flex; align-items: center; gap: var(--space-1); margin-top: auto; padding-top: var(--space-2); font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; color: var(--gold-light); }
 
   /* Funkelnde Sterne: dunkler Rand außen, Kategoriefarbe innen (über .cat-*) */
   .stars { position: absolute; inset: 0; pointer-events: none; }
   .star {
     position: absolute; width: var(--star-size-md); aspect-ratio: 1;
-    background: var(--on-accent);
+    background: var(--gold-light);
     clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
     animation: twinkle var(--dur-twinkle) ease-in-out infinite;
   }
   .star-core { position: absolute; inset: var(--bw-sm); clip-path: inherit; --dots-size: var(--dots-size-sm); }
   .star:nth-child(1) { top: var(--space-3); right: var(--space-3); width: var(--star-size-lg); }
-  .star:nth-child(2) { top: var(--space-10); right: var(--space-2); width: var(--star-size-sm); animation-delay: calc(var(--dur-twinkle) * -0.3); }
+  .star:nth-child(2) { top: var(--space-10); right: var(--space-10); width: var(--star-size-sm); animation-delay: calc(var(--dur-twinkle) * -0.3); }
   .star:nth-child(3) { top: var(--space-2); right: var(--space-11); width: var(--star-size-sm); animation-delay: calc(var(--dur-twinkle) * -0.6); }
-  .star:nth-child(4) { bottom: var(--space-3); right: var(--space-3); width: var(--star-size-lg); animation-delay: calc(var(--dur-twinkle) * -0.15); }
-  .star:nth-child(5) { bottom: var(--space-4); right: var(--space-12); animation-delay: calc(var(--dur-twinkle) * -0.8); }
-  .star:nth-child(6) { bottom: var(--space-10); right: var(--space-2); width: var(--star-size-sm); animation-delay: calc(var(--dur-twinkle) * -0.45); }
-  .star:nth-child(7) { top: 50%; right: var(--space-1); animation-delay: calc(var(--dur-twinkle) * -0.7); }
-  .star:nth-child(8) { bottom: var(--space-2); left: 45%; width: var(--star-size-sm); animation-delay: calc(var(--dur-twinkle) * -0.9); }
-  .star:nth-child(9) { top: var(--space-12); left: 70%; width: var(--star-size-sm); animation-delay: calc(var(--dur-twinkle) * -0.25); }
+  .star:nth-child(4) { bottom: var(--space-4); left: 30%; width: var(--star-size-md); animation-delay: calc(var(--dur-twinkle) * -0.15); }
+  .star:nth-child(5) { bottom: var(--space-4); left: var(--space-3); animation-delay: calc(var(--dur-twinkle) * -0.8); }
+  .star:nth-child(6) { top: 45%; left: var(--space-5); width: var(--star-size-sm); animation-delay: calc(var(--dur-twinkle) * -0.45); }
+  .star:nth-child(7) { top: 40%; right: var(--space-2); width: var(--star-size-sm); animation-delay: calc(var(--dur-twinkle) * -0.7); }
+  .star:nth-child(8) { top: var(--space-10); left: 22%; width: var(--star-size-sm); animation-delay: calc(var(--dur-twinkle) * -0.9); }
+  .star:nth-child(9) { top: var(--space-3); left: 62%; width: var(--star-size-sm); animation-delay: calc(var(--dur-twinkle) * -0.25); }
   @keyframes twinkle {
     0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
     50% { transform: scale(0.55) rotate(25deg); opacity: 0.6; }

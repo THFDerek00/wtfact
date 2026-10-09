@@ -80,6 +80,18 @@
   --star-edge: drop-shadow(0 0 1px var(--on-accent)) drop-shadow(0 0 1px var(--on-accent));
   --dur-twinkle: 2.4s;
   --locked: #e9e4d8;
+  /* Gold-Fakten als Schatzkarte (Wunsch von Eric, 2026-10-09): dunkle Bühne mit Goldrahmen, Strahlen und Glanz.
+     In beiden Modi dunkel, Gold leuchtet so auf hellem und dunklem Grund. */
+  --gold-foil: linear-gradient(115deg, var(--gold-deep) 0%, var(--gold-light) 22%, var(--gold) 40%, var(--gold-deep) 58%, var(--gold-light) 78%, var(--gold) 100%);
+  --gold-glow: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--gold) 60%, transparent) 0%, color-mix(in srgb, var(--gold-deep) 22%, transparent) 38%, transparent 68%);
+  --gold-rays: repeating-conic-gradient(from 0deg at 50% 50%, color-mix(in srgb, var(--gold) 20%, transparent) 0deg 9deg, transparent 9deg 18deg);
+  --gold-shine: linear-gradient(105deg, transparent 38%, color-mix(in srgb, var(--gold-light) 55%, transparent) 50%, transparent 62%);
+  --shadow-gold: 6px 6px 0 var(--gold-deep);
+  --shadow-gold-xl: 10px 10px 0 var(--gold-deep);
+  --medal-size: 68px;
+  --medal-size-lg: 112px;
+  --dur-rays: 40s;
+  --dur-shine: 4.5s;
 
   /* Spiel (Science Jumper): Flüssigkeit in den Reagenzgläsern */
   --flask: #2f7bff;
@@ -177,6 +189,7 @@
   --dur-marquee: 80s;
   --dur-swipe: 0.3s; /* Karte fliegt nach dem Wischen weg */
   --dur-sky-drift: 26s; /* Formenflug im Hintergrund */
+  --dur-pop: 0.35s; /* Daumen: kurzes Hüpfen nach dem Klick */
 
   color-scheme: light;
 }
