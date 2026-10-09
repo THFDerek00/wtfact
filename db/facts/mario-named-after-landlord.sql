@@ -1,7 +1,7 @@
 -- WTFact-Fakt „Super Mario ist nach dem Vermieter von Nintendo in den USA benannt“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
-INSERT INTO facts (key, date, category, emoji, draft) VALUES
-  ('mario-named-after-landlord', NULL, 'popculture', '🍄', 0);
+INSERT INTO facts (key, date, category, emoji, draft, slot) VALUES
+  ('mario-named-after-landlord', '2026-10-10T10:00:00+02:00', 'popculture', '🍄', 0, 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (
