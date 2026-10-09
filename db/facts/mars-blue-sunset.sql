@@ -1,7 +1,7 @@
 -- WTFact-Fakt „Auf dem roten Planeten sind Sonnenuntergänge blau“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
-INSERT INTO facts (key, date, category, emoji, draft) VALUES
-  ('mars-blue-sunset', NULL, 'space', '🌅', 0);
+INSERT INTO facts (key, date, category, emoji, draft, slot) VALUES
+  ('mars-blue-sunset', '2026-10-10T11:00:00+02:00', 'space', '🌅', 0, 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (
