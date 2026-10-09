@@ -1,8 +1,8 @@
 -- WTFact-Fakt „Rund die Hälfte der Zuschauer übersieht einen Gorilla mitten in einem Basketball-Video“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
 
-INSERT INTO facts (key, date, category, emoji, draft) VALUES
-  ('invisible-gorilla', NULL, 'mind', '🦍', 0);
+INSERT INTO facts (key, date, category, emoji, draft, slot) VALUES
+  ('invisible-gorilla', '2026-10-11T13:00:00+02:00', 'mind', '🦍', 0, 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (
