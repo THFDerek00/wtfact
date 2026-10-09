@@ -48,13 +48,12 @@ const no = String(factNumber(post, all)).padStart(3, '0');
   <article class="fact-main" data-fact-key={d.translationKey}>
     <p class="hook card"><span class="hook-label">WTF?!</span>{d.hook}</p>
 
-    <Thumbs lang={lang} factKey={d.translationKey} place="top" />
+    <Thumbs lang={lang} factKey={d.translationKey} place="inline" />
 
     <div class="content"><Content /></div>
 
-    <ProductBox lang={lang} products={d.products} emoji={d.emoji} category={d.category} />
+    <ProductBox lang={lang} products={d.products} category={d.category} />
 
-    <Thumbs lang={lang} factKey={d.translationKey} place="end" />
 
     {d.sources.length > 0 && (
       <section class="sources" id="sources">
@@ -67,6 +66,7 @@ const no = String(factNumber(post, all)).padStart(3, '0');
   </article>
 
   <aside class="fact-side">
+  <Thumbs lang={lang} factKey={d.translationKey} place="side" />
   {next && (
     <section class="nextup">
       <a class="next card" href={postUrl(next)}>

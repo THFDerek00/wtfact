@@ -1,6 +1,7 @@
 ---
 // Amazon-Partnerlinks unter dem Fakt (neu gestaltet auf Wunsch von Eric, 2026-10-09): Produkte als eigene,
 // ganz anklickbare Kacheln mit Bildfläche in der Kategoriefarbe des Fakts, damit sie neugierig machen.
+// Das Emoji auf der Bildfläche passt zum Artikel (src/product-art.ts), bei Büchern 📚 mit dem Thema daneben.
 // Klar als Werbung gekennzeichnet (Etikett oben rechts und Hinweis unten), wie es Amazon PartnerNet und
 // das deutsche Recht verlangen. Links tragen rel="sponsored".
 import type { Lang, Category } from '../config';
@@ -8,8 +9,9 @@ import { amazonUrl } from '../lib';
 import { t } from '../i18n/ui';
 import { SITE } from '../config';
 import Icon from './Icon.astro';
-interface Props { lang: Lang; products: { name: string; query: string; why: string }[]; emoji: string; category: Category }
-const { lang, products, emoji, category } = Astro.props;
+import { productArt } from '../product-art';
+interface Props { lang: Lang; products: { name: string; query: string; why: string }[]; category: Category }
+const { lang, products, category } = Astro.props;
 const ui = t(lang);
 const host = SITE.amazon[lang].host.replace(/^www\./, '');
 ---
@@ -21,11 +23,12 @@ const host = SITE.amazon[lang].host.replace(/^www\./, '');
     </div>
     <p class="intro">{ui.productsIntro}</p>
     <ul class="grid" data-count={products.length}>
-      {products.map((p) => (
+      {products.map((p) => { const art = productArt(p.name); return (
         <li>
           <a class="prod" href={amazonUrl(lang, p.query)} rel="sponsored nofollow noopener" target="_blank">
             <span class:list={['art', `cat-${category}`]} aria-hidden="true">
-              <span class="emoji">{emoji}</span>
+              <span class="emoji">{art.main}</span>
+              {art.topic && <span class="topic">{art.topic}</span>}
               <span class="host">{host}</span>
             </span>
             <span class="body">
@@ -35,7 +38,7 @@ const host = SITE.amazon[lang].host.replace(/^www\./, '');
             </span>
           </a>
         </li>
-      ))}
+      ); })}
     </ul>
     <p class="ad">{ui.affiliateShort}</p>
   </aside>
@@ -74,6 +77,13 @@ const host = SITE.amazon[lang].host.replace(/^www\./, '');
   .grid[data-count='1'] .art { flex: 0 0 160px; border-bottom: 0; border-right: var(--bw) solid var(--line); }
   .emoji { font-size: var(--fs-emoji-md); line-height: 1; transform: rotate(-8deg); filter: var(--emoji-shadow); transition: transform var(--dur) var(--ease-pop); }
   .prod:hover .emoji { transform: rotate(8deg) scale(1.15); }
+  /* Thema eines Buchs oder Films als runder Aufkleber oben rechts */
+  .topic {
+    position: absolute; right: var(--space-3); top: var(--space-3);
+    display: grid; place-items: center; width: var(--space-11); aspect-ratio: 1;
+    border: var(--bw-sm) solid var(--line); border-radius: 50%; background: var(--surface);
+    font-size: var(--fs-2xl); line-height: 1; box-shadow: var(--shadow-xs); transform: rotate(8deg);
+  }
   .host {
     position: absolute; left: var(--space-3); bottom: var(--space-3);
     padding: 0 var(--space-2); border-radius: var(--radius-sm); background: var(--night); color: var(--on-night);
