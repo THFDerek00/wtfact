@@ -1,16 +1,24 @@
 ---
 import Base from '../layouts/Base.astro';
+import LiveCounter from '../components/LiveCounter.astro';
+import FactRoulette from '../components/FactRoulette.astro';
 import { t } from '../i18n/ui';
 ---
 <Base lang="de" title="404">
   <section class="wrap notfound">
-    <img src="/brand/404.svg" alt="" width="320" height="210" />
-    <h1 class="sr-only">404</h1>
-    <p>{t('de').notFound} / {t('en').notFound}</p>
-    <a class="btn" href="/">WTFact</a>
+    <div class="msg">
+      <img src="/brand/404.svg" alt="" width="320" height="210" />
+      <h1 class="sr-only">404</h1>
+      <p>{t('de').notFound} / {t('en').notFound}</p>
+      <a class="btn" href="/">WTFact</a>
+    </div>
+    <!-- Statt einer leeren Fehlerseite gleich etwas zum Staunen (Wunsch von Eric, 2026-10-09) -->
+    <FactRoulette lang="de" />
+    <LiveCounter lang="de" />
   </section>
 </Base>
 
 <style>
-  .notfound { text-align: center; padding: var(--space-11) 0; }
+  .notfound { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: var(--space-8); align-items: center; padding: var(--space-11) 0; }
+  .msg { text-align: center; }
 </style>

@@ -29,6 +29,12 @@
   --tomato: #ff5947;
   --lilac: #e7a6ff;
   --blue: #5c95ff;
+  /* Fünf weitere Akzente für die Kategorien vom 2026-10-09 (Wunsch von Eric), hell genug für dunkle Schrift */
+  --periwinkle: #a5b4ff;
+  --ochre: #f2c46d;
+  --bubblegum: #ff9ed2;
+  --mint: #8ee59b;
+  --peach: #ffbe98;
 
   /* Bühne: dunkle Fläche für Hero, Ticker und Footer (in beiden Modi dunkel) */
   --night: #16131c;
@@ -55,6 +61,11 @@
   --cat-food: var(--tomato);
   --cat-language: var(--lilac);
   --cat-sport: var(--blue);
+  --cat-space: var(--periwinkle);
+  --cat-animals: var(--ochre);
+  --cat-mind: var(--bubblegum);
+  --cat-brands: var(--mint);
+  --cat-popculture: var(--peach);
 
   /* Punktmuster: liegt auf JEDER Kategorie-Fläche (über .cat-*).
      Rasterweite pro Ort über --dots-size umstellen (sm auf Chips/Sternen, lg auf großen Bannern). */
@@ -364,6 +375,11 @@ html[data-sky] .stage { background: var(--sky-stage); }
 .cat-food { background: var(--dots-strong), var(--cat-food); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
 .cat-language { background: var(--dots), var(--cat-language); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
 .cat-sport { background: var(--dots), var(--cat-sport); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
+.cat-space { background: var(--dots), var(--cat-space); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
+.cat-animals { background: var(--dots-strong), var(--cat-animals); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
+.cat-mind { background: var(--dots-strong), var(--cat-mind); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
+.cat-brands { background: var(--dots), var(--cat-brands); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
+.cat-popculture { background: var(--dots-strong), var(--cat-popculture); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
 .accent { background: var(--yellow); color: var(--on-accent); }
 .gold { background: var(--gold-surface); color: var(--on-accent); }
 

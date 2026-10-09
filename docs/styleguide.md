@@ -44,6 +44,16 @@ Build automatisch. Wer hier eine Zahl ändert, ändert sie auch dort.
   work in both German and English; explain a word game for both audiences instead of translating it literally.
 - Category "sport" is about sports history, rules, records, equipment and the Olympics. No training or fitness
   tips, no betting, and no injuries or deaths as the hook.
+- Category "space" is about astronomy, planets, stars and space travel history. Facts about space that used to sit in
+  "science" now go here.
+- Category "animals" is about surprising animal abilities, anatomy and behavior. Plants, fungi and landscapes stay in
+  "nature"; extreme survival abilities stay in "survival".
+- Category "mind" is about the brain, perception, memory and well-documented psychology findings (e.g. a famous
+  experiment or illusion). No mental health advice, no diagnoses, no self-help tips.
+- Category "brands" is about the origin stories of brands, products and everyday inventions. Stick to documented history,
+  no advertising tone and no product comparisons.
+- Category "popculture" is about films, TV, music and video games: how they were made, records and odd backstories.
+  No spoilers in the headline or hook, no gossip about private lives.
 
 ## Structure
 
