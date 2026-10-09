@@ -24,7 +24,7 @@ export const SITE = {
 export const LANGS = ['de', 'en'] as const;
 export type Lang = (typeof LANGS)[number];
 
-export const CATEGORIES = ['science', 'history', 'tech', 'nature', 'body', 'weird', 'survival', 'food', 'language', 'sport'] as const;
+export const CATEGORIES = ['science', 'history', 'tech', 'nature', 'body', 'weird', 'survival', 'food', 'language', 'sport', 'space', 'animals', 'mind', 'brands', 'popculture'] as const;
 export type Category = (typeof CATEGORIES)[number];
 
 // So viele neue Fakten schreibt Claude jeden Morgen (je als eigener PR, Eric führt sie selbst zusammen).
