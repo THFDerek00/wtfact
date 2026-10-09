@@ -1,7 +1,7 @@
 -- WTFact-Fakt „tesa ist nach einer Sekretärin benannt und stand zuerst auf einer Zahnpastatube“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
-INSERT INTO facts (key, date, category, emoji, draft) VALUES
-  ('tesa-elsa-tesmer', NULL, 'brands', '🪥', 0);
+INSERT INTO facts (key, date, category, emoji, draft, slot) VALUES
+  ('tesa-elsa-tesmer', '2026-10-10T00:26:26+02:00', 'brands', '🪥', 0, 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (
