@@ -1,8 +1,8 @@
 -- WTFact-Fakt „Das Kleid war blau-schwarz, doch 30 Prozent sahen Weiß-Gold“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
 
-INSERT INTO facts (key, date, category, emoji, draft) VALUES
-  ('the-dress-colors', NULL, 'mind', '👗', 0);
+INSERT INTO facts (key, date, category, emoji, draft, slot) VALUES
+  ('the-dress-colors', '2026-10-10T21:00:00+02:00', 'mind', '👗', 0, 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (
