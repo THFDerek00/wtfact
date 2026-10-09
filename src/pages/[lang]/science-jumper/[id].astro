@@ -40,17 +40,19 @@ const STARS = 9;
 const game = `/${lang}/science-jumper/`;
 ---
 <Base lang={lang} title={g.pageTitle(f.points)} description={g.pageDesc} altUrl={goldUrl(other, f.id)}>
-  <section class="banner gold" data-gold-page data-gold={encoded} data-lang={lang}>
+  <section class="banner" data-gold-page data-gold={encoded} data-lang={lang}>
+    <span class="rays" aria-hidden="true"></span>
     <span class="stars" aria-hidden="true">
       {Array.from({ length: STARS }, () => <span class="star"><span class:list={['star-core', `cat-${f.category}`]}></span></span>)}
     </span>
     <div class="wrap banner-inner">
       <a class="back" href={`${game}#gold`}><Icon name="chevron-left" /> {g.backToGame}</a>
       <div class="meta">
-        <span class="chip pts">{g.goldBadge} · {f.points}</span>
+        <span class="ribbon">{g.goldBadge}<span class="sr-only"> · {f.points}</span></span>
         <span class:list={['chip', `cat-${f.category}`]}>{ui.categories[cat] ?? f.category}</span>
       </div>
       <h1 data-f="title">{g.pageTitle(f.points)}</h1>
+      <span class="medal" aria-hidden="true"><Icon name="flask-conical" /><span class="medal-pts">{f.points}</span></span>
       <span class="big-emoji" aria-hidden="true" data-f="emoji"><Icon name="lock" /></span>
     </div>
   </section>
@@ -127,36 +129,60 @@ const game = `/${lang}/science-jumper/`;
 </script>
 
 <style>
-  .banner { position: relative; overflow: hidden; border-bottom: var(--bw) solid var(--line); padding: var(--space-8) 0 var(--space-12); }
+  /* Gold-Fakt-Seite als Schatzkammer (neu gestaltet auf Wunsch von Eric, 2026-10-09): dunkle Bühne in beiden
+     Modi, goldener Rahmen, langsam drehende Strahlen hinter dem Emoji, Medaille mit dem Highscore. */
+  .banner {
+    position: relative; overflow: hidden; padding: var(--space-8) 0 var(--space-12);
+    background: var(--gold-glow), var(--night); color: var(--on-night); --focus: var(--yellow);
+    border-top: var(--bw-accent) solid var(--gold); border-bottom: var(--bw-accent) solid var(--gold);
+    background-position: 85% 50%; background-size: 70% 160%, auto; background-repeat: no-repeat;
+  }
+  .rays { position: absolute; top: 50%; right: 8%; width: 140vmax; aspect-ratio: 1; translate: 50% -50%; background: var(--gold-rays); animation: spin var(--dur-rays) linear infinite; pointer-events: none; }
+  @keyframes spin { to { rotate: 360deg; } }
   .banner-inner { position: relative; }
-  .back { display: inline-flex; align-items: center; gap: var(--space-1); margin-bottom: var(--space-5); font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; text-decoration: none; }
+  .back { display: inline-flex; align-items: center; gap: var(--space-1); margin-bottom: var(--space-5); font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; text-decoration: none; color: var(--gold-light); }
   .back:hover { text-decoration: underline; }
   .meta { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
-  .pts { background: var(--night); color: var(--on-night); border-color: var(--on-accent); }
-  h1 { position: relative; z-index: 1; font-size: var(--fs-display-lg); margin: var(--space-4) 0 0; max-width: 24ch; }
+  .meta .chip { border-color: var(--on-accent); }
+  .ribbon {
+    padding: var(--space-1) var(--space-3); border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-sm);
+    background: var(--gold-foil); color: var(--on-accent); transform: rotate(-3deg);
+    font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; line-height: 1.5;
+  }
+  h1 { position: relative; z-index: 1; font-size: var(--fs-display-lg); margin: var(--space-4) 0 0; max-width: 20ch; }
+  [data-unlocked] h1 { background: var(--gold-foil); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .medal {
+    position: absolute; z-index: 2; right: calc(var(--space-12) * 2.4); top: 0;
+    display: grid; place-items: center; align-content: center; width: var(--medal-size-lg); aspect-ratio: 1;
+    border: var(--bw) solid var(--on-accent); border-radius: 50%;
+    background: var(--gold-foil); color: var(--on-accent); box-shadow: var(--shadow-new);
+    font-family: var(--font-display); font-weight: 800; line-height: 1; font-size: var(--fs-xl); transform: rotate(10deg);
+    --icon-size: 1em;
+  }
+  .medal-pts { font-size: var(--fs-3xl); letter-spacing: -0.03em; }
   .big-emoji {
     position: absolute; right: 0; bottom: calc(-1 * var(--space-10));
     font-size: var(--fs-emoji-xl); line-height: 1; transform: rotate(12deg); filter: var(--emoji-shadow); opacity: 0.9;
-    --icon-size: 1em; --icon-stroke: 1.5;
+    color: var(--gold-light); --icon-size: 1em; --icon-stroke: 1.5;
   }
-  [data-unlocked] .big-emoji { right: calc(-1 * var(--space-10)); font-size: var(--fs-emoji-2xl); bottom: calc(-1 * var(--space-12)); }
+  [data-unlocked] .big-emoji { right: 0; font-size: var(--fs-emoji-2xl); bottom: calc(-1 * var(--space-12)); opacity: 1; }
 
-  /* Sterne wie auf den Vorschaukarten, hier etwas verteilter über das Banner */
+  /* Sterne: goldener Rand, Kategoriefarbe innen */
   .stars { position: absolute; inset: 0; pointer-events: none; }
   .star {
     position: absolute; width: var(--star-size-lg); aspect-ratio: 1;
-    background: var(--on-accent);
+    background: var(--gold-light);
     clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
     animation: twinkle var(--dur-twinkle) ease-in-out infinite;
   }
   .star-core { position: absolute; inset: var(--bw-sm); clip-path: inherit; --dots-size: var(--dots-size-sm); }
   .star:nth-child(1) { top: 12%; right: 6%; }
-  .star:nth-child(2) { top: 30%; right: 22%; width: var(--star-size-sm); animation-delay: calc(var(--dur-twinkle) * -0.3); }
+  .star:nth-child(2) { top: 30%; right: 30%; width: var(--star-size-sm); animation-delay: calc(var(--dur-twinkle) * -0.3); }
   .star:nth-child(3) { top: 8%; right: 38%; width: var(--star-size-md); animation-delay: calc(var(--dur-twinkle) * -0.6); }
-  .star:nth-child(4) { bottom: 14%; right: 30%; animation-delay: calc(var(--dur-twinkle) * -0.15); }
+  .star:nth-child(4) { bottom: 14%; right: 34%; animation-delay: calc(var(--dur-twinkle) * -0.15); }
   .star:nth-child(5) { bottom: 10%; left: 6%; width: var(--star-size-md); animation-delay: calc(var(--dur-twinkle) * -0.8); }
   .star:nth-child(6) { top: 14%; left: 48%; width: var(--star-size-sm); animation-delay: calc(var(--dur-twinkle) * -0.45); }
-  .star:nth-child(7) { top: 52%; right: 4%; width: var(--star-size-md); animation-delay: calc(var(--dur-twinkle) * -0.7); }
+  .star:nth-child(7) { top: 60%; right: 4%; width: var(--star-size-md); animation-delay: calc(var(--dur-twinkle) * -0.7); }
   .star:nth-child(8) { bottom: 22%; left: 40%; width: var(--star-size-sm); animation-delay: calc(var(--dur-twinkle) * -0.9); }
   .star:nth-child(9) { top: 10%; left: 3%; width: var(--star-size-sm); animation-delay: calc(var(--dur-twinkle) * -0.25); }
   @keyframes twinkle {
@@ -170,7 +196,8 @@ const game = `/${lang}/science-jumper/`;
 
   .locked {
     position: relative; margin: calc(-1 * var(--space-9)) 0 var(--space-8); padding: var(--space-6);
-    display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); box-shadow: var(--shadow-lg);
+    display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3);
+    border-color: var(--gold); box-shadow: var(--shadow-gold);
   }
   .locked h2 { margin: 0; font-size: var(--fs-2xl); }
   .locked p { margin: 0; }
@@ -181,12 +208,12 @@ const game = `/${lang}/science-jumper/`;
   .hook {
     position: relative; margin: calc(-1 * var(--space-9)) 0 var(--space-8); padding: var(--space-6) var(--space-5) var(--space-5);
     font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 600; line-height: 1.4;
-    box-shadow: var(--shadow-lg);
+    border-color: var(--gold); box-shadow: var(--shadow-gold);
   }
   .hook-label {
     position: absolute; top: calc(-1 * var(--space-4)); left: var(--space-5);
     padding: 0 var(--space-2); border: var(--bw-sm) solid var(--line); border-radius: var(--radius-sm);
-    background: var(--gold); color: var(--on-accent); font-size: var(--fs-sm); font-weight: 800; transform: rotate(-3deg);
+    background: var(--gold-foil); color: var(--on-accent); font-size: var(--fs-sm); font-weight: 800; transform: rotate(-3deg);
   }
   .text { margin: 0; }
   .sources { margin: var(--space-9) 0; font-size: var(--fs-sm); color: var(--muted); scroll-margin-top: var(--space-12); }
@@ -195,11 +222,12 @@ const game = `/${lang}/science-jumper/`;
 
   .next {
     display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-6);
-    background: var(--gold-surface); color: var(--on-accent); text-decoration: none;
+    background: var(--gold-glow), var(--night); color: var(--on-night); text-decoration: none; --focus: var(--yellow);
+    border-color: var(--gold); box-shadow: var(--shadow-gold);
     transition: transform var(--dur) var(--ease-pop), box-shadow var(--dur) var(--ease);
   }
-  .next:hover { transform: translate(-3px, -3px) rotate(-0.6deg); box-shadow: var(--shadow-xl); }
-  .next-label { display: inline-flex; align-items: center; gap: var(--space-1); font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; }
+  .next:hover { transform: translate(-3px, -3px) rotate(-0.6deg); box-shadow: var(--shadow-gold-xl); }
+  .next-label { display: inline-flex; align-items: center; gap: var(--space-1); font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gold-light); }
   .next-title { font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 700; line-height: 1.1; }
   .more-links { display: flex; flex-direction: column; gap: var(--space-2); font-family: var(--font-display); font-weight: 700; }
   .more-links a { display: inline-flex; align-items: center; gap: var(--space-1); text-decoration: none; color: var(--pink-text); }
@@ -211,5 +239,7 @@ const game = `/${lang}/science-jumper/`;
   }
   @media (max-width: 560px) {
     .big-emoji, [data-unlocked] .big-emoji { font-size: var(--fs-emoji-md); right: 0; bottom: auto; top: 0; }
+    .medal { width: var(--medal-size); font-size: var(--fs-sm); right: auto; left: auto; top: auto; position: relative; display: inline-grid; margin-top: var(--space-4); }
+    .medal-pts { font-size: var(--fs-lg); }
   }
 </style>

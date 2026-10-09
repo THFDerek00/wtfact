@@ -1,22 +1,35 @@
 ---
-// Daumen hoch / Daumen runter unter jedem Fakt (Wunsch von Eric, 2026-10-08). Gleiche Bewertung wie die
-// Wisch-Karte: Wer hier bewertet, hat auch beim Wischen bewertet und umgekehrt (rate() in src/scripts/community.ts).
-// Zählt für Fakt des Tages und die Top 10 der Hall of Fame. Wie überall: links „weniger“, rechts „gefällt mir“.
+// Daumen hoch / Daumen runter auf jeder Faktseite (Wunsch von Eric, 2026-10-08, neu gestaltet 2026-10-09).
+// Steht direkt unter dem WTF?!-Kasten (place="top", sofort sichtbar) und noch einmal am Ende des Texts
+// (place="end"). Beide zeigen dieselbe Bewertung und bleiben im Gleichschritt.
+// Gleiche Bewertung wie die Wisch-Karte: Wer hier bewertet, hat auch beim Wischen bewertet und umgekehrt
+// (rate() in src/scripts/community.ts). Zählt für Fakt des Tages und die Top 10 der Hall of Fame.
+// Wie überall: links „weniger“, rechts „gefällt mir“.
 import Icon from './Icon.astro';
 import { t } from '../i18n/ui';
 import type { Lang } from '../config';
-interface Props { lang: Lang; factKey: string }
-const { lang, factKey } = Astro.props;
+interface Props { lang: Lang; factKey: string; place?: 'top' | 'end' }
+const { lang, factKey, place = 'top' } = Astro.props;
 const ui = t(lang).thumbs;
+const question = place === 'end' ? ui.endQuestion : ui.question;
+const share = ui.share(9001);
 ---
-<section class="thumbs card" data-thumbs={factKey} data-thanks={ui.thanks} data-local={ui.local}>
-  <h2 class="q">{ui.question}</h2>
-  <div class="row" role="group" aria-label={ui.question}>
-    <button class="btn btn--pink" type="button" data-verdict="meh" aria-pressed="false">
+<section
+  class="thumbs card" data-place={place} data-thumbs={factKey}
+  data-thanks={ui.thanks} data-local={ui.local} data-share={share} data-first={ui.first}
+>
+  <span class="label">{ui.label}</span>
+  <div class="head">
+    <h2 class="q">{question}</h2>
+    <p class="share" data-share-text>{ui.first}</p>
+  </div>
+  <div class="row" role="group" aria-label={question}>
+    <button class="vote vote--meh" type="button" data-verdict="meh" aria-pressed="false">
       <Icon name="thumbs-down" /> <span class="sr-only">{ui.down}</span> <span class="n" data-count="meh">0</span>
     </button>
-    <button class="btn btn--lime" type="button" data-verdict="like" aria-pressed="false">
-      <Icon name="thumbs-up" /> <span class="sr-only">{ui.up}</span> <span class="n" data-count="like">0</span>
+    <span class="meter" aria-hidden="true"><span class="meter-like"></span></span>
+    <button class="vote vote--like" type="button" data-verdict="like" aria-pressed="false">
+      <span class="n" data-count="like">0</span> <span class="sr-only">{ui.up}</span> <Icon name="thumbs-up" />
     </button>
   </div>
   <p class="status" data-status aria-live="polite"></p>
@@ -26,53 +39,136 @@ const ui = t(lang).thumbs;
   import { rate, myRating, ratingOf } from '../scripts/community';
   import type { Verdict } from '../week';
 
-  for (const box of document.querySelectorAll<HTMLElement>('[data-thumbs]')) {
-    const key = box.dataset.thumbs!;
-    const buttons = [...box.querySelectorAll<HTMLButtonElement>('[data-verdict]')];
-    const status = box.querySelector<HTMLElement>('[data-status]')!;
-    let counts = { like: 0, meh: 0 };
-    let shared = false;
-    const show = () => {
-      const mine = myRating(key);
-      for (const b of buttons) b.setAttribute('aria-pressed', String(b.dataset.verdict === mine));
-      // Ohne Server zählt nur die eigene Stimme.
-      const c = shared ? counts : { like: mine === 'like' ? 1 : 0, meh: mine === 'meh' ? 1 : 0 };
+  // Ein Zustand pro Fakt, alle Kästen dieses Fakts zeichnen daraus (oben und am Ende).
+  type State = { counts: { like: number; meh: number }; shared: boolean; boxes: HTMLElement[] };
+  const states = new Map<string, State>();
+
+  function draw(key: string, popped?: Verdict) {
+    const s = states.get(key)!;
+    const mine = myRating(key);
+    // Ohne Server zählt nur die eigene Stimme.
+    const c = s.shared ? s.counts : { like: mine === 'like' ? 1 : 0, meh: mine === 'meh' ? 1 : 0 };
+    const total = c.like + c.meh;
+    for (const box of s.boxes) {
+      for (const b of box.querySelectorAll<HTMLButtonElement>('[data-verdict]')) {
+        b.setAttribute('aria-pressed', String(b.dataset.verdict === mine));
+        if (popped && b.dataset.verdict === popped) {
+          b.removeAttribute('data-pop');
+          void b.offsetWidth; // Animation neu starten
+          b.setAttribute('data-pop', '');
+        }
+      }
       box.querySelector('[data-count="like"]')!.textContent = String(c.like);
       box.querySelector('[data-count="meh"]')!.textContent = String(c.meh);
-    };
-    show();
-    ratingOf(key).then((c) => {
-      if (c) [counts, shared] = [c, true];
-      show();
-    });
-    for (const b of buttons) {
+      box.style.setProperty('--like', total ? String(c.like / total) : '0.5');
+      box.toggleAttribute('data-empty', total === 0);
+      box.querySelector('[data-share-text]')!.textContent = total
+        ? box.dataset.share!.replace('9001', String(Math.round((c.like / total) * 100)))
+        : box.dataset.first!;
+    }
+  }
+
+  for (const box of document.querySelectorAll<HTMLElement>('[data-thumbs]')) {
+    const key = box.dataset.thumbs!;
+    if (!states.has(key)) {
+      states.set(key, { counts: { like: 0, meh: 0 }, shared: false, boxes: [] });
+      ratingOf(key).then((c) => {
+        const s = states.get(key)!;
+        if (c) [s.counts, s.shared] = [c, true];
+        draw(key);
+      });
+    }
+    states.get(key)!.boxes.push(box);
+
+    for (const b of box.querySelectorAll<HTMLButtonElement>('[data-verdict]')) {
       b.addEventListener('click', async () => {
+        const s = states.get(key)!;
         const verdict = b.dataset.verdict as Verdict;
         if (myRating(key) === verdict) return;
         const before = myRating(key);
         // Sofort anzeigen, der Server bestätigt danach mit den echten Zahlen.
-        if (shared) {
-          if (before) counts[before]--;
-          counts[verdict]++;
+        if (s.shared) {
+          if (before) s.counts[before]--;
+          s.counts[verdict]++;
         }
         const pending = rate(key, verdict);
-        show();
+        draw(key, verdict);
         const c = await pending;
-        if (c) [counts, shared] = [c, true];
-        show();
-        status.textContent = shared ? box.dataset.thanks! : `${box.dataset.thanks} ${box.dataset.local}`;
+        if (c) [s.counts, s.shared] = [c, true];
+        draw(key);
+        const status = box.querySelector<HTMLElement>('[data-status]')!;
+        status.textContent = s.shared ? box.dataset.thanks! : `${box.dataset.thanks} ${box.dataset.local}`;
       });
     }
+    draw(key);
   }
 </script>
 
 <style>
-  .thumbs { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); margin: var(--space-9) 0; padding: var(--space-5) var(--space-6); }
-  .q { margin: 0; font-size: var(--fs-xl); flex: 1 1 16ch; }
-  .row { display: flex; gap: var(--space-3); }
-  .btn[aria-pressed='true'] { box-shadow: var(--shadow-xs); transform: translate(2px, 2px); }
-  .btn[aria-pressed='true']::after { content: '✓'; }
-  .n { font-variant-numeric: tabular-nums; min-width: 2ch; text-align: left; }
-  .status { flex-basis: 100%; margin: 0; font-size: var(--fs-sm); color: var(--muted); }
+  .thumbs {
+    --like: 0.5;
+    position: relative; display: flex; flex-direction: column; gap: var(--space-4);
+    margin: 0 0 var(--space-9); padding: var(--space-6) var(--space-5) var(--space-5);
+  }
+  .thumbs[data-place='end'] { margin: var(--space-9) 0; box-shadow: var(--shadow-lg); }
+
+  /* Schräges Etikett auf der Kante, wie „WTF?!“ am Aufhänger */
+  .label {
+    position: absolute; top: calc(-1 * var(--space-4)); left: var(--space-5);
+    padding: 0 var(--space-2); border: var(--bw-sm) solid var(--line); border-radius: var(--radius-sm);
+    background: var(--lime); color: var(--on-accent);
+    font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 800; transform: rotate(2deg);
+  }
+
+  .head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-1) var(--space-4); }
+  .q { margin: 0; font-size: var(--fs-xl); }
+  .share { margin: 0; font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  .row { display: flex; align-items: center; gap: var(--space-3); }
+
+  /* Große, knautschige Daumen-Knöpfe: links pink (weniger), rechts lime (gefällt mir) */
+  .vote {
+    display: inline-flex; align-items: center; gap: var(--space-2); flex: 0 0 auto;
+    padding: var(--space-3) var(--space-4);
+    border: var(--bw) solid var(--line); border-radius: var(--radius-md);
+    color: var(--on-accent); box-shadow: var(--shadow-md); cursor: pointer;
+    font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 800; line-height: 1;
+    --icon-size: var(--icon-size-lg);
+    transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  }
+  .vote--meh { background: var(--pink); }
+  .vote--like { background: var(--lime); }
+  .vote:hover { transform: translate(-2px, -2px) rotate(-3deg); box-shadow: var(--shadow-lg); }
+  .vote--like:hover { transform: translate(-2px, -2px) rotate(3deg); }
+  .vote:active { transform: translate(2px, 2px); box-shadow: var(--shadow-xs); }
+  .vote[aria-pressed='true'] { transform: translate(3px, 3px); box-shadow: var(--shadow-xs); }
+  .vote[aria-pressed='true'] .n::after { content: ' ✓'; }
+  .vote[data-pop] .icon { animation: pop var(--dur-pop) var(--ease-pop); }
+  @keyframes pop {
+    0% { transform: scale(1) rotate(0deg); }
+    50% { transform: scale(1.45) rotate(-14deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+  .n { font-variant-numeric: tabular-nums; min-width: 1ch; text-align: center; }
+
+  /* Stimmungsbalken zwischen den Knöpfen: pink von links = weniger, lime von rechts = gefällt mir */
+  .meter {
+    position: relative; flex: 1 1 auto; height: var(--space-5); min-width: var(--space-10);
+    border: var(--bw-sm) solid var(--line); border-radius: var(--radius-pill);
+    background: var(--pink); overflow: hidden;
+  }
+  .meter-like {
+    position: absolute; inset: 0 0 0 auto; width: calc(var(--like) * 100%);
+    background: var(--lime); border-left: var(--bw-sm) solid var(--line);
+    transition: width var(--dur) var(--ease);
+  }
+  [data-empty] .meter { background: var(--locked); }
+  [data-empty] .meter-like { width: 0; border-left: 0; }
+
+  .status { margin: 0; font-size: var(--fs-sm); color: var(--muted); }
   .status:empty { display: none; }
+
+  @media (max-width: 420px) {
+    .vote { padding: var(--space-2) var(--space-3); font-size: var(--fs-lg); }
+  }
 </style>
