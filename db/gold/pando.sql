@@ -9,3 +9,7 @@ INSERT INTO gold_texts (gold, lang, title, text) VALUES
 INSERT INTO gold_sources (gold, pos, label, url) VALUES
   ('pando', 1, 'Live Science: Pando: The world''s largest tree and heaviest living organism', 'https://www.livescience.com/planet-earth/plants/pando-the-worlds-largest-tree-and-heaviest-living-organism'),
   ('pando', 2, 'Friends of Pando: Pando FAQ: How Pando Works', 'https://www.friendsofpando.org/faq-howpandoworks/');
+
+INSERT INTO gold_products (gold, lang, name, query, why, emoji) VALUES
+  ('pando', 'de', '„Das geheime Leben der Bäume“, illustrierte Ausgabe', 'Das geheime Leben der Bäume illustrierte Ausgabe Wohlleben', 'Peter Wohllebens Bestseller als großer Bildband mit Fotos. Erzählt, wie Bäume über die Wurzeln verbunden sind, genau wie Pando.', '🌳'),
+  ('pando', 'en', 'The Hidden Life of Trees: The Illustrated Edition', 'Hidden Life of Trees Illustrated Edition Wohlleben', 'Peter Wohlleben''s bestseller as a large photo book. Shows how trees connect through their roots, just like Pando.', '🌳');

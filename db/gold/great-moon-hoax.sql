@@ -9,3 +9,7 @@ INSERT INTO gold_texts (gold, lang, title, text) VALUES
 INSERT INTO gold_sources (gold, pos, label, url) VALUES
   ('great-moon-hoax', 1, 'History: "The Great Moon Hoax" is published in the "New York Sun"', 'https://www.history.com/this-day-in-history/august-25/the-great-moon-hoax'),
   ('great-moon-hoax', 2, 'Museum of Hoaxes: The Great Moon Hoax (1835)', 'https://hoaxes.org/archive/permalink/the_great_moon_hoax');
+
+INSERT INTO gold_products (gold, lang, name, query, why, emoji) VALUES
+  ('great-moon-hoax', 'de', 'Celestron NexStar 127SLT Teleskop', 'Celestron NexStar 127SLT', 'Fledermausmenschen findest du damit nicht, aber Mondkrater, Saturnringe und Jupitermonde. Das Teleskop findet über 4.000 Himmelsobjekte auf Knopfdruck.', '🔭'),
+  ('great-moon-hoax', 'en', 'Celestron NexStar 127SLT telescope', 'Celestron NexStar 127SLT', 'You will not find bat-people, but you will see lunar craters, Saturn''s rings and Jupiter''s moons. It finds over 4,000 objects at the push of a button.', '🔭');

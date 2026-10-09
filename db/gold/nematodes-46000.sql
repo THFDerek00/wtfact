@@ -9,3 +9,7 @@ INSERT INTO gold_texts (gold, lang, title, text) VALUES
 INSERT INTO gold_sources (gold, pos, label, url) VALUES
   ('nematodes-46000', 1, 'PLOS Genetics: A novel nematode species from the Siberian permafrost shares adaptive mechanisms for cryptobiotic survival with C. elegans dauer larva', 'https://journals.plos.org/plosgenetics/article?id=10.1371%2Fjournal.pgen.1010798'),
   ('nematodes-46000', 2, 'Scientific American: 46,000-Year-Old Worm Possibly Revived from Siberian Permafrost', 'https://www.scientificamerican.com/article/46-000-year-old-worm-possibly-revived-from-siberian-permafrost/');
+
+INSERT INTO gold_products (gold, lang, name, query, why, emoji) VALUES
+  ('nematodes-46000', 'de', 'Bresser Erudit DLX Labormikroskop', 'Bresser Erudit DLX Mikroskop', 'Fadenwürmer leben überall im Boden. Mit diesem Labor-Mikroskop von Bresser siehst du sie in einer Erdprobe aus dem Garten, bis 1000-fach.', '🧊'),
+  ('nematodes-46000', 'en', 'Swift SW380T trinocular microscope', 'Swift SW380T microscope', 'Nematodes live in all soil. With this lab-grade microscope you can spot them in a pinch of dirt from your garden, at up to 2500x.', '🧊');

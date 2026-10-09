@@ -9,3 +9,7 @@ INSERT INTO gold_texts (gold, lang, title, text) VALUES
 INSERT INTO gold_sources (gold, pos, label, url) VALUES
   ('beard-tax', 1, 'National Museum of American History: Beard Token, Russia, 1705', 'https://americanhistory.si.edu/collections/object/nmah_1412643'),
   ('beard-tax', 2, 'Russia Beyond: 319 years ago: Peter the Great established tax on beards', 'https://www.rbth.com/arts/history/2017/09/05/319-years-ago-peter-the-great-established-tax-on-beards_833570');
+
+INSERT INTO gold_products (gold, lang, name, query, why, emoji) VALUES
+  ('beard-tax', 'de', '„Peter der Große“ von Robert K. Massie', 'Robert K. Massie Peter der Große', 'Die mit dem Pulitzer-Preis ausgezeichnete Biografie über den Zaren, der Russland mit der Schere modernisieren wollte. Spannend wie ein Roman.', '👑'),
+  ('beard-tax', 'en', 'Peter the Great: His Life and World by Robert K. Massie', 'Robert K. Massie Peter the Great His Life and World', 'The Pulitzer Prize-winning biography of the tsar who tried to modernize Russia one shaved chin at a time. Reads like a novel.', '👑');

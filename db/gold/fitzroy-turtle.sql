@@ -9,3 +9,7 @@ INSERT INTO gold_texts (gold, lang, title, text) VALUES
 INSERT INTO gold_sources (gold, pos, label, url) VALUES
   ('fitzroy-turtle', 1, 'The University of Queensland: UQ researchers make head and tail of turtle breathing', 'https://news.uq.edu.au/1997-02-06-uq-researchers-make-head-and-tail-turtle-breathing'),
   ('fitzroy-turtle', 2, 'Live Science: Can turtles really breathe through their butts?', 'https://www.livescience.com/can-turtles-breathe-through-butts');
+
+INSERT INTO gold_products (gold, lang, name, query, why, emoji) VALUES
+  ('fitzroy-turtle', 'de', 'Steiff Schildkröte aus Plüsch', 'Steiff Schildkröte', 'Kuscheltier-Qualität aus Giengen seit 1880, mit dem berühmten Knopf im Ohr. Wird sicher nicht durch den Hintern atmen, ist aber trotzdem ein Liebling.', '🐢'),
+  ('fitzroy-turtle', 'en', 'Jellycat turtle plush', 'Jellycat turtle plush', 'Jellycat''s famously soft quality in turtle form. Will not breathe through its rear, but will still be everyone''s favorite.', '🐢');

@@ -9,3 +9,7 @@ INSERT INTO gold_texts (gold, lang, title, text) VALUES
 INSERT INTO gold_sources (gold, pos, label, url) VALUES
   ('lord-howe-dst', 1, 'Atlas Obscura: Lord Howe Island''s Time in Lord Howe Island', 'https://www.atlasobscura.com/places/lord-howe-islands-time'),
   ('lord-howe-dst', 2, 'SBS News: Daylight saving in Australia: When it starts and whether clocks go forward or back', 'https://sbs.com.au/news/article/clocks-forward-or-back-daylight-saving-australia-explained/cu6xfjfkd');
+
+INSERT INTO gold_products (gold, lang, name, query, why, emoji) VALUES
+  ('lord-howe-dst', 'de', 'Junghans Max Bill MEGA Funkuhr', 'Junghans Max Bill MEGA Funk', 'Bauhaus-Klassiker aus Schramberg, der sich per Funksignal selbst auf Sommer- und Winterzeit stellt. Ob ganze oder halbe Stunde, du musst nie wieder drehen.', '⌚'),
+  ('lord-howe-dst', 'en', 'Citizen Eco-Drive atomic timekeeping watch', 'Citizen Eco-Drive atomic timekeeping watch', 'Solar powered and synced by radio signal, so it switches to daylight saving time on its own. Whole hour or half hour, you never adjust it again.', '⌚');

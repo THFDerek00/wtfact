@@ -9,3 +9,7 @@ INSERT INTO gold_texts (gold, lang, title, text) VALUES
 INSERT INTO gold_sources (gold, pos, label, url) VALUES
   ('oklo-reactor', 1, 'POWER Magazine: The Curious Case of a Two-Billion-Year-Old Nuclear Reactor', 'https://www.powermag.com/%E2%80%AAthe-curious-case-of-a-two-billion-year-old-nuclear-reactor/'),
   ('oklo-reactor', 2, 'IAEA: Meet Oklo, the Earth’s Two-billion-year-old only Known Natural Nuclear Reactor', 'https://www.iaea.org/newscenter/news/meet-oklo-the-earths-two-billion-year-old-only-known-natural-nuclear-reactor');
+
+INSERT INTO gold_products (gold, lang, name, query, why, emoji) VALUES
+  ('oklo-reactor', 'de', 'GQ GMC-500+ Geigerzähler', 'GQ GMC-500 Geigerzähler', 'Ein echter Geigerzähler mit zwei Zählrohren und Datenlogger. Damit misst du die natürliche Strahlung um dich herum, wie damals in Oklo.', '☢️'),
+  ('oklo-reactor', 'en', 'GQ GMC-500+ Geiger counter', 'GQ GMC-500 Geiger counter', 'A real Geiger counter with two tubes and a data logger. Measure the natural radiation around you, just like the clues that led to Oklo.', '☢️');

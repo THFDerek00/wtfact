@@ -38,6 +38,9 @@ for (const f of facts) {
     if ((c.text.match(FILLER) ?? []).length > 1) problems.push(`${at} (${lang}): Füllwort zu oft`);
     const inText = new Set(numbers(c.text));
     for (const n of numbers(c.title)) if (!inText.has(n)) problems.push(`${at} (${lang}): Zahl ${n} aus dem Titel steht nicht im Text`);
+    // Ein ausgesuchtes Produkt pro Sprache für die Werbefläche auf der Gold-Fakt-Seite (Tabelle gold_products)
+    const p = c.product;
+    if (!p?.name?.trim() || !p?.query?.trim() || !p?.why?.trim() || !EMOJI.test(p?.emoji ?? '')) problems.push(`${at} (${lang}): Produkt fehlt oder unvollständig (name, query, why, emoji)`);
   }
 
   const sources = f.sources ?? [];
