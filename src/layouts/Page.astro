@@ -1,14 +1,30 @@
 ---
+// Textseiten (Über, Impressum, Datenschutz, Korrekturen). Gleiche Breite wie alle anderen Seiten (Wunsch von Eric,
+// 2026-10-09): links der Text in lesbarer Breite, rechts Extras, die zur Idee von WTFact passen.
 import Base from './Base.astro';
+import LiveCounter from '../components/LiveCounter.astro';
+import FactRoulette from '../components/FactRoulette.astro';
 import type { Lang } from '../config';
 interface Props { lang: Lang; title: string }
 const { lang, title } = Astro.props;
 ---
 <Base lang={lang} title={title}>
-  <article class="wrap page"><h1>{title}</h1><slot /></article>
+  <div class="wrap page-layout">
+    <article class="page"><h1>{title}</h1><slot /></article>
+    <aside class="page-side">
+      <FactRoulette lang={lang} />
+      <LiveCounter lang={lang} />
+    </aside>
+  </div>
 </Base>
 <style>
+  .page-layout { display: grid; grid-template-columns: minmax(0, var(--measure)) minmax(300px, 1fr); gap: var(--space-11); align-items: start; padding-bottom: var(--space-11); }
   .page > :global(*) { max-width: var(--measure); }
   .page h1 { font-size: var(--fs-display-md); }
   .page :global(h2) { font-size: var(--fs-xl); margin-top: var(--space-8); }
+  .page-side { position: sticky; top: var(--space-8); display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: var(--space-7); margin-top: var(--space-9); }
+  @media (max-width: 960px) {
+    .page-layout { grid-template-columns: minmax(0, 1fr); gap: var(--space-6); }
+    .page-side { position: static; margin-top: 0; }
+  }
 </style>
