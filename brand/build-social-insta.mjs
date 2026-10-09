@@ -689,7 +689,8 @@ function checkYear(it) {
 }
 
 function main() {
-  fs.rmSync(path.join(ROOT, OUT), { recursive: true, force: true });
+  // Nur die eigenen Ordner leeren; reels/ gehört zu build-social-reels.mjs
+  for (const g of ['posts', 'stories', 'extras']) fs.rmSync(path.join(ROOT, OUT, g), { recursive: true, force: true });
   // Posts
   const posts = buildPostList().map((p, i) => {
     const f = fact(p.key);
