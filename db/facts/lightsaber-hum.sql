@@ -1,7 +1,7 @@
 -- WTFact-Fakt „Das Summen der Lichtschwerter ist ein alter Projektormotor plus Fernseher-Brummen“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
-INSERT INTO facts (key, date, category, emoji, draft) VALUES
-  ('lightsaber-hum', NULL, 'popculture', '⚔️', 0);
+INSERT INTO facts (key, date, category, emoji, draft, slot) VALUES
+  ('lightsaber-hum', '2026-10-10T09:00:00+02:00', 'popculture', '⚔️', 0, 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (
