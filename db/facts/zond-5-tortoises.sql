@@ -1,7 +1,7 @@
 -- WTFact-Fakt „Die ersten Erdbewohner, die den Mond umrundeten, waren 2 Schildkröten“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
-INSERT INTO facts (key, date, category, emoji, draft) VALUES
-  ('zond-5-tortoises', NULL, 'space', '🐢', 0);
+INSERT INTO facts (key, date, category, emoji, draft, slot) VALUES
+  ('zond-5-tortoises', '2026-10-11T05:00:00+02:00', 'space', '🐢', 0, 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (
