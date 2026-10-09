@@ -1,7 +1,7 @@
 -- WTFact-Fakt „Astronauten sagen: Das Weltall riecht nach angebratenem Steak“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
-INSERT INTO facts (key, date, category, emoji, draft) VALUES
-  ('space-smells-steak', NULL, 'space', '🥩', 0);
+INSERT INTO facts (key, date, category, emoji, draft, slot) VALUES
+  ('space-smells-steak', '2026-10-10T17:00:00+02:00', 'space', '🥩', 0, 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (
