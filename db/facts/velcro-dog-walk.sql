@@ -1,7 +1,7 @@
 -- WTFact-Fakt „Der Klettverschluss entstand 1941 nach einem Ausflug mit Hund“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
-INSERT INTO facts (key, date, category, emoji, draft) VALUES
-  ('velcro-dog-walk', NULL, 'brands', '🐕', 0);
+INSERT INTO facts (key, date, category, emoji, draft, slot) VALUES
+  ('velcro-dog-walk', '2026-10-10T00:26:33+02:00', 'brands', '🐕', 0, 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (
