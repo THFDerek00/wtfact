@@ -1,7 +1,7 @@
 -- WTFact-Fakt „Sechs Sekunden Schlagzeug von 1969 gehören zu den meistgesampelten Klängen der Musik“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
-INSERT INTO facts (key, date, category, emoji, draft) VALUES
-  ('amen-break', NULL, 'popculture', '🥁', 0);
+INSERT INTO facts (key, date, category, emoji, draft, slot) VALUES
+  ('amen-break', '2026-10-10T01:00:00+02:00', 'popculture', '🥁', 0, 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (
