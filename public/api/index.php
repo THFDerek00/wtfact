@@ -5,10 +5,14 @@
 //   GET  ?r=week     Stand der Woche: laufende Abstimmung (nur montags), Fakt der Woche und Fakt des Tages
 //   POST ?r=vote     { voter, poll, key }        Stimme abgeben oder ändern (nur montags)
 //   POST ?r=rate     { voter, key, verdict }     Wisch-Bewertung, verdict = like | meh
-//   GET  ?r=history  Verlauf für die Hall of Fame: Fakten des Tages (30 Tage) und der Woche (12 Wochen)
+//   GET  ?r=history  Verlauf für die WTF-Charts: Fakten des Tages (30 Tage) und der Woche (12 Wochen)
 //   GET  ?r=rating&key=<key>  Daumen hoch/runter für einen Fakt (Faktseite)
-//   GET  ?r=top      Die 10 beliebtesten Fakten: meiste Daumen hoch minus runter (Hall of Fame)
+//   GET  ?r=top      Die 10 beliebtesten Fakten: meiste Daumen hoch minus runter (WTF-Charts);
+//                    mit &since=JJJJ-MM-TT nur Fakten ab diesem Tag (Top 5 der Woche auf der Startseite)
 //   GET  ?r=counts   Daumen je Fakt und Zahlen für die Übersicht im Dashboard (steuerung/lib/ratings.php)
+//   POST ?r=answer   { voter, game, id, pick }   Antwort in einem Mitmach-Spiel (src/scripts/quiz.ts):
+//                    game = wof (Wahr oder Fake, pick 0/1), first (Was war zuerst, 0/1), guess (Schätzfrage, 0-2), baro (WTF-Barometer, 0-10)
+//   GET  ?r=quiz&game=<game>[&id=<id>]   Zählung je Frage und Antwort, ohne Kennungen
 //
 // Gespeichert wird in SQLite (Standard, Datei neben dem Webordner, siehe wtf_db()) oder in MySQL/MariaDB,
 // wenn api/config.local.php das festlegt (Vorlage: api/config.example.php). Tabellen legt die API selbst an.
@@ -20,7 +24,9 @@ require __DIR__ . '/week.php';
 const VOTER = '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i';
 const VERDICTS = ['like', 'meh'];
 // Schutz gegen Mehrfachstimmen: so viele Stimmen bzw. Bewertungen pro Anschluss und Tag.
-const LIMITS = ['vote' => 30, 'rate' => 600];
+const LIMITS = ['vote' => 30, 'rate' => 600, 'answer' => 1500];
+// Mitmach-Spiele: höchste erlaubte Antwort je Spiel. Fragen von wof/first stehen in /quiz.json, guess/baro gehören zu einem Fakt.
+const GAMES = ['wof' => 1, 'first' => 1, 'guess' => 2, 'baro' => 10];
 
 function out($data, int $status = 200, string $cache = 'no-store'): void
 {
@@ -96,6 +102,10 @@ function migrate(PDO $db): void
         day $t NOT NULL, bucket $t NOT NULL, hits INTEGER NOT NULL, PRIMARY KEY (day, bucket))");
     $db->exec("CREATE TABLE IF NOT EXISTS salts (day $t NOT NULL PRIMARY KEY, salt $t NOT NULL)");
     if (!is_mysql($db)) $db->exec('CREATE INDEX IF NOT EXISTS votes_by_poll ON votes (poll, fact_key)');
+    // Antworten in den Mitmach-Spielen. Eine Antwort pro Kennung und Frage, die letzte zählt.
+    $db->exec("CREATE TABLE IF NOT EXISTS answers (
+        game $t NOT NULL, item $t NOT NULL, voter $t NOT NULL, pick INTEGER NOT NULL, created_at $t NOT NULL,
+        PRIMARY KEY (game, item, voter))");
 }
 
 function now_utc(): string
@@ -150,6 +160,35 @@ function facts(): array
         $all = $raw ? (json_decode($raw, true) ?: []) : [];
     }
     return $all;
+}
+
+/** Fragen-Kennungen der Quizspiele aus der beim Bauen erzeugten quiz.json: ['wof' => [...], 'first' => [...]]. */
+function quiz_ids(): array
+{
+    static $ids = null;
+    if ($ids === null) {
+        $raw = @file_get_contents(dirname(__DIR__) . '/quiz.json');
+        $ids = $raw ? (json_decode($raw, true) ?: []) : [];
+    }
+    return $ids;
+}
+
+/** Gibt es die Frage `id` im Spiel `game`? */
+function quiz_item_ok(string $game, string $id): bool
+{
+    if ($game === 'guess' || $game === 'baro') return in_array($id, array_column(facts(), 'key'), true);
+    return in_array($id, quiz_ids()[$game] ?? [], true);
+}
+
+/** Zählung je Frage: [item => [pick => n]]. */
+function answer_counts(PDO $db, string $game, ?string $item = null): array
+{
+    $sql = 'SELECT item, pick, COUNT(*) AS n FROM answers WHERE game = ?' . ($item !== null ? ' AND item = ?' : '') . ' GROUP BY item, pick';
+    $s = $db->prepare($sql);
+    $s->execute($item !== null ? [$game, $item] : [$game]);
+    $out = [];
+    foreach ($s as $r) $out[$r['item']][(string) $r['pick']] = (int) $r['n'];
+    return $out;
 }
 
 function vote_counts(PDO $db, string $poll): array
@@ -267,6 +306,8 @@ if ($route === 'rating' && $method === 'GET') {
 // Nur Fakten mit mindestens einem Daumen hoch. Gleiche Zählung wie topTen in src/week.ts.
 if ($route === 'top' && $method === 'GET') {
     $all = facts();
+    $since = str($_GET['since'] ?? null);
+    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $since)) $all = array_values(array_filter($all, function ($f) use ($since) { return $f['date'] >= $since; }));
     $ratings = ratings_for(wtf_db(), array_column($all, 'key'));
     $dateOf = array_column($all, 'date', 'key');
     $list = [];
@@ -340,6 +381,29 @@ if ($route === 'rate' && $method === 'POST') {
     if (!allowed($db, 'rate', $today)) out(['error' => 'too-many'], 429);
     upsert($db, 'ratings', ['fact_key' => $key, 'voter' => $voter, 'verdict' => $verdict, 'created_at' => now_utc()], ['fact_key', 'voter']);
     out(ratings_for($db, [$key])[$key] ?? ['like' => 0, 'meh' => 0]);
+}
+
+if ($route === 'answer' && $method === 'POST') {
+    $b = body();
+    $voter = str($b['voter'] ?? null);
+    $game = str($b['game'] ?? null);
+    $id = str($b['id'] ?? null);
+    $pick = $b['pick'] ?? null;
+    if (!preg_match(VOTER, $voter) || !isset(GAMES[$game]) || !is_int($pick) || $pick < 0 || $pick > GAMES[$game]) out(['error' => 'bad-request'], 400);
+    if (!quiz_item_ok($game, $id)) out(['error' => 'unknown-item'], 400);
+    $db = wtf_db();
+    if (!allowed($db, 'answer', $today)) out(['error' => 'too-many'], 429);
+    upsert($db, 'answers', ['game' => $game, 'item' => $id, 'voter' => $voter, 'pick' => $pick, 'created_at' => now_utc()], ['game', 'item', 'voter']);
+    out(['id' => $id, 'counts' => (object) (answer_counts($db, $game, $id)[$id] ?? [])]);
+}
+
+if ($route === 'quiz' && $method === 'GET') {
+    $game = str($_GET['game'] ?? null);
+    if (!isset(GAMES[$game])) out(['error' => 'bad-request'], 400);
+    $id = isset($_GET['id']) ? str($_GET['id']) : null;
+    if ($id !== null && !quiz_item_ok($game, $id)) out(['error' => 'unknown-item'], 400);
+    $counts = answer_counts(wtf_db(), $game, $id);
+    out((object) array_map(function ($c) { return (object) $c; }, $counts), 200, 'public, max-age=60');
 }
 
 out(['error' => 'not-found'], 404);

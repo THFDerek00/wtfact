@@ -1,0 +1,150 @@
+---
+// Woche auf der Startseite (Design „E“): Top 5 der Woche (Daumen der letzten 7 Tage) und daneben
+// Fakt der Woche plus Hinweis auf die nächste Montags-Abstimmung. Ersetzt den früheren Hinweis FamePointer.astro.
+// Zahlen: GET /api/index.php?r=top&since=… (public/api/index.php), ohne Server die eigenen Daumen.
+import { FACTS_PER_DAY, type Lang } from '../../config';
+import { t } from '../../i18n/ui';
+import { factInfo, type Post } from '../../lib';
+import Icon from '../Icon.astro';
+interface Props { lang: Lang; posts: Post[]; chartsUrl: string }
+const { lang, posts, chartsUrl } = Astro.props;
+const ui = t(lang);
+const h = ui.home;
+// Ein Fakt der Woche ist höchstens 15 Tage alt.
+const facts = posts.slice(0, 17 * FACTS_PER_DAY).map(factInfo);
+const texts = { pct: lang === 'de' ? '9001 %' : '9001%', dayOne: ui.fame.dayUnit(1), dayMany: ui.fame.dayUnit(9001) };
+---
+<section class="sec sec--paper week" id="week" data-edge data-week data-facts={JSON.stringify(facts)} data-texts={JSON.stringify(texts)} data-focus-day="2,5">
+  <span class="focus-tag">{h.dayFocus}</span>
+  <div class="wrap grid">
+    <div class="top5">
+      <div class="sec-head"><h2>{h.weekTop}</h2><a class="more-link" href={chartsUrl}>{ui.fame.name} <Icon name="chevron-right" /></a></div>
+      <p class="intro">{h.weekTopIntro}</p>
+      <ol class="rows" data-rows></ol>
+      <p class="empty" data-empty hidden>{h.weekTopEmpty}</p>
+    </div>
+    <div class="side">
+      <a class="card fow bleed" href={chartsUrl} data-fow hidden>
+        <span class="fow-art" data-art aria-hidden="true"><span data-emoji></span></span>
+        <span class="chip accent"><Icon name="trophy" /> {ui.weekly.badge}</span>
+        <span class="fow-title" data-title></span>
+      </a>
+      <a class="card nextvote" href={`${chartsUrl}#vote`} data-next>
+        <span class="tag">{h.nextVote}</span>
+        <span class="nv-title">{h.nextVoteTitle}</span>
+        <span class="nv-time" data-left></span>
+        <span class="mega nv-word" aria-hidden="true">{ui.home.days[1]}</span>
+      </a>
+    </div>
+  </div>
+  <template data-row>
+    <li><a class="row" data-link>
+      <span class="no mega" data-no></span>
+      <span class="r-emoji" data-emoji aria-hidden="true"></span>
+      <span class="r-title" data-title></span>
+      <span class="r-pct" data-pct><Icon name="thumbs-up" /> <span data-val></span></span>
+    </a></li>
+  </template>
+</section>
+
+<script>
+  import { current } from '../../scripts/fame';
+  import { topFacts, myRatings } from '../../scripts/community';
+  import { addDays, berlinDay, likePct, mondayOf, dayStartUtc } from '../../week';
+  import type { FactInfo } from '../../lib';
+
+  const root = document.querySelector<HTMLElement>('[data-week]');
+  if (root) {
+    const facts: FactInfo[] = JSON.parse(root.dataset.facts ?? '[]');
+    const texts: Record<string, string> = JSON.parse(root.dataset.texts ?? '{}');
+    const byKey = new Map(facts.map((f) => [f.key, f]));
+    const today = berlinDay();
+    const since = addDays(today, -6);
+    (async () => {
+      const shared = await topFacts(since);
+      const list = (shared ?? Object.entries(myRatings()).map(([key, r]) => ({ key, ...r })).filter((e) => e.like > 0))
+        .filter((e) => (byKey.get(e.key)?.date ?? '') >= since)
+        .sort((a, b) => b.like - b.meh - (a.like - a.meh) || b.like - a.like)
+        .slice(0, 5);
+      const ol = root.querySelector('[data-rows]')!;
+      const tpl = root.querySelector<HTMLTemplateElement>('[data-row]')!;
+      list.forEach((e, i) => {
+        const f = byKey.get(e.key)!;
+        const li = tpl.content.firstElementChild!.cloneNode(true) as HTMLElement;
+        li.querySelector<HTMLAnchorElement>('[data-link]')!.href = f.url;
+        li.querySelector('[data-no]')!.textContent = String(i + 1);
+        const em = li.querySelector<HTMLElement>('[data-emoji]')!;
+        em.textContent = f.emoji;
+        em.classList.add(`cat-${f.cat}`);
+        li.querySelector('[data-title]')!.textContent = f.title;
+        li.querySelector('[data-val]')!.textContent = texts.pct.replace('9001', String(likePct(e)));
+        ol.append(li);
+      });
+      root.querySelector<HTMLElement>('[data-empty]')!.hidden = list.length > 0;
+    })();
+    current(facts).then(({ featured, state }) => {
+      const f = featured && byKey.get(featured.key);
+      if (f) {
+        const a = root.querySelector<HTMLAnchorElement>('[data-fow]')!;
+        a.href = f.url;
+        a.querySelector('[data-emoji]')!.textContent = f.emoji;
+        a.querySelector('[data-art]')!.classList.add(`cat-${f.cat}`);
+        a.querySelector('[data-title]')!.textContent = f.title;
+        a.hidden = false;
+      }
+      // Montags ist die Abstimmung oben auf der Seite, hier dann nur der Hinweis darauf
+      const next = state.openPoll ? today : addDays(mondayOf(today), 7);
+      const ms = Date.parse(`${dayStartUtc(next).replace(' ', 'T')}Z`) - Date.now();
+      const el = root.querySelector('[data-left]')!;
+      if (ms <= 0) { el.textContent = ''; return; }
+      const d = Math.floor(ms / 86_400_000), hrs = Math.floor(ms / 3_600_000) % 24;
+      el.textContent = `${d ? `${d === 1 ? texts.dayOne : texts.dayMany.replace('9001', String(d))}, ` : ''}${hrs} h`;
+    });
+  }
+</script>
+
+<style>
+  .week { padding-top: calc(var(--space-12) + var(--edge)); }
+  .grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: var(--space-11); align-items: start; }
+  .intro { margin: calc(-1 * var(--space-5)) 0 var(--space-6); color: var(--muted); }
+  .rows { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-4); }
+  .row {
+    display: grid; grid-template-columns: 4.5rem auto minmax(0, 1fr) auto; gap: var(--space-4); align-items: center;
+    padding: var(--space-3) var(--space-5) var(--space-3) var(--space-3); border: var(--bw-strong) solid var(--line); border-radius: var(--radius-md);
+    background: var(--surface); color: var(--ink); box-shadow: var(--shadow-md); text-decoration: none;
+    transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  }
+  .row:hover { transform: translate(-2px, -2px); box-shadow: var(--shadow-lg); }
+  li:nth-child(odd) .row { transform: rotate(-0.4deg); }
+  .no { font-size: var(--fs-display-lg); text-align: center; color: var(--yellow); }
+  li:first-child .no { color: var(--pink); }
+  .r-emoji { display: grid; place-items: center; width: var(--space-11); aspect-ratio: 1; border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-sm); font-size: var(--fs-2xl); }
+  .r-title { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lg); line-height: 1.2; }
+  .r-pct { display: inline-flex; align-items: center; gap: var(--space-1); padding: var(--space-1) var(--space-3); border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-pill); background: var(--lime); color: var(--on-accent); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); white-space: nowrap; }
+  .empty { margin: 0; padding: var(--space-6); border: var(--bw-sm) dashed var(--line); border-radius: var(--radius-md); color: var(--muted); font-weight: 600; }
+  .side { display: grid; gap: var(--space-9); padding-top: var(--space-6); }
+  .fow {
+    position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); padding: var(--space-6);
+    margin-top: calc(-1 * var(--bleed)); background: var(--surface); color: var(--ink); text-decoration: none; box-shadow: var(--shadow-xl); transform: rotate(1.5deg);
+  }
+  .fow-art { display: grid; place-items: center; width: 100%; aspect-ratio: 5 / 2; border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-md); font-size: var(--fs-emoji-lg); }
+  .fow-title { font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 700; line-height: 1.15; }
+  .nextvote {
+    position: relative; overflow: hidden; display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-6) var(--space-6) var(--space-12);
+    background: var(--dots-night), var(--night); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-night);
+    border-color: var(--on-accent); box-shadow: var(--shadow-xl); text-decoration: none; transform: rotate(-1deg);
+  }
+  .tag { align-self: flex-start; padding: var(--space-1) var(--space-3); border-radius: var(--radius-sm); background: var(--yellow); color: var(--on-accent); font-family: var(--font-display); font-weight: 800; font-size: var(--fs-sm); transform: rotate(-3deg); }
+  .nv-title { font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 700; line-height: 1.2; }
+  .nv-time { color: var(--yellow); font-family: var(--font-display); font-weight: 700; }
+  .nv-word { position: absolute; right: calc(-1 * var(--space-4)); bottom: calc(-1 * var(--space-3)); font-size: var(--fs-display-2xl); color: transparent; -webkit-text-stroke: var(--bw) var(--pink); text-transform: uppercase; }
+  @media (max-width: 960px) {
+    .grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-10); }
+    .fow { margin-top: 0; }
+  }
+  @media (max-width: 520px) {
+    .row { grid-template-columns: 2.5rem minmax(0, 1fr) auto; padding: var(--space-3); }
+    .r-emoji { display: none; }
+    .no { font-size: var(--fs-display-sm); }
+  }
+</style>

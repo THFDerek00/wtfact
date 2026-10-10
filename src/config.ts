@@ -34,5 +34,5 @@ export const FACTS_PER_DAY = 3;
 
 // Feste Veröffentlichungszeiten pro Tag, deutsche Zeit (Wunsch von Eric, 2026-10-08: 8, 12 und 16 Uhr).
 // Gleiche Werte als Standard im Dashboard (steuerung/lib/bootstrap.php, slot_times) und in .github/workflows/deploy.yml
-// (STEUERUNG_SLOTS); `npm run check` prüft, dass alle drei übereinstimmen. Genutzt vom Countdown in der Hall of Fame.
+// (STEUERUNG_SLOTS); `npm run check` prüft, dass alle drei übereinstimmen. Genutzt vom Countdown in der WTF-Charts.
 export const SLOT_TIMES = ['08:00', '12:00', '16:00'] as const;

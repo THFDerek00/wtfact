@@ -1,0 +1,149 @@
+---
+// „Frisch aus dem Labor“ (Design „E“, Karten aus Entwurf A): alle Fakten als Kacheln auf Papier, mit Filter nach Kategorie.
+// Drei Kachel-Arten im Wechsel: Kategoriefarbe mit Emoji, große Zahl aus dem Fakt, Papier mit gelbem Streifen.
+// ?cat=<kategorie> in der Adresse filtert direkt (Links von der Kategorien-Seite). Werbekarte bleibt an Platz 3 (AdCard.astro).
+import type { Lang } from '../../config';
+import { CATEGORIES } from '../../config';
+import { t } from '../../i18n/ui';
+import { postUrl, factNumber, bigNumber, type Post } from '../../lib';
+import NewBadge from '../NewBadge.astro';
+import AdCard from '../AdCard.astro';
+import Icon from '../Icon.astro';
+interface Props { lang: Lang; posts: Post[]; catsUrl: string }
+const { lang, posts, catsUrl } = Astro.props;
+const ui = t(lang);
+const PAGE = 12;
+const count = (c: string) => posts.filter((p) => p.data.category === c).length;
+const cats = CATEGORIES.filter((c) => count(c) > 0);
+const hero = posts[0];
+// Kachel-Art: jede dritte Papier, jede dritte mit großer Zahl (falls der Fakt eine hat), sonst Kategoriefarbe.
+const kind = (p: Post, i: number) => (i % 3 === 1 && bigNumber(p) ? 'num' : i % 3 === 2 ? 'paper' : 'cat');
+---
+<section class="sec sec--paper labor" id="facts" data-edge="left">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>{ui.home.laborTitle[0]} <span class="mark">{ui.home.laborTitle[1]}</span></h2>
+      <a class="more-link" href={catsUrl}>{ui.home.allCategories} <Icon name="chevron-right" /></a>
+    </div>
+    <div class="filters" role="group" aria-label={ui.filterLabel}>
+      <button class="chip" data-filter="all" type="button" aria-pressed="true">{ui.allCategories}</button>
+      {cats.map((c) => (
+        <button class:list={['chip', `cat-${c}`]} data-filter={c} type="button" aria-pressed="false">{ui.categories[c]}</button>
+      ))}
+    </div>
+    <div class="grid">
+      {posts.map((p, i) => {
+        const k = kind(p, i);
+        const big = k === 'num' ? bigNumber(p) : null;
+        const d = p.data;
+        return (
+          <>
+            <a href={postUrl(p)} class:list={['tile', `tile--${k}`, k !== 'paper' && `cat-${d.category}`, `tilt-${i % 4}`]} data-cat={d.category} data-page={i >= PAGE ? 'later' : undefined} hidden={i >= PAGE}>
+              <span class="top">
+                <span class:list={['chip', k === 'paper' ? `cat-${d.category}` : 'chip-light']}>{ui.categories[d.category]}</span>
+                <NewBadge lang={lang} date={d.date} />
+              </span>
+              {big && <span class="big" aria-hidden="true" data-len={Math.min(big.show.length, 7)}>{big.show}{big.below && <small>{big.below}</small>}</span>}
+              {!big && <span class="emoji" aria-hidden="true">{d.emoji}</span>}
+              <span class="title">{d.title}</span>
+              <span class="foot"><span>#{String(factNumber(p, posts)).padStart(3, '0')}</span><span class="go">{ui.readMore} <Icon name="chevron-right" /></span></span>
+            </a>
+            {i === 1 && hero?.data.products[0] && (
+              <AdCard lang={lang} product={hero.data.products[0]} category={hero.data.category} factKey={hero.data.translationKey} factTitle={hero.data.title} />
+            )}
+          </>
+        );
+      })}
+    </div>
+    {posts.length > PAGE && (
+      <div class="loadmore"><button class="btn" type="button" data-loadmore>{ui.loadMore}</button></div>
+    )}
+  </div>
+</section>
+
+<script>
+  const root = document.getElementById('facts');
+  if (root) {
+    const buttons = root.querySelectorAll<HTMLButtonElement>('[data-filter]');
+    const cards = root.querySelectorAll<HTMLElement>('.grid [data-cat]');
+    const more = root.querySelector<HTMLButtonElement>('[data-loadmore]');
+    let expanded = false;
+    const apply = (filter: string) => {
+      buttons.forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.filter === filter)));
+      cards.forEach((card) => {
+        const matches = filter === 'all' || card.dataset.cat === filter;
+        const paged = filter === 'all' && !expanded && card.dataset.page === 'later';
+        card.hidden = !matches || paged;
+      });
+      if (more) more.hidden = filter !== 'all' || expanded;
+    };
+    buttons.forEach((b) => b.addEventListener('click', () => apply(b.dataset.filter ?? 'all')));
+    more?.addEventListener('click', () => { expanded = true; apply('all'); });
+    // Von der Kategorien-Seite: /?cat=space#facts
+    const cat = new URLSearchParams(location.search).get('cat');
+    if (cat && [...buttons].some((b) => b.dataset.filter === cat)) apply(cat);
+    // Kategorie-Kacheln weiter unten auf der Startseite filtern direkt hier
+    document.querySelectorAll<HTMLElement>('[data-jump]').forEach((el) =>
+      el.addEventListener('click', (e) => {
+        if (!document.getElementById('facts')) return;
+        e.preventDefault();
+        apply(el.dataset.jump ?? 'all');
+        root.scrollIntoView();
+      }),
+    );
+  }
+</script>
+
+<style>
+  /* Unten Platz für die Quizkarte, die von unten in den Abschnitt ragt (TrueOrFake.astro) */
+  .labor { scroll-margin-top: var(--space-10); padding-bottom: calc(2 * var(--space-12)); }
+  .filters { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-9); }
+  .filters .chip { cursor: pointer; padding: var(--space-2) var(--space-4); font-size: var(--fs-sm); box-shadow: var(--shadow-xs); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 270px), 1fr)); gap: var(--space-8) var(--space-7); align-items: stretch; }
+  .tile {
+    position: relative; display: flex; flex-direction: column; gap: var(--space-3); min-height: 21rem; padding: var(--space-5);
+    border: var(--bw-strong) solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+    text-decoration: none; overflow: hidden;
+    transition: transform var(--dur) var(--ease-pop), box-shadow var(--dur) var(--ease);
+  }
+  .tile:hover { transform: translate(-3px, -4px) rotate(-1.5deg); box-shadow: var(--shadow-2xl); }
+  .tilt-1 { transform: rotate(0.8deg); }
+  .tilt-3 { transform: rotate(-0.8deg); }
+  .tile[class*='cat-'] { border-color: var(--on-accent); }
+  .top { display: flex; flex-wrap: wrap; gap: var(--space-2); position: relative; z-index: 1; }
+  .chip-light { background: var(--surface); color: var(--ink); }
+  .emoji { position: absolute; right: calc(-1 * var(--space-4)); top: var(--space-10); font-size: var(--fs-emoji-xl); line-height: 1; transform: rotate(12deg); filter: var(--emoji-shadow); transition: transform var(--dur) var(--ease-pop); }
+  .tile:hover .emoji { transform: rotate(-6deg) scale(1.08); }
+  .big {
+    margin: var(--space-2) 0 0 calc(-1 * var(--space-2)); font-family: var(--font-display); font-weight: 800; line-height: 0.85; letter-spacing: -0.05em;
+    font-size: calc(var(--fs-huge) * 0.62 * var(--fit, 1)); color: var(--on-night); -webkit-text-stroke: var(--bw-strong) var(--on-accent); paint-order: stroke fill;
+    text-shadow: var(--space-1) var(--space-1) 0 var(--on-accent);
+  }
+  .big[data-len='4'] { --fit: 0.85; }
+  .big[data-len='5'] { --fit: 0.7; }
+  .big[data-len='6'], .big[data-len='7'] { --fit: 0.56; }
+  .big small { display: block; margin-top: var(--space-2); font-size: var(--fs-xl); letter-spacing: -0.01em; -webkit-text-stroke: 0; color: var(--on-accent); text-shadow: none; }
+  .title {
+    margin-top: auto; position: relative; z-index: 1; font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 700; line-height: 1.15; letter-spacing: -0.02em;
+  }
+  .tile--cat .title { padding: var(--space-3) var(--space-4); background: var(--surface); color: var(--ink); border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-md); }
+  .tile--num .title { font-size: var(--fs-lg); }
+  .tile--paper { background: var(--surface); color: var(--ink); border-left: var(--bw-stripe) solid var(--yellow); }
+  .tile--paper .title { font-size: var(--fs-2xl); margin-top: var(--space-4); }
+  .tile--paper .emoji { top: auto; bottom: var(--space-10); opacity: 0.9; font-size: var(--fs-emoji-md); }
+  .foot { display: flex; justify-content: space-between; align-items: center; gap: var(--space-2); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); position: relative; z-index: 1; }
+  .go { display: inline-flex; align-items: center; gap: var(--space-1); }
+  .tile--paper .go { color: var(--pink-text); }
+  .grid :global(.ad) { border-radius: var(--radius-lg); }
+  .loadmore { display: flex; justify-content: center; margin-top: var(--space-10); }
+  @media (max-width: 520px) {
+    .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+    .tile { min-height: 15rem; padding: var(--space-3); gap: var(--space-2); }
+    .tile .title, .tile--paper .title { font-size: var(--fs-md); }
+    .emoji { font-size: var(--fs-emoji-md); top: var(--space-9); }
+    .big { font-size: calc(var(--fs-huge) * 0.45 * var(--fit, 1)); }
+    .tile--cat .title { padding: var(--space-2); }
+    .foot span:first-child { display: none; }
+    .grid :global(.ad) { grid-column: 1 / -1; }
+  }
+</style>

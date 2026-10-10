@@ -1,0 +1,113 @@
+---
+// Kopf der Startseite (Design „E“, Wunsch von Eric, 2026-10-10): gelbe Fläche mit heutigem Wochentag und Datum.
+// Wechselt jeden Tag um Mitternacht (deutsche Zeit) im Browser, auch wenn die Seite nicht neu gebaut wurde.
+// Jeder Wochentag hat eigene Farbe, eigene Überschrift und einen Abschnitt „im Fokus“ (data-focus-day an den Abschnitten):
+// Montag Abstimmung, Dienstag Fakt der Woche, Mittwoch Wahr oder Fake, Donnerstag Was war zuerst, Freitag Top 5,
+// Samstag neue Quizfragen, Sonntag Kategorien.
+import type { Lang } from '../../config';
+import { t } from '../../i18n/ui';
+import { berlinDay } from '../../week';
+import Icon from '../Icon.astro';
+interface Props { lang: Lang; catsUrl: string }
+const { lang, catsUrl } = Astro.props;
+const ui = t(lang);
+const h = ui.home;
+const today = berlinDay();
+const wd = new Date(`${today}T12:00:00Z`).getUTCDay();
+const dateText = new Intl.DateTimeFormat(lang === 'de' ? 'de-DE' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${today}T12:00:00Z`));
+const hrefs = [catsUrl, '#vote', '#week', '#wof', '#first', '#week', '#wof'];
+---
+<section class="sec sec--yellow day-hero" data-day-hero data-weekday={wd} data-lang={lang}>
+  <div class="wrap top-row">
+    <span class="pill" data-date>{dateText}</span>
+    <span class="upd">{h.updates}</span>
+  </div>
+  <p class="mega day-word" aria-hidden="true" data-day-word data-len={h.days[wd].length}>{h.days[wd]}</p>
+  <div class="wrap row">
+    {h.dayTitles.map((title, i) => (
+      <div class="variant" data-variant={i} hidden={i !== wd}>
+        <h1>{title}</h1>
+        <div class="acts">
+          <a class="btn btn--ghost" href={hrefs[i]}>{h.dayCtas[i]} <Icon name="chevron-right" /></a>
+          <a class="btn btn--pink" href="#today">{h.go} <Icon name="chevron-down" /></a>
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
+
+<script>
+  import { berlinDay, nextDayStart } from '../../week';
+  const root = document.querySelector<HTMLElement>('[data-day-hero]');
+  if (root) {
+    const lang = root.dataset.lang === 'en' ? 'en-GB' : 'de-DE';
+    const apply = () => {
+      const today = berlinDay();
+      const noon = new Date(`${today}T12:00:00Z`);
+      const wd = noon.getUTCDay();
+      root.dataset.weekday = String(wd);
+      root.querySelector('[data-date]')!.textContent = new Intl.DateTimeFormat(lang, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(noon);
+      const word = root.querySelector<HTMLElement>('[data-day-word]')!;
+      word.textContent = new Intl.DateTimeFormat(lang, { weekday: 'long', timeZone: 'UTC' }).format(noon);
+      word.dataset.len = String(word.textContent.length);
+      root.querySelectorAll<HTMLElement>('[data-variant]').forEach((v) => (v.hidden = v.dataset.variant !== String(wd)));
+      // Abschnitt des Tages markieren
+      document.querySelectorAll<HTMLElement>('[data-focus-day]').forEach((s) => s.toggleAttribute('data-focus', s.dataset.focusDay!.split(',').includes(String(wd))));
+      // Um Mitternacht weiterschalten
+      setTimeout(apply, Math.max(1000, nextDayStart(today) - Date.now() + 1000));
+    };
+    apply();
+  }
+</script>
+
+<style>
+  .day-hero { padding: var(--space-8) 0 calc(var(--space-12) + var(--bleed)); overflow: clip; border-bottom: none; }
+  .top-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+  .pill {
+    display: inline-block; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill);
+    background: var(--on-accent); color: var(--yellow); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lg);
+    transform: rotate(-2deg);
+  }
+  .upd { font-size: var(--fs-sm); font-weight: 600; }
+  .day-word {
+    margin: var(--space-4) calc(-1 * var(--space-6)) 0; font-size: calc(var(--fs-mega) * var(--fit, 1)); text-transform: uppercase;
+    text-shadow: var(--space-3) var(--space-3) 0 var(--day-accent, var(--pink));
+    transform: rotate(-3deg); transform-origin: left center;
+  }
+  /* Lange Wochentage etwas kleiner, damit das Wort lesbar bleibt und trotzdem über den Rand ragt */
+  .day-word[data-len='7'] { --fit: 0.92; }
+  .day-word[data-len='8'] { --fit: 0.82; }
+  .day-word[data-len='9'] { --fit: 0.74; }
+  .day-word[data-len='10'] { --fit: 0.68; }
+  .row { margin-top: calc(-1 * var(--space-8)); position: relative; }
+  .variant { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--space-6); }
+  .variant[hidden] { display: none; }
+  h1 {
+    margin: 0; max-width: 20ch; font-size: var(--fs-display-lg); line-height: 1.02; letter-spacing: -0.04em;
+    padding: var(--space-4) var(--space-5); background: var(--yellow); border: var(--bw-strong) solid var(--on-accent);
+    border-radius: var(--radius-md); box-shadow: var(--shadow-accent); transform: rotate(-1deg);
+  }
+  .acts { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  .acts .btn { border-color: var(--on-accent); box-shadow: var(--shadow-accent-sm); }
+  .acts .btn--ghost { background: var(--surface); color: var(--ink); }
+  /* Farbe je Wochentag: Schatten des Riesenworts */
+  [data-weekday='1'] { --day-accent: var(--pink); }
+  [data-weekday='2'] { --day-accent: var(--lime); }
+  [data-weekday='3'] { --day-accent: var(--cyan); }
+  [data-weekday='4'] { --day-accent: var(--violet); }
+  [data-weekday='5'] { --day-accent: var(--orange); }
+  [data-weekday='6'] { --day-accent: var(--teal); }
+  [data-weekday='0'] { --day-accent: var(--blue); }
+  @media (max-width: 760px) {
+    .day-hero { padding-top: var(--space-5); }
+    .day-word { margin-inline: calc(-1 * var(--space-2)); }
+    /* Lange Wochentage etwas kleiner, damit das Wort lesbar bleibt und trotzdem über den Rand ragt */
+  .day-word[data-len='7'] { --fit: 0.92; }
+  .day-word[data-len='8'] { --fit: 0.82; }
+  .day-word[data-len='9'] { --fit: 0.74; }
+  .day-word[data-len='10'] { --fit: 0.68; }
+  .row { margin-top: calc(-1 * var(--space-4)); }
+    .acts { width: 100%; }
+    .acts .btn { flex: 1 1 auto; }
+  }
+</style>

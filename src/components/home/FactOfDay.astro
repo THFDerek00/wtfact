@@ -1,0 +1,108 @@
+---
+// Fakt des Tages als Plakat (Design „E“): große Zahl aus dem Fakt, Kategorie-Fläche mit Emoji, Karte mit Titel.
+// Eine Vorlage für jeden Fakt (Wunsch von Eric: „einheitlich austauschbar“). Welcher Fakt heute vorne steht,
+// rechnet src/scripts/fame.ts im Browser aus; gerendert werden alle Kandidaten der letzten Tage, sichtbar ist einer.
+// Die Zahl ragt oben in den gelben Kopf und unten in den nächsten Abschnitt.
+import type { Lang } from '../../config';
+import { t } from '../../i18n/ui';
+import { postUrl, bigNumber, factInfo, type Post } from '../../lib';
+import { berlinDay, addDays, postDay, pickFactOfDay } from '../../week';
+import Icon from '../Icon.astro';
+interface Props { lang: Lang; posts: Post[] }
+const { lang, posts } = Astro.props;
+const ui = t(lang);
+const today = berlinDay();
+// Kandidaten: Fakten von vorgestern bis heute, damit auch eine Seite vom Vortag den richtigen zeigen kann.
+const cands = posts.filter((p) => postDay(p.data.date) >= addDays(today, -2));
+const pick = pickFactOfDay(cands.map(factInfo), {}, today)?.key ?? cands[0]?.data.translationKey;
+---
+{cands.length > 0 && (
+  <section class="sec sec--night fotd" data-edge data-fotd data-facts={JSON.stringify(cands.map(factInfo))} aria-label={ui.home.fotd}>
+    {cands.map((p) => {
+      const d = p.data;
+      const big = bigNumber(p);
+      return (
+        <article class="wrap poster" data-fotd-key={d.translationKey} hidden={d.translationKey !== pick}>
+          <div class="left">
+            {big
+              ? <p class="mega big bleed" aria-hidden="true" data-len={Math.min(big.show.length, 8)}>{big.show}{big.below && <span class="unit">{big.below}</span>}</p>
+              : <p class="big-emoji bleed" aria-hidden="true">{d.emoji}</p>}
+            <span class="label">{ui.home.fotd}</span>
+            {big && <span class:list={['slab', `cat-${d.category}`]} aria-hidden="true"><span class="slab-emoji">{d.emoji}</span></span>}
+          </div>
+          <a class="card fcard bleed" href={postUrl(p)}>
+            <span class="sticker">WTF?!</span>
+            <span class="chips"><span class:list={['chip', `cat-${d.category}`]}>{ui.categories[d.category]}</span></span>
+            <span class="title">{d.title}</span>
+            <span class="hook">{d.hook}</span>
+            <span class="cta"><span class="btn">{ui.home.readFull} <Icon name="chevron-right" /></span><span class="src"><Icon name="badge-check" /> {ui.sourcesCount(d.sources.length)}</span></span>
+          </a>
+        </article>
+      );
+    })}
+  </section>
+)}
+
+<script>
+  import { current } from '../../scripts/fame';
+  const root = document.querySelector<HTMLElement>('[data-fotd]');
+  if (root) {
+    current(JSON.parse(root.dataset.facts ?? '[]')).then(({ daily }) => {
+      const el = daily && root.querySelector<HTMLElement>(`[data-fotd-key="${daily.key}"]`);
+      if (!el) return;
+      root.querySelectorAll<HTMLElement>('[data-fotd-key]').forEach((a) => (a.hidden = a !== el));
+    });
+  }
+</script>
+
+<style>
+  .fotd { padding: 0 0 var(--space-12); }
+  .poster {
+    position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: var(--space-10);
+    align-items: start;
+  }
+  .poster[hidden] { display: none; }
+  .left { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-5); }
+  .label {
+    position: relative; z-index: 3; margin-top: calc(-1 * var(--space-6)); padding: var(--space-2) var(--space-4);
+    border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-sm); background: var(--yellow); color: var(--on-accent);
+    font-family: var(--font-display); font-weight: 800; font-size: var(--fs-lg); text-transform: uppercase; letter-spacing: 0.04em;
+    box-shadow: var(--shadow-night-pink); transform: rotate(-3deg);
+  }
+  .slab {
+    align-self: stretch; margin: var(--space-4) var(--space-8) 0 var(--space-6); height: 16rem;
+    border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-lg); box-shadow: var(--shadow-night-lime);
+    transform: rotate(-2deg); display: grid; place-items: center; overflow: hidden;
+  }
+  .slab-emoji { font-size: var(--fs-emoji-2xl); transform: rotate(-10deg); filter: var(--emoji-shadow); }
+  /* Die Zahl: oben in den gelben Kopf hinein, Kontur in Tinte, Schatten pink */
+  .big {
+    margin: calc(-1 * var(--bleed) - var(--space-12)) 0 0 calc(-1 * var(--space-2));
+    font-size: calc(var(--fs-mega) * var(--fit, 1)); text-shadow: var(--space-3) var(--space-3) 0 var(--pink);
+  }
+  .big[data-len='4'] { --fit: 0.85; }
+  .big[data-len='5'] { --fit: 0.72; }
+  .big[data-len='6'] { --fit: 0.6; }
+  .big[data-len='7'], .big[data-len='8'] { --fit: 0.5; }
+  .unit { display: block; margin-top: var(--space-4); font-size: var(--fs-display-md); letter-spacing: -0.02em; -webkit-text-stroke: 0; color: var(--yellow); text-shadow: none; }
+  .big-emoji { margin: calc(-1 * var(--bleed) - var(--space-8)) 0 0; font-size: var(--fs-huge); line-height: 1; transform: rotate(-8deg); filter: var(--emoji-shadow); }
+  .fcard {
+    position: relative; display: flex; flex-direction: column; gap: var(--space-3);
+    margin: calc(-1 * var(--bleed)) 0 calc(-1 * var(--bleed) - var(--space-12)); padding: var(--space-8) var(--space-7) var(--space-7);
+    background: var(--surface); color: var(--ink); border: var(--bw-strong) solid var(--on-accent); box-shadow: var(--shadow-2xl);
+    text-decoration: none; transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  }
+  .fcard:hover { transform: translate(-3px, -3px) rotate(-0.4deg); }
+  .fcard .sticker { position: absolute; top: calc(-1 * var(--space-5)); left: var(--space-6); font-family: var(--font-display); font-weight: 800; font-size: var(--fs-xl); border: var(--bw-sm) solid var(--on-accent); }
+  .title { font-family: var(--font-display); font-size: var(--fs-display-sm); font-weight: 700; line-height: 1.08; letter-spacing: -0.03em; }
+  .hook { color: var(--muted); font-size: var(--fs-lg); }
+  .cta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); margin-top: var(--space-2); }
+  .src { display: inline-flex; align-items: center; gap: var(--space-1); font-weight: 700; font-size: var(--fs-sm); }
+  @media (max-width: 860px) {
+    .poster { grid-template-columns: minmax(0, 1fr); gap: var(--space-8); }
+    .slab { position: absolute; right: 0; top: calc(-1 * var(--space-6)); width: 40%; height: 9rem; margin: 0; }
+    .slab-emoji { font-size: var(--fs-emoji-md); }
+    .big { margin-top: calc(-1 * var(--bleed) - var(--space-8)); }
+    .fcard { margin: 0 0 calc(-1 * var(--bleed) - var(--space-10)); padding: var(--space-7) var(--space-5) var(--space-5); }
+  }
+</style>

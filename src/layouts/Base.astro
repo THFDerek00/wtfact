@@ -3,7 +3,7 @@ import '../styles/global.css';
 import NightSky from '../components/NightSky.astro';
 import Icon from '../components/Icon.astro';
 import { SITE, type Lang } from '../config';
-import { t } from '../i18n/ui';
+import { t, catsPath, chartsPath } from '../i18n/ui';
 import { postsFor, postUrl } from '../lib';
 
 interface Props {
@@ -66,6 +66,16 @@ const allUrls = (await postsFor(lang)).map(postUrl);
           WTF<span>act</span><b class="sticker">?!</b>
         </a>
         <p class="slogan">{ui.slogan}</p>
+        <nav class="mainnav" aria-label={ui.home.nav}>
+          {[
+            [`/${lang}/#facts`, ui.home.navFacts],
+            [catsPath(lang), ui.home.catsAll],
+            [chartsPath(lang), ui.fame.name],
+            [`/${lang}/science-jumper/`, ui.game.name],
+          ].map(([href, label]) => (
+            <a href={href} aria-current={Astro.url.pathname === href ? 'page' : undefined}>{label}</a>
+          ))}
+        </nav>
         <div class="actions">
           <button class="btn btn--pink surprise" type="button" data-surprise={JSON.stringify(allUrls)} aria-label={ui.surprise}>
             <Icon name="dices" /><span class="label" aria-hidden="true">{ui.surprise}</span>
@@ -81,14 +91,16 @@ const allUrls = (await postsFor(lang)).map(postUrl);
       </div>
     </header>
     <main id="main"><slot /></main>
-    <footer class="foot stage">
+    <footer class="foot sec sec--yellow" data-edge>
       <div class="wrap">
         <a href={`/${lang}/`} class="logo big" aria-label={SITE.name}>WTF<span>act</span><b class="sticker">?!</b></a>
         <p class="claim">{ui.slogan}</p>
         <p class="note">{ui.tagline}</p>
         <p class="note">{ui.affiliateFooter} {ui.madeWith}</p>
         <nav>
-          <a href={`/${lang}/hall-of-fame/`}>{ui.fame.name}</a>
+          <a href={chartsPath(lang)}>{ui.fame.name}</a>
+          <a href={catsPath(lang)}>{ui.home.catsAll}</a>
+          <a href={`/${lang}/science-jumper/`}>{ui.game.name}</a>
           <a href={`/${lang}/about/`}>{ui.about}</a>
           <a href={`/${lang}/korrekturen/`}>{ui.corrections}</a>
           <a href={`/${lang}/impressum/`}>{ui.imprint}</a>
@@ -148,6 +160,12 @@ const allUrls = (await postsFor(lang)).map(postUrl);
     line-height: 1.2; color: var(--muted);
   }
   .actions { display: flex; align-items: center; gap: var(--space-3); }
+  /* Hauptmenü (Design „E“): nur auf breiten Bildschirmen, schmal reichen Logo, Zufall und Fußzeile */
+  .mainnav { display: flex; gap: var(--space-5); margin-right: var(--space-4); }
+  .mainnav a { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-md); text-decoration: none; padding-bottom: var(--space-1); border-bottom: var(--bw-strong) solid transparent; }
+  .mainnav a:hover, .mainnav a[aria-current='page'] { border-color: var(--pink); }
+  @media (max-width: 1060px) { .mainnav { display: none; } }
+  @media (max-width: 1360px) and (min-width: 1061px) { .slogan { display: none; } .mainnav { margin-left: auto; } }
   .surprise { padding: var(--space-2) var(--space-4); font-size: var(--fs-sm); }
   .lang { padding: var(--space-1) var(--space-3); font-size: var(--fs-sm); }
   .theme { padding: var(--space-1) var(--space-2); cursor: pointer; }
@@ -158,15 +176,18 @@ const allUrls = (await postsFor(lang)).map(postUrl);
   .theme[aria-pressed='true'] .moon { display: none; }
   .theme[aria-pressed='true'] { box-shadow: none; transform: none; }
   .theme[aria-pressed='true']::before { content: none; }
-  .foot { margin-top: var(--space-12); padding: var(--space-11) 0 var(--space-10); font-size: var(--fs-sm); }
-  .foot .logo { font-size: var(--fs-display-md); }
-  .foot .logo span { color: var(--pink); }
+  /* Fuß im Design „E“: gelb mit Punkten und schräger Kante, Logo riesig */
+  .foot { margin-top: calc(var(--space-12) + var(--edge)); padding: var(--space-12) 0 var(--space-10); font-size: var(--fs-sm); }
+  /* Endet die Seite mit einem farbigen Abschnitt, schließt der Fuß direkt an (schräge Kante statt Lücke) */
+  main:has(> .sec:last-child) + .foot { margin-top: 0; }
+  .foot .logo { font-size: var(--fs-display-2xl); }
+  .foot .logo span { color: var(--on-accent); -webkit-text-stroke: 0; text-decoration: underline; text-decoration-color: var(--pink); text-decoration-thickness: var(--space-2); text-underline-offset: var(--space-1); }
   .claim { font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 700; line-height: 1.3; margin: var(--space-4) 0 var(--space-6); max-width: 30ch; }
   .note + .note { margin-top: var(--space-2); }
-  .note { margin: 0; max-width: 62ch; color: var(--on-night-muted); }
+  .note { margin: 0; max-width: 62ch; }
   .foot nav { display: flex; flex-wrap: wrap; gap: var(--space-5); margin: var(--space-5) 0; }
   .foot nav a { font-weight: 600; }
-  .copy { margin: 0; color: var(--on-night-muted); }
+  .copy { margin: 0; font-weight: 600; }
   @media (max-width: 760px) {
     .slogan { display: none; }
   }

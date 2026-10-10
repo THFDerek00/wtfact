@@ -1,16 +1,18 @@
 ---
+// Faktseite im Design „E“ (Wunsch von Eric, 2026-10-10): Plakat mit großer Zahl, Band mit Slogan, Schätzfrage,
+// Text auf Papier mit gelbem Streifen und daneben Daumen plus zwei weitere Fakten, Werbung über die ganze Breite,
+// Beweise auf der Nacht, WTF-Barometer (nur hier) und „Noch ein WTF zum Schluss“, das automatisch wechselt.
 import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import ProductBox from '../../components/ProductBox.astro';
 import ProductTeaser from '../../components/ProductTeaser.astro';
 import ShareBar from '../../components/ShareBar.astro';
-import PostCard from '../../components/PostCard.astro';
 import NewBadge from '../../components/NewBadge.astro';
 import Thumbs from '../../components/Thumbs.astro';
 import Icon from '../../components/Icon.astro';
 import { LANGS } from '../../config';
 import { t, dateFmt } from '../../i18n/ui';
-import { postsFor, langOf, slugOf, postUrl, translationOf, readingMinutes, factNumber, type Post } from '../../lib';
+import { postsFor, langOf, slugOf, postUrl, translationOf, readingMinutes, factNumber, bigNumber, guessFor, type Post } from '../../lib';
 import { ogPath } from '../../og';
 
 export async function getStaticPaths() {
@@ -20,6 +22,7 @@ export async function getStaticPaths() {
 const { post } = Astro.props as { post: Post };
 const lang = langOf(post);
 const ui = t(lang);
+const fp = ui.factPage;
 const d = post.data;
 const { Content } = await render(post);
 const alt = await translationOf(post);
@@ -27,72 +30,148 @@ const all = await postsFor(lang);
 const i = all.findIndex((p) => p.id === post.id);
 // Nächster Fakt = der davor veröffentlichte (beim ältesten wieder der neueste), so entsteht eine Kette.
 const next = all.length > 1 ? all[(i + 1) % all.length] : undefined;
-const related = all.filter((p) => p.id !== post.id && p.id !== next?.id && p.data.category === d.category).slice(0, 2);
+const others = all.filter((p) => p.id !== post.id);
+// Zwei Fakten neben dem Text: erst aus derselben Kategorie, sonst die nächsten.
+const side = [...others.filter((p) => p.data.category === d.category && p.id !== next?.id), ...others].filter((p, k, arr) => arr.indexOf(p) === k).slice(0, 2);
+// „Noch ein WTF zum Schluss“: der nächste Fakt und fünf weitere mit großer Zahl, fest pro Fakt ausgewählt.
+const seed = [...d.translationKey].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
+const pool = others.filter((p) => p.id !== next?.id && !side.includes(p) && bigNumber(p));
+const finale = [next, ...Array.from({ length: Math.min(5, pool.length) }, (_, k) => pool[(seed + k * 7919) % pool.length])]
+  .filter((p, k, arr): p is Post => !!p && arr.indexOf(p) === k)
+  .map((p) => ({ p, big: bigNumber(p) }));
 const no = String(factNumber(post, all)).padStart(3, '0');
+const big = bigNumber(post);
+const guess = guessFor(post);
+const sideTile = (p: Post) => ({ p, big: bigNumber(p) });
 ---
 <Base lang={lang} title={d.title} description={d.teaser} altUrl={alt ? postUrl(alt) : undefined} image={ogPath(post)}>
   <div class="progress" aria-hidden="true"><span></span></div>
-  <section class:list={['banner', `cat-${d.category}`]}>
-    <div class="wrap banner-inner">
-      <div class="meta">
-        <span class="chip">{ui.categories[d.category]}</span>
-        <span class="no">{ui.factNo} #{no}</span>
-        <NewBadge lang={lang} date={d.date} />
+
+  <section class="sec sec--night fhero">
+    <div class="wrap poster">
+      <a class="crumb" href={`/${lang}/?cat=${d.category}#facts`}>{ui.categories[d.category]} <Icon name="chevron-right" /></a>
+      <span class:list={['slab', `cat-${d.category}`]} aria-hidden="true"><span>{d.emoji}</span></span>
+      {big
+        ? <p class="mega big bleed" aria-hidden="true" data-len={Math.min(big.show.length, 8)}>{big.show}{big.below && <span class="unit">{big.below}</span>}</p>
+        : <p class="big-emoji bleed" aria-hidden="true">{d.emoji}</p>}
+      <div class="card hcard bleed">
+        <span class="sticker">WTF?!</span>
+        <div class="meta">
+          <span class:list={['chip', `cat-${d.category}`]}>{ui.categories[d.category]}</span>
+          <span class="chip">{ui.factNo} #{no}</span>
+          <NewBadge lang={lang} date={d.date} />
+        </div>
+        <h1>{d.title}</h1>
+        <p class="hook" data-fact-key={d.translationKey}>{d.hook}</p>
+        <p class="info">{dateFmt(lang, d.date)} · {ui.readingTime(readingMinutes(post.body))} · <a href="#sources"><Icon name="badge-check" /> {ui.sourcesCount(d.sources.length)}</a></p>
       </div>
-      <h1>{d.title}</h1>
-      <p class="info">{dateFmt(lang, d.date)} · {ui.readingTime(readingMinutes(post.body))} · <a href="#sources"><Icon name="badge-check" /> {ui.sourcesCount(d.sources.length)}</a></p>
-      <span class="big-emoji" aria-hidden="true">{d.emoji}</span>
+    </div>
+  </section>
+  <div class="tape bleed" aria-hidden="true"><span>{ui.slogan} · {ui.slogan} · {ui.slogan} · {ui.slogan} · {ui.slogan}</span></div>
+
+  <section class="sec sec--paper body-sec">
+    <div class="wrap">
+      {guess && (
+        <div class="card guess" data-guess={d.translationKey} data-correct={guess.correct} data-stat={fp.guessStat(9001)}>
+          <div class="g-q">
+            <span class="g-kicker">{fp.guessKicker}</span>
+            <p class="g-title">{fp.guessQ}</p>
+            <p class="g-text">{guess.before}<span class="gap" data-gap>___</span>{guess.after}</p>
+          </div>
+          <div class="g-ans" role="group" aria-label={fp.guessLabel}>
+            {guess.options.map((o, k) => <button class="g-btn" type="button" aria-pressed="false" data-opt={k}>{o}</button>)}
+          </div>
+          <p class="g-res" data-res aria-live="polite" hidden>
+            <b data-ok-text={fp.guessRight} data-no-text={`${fp.guessWrong} ${guess.options[guess.correct]}.`}></b> <span data-pct></span>
+          </p>
+        </div>
+      )}
+
+      <div class="cols">
+        <article class="paper" data-fact-key={d.translationKey}>
+          <Thumbs lang={lang} factKey={d.translationKey} place="inline" />
+          {d.products[0] && <ProductTeaser lang={lang} product={d.products[0]} category={d.category} place="inline" factKey={d.translationKey} />}
+          <div class="content"><Content /></div>
+        </article>
+        <aside class="aside">
+          <Thumbs lang={lang} factKey={d.translationKey} place="side" />
+          {side.length > 0 && (
+            <div class="two">
+              <p class="side-h">{fp.twoFacts}</p>
+              {side.map(sideTile).map(({ p, big: b }, k) => (
+                <a class:list={['stile', k === 0 && b ? `cat-${p.data.category}` : 'stile--paper']} href={postUrl(p)}>
+                  <span class:list={['chip', k === 0 && b ? 'chip-light' : `cat-${p.data.category}`]}>{ui.categories[p.data.category]}</span>
+                  {k === 0 && b ? <span class="s-big" aria-hidden="true">{b.show}{b.below && <small>{b.below}</small>}</span> : <span class="s-emoji" aria-hidden="true">{p.data.emoji}</span>}
+                  <span class="s-title">{p.data.title}</span>
+                </a>
+              ))}
+            </div>
+          )}
+        </aside>
+      </div>
     </div>
   </section>
 
-  <div class="wrap fact-layout">
-  <article class="fact-main" data-fact-key={d.translationKey}>
-    <p class="hook card"><span class="hook-label">WTF?!</span>{d.hook}</p>
-
-    <Thumbs lang={lang} factKey={d.translationKey} place="inline" />
-
-    {d.products[0] && <ProductTeaser lang={lang} product={d.products[0]} category={d.category} place="inline" factKey={d.translationKey} />}
-
-    <div class="content"><Content /></div>
-
-    <ProductBox lang={lang} products={d.products} category={d.category} factKey={d.translationKey} />
-
-
-    {d.sources.length > 0 && (
-      <section class="sources" id="sources">
-        <h2>{ui.sources}</h2>
-        <ol>{d.sources.map((s) => <li><a href={s.url} rel="noopener" target="_blank">{s.label}</a></li>)}</ol>
-      </section>
-    )}
-
-    <ShareBar lang={lang} title={d.title} />
-  </article>
-
-  <aside class="fact-side">
-  <Thumbs lang={lang} factKey={d.translationKey} place="side" />
-  {d.products[0] && <ProductTeaser lang={lang} product={d.products[0]} category={d.category} place="side" factKey={d.translationKey} />}
-  {next && (
-    <section class="nextup">
-      <a class="next card" href={postUrl(next)}>
-        <span class="next-label">{ui.next} <Icon name="chevron-right" /></span>
-        <span class="next-title"><span aria-hidden="true">{next.data.emoji}</span> {next.data.title}</span>
-      </a>
+  {d.products.length > 0 && (
+    <section class="sec sec--yellow adband" data-edge>
+      <div class="wrap"><ProductBox lang={lang} products={d.products} category={d.category} factKey={d.translationKey} wide /></div>
     </section>
   )}
 
-  {related.length > 0 && (
-    <section class="related">
-      <h2>{ui.categories[d.category]}</h2>
-      <div class="related-grid">{related.map((p) => <PostCard post={p} no={factNumber(p, all)} />)}</div>
+  {d.sources.length > 0 && (
+    <section class="sec sec--night proofs" id="sources" data-edge="left">
+      <div class="wrap">
+        <h2>{fp.proofs}</h2>
+        <ol class="srcs">{d.sources.map((s, k) => <li><b>{k + 1}</b><a href={s.url} rel="noopener" target="_blank">{s.label}</a></li>)}</ol>
+        <ShareBar lang={lang} title={d.title} />
+      </div>
     </section>
   )}
-  </aside>
-  </div>
+
+  <section class="sec sec--pink baro" data-edge data-baro={d.translationKey} data-avg={fp.baroAvg('§', 9001)} data-avg-one={fp.baroAvg('§', 1)} data-thanks={fp.baroThanks}>
+    <div class="wrap b-in">
+      <h2>{fp.baroTitle}</h2>
+      <p>{fp.baroIntro}</p>
+      <div class="slider">
+        <input type="range" min="0" max="10" step="1" value="5" aria-label={fp.baroLabel} data-range />
+        <div class="lbls" aria-hidden="true"><span>{fp.baroLow}</span><span>{fp.baroMid}</span><span>{fp.baroHigh}</span></div>
+      </div>
+      <div class="b-row">
+        <output class="b-val" data-val>5</output>
+        <button class="btn btn--ghost" type="button" data-send>{fp.baroSave}</button>
+      </div>
+      <p class="b-avg" data-avg-out aria-live="polite"></p>
+    </div>
+  </section>
+
+  {finale.length > 0 && (
+    <section class="finale sec sec--night" aria-roledescription="carousel" aria-label={fp.finaleLabel} data-finale>
+      <div class="f-track">
+        {finale.map(({ p, big: b }, k) => (
+          <a class:list={['f-slide', `cat-${p.data.category}`, `f-v${k % 3}`]} href={postUrl(p)} data-slide hidden={k > 0} aria-roledescription="slide">
+            <span class="wrap f-in">
+              <span class="f-lbl">{fp.finale}</span>
+              <span class="f-title">{p.data.title}</span>
+              <span class="f-go btn">{ui.readMore} <Icon name="chevron-right" /></span>
+            </span>
+            {b ? <span class="mega f-out bleed" aria-hidden="true" data-len={Math.min(b.show.length, 8)}>{b.show}</span> : <span class="f-emoji bleed" aria-hidden="true">{p.data.emoji}</span>}
+          </a>
+        ))}
+      </div>
+      {finale.length > 1 && (
+        <div class="wrap f-ctrl">
+          <div class="f-dots" aria-hidden="true">{finale.map((_, k) => <i data-dot={k}></i>)}</div>
+          <button class="chip f-play" type="button" aria-pressed="false" data-pause data-pause-label={fp.pause} data-play-label={fp.play}><Icon name="pause" /> <span data-pause-text>{fp.pause}</span></button>
+        </div>
+      )}
+    </section>
+  )}
 </Base>
 
 <script>
   import { markRead } from '../../scripts/fame';
-  // Für das Sammelalbum in der Hall of Fame: Dieser Fakt gilt als gelesen.
+  import { answer, myAnswer, tallies, localTally, share, total, type Tally } from '../../scripts/quiz';
+  // Für das Sammelalbum in den WTF-Charts: Dieser Fakt gilt als gelesen.
   const key = document.querySelector<HTMLElement>('[data-fact-key]')?.dataset.factKey;
   if (key) markRead(key);
   const bar = document.querySelector<HTMLElement>('.progress span');
@@ -102,79 +181,287 @@ const no = String(factNumber(post, all)).padStart(3, '0');
   };
   addEventListener('scroll', update, { passive: true });
   update();
+
+  // ---------- Schätzfrage ----------
+  const g = document.querySelector<HTMLElement>('[data-guess]');
+  if (g) {
+    const id = g.dataset.guess!;
+    const correct = Number(g.dataset.correct);
+    const btns = [...g.querySelectorAll<HTMLButtonElement>('[data-opt]')];
+    const show = (pick: number, counts: Tally) => {
+      btns.forEach((b, k) => {
+        b.disabled = true;
+        b.setAttribute('aria-pressed', String(k === pick));
+        b.dataset.result = k === correct ? 'ok' : k === pick ? 'no' : '';
+      });
+      g.querySelector('[data-gap]')!.textContent = btns[correct].textContent;
+      const res = g.querySelector<HTMLElement>('[data-res]')!;
+      const b = res.querySelector<HTMLElement>('b')!;
+      b.textContent = (pick === correct ? b.dataset.okText : b.dataset.noText) ?? '';
+      b.toggleAttribute('data-ok', pick === correct);
+      res.querySelector('[data-pct]')!.textContent = total(counts) > 1 ? g.dataset.stat!.replace('9001', String(100 - share(counts, correct))) : '';
+      res.hidden = false;
+    };
+    const mine = myAnswer('guess', id);
+    if (mine !== undefined) tallies('guess', id).then((t) => show(mine, t?.[id] ?? localTally('guess', id)));
+    btns.forEach((b, k) => b.addEventListener('click', async () => {
+      show(k, localTally('guess', id));
+      const counts = await answer('guess', id, k);
+      if (counts) show(k, counts);
+    }));
+  }
+
+  // ---------- WTF-Barometer ----------
+  const baro = document.querySelector<HTMLElement>('[data-baro]');
+  if (baro) {
+    const id = baro.dataset.baro!;
+    const range = baro.querySelector<HTMLInputElement>('[data-range]')!;
+    const val = baro.querySelector<HTMLOutputElement>('[data-val]')!;
+    const out = baro.querySelector<HTMLElement>('[data-avg-out]')!;
+    const avg = (c: Tally) => {
+      const n = total(c);
+      if (!n) return;
+      const sum = Object.entries(c).reduce((s, [k, v]) => s + Number(k) * v, 0);
+      const a = (sum / n).toLocaleString(document.documentElement.lang, { maximumFractionDigits: 1 });
+      out.textContent = (n === 1 ? baro.dataset.avgOne! : baro.dataset.avg!.replace('9001', String(n))).replace('§', a);
+    };
+    const sync = () => { val.textContent = range.value; baro.style.setProperty('--v', range.value); };
+    range.addEventListener('input', sync);
+    const mine = myAnswer('baro', id);
+    if (mine !== undefined) range.value = String(mine);
+    sync();
+    tallies('baro', id).then((t) => t?.[id] && avg(t[id]));
+    baro.querySelector('[data-send]')!.addEventListener('click', async () => {
+      const counts = (await answer('baro', id, Number(range.value))) ?? localTally('baro', id);
+      avg(counts);
+      out.textContent = `${baro.dataset.thanks} ${out.textContent}`;
+    });
+  }
+
+  // ---------- Noch ein WTF zum Schluss: wechselt alle paar Sekunden ----------
+  const fin = document.querySelector<HTMLElement>('[data-finale]');
+  if (fin) {
+    const slides = [...fin.querySelectorAll<HTMLElement>('[data-slide]')];
+    const dots = [...fin.querySelectorAll<HTMLElement>('[data-dot]')];
+    const pauseBtn = fin.querySelector<HTMLButtonElement>('[data-pause]');
+    let cur = 0;
+    let paused = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let hover = false;
+    const go = (n: number) => {
+      cur = (n + slides.length) % slides.length;
+      slides.forEach((s, k) => (s.hidden = k !== cur));
+      dots.forEach((d, k) => d.toggleAttribute('data-on', k === cur));
+    };
+    const syncBtn = () => {
+      if (!pauseBtn) return;
+      pauseBtn.setAttribute('aria-pressed', String(paused));
+      pauseBtn.querySelector('[data-pause-text]')!.textContent = (paused ? pauseBtn.dataset.playLabel : pauseBtn.dataset.pauseLabel) ?? '';
+    };
+    go(0);
+    syncBtn();
+    if (slides.length > 1) {
+      setInterval(() => { if (!paused && !hover && !document.hidden) go(cur + 1); }, 6000);
+      fin.addEventListener('mouseenter', () => (hover = true));
+      fin.addEventListener('mouseleave', () => (hover = false));
+      fin.addEventListener('focusin', () => (hover = true));
+      fin.addEventListener('focusout', () => (hover = false));
+      pauseBtn?.addEventListener('click', () => { paused = !paused; syncBtn(); });
+      dots.forEach((d, k) => d.addEventListener('click', () => go(k)));
+    }
+  }
 </script>
 
 <style>
-  .progress { position: fixed; top: 0; left: 0; right: 0; height: 5px; z-index: 6; pointer-events: none; }
+  .progress { position: fixed; top: 0; left: 0; right: 0; height: var(--space-1); z-index: 6; pointer-events: none; }
   .progress span { display: block; height: 100%; background: var(--pink); transform-origin: left; transform: scaleX(0); }
 
-  .banner { position: relative; overflow: hidden; border-bottom: var(--bw) solid var(--line); padding: var(--space-10) 0 var(--space-12); --dots-size: var(--dots-size-lg); }
-  .banner-inner { position: relative; }
-  .meta { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
-  .no { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); }
-  h1 { position: relative; z-index: 1; font-size: var(--fs-display-lg); margin: var(--space-4) 0 var(--space-4); max-width: 24ch; }
-  .info { position: relative; z-index: 1; margin: 0; font-size: var(--fs-sm); font-weight: 600; }
-  .big-emoji {
-    position: absolute; right: calc(-2 * var(--space-12)); bottom: calc(-1 * var(--space-12));
-    font-size: var(--fs-emoji-2xl); transform: rotate(12deg); filter: var(--emoji-shadow); opacity: 0.9;
+  /* Plakat */
+  .fhero { padding: var(--space-8) 0 calc(var(--space-12) + var(--space-8)); }
+  .poster { position: relative; display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: var(--space-8); align-items: end; min-height: 32rem; }
+  .crumb { position: absolute; top: 0; left: 0; z-index: 3; display: inline-flex; align-items: center; gap: var(--space-1); font-family: var(--font-display); font-weight: 700; color: var(--yellow); text-decoration: none; }
+  .crumb:hover { text-decoration: underline; }
+  .slab {
+    position: absolute; right: 4%; top: var(--space-2); width: 40%; height: 70%; display: grid; place-items: center; overflow: hidden;
+    border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-lg); box-shadow: var(--shadow-night-lime); transform: rotate(2.5deg);
+  }
+  .slab span { font-size: var(--fs-emoji-2xl); transform: rotate(-10deg); filter: var(--emoji-shadow); }
+  .big { grid-column: 1; align-self: center; margin: var(--space-10) 0 0 calc(-1 * var(--space-2)); font-size: calc(var(--fs-mega) * 0.9 * var(--fit, 1)); text-shadow: var(--space-3) var(--space-3) 0 var(--pink); }
+  .big[data-len='4'] { --fit: 0.85; }
+  .big[data-len='5'] { --fit: 0.72; }
+  .big[data-len='6'] { --fit: 0.6; }
+  .big[data-len='7'], .big[data-len='8'] { --fit: 0.5; }
+  .unit { display: block; margin-top: var(--space-4); font-size: var(--fs-display-md); letter-spacing: -0.02em; -webkit-text-stroke: 0; color: var(--yellow); text-shadow: none; }
+  .big-emoji { grid-column: 1; margin: 0; font-size: var(--fs-huge); line-height: 1; transform: rotate(-8deg); filter: var(--emoji-shadow); }
+  .hcard {
+    grid-column: 2; position: relative; z-index: 3; display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-8) var(--space-7) var(--space-7);
+    margin-bottom: calc(-1 * var(--space-12) - var(--space-12)); background: var(--surface); color: var(--ink); border: var(--bw-strong) solid var(--on-accent); box-shadow: var(--shadow-2xl);
+  }
+  .hcard .sticker { position: absolute; top: calc(-1 * var(--space-5)); left: var(--space-6); font-family: var(--font-display); font-weight: 800; font-size: var(--fs-xl); border: var(--bw-sm) solid var(--on-accent); }
+  .meta { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+  h1 { margin: var(--space-2) 0 0; font-size: var(--fs-display-md); line-height: 1.05; letter-spacing: -0.03em; }
+  .hook { margin: 0; font-size: var(--fs-lg); color: var(--muted); }
+  .info { margin: 0; font-size: var(--fs-sm); font-weight: 600; }
+  .info a { display: inline-flex; align-items: center; gap: var(--space-1); }
+  /* Band mit Slogan, ragt schräg über beide Abschnitte */
+  .tape {
+    margin: calc(-1 * var(--space-6)) calc(-1 * var(--space-6)) 0; padding: var(--space-3) 0; overflow: hidden; white-space: nowrap;
+    background: var(--lime); color: var(--on-accent); border-block: var(--bw-strong) solid var(--on-accent); transform: rotate(-1.6deg);
+    font-family: var(--font-display); font-weight: 800; font-size: var(--fs-xl); text-transform: uppercase; letter-spacing: 0.02em;
   }
 
-  /* Breites Layout (Wunsch von Eric, 2026-10-02): Fakt links, „Noch ein Fakt“ und Verwandtes rechts daneben.
-     Der Text bleibt höchstens 54rem breit (lesbare Zeilen), auf breiten Bildschirmen wächst die rechte Spalte
-     und zeigt die verwandten Fakten nebeneinander (Wunsch von Eric, 2026-10-09). */
-  .fact-layout { display: grid; grid-template-columns: minmax(0, 54rem) minmax(280px, 1fr); gap: var(--space-11); align-items: start; }
-  .fact-main { font-size: var(--fs-lg); }
-  .fact-side { position: sticky; top: var(--space-12); display: flex; flex-direction: column; gap: var(--space-8); margin-top: var(--space-8); }
-
-  .hook {
-    position: relative; margin: calc(-1 * var(--space-9)) 0 var(--space-8); padding: var(--space-6) var(--space-5) var(--space-5);
-    font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 600; line-height: 1.4;
-    box-shadow: var(--shadow-lg);
+  /* Schätzfrage */
+  .body-sec { padding-top: var(--space-12); }
+  .guess {
+    display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: var(--space-6) var(--space-8); align-items: center;
+    padding: var(--space-7); margin-bottom: var(--space-11); border-width: var(--bw-strong); box-shadow: var(--shadow-xl); transform: rotate(-0.4deg);
   }
-  .hook-label {
-    position: absolute; top: calc(-1 * var(--space-4)); left: var(--space-5);
-    padding: 0 var(--space-2); border: var(--bw-sm) solid var(--line); border-radius: var(--radius-sm);
-    background: var(--yellow); color: var(--on-accent); font-size: var(--fs-sm); font-weight: 800; transform: rotate(-3deg);
+  .g-kicker { display: inline-block; padding: var(--space-1) var(--space-3); border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-sm); background: var(--yellow); color: var(--on-accent); font-family: var(--font-display); font-weight: 800; font-size: var(--fs-sm); transform: rotate(-3deg); }
+  .g-title { margin: var(--space-3) 0 var(--space-2); font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 700; line-height: 1.15; }
+  .g-text { margin: 0; color: var(--muted); }
+  .gap { display: inline-block; min-width: 3ch; padding: 0 var(--space-1); border-bottom: var(--bw-strong) solid var(--pink); color: var(--ink); font-weight: 800; }
+  .g-ans { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); }
+  .g-btn {
+    padding: var(--space-4) var(--space-2); border: var(--bw-strong) solid var(--line); border-radius: var(--radius-md); background: var(--surface); color: var(--ink);
+    font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 800; cursor: pointer; box-shadow: var(--shadow-md);
+    transition: transform var(--dur) var(--ease-pop), box-shadow var(--dur) var(--ease);
   }
+  .g-btn:not(:disabled):hover { transform: translate(-2px, -2px) rotate(-2deg); box-shadow: var(--shadow-lg); }
+  .g-btn:disabled { cursor: default; }
+  .g-btn[data-result='ok'] { background: var(--lime); color: var(--on-accent); border-color: var(--on-accent); }
+  .g-btn[data-result='no'] { background: var(--pink); color: var(--on-accent); border-color: var(--on-accent); text-decoration: line-through; }
+  .g-res { grid-column: 1 / -1; margin: 0; font-weight: 600; }
+  .g-res b { padding: var(--space-1) var(--space-3); border-radius: var(--radius-sm); background: var(--pink); color: var(--on-accent); font-family: var(--font-display); }
+  .g-res b[data-ok] { background: var(--lime); }
 
-  .content :global(h2) { font-size: var(--fs-2xl); margin-top: var(--space-9); }
+  /* Text auf Papier mit gelbem Streifen, daneben Daumen und zwei Fakten */
+  .cols { display: grid; grid-template-columns: minmax(0, 54rem) minmax(280px, 1fr); gap: var(--space-11); align-items: start; }
+  .paper {
+    padding: var(--space-9) var(--space-10); background: var(--surface); color: var(--ink); font-size: var(--fs-lg);
+    border: var(--bw-strong) solid var(--line); border-left: var(--bw-stripe) solid var(--yellow); border-radius: var(--radius-lg); box-shadow: var(--shadow-2xl);
+  }
+  .content > :global(:first-child) { margin-top: 0; }
+  .content :global(h2) { font-size: var(--fs-display-sm); margin-top: var(--space-10); }
+  .content :global(p:first-child)::first-letter { font-family: var(--font-display); font-weight: 800; }
+  /* Bonus-Fakt: gelbes Band, ragt links und rechts über das Papier hinaus */
   .content :global(blockquote) {
-    position: relative; margin: var(--space-9) 0; padding: var(--space-6) var(--space-5) var(--space-5);
-    border: var(--bw) solid var(--line); border-radius: var(--radius-md); box-shadow: var(--shadow-md);
-    background: var(--cyan); color: var(--on-accent); font-family: var(--font-display); font-weight: 600;
+    position: relative; margin: var(--space-10) calc(-1 * var(--space-12)); padding: var(--space-8) var(--space-12) var(--space-7);
+    background: var(--dots), var(--yellow); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-accent);
+    border-block: var(--bw-strong) solid var(--on-accent); transform: rotate(-1deg);
+    font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 700; line-height: 1.3;
   }
   .content :global(blockquote p) { margin: 0; }
   .content :global(blockquote)::before {
-    content: 'Bonus fact'; position: absolute; top: calc(-1 * var(--space-4)); left: var(--space-5);
-    padding: 0 var(--space-2); border: var(--bw-sm) solid var(--line); border-radius: var(--radius-sm);
-    background: var(--surface); color: var(--ink); font-size: var(--fs-sm); font-weight: 800;
+    content: 'Bonus fact'; position: absolute; top: calc(-1 * var(--space-4)); left: var(--space-12);
+    padding: var(--space-1) var(--space-3); border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-sm);
+    background: var(--pink); color: var(--on-accent); font-size: var(--fs-sm); font-weight: 800; transform: rotate(-3deg);
   }
   .content :global(blockquote:lang(de))::before { content: 'Bonus-Fakt'; }
-  .content :global(strong) { background: linear-gradient(transparent 60%, color-mix(in srgb, var(--pink) 35%, transparent) 0); }
-
-  .sources { margin: var(--space-9) 0; font-size: var(--fs-sm); color: var(--muted); scroll-margin-top: var(--space-12); }
-  .sources h2 { font-size: var(--fs-lg); color: var(--ink); margin: 0 0 var(--space-2); }
-  .sources ol { margin: 0; padding-left: var(--space-5); }
-
-  .next {
-    display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-6);
-    background: var(--night); color: var(--on-night); text-decoration: none; --focus: var(--yellow);
+  .content :global(strong) { background: linear-gradient(transparent 60%, color-mix(in srgb, var(--yellow) 70%, transparent) 0); }
+  .aside { position: sticky; top: var(--space-12); display: flex; flex-direction: column; gap: var(--space-8); }
+  .side-h { margin: 0 0 var(--space-3); font-family: var(--font-display); font-weight: 800; font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: 0.08em; }
+  .two { display: grid; gap: var(--space-6); }
+  .stile {
+    position: relative; display: flex; flex-direction: column; gap: var(--space-2); min-height: 12rem; padding: var(--space-5); overflow: hidden;
+    border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); text-decoration: none;
     transition: transform var(--dur) var(--ease-pop), box-shadow var(--dur) var(--ease);
   }
-  .next:hover { transform: translate(-3px, -3px) rotate(-0.6deg); box-shadow: var(--shadow-xl); }
-  .next-label { display: inline-flex; align-items: center; gap: var(--space-1); font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--yellow); }
-  .next-title { font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 700; line-height: 1.1; }
+  .stile:hover { transform: translate(-3px, -3px) rotate(-1.5deg); box-shadow: var(--shadow-xl); }
+  .stile:nth-child(2) { transform: rotate(1deg); }
+  .stile--paper { background: var(--surface); color: var(--ink); border-color: var(--line); border-left: var(--bw-stripe) solid var(--yellow); }
+  .stile .chip { align-self: flex-start; }
+  .chip-light { background: var(--surface); color: var(--ink); }
+  .s-big { font-family: var(--font-display); font-weight: 800; font-size: var(--fs-display-lg); line-height: 0.9; letter-spacing: -0.05em; color: var(--on-night); -webkit-text-stroke: var(--bw-strong) var(--on-accent); paint-order: stroke fill; }
+  .s-big small { font-size: var(--fs-lg); -webkit-text-stroke: 0; color: var(--on-accent); margin-left: var(--space-1); letter-spacing: 0; }
+  .s-emoji { position: absolute; right: calc(-1 * var(--space-2)); top: var(--space-6); font-size: var(--fs-emoji-md); transform: rotate(12deg); filter: var(--emoji-shadow); }
+  .s-title { margin-top: auto; font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lg); line-height: 1.2; position: relative; }
 
-  .related h2 { font-size: var(--fs-2xl); margin: 0 0 var(--space-5); }
-  .related-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: var(--space-6); }
+  /* Werbung über die ganze Breite */
+  .adband { padding-block: calc(var(--space-12) + var(--space-4)); }
+
+  /* Beweise */
+  .proofs { padding-block: calc(var(--space-12) + var(--space-4)) var(--space-12); }
+  .proofs h2 { margin: 0 0 var(--space-8); font-size: var(--fs-display-lg); color: var(--yellow); }
+  .srcs { list-style: none; margin: 0 0 var(--space-8); padding: 0; columns: 3 18rem; column-gap: var(--space-8); }
+  .srcs li { display: flex; gap: var(--space-3); break-inside: avoid; margin-bottom: var(--space-5); }
+  .srcs b { flex: 0 0 auto; display: grid; place-items: center; width: var(--space-9); aspect-ratio: 1; border-radius: var(--radius-pill); background: var(--yellow); color: var(--on-accent); font-family: var(--font-display); }
+  .srcs a { color: var(--on-night); font-weight: 600; }
+
+  /* WTF-Barometer */
+  .baro { padding-block: calc(var(--space-12) + var(--space-4)) calc(var(--space-12) + var(--bleed)); text-align: center; --v: 5; }
+  .b-in { max-width: 56rem; }
+  .baro h2 { margin: 0; font-size: var(--fs-display-lg); }
+  .baro p { margin: var(--space-3) 0 0; font-size: var(--fs-lg); font-weight: 600; }
+  .slider { margin-top: var(--space-9); }
+  .slider input { width: 100%; height: var(--space-10); appearance: none; background: transparent; cursor: pointer; }
+  .slider input::-webkit-slider-runnable-track { height: var(--space-5); border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-pill); background: linear-gradient(90deg, var(--lime), var(--yellow), var(--orange)); }
+  .slider input::-moz-range-track { height: var(--space-5); border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-pill); background: linear-gradient(90deg, var(--lime), var(--yellow), var(--orange)); }
+  .slider input::-webkit-slider-thumb { appearance: none; width: var(--space-10); height: var(--space-10); margin-top: calc(-1 * var(--space-4)); border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-pill); background: var(--surface); box-shadow: var(--shadow-accent-sm); }
+  .slider input::-moz-range-thumb { width: var(--space-9); height: var(--space-9); border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-pill); background: var(--surface); box-shadow: var(--shadow-accent-sm); }
+  .lbls { display: flex; justify-content: space-between; margin-top: var(--space-2); font-family: var(--font-display); font-weight: 700; }
+  .b-row { display: flex; justify-content: center; align-items: center; gap: var(--space-5); margin-top: var(--space-6); }
+  .b-val { font-family: var(--font-display); font-size: var(--fs-display-lg); font-weight: 800; line-height: 1; min-width: 2ch; }
+  .b-row .btn { border-color: var(--on-accent); box-shadow: var(--shadow-accent-sm); }
+  .b-avg { min-height: 1.65em; }
+  .baro p.b-avg { display: inline-block; margin-top: var(--space-5); padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); background: var(--on-accent); color: var(--on-night); font-size: var(--fs-md); }
+  .b-avg:empty { visibility: hidden; }
+
+  /* Noch ein WTF zum Schluss */
+  .finale { position: relative; margin-top: calc(-1 * var(--bleed)); padding: 0 0 calc(var(--space-6) + var(--edge)); }
+  .f-slide {
+    position: relative; display: block; min-height: 26rem; padding: var(--space-12) 0; overflow: visible; text-decoration: none;
+    border-top: var(--bw-strong) solid var(--on-accent); --dots-size: var(--dots-size-md);
+    animation: f-in var(--dur-slide) var(--ease);
+  }
+  .f-slide[hidden] { display: none; }
+  .f-in { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-5); }
+  .f-lbl { padding: var(--space-2) var(--space-4); border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-sm); background: var(--yellow); color: var(--on-accent); font-family: var(--font-display); font-weight: 800; transform: rotate(-3deg); box-shadow: var(--shadow-accent-sm); }
+  .f-title { max-width: 22ch; font-family: var(--font-display); font-size: var(--fs-display-lg); font-weight: 700; line-height: 1.02; letter-spacing: -0.03em; }
+  .f-go { border-color: var(--on-accent); box-shadow: var(--shadow-accent-sm); }
+  .f-out { position: absolute; right: calc(-1 * var(--space-6)); top: calc(-1 * var(--bleed) - var(--space-8)); font-size: calc(var(--fs-mega) * var(--fit, 1)); text-shadow: var(--space-3) var(--space-3) 0 var(--on-accent); transform: rotate(-6deg); }
+  .f-out[data-len='4'] { --fit: 0.85; }
+  .f-out[data-len='5'] { --fit: 0.72; }
+  .f-out[data-len='6'] { --fit: 0.6; }
+  .f-out[data-len='7'], .f-out[data-len='8'] { --fit: 0.5; }
+  .f-emoji { position: absolute; right: 4%; top: calc(-1 * var(--bleed)); font-size: var(--fs-huge); line-height: 1; transform: rotate(12deg); filter: var(--emoji-shadow); }
+  /* Drei Varianten im Wechsel: Zahl rechts oben, Zahl links unten (Text rechts), Zahl unten rechts */
+  .f-v1 .f-in { align-items: flex-end; text-align: right; }
+  .f-v1 .f-out { right: auto; left: calc(-1 * var(--space-6)); top: auto; bottom: calc(-1 * var(--space-10)); transform: rotate(4deg); }
+  .f-v1 .f-emoji { right: auto; left: 4%; transform: rotate(-12deg); }
+  .f-v2 .f-out { top: auto; bottom: calc(-1 * var(--space-8)); transform: rotate(3deg); color: var(--yellow); }
+  .f-ctrl { display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); padding-block: var(--space-5); }
+  .f-dots { display: flex; gap: var(--space-2); }
+  .f-dots i { width: var(--space-9); height: var(--space-2); border-radius: var(--radius-pill); background: var(--line); opacity: 0.25; cursor: pointer; }
+  .f-dots i[data-on] { opacity: 1; background: var(--pink); }
+  .f-play { cursor: pointer; padding: var(--space-2) var(--space-3); }
+  .f-play[aria-pressed='true']::before { content: none; }
+  @keyframes f-in { from { opacity: 0; transform: translateX(var(--space-6)); } to { opacity: 1; transform: none; } }
 
   @media (max-width: 960px) {
-    .fact-layout { grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
-    .fact-side { position: static; margin-top: 0; }
-    .related-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
+    .cols { grid-template-columns: minmax(0, 1fr); gap: var(--space-8); }
+    .aside { position: static; }
+    .two { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+    .guess { grid-template-columns: minmax(0, 1fr); }
   }
-
-  @media (max-width: 560px) {
-    .big-emoji { font-size: var(--fs-emoji-sm); top: 0; bottom: auto; right: 0; }
+  @media (max-width: 860px) {
+    .poster { grid-template-columns: minmax(0, 1fr); min-height: 0; padding-top: var(--space-10); }
+    .slab { width: 48%; height: 13rem; top: var(--space-6); }
+    .slab span { font-size: var(--fs-emoji-xl); }
+    .big { margin-top: var(--space-8); }
+    .hcard { grid-column: 1; margin-bottom: calc(-1 * var(--space-12) - var(--space-10)); padding: var(--space-7) var(--space-5) var(--space-5); }
+  }
+  @media (max-width: 760px) {
+    .paper { padding: var(--space-6) var(--space-5); font-size: var(--fs-base); }
+    .content :global(blockquote) { margin-inline: calc(-1 * var(--space-8)); padding-inline: var(--space-8); font-size: var(--fs-xl); }
+    .content :global(blockquote)::before { left: var(--space-8); }
+    .tape { font-size: var(--fs-md); }
+    .f-slide { min-height: 22rem; padding-block: var(--space-12) var(--space-11); }
+    .f-out { font-size: calc(var(--fs-huge) * var(--fit, 1)); }
+    .g-btn { font-size: var(--fs-xl); }
+  }
+  @media (max-width: 520px) {
+    .two { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .f-slide { animation: none; }
   }
 </style>

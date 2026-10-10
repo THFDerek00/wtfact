@@ -1,0 +1,114 @@
+---
+// Quiz-Auswertung in den WTF-Charts (Wunsch von Eric, 2026-10-10): je Spiel die Trefferquote aller und die eigene,
+// dazu die 5 Fragen, bei denen die meisten danebenliegen. Zahlen: GET /api/index.php?r=quiz&game=… (src/scripts/quiz.ts).
+import type { Lang } from '../config';
+import { t } from '../i18n/ui';
+import { WOF, FIRST, liveItems } from '../data/quiz';
+import { berlinDay } from '../week';
+import Icon from './Icon.astro';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const ui = t(lang);
+const f = ui.fame;
+const today = berlinDay();
+// Pro Frage: Text und die richtige Antwort (wof: 1 = wahr, first: 0 = a war zuerst)
+const games = [
+  { game: 'wof', title: ui.quiz.wofTitle.join(' '), href: `/${lang}/#wof`, items: liveItems(WOF, today).map((x) => ({ id: x.id, from: x.from, text: x[lang].q, right: x.answer ? 1 : 0 })) },
+  { game: 'first', title: ui.quiz.firstTitle, href: `/${lang}/#first`, items: liveItems(FIRST, today).map((x) => ({ id: x.id, from: x.from, text: `${x.a[lang]} / ${x.b[lang]}`, right: x.a.year < x.b.year ? 0 : 1 })) },
+];
+const texts = { pct: lang === 'de' ? '9001 %' : '9001%', right: f.quizRight(9001), answers: f.quizAnswers(9001), answersOne: f.quizAnswers(1) };
+---
+<section class="wrap quiz" data-quiz-charts data-games={JSON.stringify(games)} data-texts={JSON.stringify(texts)}>
+  <h2>{f.quizTitle}</h2>
+  <p class="lead">{f.quizIntro}</p>
+  <div class="games">
+    {games.map((g) => (
+      <article class="card game" data-game={g.game}>
+        <div class="g-head"><h3>{g.title}</h3><a class="btn btn--pink" href={g.href}>{f.quizPlay} <Icon name="chevron-right" /></a></div>
+        <dl class="rates">
+          <div><dt>{f.quizAll}</dt><dd data-all>–</dd><span class="n" data-all-n></span></div>
+          <div><dt>{f.quizYou}</dt><dd data-you>–</dd><span class="n" data-you-n></span></div>
+        </dl>
+        <h4>{f.quizHardest}</h4>
+        <ol class="hard" data-hard></ol>
+        <p class="note" data-empty>{f.quizEmpty}</p>
+      </article>
+    ))}
+  </div>
+  <p class="note" data-local hidden>{f.quizLocal}</p>
+  <template data-row><li><span class="h-text" data-text></span><span class="h-bar" aria-hidden="true"><i data-fill></i></span><span class="h-pct" data-pct></span></li></template>
+</section>
+
+<script>
+  import { tallies, myAnswers, share, total, type Game, type Tally } from '../scripts/quiz';
+  type G = { game: Game; items: { id: string; text: string; right: number }[] };
+  const root = document.querySelector<HTMLElement>('[data-quiz-charts]');
+  if (root) {
+    const games: G[] = JSON.parse(root.dataset.games ?? '[]');
+    const texts: Record<string, string> = JSON.parse(root.dataset.texts ?? '{}');
+    const pct = (n: number) => texts.pct.replace('9001', String(n));
+    const n = (k: number) => (k === 1 ? texts.answersOne : texts.answers.replace('9001', String(k)));
+    games.forEach(async (g) => {
+      const box = root.querySelector<HTMLElement>(`[data-game="${g.game}"]`)!;
+      const mine = myAnswers(g.game);
+      const done = g.items.filter((x) => x.id in mine);
+      if (done.length) {
+        box.querySelector('[data-you]')!.textContent = pct(Math.round((done.filter((x) => mine[x.id] === x.right).length / done.length) * 100));
+        box.querySelector('[data-you-n]')!.textContent = n(done.length);
+      }
+      const server = await tallies(g.game);
+      root.querySelector<HTMLElement>('[data-local]')!.hidden = server !== null;
+      const counts: Record<string, Tally> = server ?? Object.fromEntries(done.map((x) => [x.id, { [mine[x.id]]: 1 }]));
+      let all = 0, ok = 0;
+      const rows = g.items
+        .map((x) => ({ ...x, c: counts[x.id] ?? {} }))
+        .filter((x) => total(x.c) > 0)
+        .map((x) => { all += total(x.c); ok += x.c[x.right] ?? 0; return { ...x, p: share(x.c, x.right) }; });
+      if (all) {
+        box.querySelector('[data-all]')!.textContent = pct(Math.round((ok / all) * 100));
+        box.querySelector('[data-all-n]')!.textContent = n(all);
+      }
+      const hard = rows.filter((x) => total(x.c) >= (server ? 3 : 1)).sort((a, b) => a.p - b.p).slice(0, 5);
+      const ol = box.querySelector('[data-hard]')!;
+      const tpl = root.querySelector<HTMLTemplateElement>('[data-row]')!;
+      hard.forEach((x) => {
+        const li = tpl.content.firstElementChild!.cloneNode(true) as HTMLElement;
+        li.querySelector('[data-text]')!.textContent = x.text;
+        li.querySelector<HTMLElement>('[data-fill]')!.style.setProperty('--pct', String(x.p));
+        li.querySelector('[data-pct]')!.textContent = texts.right.replace('9001', String(x.p));
+        ol.append(li);
+      });
+      box.querySelector<HTMLElement>('[data-empty]')!.hidden = hard.length > 0;
+    });
+  }
+</script>
+
+<style>
+  .quiz { margin-top: var(--space-11); }
+  h2 { margin: 0 0 var(--space-3); font-size: var(--fs-display-sm); }
+  .lead { color: var(--muted); max-width: 62ch; margin: 0 0 var(--space-7); }
+  .games { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-8); }
+  .game { padding: var(--space-7); border-width: var(--bw-strong); box-shadow: var(--shadow-xl); }
+  .game:first-child { background: var(--dots-strong), var(--pink); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-accent); border-color: var(--on-accent); }
+  .game:last-child { background: var(--dots), var(--violet); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-accent); border-color: var(--on-accent); }
+  .game:first-child .btn { background: var(--yellow); }
+  .g-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--space-4); }
+  h3 { margin: 0; font-size: var(--fs-display-sm); }
+  .rates { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin: var(--space-6) 0; }
+  .rates div { padding: var(--space-4) var(--space-5); background: var(--surface); color: var(--ink); border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-md); box-shadow: var(--shadow-accent-sm); }
+  .rates dt { font-size: var(--fs-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  .rates dd { margin: 0; font-family: var(--font-display); font-size: var(--fs-display-md); font-weight: 800; line-height: 1.05; }
+  .n { font-size: var(--fs-sm); color: var(--muted); }
+  h4 { margin: 0 0 var(--space-3); font-family: var(--font-display); font-size: var(--fs-lg); }
+  .hard { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
+  .hard :global(li) { display: grid; grid-template-columns: minmax(0, 1fr) 6rem auto; gap: var(--space-3); align-items: center; padding: var(--space-2) var(--space-3); background: var(--surface); color: var(--ink); border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-sm); font-size: var(--fs-sm); font-weight: 600; }
+  .hard :global(.h-bar) { height: var(--space-3); border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-pill); overflow: hidden; background: var(--bg); }
+  .hard :global(.h-bar i) { display: block; height: 100%; width: calc(var(--pct, 0) * 1%); background: var(--yellow); }
+  .hard :global(.h-pct) { font-family: var(--font-display); font-weight: 700; white-space: nowrap; }
+  .note { margin: var(--space-3) 0 0; font-size: var(--fs-sm); font-weight: 600; }
+  @media (max-width: 860px) {
+    .games { grid-template-columns: minmax(0, 1fr); }
+    .hard :global(li) { grid-template-columns: minmax(0, 1fr) auto; }
+    .hard :global(.h-bar) { display: none; }
+  }
+</style>
