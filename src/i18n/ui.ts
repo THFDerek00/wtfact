@@ -233,6 +233,9 @@ export const ui = {
       latestIn: 'Neuester Fakt',
       nav: 'Hauptmenü',
       navFacts: 'Fakten',
+      navQuiz: 'Quiz',
+      // Kurze Namen für die Leiste unten am Handy
+      tabs: { facts: 'Fakten', quiz: 'Quiz', cats: 'Themen', charts: 'Charts', game: 'Jumper' },
     },
     quiz: {
       wofTitle: ['Wahr', 'oder', 'Fake?'],
@@ -581,6 +584,8 @@ export const ui = {
       latestIn: 'Latest fact',
       nav: 'Main menu',
       navFacts: 'Facts',
+      navQuiz: 'Quiz',
+      tabs: { facts: 'Facts', quiz: 'Quiz', cats: 'Topics', charts: 'Charts', game: 'Jumper' },
     },
     quiz: {
       wofTitle: ['True', 'or', 'fake?'],

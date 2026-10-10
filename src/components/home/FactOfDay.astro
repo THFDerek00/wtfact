@@ -78,7 +78,7 @@ const pick = pickFactOfDay(cands.map(factInfo), {}, today)?.key ?? cands[0]?.dat
   /* Die Zahl: oben in den gelben Kopf hinein, Kontur in Tinte, Schatten pink */
   .big {
     margin: calc(-1 * var(--bleed) - var(--space-12)) 0 0 calc(-1 * var(--space-2));
-    font-size: calc(var(--fs-mega) * var(--fit, 1)); text-shadow: var(--space-3) var(--space-3) 0 var(--pink);
+    font-size: calc(var(--fs-mega) * var(--fit, 1)); text-shadow: var(--shift-mega) var(--shift-mega) 0 var(--pink);
   }
   .big[data-len='4'] { --fit: 0.85; }
   .big[data-len='5'] { --fit: 0.72; }

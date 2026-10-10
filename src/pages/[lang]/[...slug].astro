@@ -285,7 +285,7 @@ const sideTile = (p: Post) => ({ p, big: bigNumber(p) });
     border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-lg); box-shadow: var(--shadow-night-lime); transform: rotate(2.5deg);
   }
   .slab span { font-size: var(--fs-emoji-2xl); transform: rotate(-10deg); filter: var(--emoji-shadow); }
-  .big { grid-column: 1; align-self: center; margin: var(--space-10) 0 0 calc(-1 * var(--space-2)); font-size: calc(var(--fs-mega) * 0.9 * var(--fit, 1)); text-shadow: var(--space-3) var(--space-3) 0 var(--pink); }
+  .big { grid-column: 1; align-self: center; margin: var(--space-10) 0 0 calc(-1 * var(--space-2)); font-size: calc(var(--fs-mega) * 0.9 * var(--fit, 1)); text-shadow: var(--shift-mega) var(--shift-mega) 0 var(--pink); }
   .big[data-len='4'] { --fit: 0.85; }
   .big[data-len='5'] { --fit: 0.72; }
   .big[data-len='6'] { --fit: 0.6; }
@@ -417,7 +417,7 @@ const sideTile = (p: Post) => ({ p, big: bigNumber(p) });
   .f-lbl { padding: var(--space-2) var(--space-4); border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-sm); background: var(--yellow); color: var(--on-accent); font-family: var(--font-display); font-weight: 800; transform: rotate(-3deg); box-shadow: var(--shadow-accent-sm); }
   .f-title { max-width: 22ch; font-family: var(--font-display); font-size: var(--fs-display-lg); font-weight: 700; line-height: 1.02; letter-spacing: -0.03em; }
   .f-go { border-color: var(--on-accent); box-shadow: var(--shadow-accent-sm); }
-  .f-out { position: absolute; right: calc(-1 * var(--space-6)); top: calc(-1 * var(--bleed) - var(--space-8)); font-size: calc(var(--fs-mega) * var(--fit, 1)); text-shadow: var(--space-3) var(--space-3) 0 var(--on-accent); transform: rotate(-6deg); }
+  .f-out { position: absolute; right: calc(-1 * var(--space-6)); top: calc(-1 * var(--bleed) - var(--space-8)); font-size: calc(var(--fs-mega) * var(--fit, 1)); text-shadow: var(--shift-mega) var(--shift-mega) 0 var(--on-accent); transform: rotate(-6deg); }
   .f-out[data-len='4'] { --fit: 0.85; }
   .f-out[data-len='5'] { --fit: 0.72; }
   .f-out[data-len='6'] { --fit: 0.6; }
