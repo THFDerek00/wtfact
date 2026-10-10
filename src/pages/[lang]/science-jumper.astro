@@ -38,42 +38,47 @@ const staticTexts = Object.fromEntries(Object.entries(texts).filter(([, v]) => t
 const STARS = 9;
 ---
 <Base lang={lang} title={g.title} description={g.intro} altUrl={`/${other}/science-jumper/`}>
-  <section class="stage play">
-    <div class="wrap">
-      <p class="kicker"><span class="sticker"><Icon name="flask-conical" /> {g.name}</span></p>
-      <h1>{g.title}</h1>
-      <p class="intro">{g.intro}</p>
-
-      <div class="frame">
-        <canvas
-          width="800"
-          height="260"
-          tabindex="0"
-          role="img"
-          aria-label={g.canvasLabel}
-          aria-describedby="jumper-controls"
-          data-jumper
-        ></canvas>
+  <!-- Spiel eingebettet wie ein Abschnitt der Startseite (Wunsch von Eric, 2026-10-10): Text links, Spiel als
+       kleinere Konsole rechts mit gelbem Rahmen und Etikett, Hintergrund wie die Nacht-Abschnitte. -->
+  <section class="sec sec--night play">
+    <div class="wrap play-grid">
+      <div class="play-text">
+        <p class="kicker"><span class="sticker"><Icon name="flask-conical" /> {g.name}</span></p>
+        <h1>{g.title}</h1>
+        <p class="intro">{g.intro}</p>
+        <div class="below">
+          <dl class="stats">
+            <div><dt>{g.run}</dt><dd data-stat="run">0</dd></div>
+            <div><dt>{g.best}</dt><dd data-stat="best">0</dd></div>
+            <div><dt>{g.total}</dt><dd data-stat="total">0</dd></div>
+          </dl>
+          <button class="btn" type="button" data-start><Icon name="play" /> {g.start}</button>
+        </div>
+        <p class="controls" id="jumper-controls">{g.controls}</p>
       </div>
-
-      <div class="below">
-        <dl class="stats">
-          <div><dt>{g.run}</dt><dd data-stat="run">0</dd></div>
-          <div><dt>{g.best}</dt><dd data-stat="best">0</dd></div>
-          <div><dt>{g.total}</dt><dd data-stat="total">0</dd></div>
-        </dl>
-        <button class="btn" type="button" data-start><Icon name="play" /> {g.start}</button>
+      <div class="console bleed">
+        <span class="console-tag" aria-hidden="true">{g.name}</span>
+        <div class="frame">
+          <canvas
+            width="800"
+            height="260"
+            tabindex="0"
+            role="img"
+            aria-label={g.canvasLabel}
+            aria-describedby="jumper-controls"
+            data-jumper
+          ></canvas>
+        </div>
+        <p class="sr-only" aria-live="polite" data-live></p>
+        <p class="toast" data-toast hidden>
+          <Icon name="trophy" /> <span data-toast-text></span>
+          <a href="#gold">{g.goldTitle} <Icon name="chevron-down" /></a>
+        </p>
       </div>
-      <p class="controls" id="jumper-controls">{g.controls}</p>
-      <p class="sr-only" aria-live="polite" data-live></p>
-      <p class="toast" data-toast hidden>
-        <Icon name="trophy" /> <span data-toast-text></span>
-        <a href="#gold">{g.goldTitle} <Icon name="chevron-down" /></a>
-      </p>
     </div>
   </section>
 
-  <section class="wrap gold-sec" id="gold" data-gold={encoded} data-texts={JSON.stringify(staticTexts)} data-lang={lang}>
+  <section class="sec sec--paper gold-wrap" data-edge><div class="wrap gold-sec" id="gold" data-gold={encoded} data-texts={JSON.stringify(staticTexts)} data-lang={lang}>
     <div class="gold-head">
       <div>
         <h2>{g.goldTitle}</h2>
@@ -131,7 +136,7 @@ const STARS = 9;
         </span>
       </a>
     </template>
-  </section>
+  </div></section>
 </Base>
 
 <script>
@@ -259,14 +264,22 @@ const STARS = 9;
 </script>
 
 <style>
-  .play { padding: var(--space-10) 0 var(--space-11); }
+  .play { padding: var(--space-10) 0 calc(var(--space-12) + var(--space-6)); }
+  .play-grid { display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: var(--space-11); align-items: center; }
+  .console { position: relative; max-width: 56rem; justify-self: end; width: 100%; margin-bottom: calc(-1 * var(--space-12) - var(--edge)); }
+  .console-tag {
+    position: absolute; top: calc(-1 * var(--space-5)); left: var(--space-6); z-index: 1; padding: var(--space-1) var(--space-4);
+    border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-sm); background: var(--yellow); color: var(--on-accent);
+    font-family: var(--font-display); font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; transform: rotate(-3deg);
+  }
+  .gold-wrap { padding-block: calc(var(--space-12) + var(--space-10)) var(--space-12); }
   .kicker { margin: 0 0 var(--space-4); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-md); }
-  h1 { font-size: var(--fs-display-lg); margin: 0; max-width: 22ch; }
+  h1 { font-size: var(--fs-display-md); margin: 0; max-width: 22ch; }
   .intro { color: var(--on-night-muted); font-size: var(--fs-lg); max-width: 62ch; margin: var(--space-4) 0 var(--space-8); }
 
   .frame {
-    border: var(--bw) solid var(--on-night); border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-on-night); overflow: hidden; background: var(--night);
+    border: var(--bw-accent) solid var(--yellow); border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-night-pink); overflow: hidden; background: var(--night); transform: rotate(-0.6deg);
   }
   canvas { display: block; width: 100%; height: auto; aspect-ratio: 800 / 260; touch-action: manipulation; cursor: pointer; }
   canvas:focus-visible { outline-offset: calc(-1 * var(--bw-focus)); }
@@ -286,7 +299,7 @@ const STARS = 9;
   .toast a { display: inline-flex; align-items: center; gap: var(--space-1); margin-left: auto; }
 
   /* Sammlung */
-  .gold-sec { margin-top: var(--space-11); scroll-margin-top: var(--space-12); }
+  .gold-sec { scroll-margin-top: var(--space-12); }
   .gold-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: var(--space-6); margin-bottom: var(--space-8); }
   .gold-head h2 { font-size: var(--fs-display-sm); margin: 0; }
   .lead { color: var(--muted); margin: var(--space-2) 0 0; max-width: 52ch; }
@@ -394,6 +407,10 @@ const STARS = 9;
   .foot-note { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-4); margin-top: var(--space-8); color: var(--muted); font-size: var(--fs-sm); }
   .foot-note p { margin: 0; }
 
+  @media (max-width: 1060px) {
+    .play-grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-9); }
+    .console { justify-self: stretch; max-width: none; }
+  }
   @media (max-width: 520px) {
     .stats { gap: var(--space-5); }
     .stats dd { font-size: var(--fs-2xl); }

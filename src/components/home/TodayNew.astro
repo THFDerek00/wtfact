@@ -1,0 +1,193 @@
+---
+// „Heute neu“ (Design „E“, Stil aus Entwurf D): die Fakten von heute als Wisch-Folien auf der Nacht.
+// Fakten, die heute noch erscheinen, stehen als gesperrte Folie mit Countdown dahinter (nur Kategorie, kein Titel).
+// Daumen auf jeder Folie zählen wie die Wisch-Bewertung für den Fakt des Tages (src/scripts/community.ts).
+import type { Lang } from '../../config';
+import { t } from '../../i18n/ui';
+import { postUrl, upcomingToday, type Post } from '../../lib';
+import { berlinDay, postDay } from '../../week';
+import Icon from '../Icon.astro';
+interface Props { lang: Lang; posts: Post[]; allUrl: string }
+const { lang, posts, allUrl } = Astro.props;
+const ui = t(lang);
+const h = ui.home;
+const today = berlinDay();
+const todays = posts.filter((p) => postDay(p.data.date) === today).reverse();
+const shown = (todays.length ? todays : posts.slice(0, 3).reverse()).slice(-6);
+const upcoming = (await upcomingToday(lang)).slice(0, 3);
+const time = (ms: number) => new Intl.DateTimeFormat('de-DE', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin' }).format(ms);
+const total = shown.length + upcoming.length;
+---
+<section class="sec sec--night today" id="today" data-today data-day={todays.length ? today : ''} data-focus-day="">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 data-today-title>
+        <span data-when="today" hidden={!todays.length}>{h.todayTitle[0]} <span class="mark">{h.todayTitle[1]}</span></span>
+        <span data-when="recent" hidden={!!todays.length}>{h.recentTitle[0]} <span class="mark">{h.recentTitle[1]}</span></span>
+      </h2>
+      <a class="more-link" href={allUrl}>{h.allFacts} <Icon name="chevron-right" /></a>
+    </div>
+    <div class="track" data-track role="group" aria-label={h.slidesLabel} tabindex="0">
+      {shown.map((p, i) => (
+        <article class="slide" data-slide data-key={p.data.translationKey}>
+          <span class="num mega" aria-hidden="true">{i + 1}</span>
+          <a class:list={['tile', `cat-${p.data.category}`]} href={postUrl(p)} aria-hidden="true" tabindex="-1"><span>{p.data.emoji}</span></a>
+          <div class="text">
+            <span class:list={['chip', `cat-${p.data.category}`]}>{ui.categories[p.data.category]}</span>
+            <h3><a href={postUrl(p)}>{p.data.title}</a></h3>
+            <p>{p.data.hook}</p>
+            <div class="rate" role="group" aria-label={ui.thumbs.question}>
+              <button class="thumb" type="button" aria-pressed="false" data-rate="meh" aria-label={ui.thumbs.down}><Icon name="thumbs-down" /></button>
+              <button class="thumb" type="button" aria-pressed="false" data-rate="like" aria-label={ui.thumbs.up}><Icon name="thumbs-up" /></button>
+              <a class="read" href={postUrl(p)}>{ui.readMore} <Icon name="chevron-right" /></a>
+            </div>
+          </div>
+        </article>
+      ))}
+      {upcoming.map((u, i) => (
+        <article class="slide lock" data-slide data-lock={u.at}>
+          <span class="num mega" aria-hidden="true">{shown.length + i + 1}</span>
+          <span class="tile locked" aria-hidden="true"><Icon name="lock" /></span>
+          <div class="text">
+            <span class="tags"><span class:list={['chip', `cat-${u.cat}`]}>{ui.categories[u.cat]}</span><span class="chip chip--new">{h.soon}</span></span>
+            <h3>{h.lockedTitle}</h3>
+            <p class="cd" data-cd aria-live="off"><b>--</b><i>:</i><b>--</b><i>:</i><b>--</b></p>
+            <p class="when" data-when-text>{h.lockAt(time(u.at))}</p>
+            <button class="btn" type="button" data-reload hidden>{h.lockReady}</button>
+          </div>
+        </article>
+      ))}
+    </div>
+    {total > 1 && (
+      <div class="nav">
+        <div class="bars" aria-hidden="true">{Array.from({ length: total }, (_, i) => <i data-bar={i}></i>)}</div>
+        <div class="arrows">
+          <button class="chip arrow" type="button" data-step="-1" aria-label={h.prev}><Icon name="chevron-left" /></button>
+          <button class="chip arrow" type="button" data-step="1" aria-label={h.nextSlide}><Icon name="chevron-right" /></button>
+        </div>
+      </div>
+    )}
+  </div>
+</section>
+
+<script>
+  import { berlinDay } from '../../week';
+  import { rate, myRating } from '../../scripts/community';
+  const root = document.querySelector<HTMLElement>('[data-today]');
+  if (root) {
+    // Seite von gestern (noch nicht neu gebaut): Überschrift „Zuletzt neu“
+    if (root.dataset.day && root.dataset.day !== berlinDay()) {
+      root.querySelector<HTMLElement>('[data-when="today"]')!.hidden = true;
+      root.querySelector<HTMLElement>('[data-when="recent"]')!.hidden = false;
+    }
+    const track = root.querySelector<HTMLElement>('[data-track]')!;
+    const slides = [...root.querySelectorAll<HTMLElement>('[data-slide]')];
+    const bars = [...root.querySelectorAll<HTMLElement>('[data-bar]')];
+    const active = () => {
+      const x = track.scrollLeft;
+      let best = 0;
+      slides.forEach((s, i) => { if (Math.abs(s.offsetLeft - track.offsetLeft - x) < Math.abs(slides[best].offsetLeft - track.offsetLeft - x)) best = i; });
+      return best;
+    };
+    const sync = () => { const a = active(); bars.forEach((b, i) => b.toggleAttribute('data-on', i === a)); };
+    track.addEventListener('scroll', () => requestAnimationFrame(sync), { passive: true });
+    root.querySelectorAll<HTMLButtonElement>('[data-step]').forEach((b) =>
+      b.addEventListener('click', () => {
+        const i = Math.min(slides.length - 1, Math.max(0, active() + Number(b.dataset.step)));
+        track.scrollTo({ left: slides[i].offsetLeft - track.offsetLeft, behavior: 'smooth' });
+      }),
+    );
+    sync();
+
+    // Daumen
+    slides.forEach((s) => {
+      const key = s.dataset.key;
+      if (!key) return;
+      const btns = [...s.querySelectorAll<HTMLButtonElement>('[data-rate]')];
+      const mark = () => btns.forEach((b) => b.setAttribute('aria-pressed', String(myRating(key) === b.dataset.rate)));
+      btns.forEach((b) => b.addEventListener('click', () => { rate(key, b.dataset.rate as 'like' | 'meh'); mark(); }));
+      mark();
+    });
+
+    // Countdowns
+    const locks = slides.filter((s) => s.dataset.lock);
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const tick = () => {
+      const now = Date.now();
+      locks.forEach((s) => {
+        const left = Number(s.dataset.lock) - now;
+        const b = s.querySelectorAll('[data-cd] b');
+        const sec = Math.max(0, Math.floor(left / 1000));
+        [Math.floor(sec / 3600), Math.floor(sec / 60) % 60, sec % 60].forEach((n, i) => (b[i].textContent = pad(n)));
+        const ready = left <= 0;
+        s.querySelector<HTMLElement>('[data-reload]')!.hidden = !ready;
+        s.querySelector<HTMLElement>('[data-cd]')!.hidden = ready;
+      });
+    };
+    if (locks.length) { tick(); setInterval(tick, 1000); }
+    root.querySelectorAll('[data-reload]').forEach((b) => b.addEventListener('click', () => location.reload()));
+  }
+</script>
+
+<style>
+  .today { padding-top: calc(var(--space-12) + var(--bleed)); }
+  .track {
+    display: grid; grid-auto-flow: column; grid-auto-columns: min(78%, 60rem); gap: var(--space-7);
+    overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding: var(--space-11) var(--space-6) var(--space-8);
+    margin-inline: calc(-1 * var(--space-6)); scroll-padding-inline: var(--space-6);
+  }
+  .track::-webkit-scrollbar { display: none; }
+  .slide {
+    position: relative; scroll-snap-align: start; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-7);
+    align-items: center; padding: var(--space-8) var(--space-8) var(--space-8) var(--space-12);
+    background: var(--dots), var(--yellow); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-accent);
+    border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-lg); box-shadow: var(--shadow-night-pink);
+  }
+  .slide:nth-child(even) { background: var(--dots-night), var(--night-2); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-night); border-color: var(--on-night); box-shadow: var(--shadow-night-lime); }
+  .slide:nth-child(3n) { background: var(--dots), var(--lime); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-accent); border-color: var(--on-accent); box-shadow: var(--shadow-night-pink); }
+  .num { position: absolute; left: calc(-1 * var(--space-4)); top: calc(-1 * var(--space-10)); font-size: var(--fs-huge); color: transparent; -webkit-text-stroke: var(--stroke-mega) var(--yellow); }
+  .slide:nth-child(odd) .num { -webkit-text-stroke-color: var(--pink); }
+  .tile {
+    display: grid; place-items: center; width: clamp(96px, 12vw, 168px); aspect-ratio: 1; border: var(--bw-strong) solid var(--on-accent);
+    border-radius: var(--radius-lg); font-size: var(--fs-emoji-md); text-decoration: none; transform: rotate(-4deg); box-shadow: var(--shadow-accent-sm);
+  }
+  .tile span { filter: var(--emoji-shadow); }
+  .tile.locked { background: var(--night-3); color: var(--yellow); font-size: var(--fs-emoji-sm); }
+  .text { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); min-width: 0; }
+  .text .chip { border-color: var(--on-accent); }
+  .tags { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+  h3 { margin: 0; font-size: var(--fs-display-sm); }
+  h3 a { text-decoration: none; }
+  h3 a:hover { text-decoration: underline; }
+  .text p { margin: 0; font-size: var(--fs-lg); max-width: 60ch; }
+  .rate { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); margin-top: var(--space-2); }
+  .thumb {
+    display: grid; place-items: center; width: var(--space-10); aspect-ratio: 1; border: var(--bw) solid currentColor; border-radius: var(--radius-pill);
+    background: transparent; color: inherit; cursor: pointer; font-size: var(--fs-lg);
+    transition: transform var(--dur) var(--ease-pop);
+  }
+  .thumb:hover { transform: scale(1.1) rotate(-6deg); }
+  .thumb[data-rate='like'][aria-pressed='true'] { background: var(--lime); color: var(--on-accent); border-color: var(--on-accent); }
+  .thumb[data-rate='meh'][aria-pressed='true'] { background: var(--pink); color: var(--on-accent); border-color: var(--on-accent); }
+  .read { display: inline-flex; align-items: center; gap: var(--space-1); font-family: var(--font-display); font-weight: 700; }
+  /* Gesperrte Folie */
+  .slide.lock, .slide.lock:nth-child(even), .slide.lock:nth-child(3n) { background: var(--dots-night), var(--night-2); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-night); border-color: var(--on-night); box-shadow: var(--shadow-night-lime); }
+  .lock h3 { filter: var(--blur-lock); user-select: none; }
+  .cd { display: flex; align-items: center; gap: var(--space-2); font-family: var(--font-display); }
+  .cd b { padding: var(--space-2) var(--space-3); border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-sm); background: var(--yellow); color: var(--on-accent); font-size: var(--fs-display-sm); line-height: 1; font-variant-numeric: tabular-nums; }
+  .cd i { font-style: normal; font-size: var(--fs-2xl); font-weight: 800; color: var(--yellow); }
+  .when { color: var(--on-night-faint); font-size: var(--fs-md); font-weight: 600; }
+  .nav { display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); }
+  .bars { display: flex; gap: var(--space-2); }
+  .bars i { width: var(--space-10); height: var(--space-2); border-radius: var(--radius-pill); background: var(--night-3); transition: background var(--dur) var(--ease); }
+  .bars i[data-on] { background: var(--yellow); }
+  .arrows { display: flex; gap: var(--space-2); }
+  .arrow { cursor: pointer; padding: var(--space-2) var(--space-3); font-size: var(--fs-lg); }
+  @media (max-width: 760px) {
+    .track { grid-auto-columns: 88%; gap: var(--space-4); }
+    .slide { grid-template-columns: minmax(0, 1fr); padding: var(--space-10) var(--space-5) var(--space-6); gap: var(--space-4); }
+    .tile { width: var(--space-12); font-size: var(--fs-emoji-sm); position: absolute; right: var(--space-4); top: calc(-1 * var(--space-6)); }
+    .num { font-size: var(--fs-emoji-xl); top: calc(-1 * var(--space-6)); left: var(--space-2); }
+    .cd b { font-size: var(--fs-2xl); }
+  }
+</style>

@@ -1,0 +1,42 @@
+---
+// Übersicht aller Kategorien (Design „E“, Wunsch von Eric, 2026-10-10): /de/kategorien/ und /en/categories/.
+// Gelber Kopf mit Riesenwort, darunter große Kategorie-Kacheln mit Symbol in der Ecke und dem neuesten Fakt.
+import Base from '../../layouts/Base.astro';
+import CatsGrid from '../../components/home/CatsGrid.astro';
+import { LANGS, CATEGORIES, type Lang } from '../../config';
+import { t, catsSlug, catsPath } from '../../i18n/ui';
+import { postsFor } from '../../lib';
+
+export function getStaticPaths() {
+  return LANGS.map((lang) => ({ params: { lang, cats: catsSlug(lang) } }));
+}
+const lang = Astro.params.lang as Lang;
+const ui = t(lang);
+const h = ui.home;
+const other: Lang = lang === 'de' ? 'en' : 'de';
+const posts = await postsFor(lang);
+const n = CATEGORIES.filter((c) => posts.some((p) => p.data.category === c)).length;
+---
+<Base lang={lang} title={h.catsPageTitle} description={h.catsPageIntro} altUrl={catsPath(other)}>
+  <section class="sec sec--yellow chero">
+    <div class="wrap">
+      <span class="pill">{h.catsCount(n)}</span>
+      <h1 class="mega word">{h.catsPageTitle}</h1>
+      <p class="intro">{h.catsPageIntro}</p>
+    </div>
+  </section>
+  <section class="sec sec--paper list" data-edge>
+    <div class="wrap"><CatsGrid lang={lang} posts={posts} big /></div>
+  </section>
+</Base>
+
+<style>
+  .chero { padding: var(--space-10) 0 calc(var(--space-12) + var(--bleed)); overflow: clip; }
+  .pill { display: inline-block; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); background: var(--on-accent); color: var(--yellow); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lg); transform: rotate(-3deg); }
+  .word { margin: var(--space-5) calc(-1 * var(--space-4)) 0; font-size: var(--fs-huge); text-transform: uppercase; text-shadow: var(--space-3) var(--space-3) 0 var(--pink); transform: rotate(-2deg); }
+  .intro { max-width: 40ch; margin: var(--space-8) 0 0; font-size: var(--fs-xl); font-weight: 600; }
+  .list { padding-block: calc(var(--space-12) + var(--space-4)) calc(var(--space-12) + var(--space-8)); }
+  @media (max-width: 760px) {
+    .word { font-size: var(--fs-display-2xl); white-space: normal; }
+  }
+</style>

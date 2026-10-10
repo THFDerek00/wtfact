@@ -116,28 +116,34 @@ Farben, Schrift, Abstände und Bausteine sind in `docs/design-system.md` beschri
 
 ## Bewerten, Fakt des Tages, Abstimmung und Fakt der Woche
 
-- **Wischen:** Die Begrüßungskarte auf der Startseite (neuester Fakt, danach die nächsten neuen Fakten)
-  lässt sich nach oben links („Gefällt mir weniger“) oder oben rechts („Gefällt mir“) ziehen. Knöpfe und
-  Pfeiltasten machen dasselbe. Komponente: `src/components/SwipeDeck.astro`.
+- **Daumen auf „Heute neu“:** Jede Folie mit einem Fakt von heute hat Daumen runter / hoch (früher die Wisch-Karte).
+  Komponente: `src/components/home/TodayNew.astro`, gespeichert wie bisher über `rate()` in `src/scripts/community.ts`.
 - **Fakt des Tages:** Kein Abstimmen. Von den Fakten des Vortags wird der mit dem höchsten Anteil „Gefällt mir“
   beim Wischen Fakt des Tages. Gezählt werden die Bewertungen bis 0 Uhr, so bleibt er den ganzen Tag gleich.
   Gleicher Anteil (auch: noch gar keine Bewertungen) entscheidet das Los, für alle Besucher dasselbe.
-  Logik: `pickFactOfDay` in `src/week.ts`, Anzeige: Hall of Fame (siehe unten).
+  Logik: `pickFactOfDay` in `src/week.ts`, Anzeige: Startseite (`src/components/home/FactOfDay.astro`) und WTF-Charts.
 - **Montags-Abstimmung:** Jeden Montag (deutsche Zeit, 0 bis 24 Uhr) stimmen alle ab, welcher Fakt der
   letzten 7 Tage der beste war. Der Gewinner ist ab Dienstag eine Woche lang „Fakt der Woche“.
   Gleichstand: mehr „Gefällt mir“ beim Wischen gewinnt, danach der neuere Fakt. Ohne Stimmen gibt es keinen
-  Fakt der Woche. Komponente: `src/components/Vote.astro` (auf der Hall of Fame), Kalender: `src/week.ts`.
+  Fakt der Woche. Komponente: `src/components/Vote.astro` (WTF-Charts und montags oben auf der Startseite), Kalender: `src/week.ts`.
 - **Daumen unter jedem Fakt** (`src/components/Thumbs.astro`): dieselbe Bewertung wie auf der Wisch-Karte, mit Zahlen
   aller Besucher (`GET /api/index.php?r=rating&key=…`).
-- **Top 10** (`src/components/TopTen.astro`, auf der Hall of Fame): meiste Daumen hoch minus Daumen runter
+- **Top 10** (`src/components/TopTen.astro`, in den WTF-Charts): meiste Daumen hoch minus Daumen runter
   (`GET /api/index.php?r=top`, ohne Server `topTen` in `src/week.ts`).
-- **Hall of Fame** (`/de/hall-of-fame/`, `src/pages/[lang]/hall-of-fame.astro`): eigene Seite für Fakt des
+- **WTF-Charts** (`/de/charts/`, `src/pages/[lang]/charts.astro`, bis 2026-10-10 „Hall of Fame“; `/de/hall-of-fame/`
+  leitet weiter, siehe `astro.config.mjs`): eigene Seite für Fakt des
   Tages, Fakt der Woche und die Montags-Abstimmung. Dazu Countdowns (nächster neuer Fakt zur nächsten festen Zeit aus `SLOT_TIMES`, nächster Fakt des Tages, nächste
   Abstimmung), Tippspiel „Wer wird morgen Fakt des Tages?“ mit Trefferserie, Verlauf (30 Tage, 12 Wochen)
   mit Sammelalbum (gelesene Sieger, die Beitragsseite merkt sich gelesene Fakten) und eine Rangliste der
-  Kategorien. Auf der Startseite steht nur ein kurzer Hinweis (`src/components/FamePointer.astro`).
+  Kategorien und die Quiz-Auswertung (`src/components/QuizCharts.astro`). Auf der Startseite: Top 5 der Woche und Fakt der Woche (`src/components/home/WeekBlock.astro`).
   Browser-Logik: `src/scripts/fame.ts`, Verlauf vom Server: `GET /api/index.php?r=history`. Tipps und Album liegen nur im
   Browser (`localStorage` `wtfact:fame`).
+- **Wahr oder Fake? / Was war zuerst?** (Startseite, `src/components/home/TrueOrFake.astro` und `WhatFirst.astro`):
+  Fragen in `src/data/quiz-wof.ts` und `src/data/quiz-first.ts`. Jeder Eintrag hat ein Datum `from` (immer ein Samstag),
+  vorher erscheint er nicht. Start mit 20 je Spiel, danach jeden Samstag 5 neue. Neue Fragen einfach mit dem nächsten
+  Samstag als `from` anhängen; `npm run check` (`scripts/check-quiz.mjs`) prüft Aufbau und Quellen und warnt, wenn weniger
+  als 2 Samstage vorbereitet sind. Antworten zählt `POST /api/index.php?r=answer`, Auswertung `GET ?r=quiz&game=wof|first`;
+  dieselbe Route speichert auch Schätzfrage (`guess`) und WTF-Barometer (`baro`) der Faktseiten.
 - **Neu:** Fakten der letzten 7 Tage (heute eingeschlossen) tragen das Etikett „Neu“ (`src/components/NewBadge.astro`).
   Der Browser prüft das nach, damit es auch ohne neuen Build verschwindet.
 

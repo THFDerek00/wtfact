@@ -6,13 +6,13 @@ interface Props { lang: Lang; title: string }
 const { lang, title } = Astro.props;
 const ui = t(lang);
 ---
-<div class="share" data-title={title} data-copied={ui.copied}>
+<div class="share" data-sharebar data-title={title} data-copied={ui.copied}>
   <button class="btn btn--cyan" type="button"><Icon name="share-2" /> {ui.share}</button>
   <span class="status" role="status" aria-live="polite"></span>
 </div>
 
 <script>
-  document.querySelectorAll<HTMLElement>('.share').forEach((el) => {
+  document.querySelectorAll<HTMLElement>('[data-sharebar]').forEach((el) => {
     const btn = el.querySelector('button')!;
     const status = el.querySelector<HTMLElement>('.status')!;
     btn.addEventListener('click', async () => {

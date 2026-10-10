@@ -1,13 +1,21 @@
 ---
+// Startseite im Design „E“ (Wunsch von Eric, 2026-10-10). Reihenfolge und Flächen:
+// Gelb Datum (DayHero) → montags Pink Abstimmung → Nacht Fakt des Tages → Nacht Heute neu → Papier Labor →
+// Pink/Lime Wahr oder Fake → Violett Was war zuerst → Papier Woche → Nacht Kategorien. Regeln: docs/design-system.md.
 import Base from '../../layouts/Base.astro';
-import PostCard from '../../components/PostCard.astro';
-import SwipeDeck from '../../components/SwipeDeck.astro';
-import FamePointer from '../../components/FamePointer.astro';
-import AdCard from '../../components/AdCard.astro';
+import DayHero from '../../components/home/DayHero.astro';
+import FactOfDay from '../../components/home/FactOfDay.astro';
+import TodayNew from '../../components/home/TodayNew.astro';
+import Labor from '../../components/home/Labor.astro';
+import TrueOrFake from '../../components/home/TrueOrFake.astro';
+import WhatFirst from '../../components/home/WhatFirst.astro';
+import WeekBlock from '../../components/home/WeekBlock.astro';
+import CatsGrid from '../../components/home/CatsGrid.astro';
+import Vote from '../../components/Vote.astro';
 import Icon from '../../components/Icon.astro';
-import { LANGS, CATEGORIES, type Lang } from '../../config';
-import { t } from '../../i18n/ui';
-import { postsFor, postUrl, factNumber, categoryIcon } from '../../lib';
+import { LANGS, type Lang } from '../../config';
+import { t, catsPath, chartsPath } from '../../i18n/ui';
+import { postsFor } from '../../lib';
 
 export function getStaticPaths() {
   return LANGS.map((lang) => ({ params: { lang } }));
@@ -15,187 +23,35 @@ export function getStaticPaths() {
 const lang = Astro.params.lang as Lang;
 const ui = t(lang);
 const posts = await postsFor(lang);
-const [hero, ...rest] = posts;
-const PAGE = 12;
-const count = (c: string) => posts.filter((p) => p.data.category === c).length;
-const cats = CATEGORIES.filter((c) => count(c) > 0);
-const ticker = rest.slice(0, 12);
+const catsUrl = catsPath(lang);
+const chartsUrl = chartsPath(lang);
 ---
 <Base lang={lang}>
-  <section class="hero stage">
-    <div class="wrap hero-grid">
-      <div class="pitch">
-        <h1>{ui.hero[0]} <span class="sticker">{ui.hero[1]}</span> {ui.hero[2]}</h1>
-        <p class="sub">{ui.heroSub}</p>
-        <div class="ctas">
-          {hero && <a class="btn" href={postUrl(hero)}>{ui.readToday} <Icon name="chevron-right" /></a>}
-          <button class="btn btn--pink" type="button" data-surprise={JSON.stringify(posts.map(postUrl))}>
-            <Icon name="dices" /> {ui.surprise}
-          </button>
-          <a class="btn btn--cyan" href={`/${lang}/science-jumper/`}><Icon name="flask-conical" /> {ui.game.cta}</a>
-        </div>
-      </div>
-
-      {hero && <SwipeDeck lang={lang} posts={posts} />}
-    </div>
+  <DayHero lang={lang} catsUrl={catsUrl} />
+  <section class="sec sec--pink monvote" data-edge data-focus-day="1">
+    <span class="focus-tag">{ui.home.dayFocus}</span>
+    <div class="wrap"><Vote lang={lang} posts={posts} /></div>
   </section>
-
-  {ticker.length > 0 && (
-    <section class="ticker" aria-label={ui.tickerLabel}>
-      <div class="track">
-        {[0, 1].map((copy) => (
-          <ul aria-hidden={copy === 1 ? 'true' : undefined}>
-            {ticker.map((p) => (
-              <li>
-                <a href={postUrl(p)} tabindex={copy === 1 ? -1 : undefined}>
-                  {p.data.hook}
-                </a>
-              </li>
-            ))}
-          </ul>
-        ))}
-      </div>
-    </section>
-  )}
-
-  <FamePointer lang={lang} posts={posts} />
-
-
-  <section class="wrap holes">
-    <h2>{ui.rabbitHole}</h2>
-    <div class="tiles">
-      {cats.map((c, i) => (
-        <button class:list={['tile', `cat-${c}`, `tilt-${i % 3}`]} type="button" data-jump={c}>
-          <img src={categoryIcon(c)} alt="" width="40" height="40" />
-          <span class="tile-name">{ui.categories[c]}</span>
-          <span class="tile-count">{ui.factsCount(count(c))}</span>
-        </button>
-      ))}
+  <FactOfDay lang={lang} posts={posts} />
+  <TodayNew lang={lang} posts={posts} allUrl="#facts" />
+  <Labor lang={lang} posts={posts} catsUrl={catsUrl} />
+  <TrueOrFake lang={lang} />
+  <WhatFirst lang={lang} />
+  <WeekBlock lang={lang} posts={posts} chartsUrl={chartsUrl} />
+  <section class="sec sec--night cats-sec" data-edge="left" data-focus-day="0">
+    <span class="focus-tag">{ui.home.dayFocus}</span>
+    <div class="wrap">
+      <div class="sec-head"><h2>{ui.home.catsTitle}</h2><a class="more-link" href={catsUrl}>{ui.home.catsAll} <Icon name="chevron-right" /></a></div>
+      <CatsGrid lang={lang} posts={posts} />
     </div>
-  </section>
-
-  <section class="wrap list" id="facts">
-    <div class="head">
-      <h2>{ui.latest}</h2>
-      <div class="filters" role="group" aria-label={ui.filterLabel}>
-        <button class="chip" data-filter="all" type="button" aria-pressed="true">{ui.allCategories}</button>
-        {cats.map((c) => (
-          <button class:list={['chip', `cat-${c}`]} data-filter={c} type="button" aria-pressed="false">{ui.categories[c]}</button>
-        ))}
-      </div>
-    </div>
-    <div class="grid">
-      {rest.map((p, i) => (
-        <>
-          <PostCard post={p} no={factNumber(p, posts)} hidden={i >= PAGE} />
-          {i === 1 && hero?.data.products[0] && (
-            <AdCard
-              lang={lang} product={hero.data.products[0]} category={hero.data.category}
-              factKey={hero.data.translationKey} factTitle={hero.data.title}
-            />
-          )}
-        </>
-      ))}
-    </div>
-    {rest.length > PAGE && (
-      <div class="loadmore">
-        <button class="btn btn--cyan" type="button" data-loadmore>{ui.loadMore}</button>
-      </div>
-    )}
   </section>
 </Base>
 
-<script>
-  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
-  const cards = document.querySelectorAll<HTMLElement>('.grid [data-cat]');
-  const more = document.querySelector<HTMLButtonElement>('[data-loadmore]');
-  let expanded = false;
-
-  function apply(filter: string) {
-    buttons.forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.filter === filter)));
-    cards.forEach((card) => {
-      const matches = filter === 'all' || card.dataset.cat === filter;
-      const paged = filter === 'all' && !expanded && card.dataset.page === 'later';
-      card.hidden = !matches || paged;
-    });
-    if (more) more.hidden = filter !== 'all' || expanded;
-  }
-
-  buttons.forEach((b) => b.addEventListener('click', () => apply(b.dataset.filter ?? 'all')));
-  more?.addEventListener('click', () => {
-    expanded = true;
-    apply('all');
-  });
-  document.querySelectorAll<HTMLButtonElement>('[data-jump]').forEach((tile) =>
-    tile.addEventListener('click', () => {
-      apply(tile.dataset.jump ?? 'all');
-      document.getElementById('facts')?.scrollIntoView();
-    }),
-  );
-</script>
-
 <style>
-  /* Hero */
-  .hero { padding: var(--space-11) 0 var(--space-12); overflow: hidden; }
-  .hero-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: var(--space-11); align-items: center; }
-  h1 { font-size: var(--fs-display-xl); line-height: 1.02; letter-spacing: -0.04em; margin: 0; }
-  h1 .sticker { transform: rotate(-3deg); }
-  .sub { font-size: var(--fs-lg); color: var(--on-night-muted); max-width: 46ch; margin: var(--space-6) 0 var(--space-8); }
-  .ctas { display: flex; flex-wrap: wrap; gap: var(--space-4); }
-
-
-  /* Ticker: gelbes Band ohne Ränder (Wunsch von Eric, 2026-10-02), Meldungen nur durch Punkte getrennt */
-  .ticker { background: var(--yellow); color: var(--on-accent); overflow: hidden; }
-  .track { display: flex; width: max-content; animation: marquee var(--dur-marquee) linear infinite; }
-  .ticker:hover .track, .ticker:focus-within .track { animation-play-state: paused; }
-  .ticker ul { display: flex; list-style: none; margin: 0; padding: 0; }
-  .ticker li { display: flex; align-items: center; gap: var(--space-6); padding: var(--space-3) 0 var(--space-3) var(--space-6); white-space: nowrap; }
-  .ticker li::after { content: ''; width: var(--space-2); aspect-ratio: 1; border-radius: var(--radius-pill); background: currentColor; }
-  .ticker a { font-family: var(--font-display); font-weight: 600; text-decoration: none; }
-  .ticker a:hover { text-decoration: underline; }
-  @keyframes marquee { to { transform: translateX(-50%); } }
-  @media (prefers-reduced-motion: reduce) {
-    .ticker { overflow-x: auto; }
-    .track { animation: none; }
-  }
-
-  /* Rabbit Holes */
-  .holes { margin-top: var(--space-11); }
-  .holes h2, .head h2 { margin: 0 0 var(--space-6); font-size: var(--fs-display-sm); }
-  .tiles { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--space-5); }
-  .tile {
-    display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1);
-    padding: var(--space-5); border: var(--bw) solid var(--line); border-radius: var(--radius-md);
-    box-shadow: var(--shadow-md); cursor: pointer; text-align: left;
-    font-family: var(--font-display);
-    transition: transform var(--dur) var(--ease-pop), box-shadow var(--dur) var(--ease);
-  }
-  .tile img { margin-bottom: var(--space-3); }
-  .tilt-0 { transform: rotate(-1deg); }
-  .tilt-1 { transform: rotate(0.8deg); }
-  .tilt-2 { transform: rotate(-0.4deg); }
-  .tile:hover { transform: translate(-2px, -3px) rotate(-2deg); box-shadow: var(--shadow-xl); }
-  .tile-name { font-size: var(--fs-xl); font-weight: 700; }
-  .tile-count { font-size: var(--fs-sm); font-weight: 600; }
-
-  /* Liste */
-  .list { margin-top: var(--space-11); scroll-margin-top: var(--space-12); }
-  .head { display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: center; justify-content: space-between; margin-bottom: var(--space-6); }
-  .head h2 { margin: 0; }
-  .filters { display: flex; flex-wrap: wrap; gap: var(--space-2); }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: var(--space-7); }
-  .loadmore { display: flex; justify-content: center; margin-top: var(--space-10); }
-
-  @media (max-width: 1060px) {
-    .tiles { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
-  }
-  @media (max-width: 860px) {
-    .hero { padding: var(--space-9) 0 var(--space-11); }
-    .hero-grid { grid-template-columns: 1fr; gap: var(--space-10); }
-  }
-  @media (max-width: 520px) {
-    .tiles { grid-template-columns: repeat(2, 1fr); gap: var(--space-3); }
-    .tile { padding: var(--space-4); }
-    .tile:last-child:nth-child(odd) { grid-column: 1 / -1; }
-  }
+  /* Montags-Abstimmung: nur sichtbar, wenn Vote.astro sich einblendet (montags) */
+  .monvote { padding-block: var(--space-10); }
+  .monvote:has(.wrap > [hidden]) { display: none; }
+  .monvote :global(.vote) { border-color: var(--on-accent); box-shadow: var(--shadow-2xl); margin-top: calc(-1 * var(--bleed) - var(--space-10)); position: relative; z-index: 2; }
+  .cats-sec { padding-block: calc(var(--space-12) + var(--space-4)) calc(var(--space-12) + var(--space-8)); }
+  .cats-sec h2 { color: var(--on-night); }
 </style>

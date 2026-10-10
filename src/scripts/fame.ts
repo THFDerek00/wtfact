@@ -1,4 +1,4 @@
-// Browser-Teil der Hall of Fame (Fakt des Tages, Fakt der Woche, Verlauf, Tippspiel, Sammelalbum).
+// Browser-Teil der WTF-Charts (Fakt des Tages, Fakt der Woche, Verlauf, Tippspiel, Sammelalbum).
 // Gemeinsame Zahlen kommen von der PHP-API (public/api/index.php). Ohne Server rechnet alles mit den
 // eigenen Bewertungen und Stimmen aus diesem Browser, genau wie die Abstimmung (src/scripts/community.ts).
 import { week, myRatings, myVote, type Week } from './community';

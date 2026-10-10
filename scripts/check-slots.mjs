@@ -1,5 +1,5 @@
 // Prüft, dass die festen Veröffentlichungszeiten überall gleich sind (Wunsch von Eric, 2026-10-08: 8, 12, 16 Uhr):
-// src/config.ts (SLOT_TIMES, Countdown der Hall of Fame), steuerung/lib/bootstrap.php (Dashboard) und
+// src/config.ts (SLOT_TIMES, Countdown der WTF-Charts), steuerung/lib/bootstrap.php (Dashboard) und
 // .github/workflows/deploy.yml (Standard für STEUERUNG_SLOTS).
 import { readFileSync } from 'node:fs';
 

@@ -1,0 +1,246 @@
+---
+// „Was war zuerst?“ (Design „E“, Wunsch von Eric, 2026-10-10): Runden mit je 6 Duellen. Tippen auf das ältere Ereignis,
+// danach Jahreszahlen, Gewinner und wie viele der anderen richtig lagen. Fragen: src/data/quiz.ts (jeden Samstag 5 neue).
+import type { Lang } from '../../config';
+import { t } from '../../i18n/ui';
+import { FIRST, liveItems } from '../../data/quiz';
+import { berlinDay, addDays } from '../../week';
+import { categoryIcon } from '../../lib';
+import Icon from '../Icon.astro';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const ui = t(lang);
+const q = ui.quiz;
+const items = liveItems(FIRST, addDays(berlinDay(), 6)).map((x) => ({
+  id: x.id, from: x.from,
+  a: { cat: x.a.cat, year: x.a.year, approx: x.a.approx ?? false, label: x.a[lang], icon: categoryIcon(x.a.cat) },
+  b: { cat: x.b.cat, year: x.b.year, approx: x.b.approx ?? false, label: x.b[lang], icon: categoryIcon(x.b.cat) },
+  why: x[lang].why, src: x.sources[0],
+}));
+const texts = {
+  round: q.round(9001, 9002), right: q.right, wrong: q.wrong, pct: q.pctOthers(9001), about: q.about, bc: q.bc, mya: q.mya,
+  years: q.yearsApart(9001), yearOne: q.yearsApart(1), closest: q.closestText('§', '¶'), yoursEmpty: q.yoursEmpty,
+  wrongPct: lang === 'de' ? '9001 %' : '9001%', done: q.done(9001, 9002), locale: lang === 'de' ? 'de-DE' : 'en-US',
+};
+---
+{items.length > 0 && (
+  <section class="sec sec--violet first" id="first" data-edge="left" data-first data-items={JSON.stringify(items)} data-texts={JSON.stringify(texts)} data-focus-day="4,6">
+    <span class="focus-tag">{ui.home.dayFocus}</span>
+    <div class="wrap">
+      <div class="sec-head">
+        <h2>{q.firstTitle}</h2>
+        <span class="weekly"><Icon name="calendar" /> {q.newWeek}</span>
+      </div>
+      <p class="sub">{q.firstIntro}</p>
+      <div class="round"><div class="pg" aria-hidden="true" data-pg></div><b data-round></b></div>
+      <div class="vs" role="group" aria-label={q.firstLabel} data-vs>
+        {(['a', 'b'] as const).map((side, i) => (
+          <>
+            <button class="opt" type="button" data-side={side} aria-pressed="false">
+              <span class="t" data-tile><img data-icon src="" alt="" width="56" height="56" /></span>
+              <span class="o-text">
+                <span class="o-label" data-label></span>
+                <span class="o-year" data-year hidden></span>
+                <span class="tagw" data-win hidden>{q.first}</span>
+              </span>
+            </button>
+            {i === 0 && <span class="vsb" aria-hidden="true">VS</span>}
+          </>
+        ))}
+      </div>
+      <div class="res" data-res hidden aria-live="polite">
+        <p><b data-verdict></b> <span data-why></span> <a data-src target="_blank" rel="noopener"><Icon name="badge-check" /> {q.source}</a></p>
+        <button class="btn" type="button" data-next>{q.next} <Icon name="chevron-right" /></button>
+      </div>
+      <div class="fin" data-fin hidden><p data-fin-text></p><button class="btn" type="button" data-again><Icon name="rotate-ccw" /> {q.again}</button></div>
+      <div class="stats">
+        <div class="st"><span class="lb">{q.firstWrongPct}</span><span class="v v--pink" data-st="wrong">–</span><p data-st-text="wrong">{q.statEmpty}</p></div>
+        <div class="st"><span class="lb">{q.closest}</span><span class="v" data-st="closest">–</span><p data-st-text="closest"></p></div>
+        <div class="st"><span class="lb">{q.yourRounds}</span><span class="v" data-st="yours">–</span><p data-st-text="yours">{q.yoursEmpty}</p></div>
+      </div>
+    </div>
+  </section>
+)}
+
+<script>
+  import { answer, myAnswers, tallies, localTally, share, total, yearText, type Tally } from '../../scripts/quiz';
+  import { berlinDay } from '../../week';
+
+  type Side = { cat: string; year: number; approx: boolean; label: string; icon: string };
+  type Item = { id: string; from: string; a: Side; b: Side; why: string; src?: { url: string; label: string } };
+  const root = document.querySelector<HTMLElement>('[data-first]');
+  if (root) {
+    const today = berlinDay();
+    const all: Item[] = JSON.parse(root.dataset.items ?? '[]').filter((x: Item) => x.from <= today);
+    const texts: Record<string, string> = JSON.parse(root.dataset.texts ?? '{}');
+    const fill = (s: string, v: Record<string, string | number>) => s.replace(/900\d|§|¶/g, (m) => String(v[m] ?? m));
+    const $ = <T extends HTMLElement = HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+    const yt = (s: Side) => yearText(s.year, s.approx, { about: texts.about, bc: texts.bc, mya: texts.mya }, texts.locale);
+    const older = (it: Item) => (it.a.year < it.b.year ? 0 : 1);
+    const ROUND = 6;
+    let server: Record<string, Tally> | null = null;
+    let round: Item[] = [];
+    let pos = 0;
+    let right = 0;
+    const btn = (side: 'a' | 'b') => $<HTMLButtonElement>(`[data-side="${side}"]`);
+
+    const start = () => {
+      const mine = myAnswers('first');
+      round = [...all].sort((a, b) => Number(a.id in mine) - Number(b.id in mine) || b.from.localeCompare(a.from)).slice(0, ROUND);
+      pos = 0; right = 0;
+      $('[data-fin]').hidden = true;
+      $('[data-vs]').hidden = false;
+      $('[data-pg]').replaceChildren(...round.map(() => document.createElement('i')));
+      show();
+    };
+    const show = () => {
+      const it = round[pos];
+      $('[data-round]').textContent = fill(texts.round, { 9001: pos + 1, 9002: round.length });
+      root.querySelectorAll('[data-pg] i').forEach((d, i) => d.setAttribute('data-state', i < pos ? 'done' : i === pos ? 'on' : ''));
+      for (const side of ['a', 'b'] as const) {
+        const b = btn(side);
+        const s = it[side];
+        b.disabled = false;
+        b.setAttribute('aria-pressed', 'false');
+        b.removeAttribute('data-result');
+        b.querySelector<HTMLElement>('[data-tile]')!.className = `t cat-${s.cat}`;
+        b.querySelector<HTMLImageElement>('[data-icon]')!.src = s.icon;
+        b.querySelector('[data-label]')!.textContent = s.label;
+        b.querySelector<HTMLElement>('[data-year]')!.hidden = true;
+        b.querySelector<HTMLElement>('[data-win]')!.hidden = true;
+      }
+      $('[data-res]').hidden = true;
+    };
+    const reveal = async (pick: number) => {
+      const it = round[pos];
+      const win = older(it);
+      const ok = pick === win;
+      if (ok) right++;
+      (['a', 'b'] as const).forEach((side, i) => {
+        const b = btn(side);
+        b.disabled = true;
+        b.setAttribute('aria-pressed', String(i === pick));
+        b.dataset.result = i === win ? 'win' : 'lose';
+        const y = b.querySelector<HTMLElement>('[data-year]')!;
+        y.textContent = yt(it[side]);
+        y.hidden = false;
+        b.querySelector<HTMLElement>('[data-win]')!.hidden = i !== win;
+      });
+      $('[data-verdict]').textContent = ok ? texts.right : texts.wrong;
+      $('[data-verdict]').toggleAttribute('data-ok', ok);
+      $('[data-why]').textContent = it.why;
+      const src = $<HTMLAnchorElement>('[data-src]');
+      src.hidden = !it.src;
+      if (it.src) { src.href = it.src.url; src.title = it.src.label; }
+      $('[data-res]').hidden = false;
+      const counts = (await answer('first', it.id, pick)) ?? localTally('first', it.id);
+      if (server) server[it.id] = counts;
+      const wrong = 100 - share(counts, win);
+      if (total(counts) > 0) {
+        $('[data-st="wrong"]').textContent = fill(texts.wrongPct, { 9001: wrong });
+        $('[data-st-text="wrong"]').textContent = `${it.a.label} / ${it.b.label}`;
+      }
+      yours();
+    };
+    const next = () => {
+      if (pos + 1 < round.length) { pos++; show(); return; }
+      $('[data-vs]').hidden = true;
+      $('[data-res]').hidden = true;
+      $('[data-fin-text]').textContent = fill(texts.done, { 9001: right, 9002: round.length });
+      $('[data-fin]').hidden = false;
+    };
+    const yours = () => {
+      const mine = myAnswers('first');
+      const done = all.filter((x) => x.id in mine);
+      if (!done.length) return;
+      $('[data-st="yours"]').textContent = `${done.filter((x) => mine[x.id] === older(x)).length} / ${done.length}`;
+      $('[data-st-text="yours"]').textContent = '';
+    };
+    // Knappstes Duell (fest aus den Daten) und schwerstes Duell (aus allen Antworten)
+    const closest = [...all].sort((x, y) => Math.abs(x.a.year - x.b.year) - Math.abs(y.a.year - y.b.year))[0];
+    if (closest) {
+      const d = Math.abs(closest.a.year - closest.b.year);
+      $('[data-st="closest"]').textContent = d === 1 ? texts.yearOne : fill(texts.years, { 9001: d.toLocaleString(texts.locale) });
+      const [p, q] = closest.a.year < closest.b.year ? [closest.a, closest.b] : [closest.b, closest.a];
+      $('[data-st-text="closest"]').textContent = fill(texts.closest, { '§': `${p.label} (${yt(p)})`, '¶': `${q.label} (${yt(q)})` });
+    }
+    const hardest = () => {
+      let best: { it: Item; p: number } | null = null;
+      for (const it of all) {
+        const c = server?.[it.id];
+        if (!c || total(c) < 5) continue;
+        const p = 100 - share(c, older(it));
+        if (!best || p > best.p) best = { it, p };
+      }
+      if (!best) return;
+      $('[data-st="wrong"]').textContent = fill(texts.wrongPct, { 9001: best.p });
+      $('[data-st-text="wrong"]').textContent = `${best.it.a.label} / ${best.it.b.label}`;
+    };
+    (['a', 'b'] as const).forEach((side, i) => btn(side).addEventListener('click', () => reveal(i)));
+    $('[data-next]').addEventListener('click', next);
+    $('[data-again]').addEventListener('click', start);
+    if (all.length) start();
+    yours();
+    tallies('first').then((t) => { server = t; hardest(); });
+  }
+</script>
+
+<style>
+  .first { padding-block: calc(var(--space-12) + var(--space-4)) var(--space-12); }
+  .first .sec-head { margin-bottom: var(--space-3); }
+  .first h2 { font-size: var(--fs-display-xl); letter-spacing: -0.04em; }
+  .weekly { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); background: var(--on-accent); color: var(--yellow); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); }
+  .sub { margin: 0 0 var(--space-6); font-size: var(--fs-lg); font-weight: 600; }
+  .round { display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); margin-bottom: var(--space-6); }
+  .round b { font-family: var(--font-display); font-size: var(--fs-lg); }
+  .pg { display: flex; gap: var(--space-2); }
+  .pg :global(i) { width: var(--space-9); height: var(--space-3); border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-pill); background: color-mix(in srgb, var(--on-accent) 20%, transparent); }
+  .pg :global(i[data-state='done']) { background: var(--surface); }
+  .pg :global(i[data-state='on']) { background: var(--yellow); }
+  .vs { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: var(--space-6); align-items: stretch; }
+  .vs[hidden] { display: none; }
+  .opt {
+    display: flex; align-items: center; gap: var(--space-5); padding: var(--space-6); text-align: left; cursor: pointer; font: inherit;
+    background: var(--surface); color: var(--ink); border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-lg); box-shadow: var(--shadow-accent);
+    transition: transform var(--dur) var(--ease-pop), box-shadow var(--dur) var(--ease);
+  }
+  .opt:first-child { transform: rotate(-1deg); }
+  .opt:last-child { transform: rotate(1deg); }
+  .opt:not(:disabled):hover { transform: translate(-3px, -3px) rotate(-1.5deg); box-shadow: var(--shadow-2xl); }
+  .opt:disabled { cursor: default; }
+  .opt[data-result='win'] { outline: var(--bw-accent) solid var(--lime); outline-offset: var(--space-1); }
+  .opt[data-result='lose'] { opacity: 0.75; }
+  .t { flex: 0 0 auto; display: grid; place-items: center; width: clamp(64px, 8vw, 104px); aspect-ratio: 1; border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-md); }
+  .t img { width: 62%; height: auto; }
+  .o-text { display: flex; flex-direction: column; gap: var(--space-2); }
+  .o-label { font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 700; line-height: 1.15; }
+  .o-year { font-family: var(--font-display); font-size: var(--fs-display-md); font-weight: 800; line-height: 1; color: var(--pink-text); letter-spacing: -0.03em; }
+  .tagw { align-self: flex-start; padding: var(--space-1) var(--space-3); border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-sm); background: var(--lime); color: var(--on-accent); font-family: var(--font-display); font-weight: 800; font-size: var(--fs-sm); }
+  .vsb {
+    align-self: center; display: grid; place-items: center; width: var(--space-12); aspect-ratio: 1; border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-pill);
+    background: var(--yellow); color: var(--on-accent); font-family: var(--font-display); font-weight: 800; font-size: var(--fs-2xl); box-shadow: var(--shadow-accent-sm); transform: rotate(-8deg); z-index: 1;
+  }
+  .res { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--space-4); margin-top: var(--space-6); padding: var(--space-4) var(--space-5); background: var(--surface); color: var(--ink); border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-md); }
+  .res p { margin: 0; flex: 1 1 30rem; }
+  .res b { display: inline-block; margin-right: var(--space-2); padding: var(--space-1) var(--space-3); border-radius: var(--radius-sm); background: var(--pink); color: var(--on-accent); font-family: var(--font-display); }
+  .res b[data-ok] { background: var(--lime); }
+  .res a { display: inline-flex; align-items: center; gap: var(--space-1); font-weight: 700; font-size: var(--fs-sm); }
+  .fin { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-5); padding: var(--space-6); background: var(--surface); color: var(--ink); border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-lg); box-shadow: var(--shadow-accent); }
+  .fin p { margin: 0; font-family: var(--font-display); font-size: var(--fs-display-sm); font-weight: 700; }
+  .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-7); margin-top: var(--space-11); }
+  .st { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-6); background: var(--surface); color: var(--ink); border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-lg); box-shadow: var(--shadow-accent); }
+  .st:nth-child(2) { transform: rotate(-1deg) translateY(var(--space-4)); }
+  .lb { font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); }
+  .v { font-family: var(--font-display); font-size: var(--fs-display-lg); font-weight: 700; line-height: 1; letter-spacing: -0.04em; }
+  .v--pink { color: var(--pink-text); }
+  .st p { margin: 0; font-size: var(--fs-md); }
+  @media (max-width: 860px) {
+    .vs { grid-template-columns: minmax(0, 1fr); gap: var(--space-3); }
+    .vsb { justify-self: center; margin-block: calc(-1 * var(--space-6)); width: var(--space-11); font-size: var(--fs-lg); }
+    .opt { padding: var(--space-4); gap: var(--space-4); }
+    .o-label { font-size: var(--fs-lg); }
+    .stats { grid-template-columns: minmax(0, 1fr); gap: var(--space-5); margin-top: var(--space-9); }
+    .st:nth-child(2) { transform: none; }
+    .round { flex-direction: column; align-items: flex-start; }
+  }
+</style>

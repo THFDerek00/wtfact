@@ -1,0 +1,241 @@
+---
+// „Wahr oder Fake?“ (Design „E“, Wunsch von Eric, 2026-10-10): 10 Aussagen am Stück, nach jeder Antwort die Auflösung
+// mit Quelle und wie alle anderen getippt haben. Darunter drei Statistiken. Fragen: src/data/quiz.ts (jeden Samstag 5 neue),
+// Speichern und Zählen: src/scripts/quiz.ts.
+import type { Lang } from '../../config';
+import { t } from '../../i18n/ui';
+import { WOF, liveItems } from '../../data/quiz';
+import { berlinDay, addDays } from '../../week';
+import Icon from '../Icon.astro';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const ui = t(lang);
+const q = ui.quiz;
+// Bis zu 6 Tage im Voraus mitliefern, freigeschaltet wird im Browser am richtigen Samstag (falls die Seite älter ist).
+const items = liveItems(WOF, addDays(berlinDay(), 6)).map((x) => ({
+  id: x.id, from: x.from, cat: x.cat, answer: x.answer, q: x[lang].q, why: x[lang].why, src: x.sources[0],
+}));
+const texts = {
+  question: q.question(9001, 9002), streak: q.streak(9001), right: q.right, wrong: q.wrong, itsTrue: q.itsTrue, itsFake: q.itsFake,
+  done: q.done(9001, 9002), yoursText: q.yoursText(9001), yoursTextOne: q.yoursText(1), yoursEmpty: q.yoursEmpty,
+  fooledText: q.statFooledText('§'), doubtedText: q.statDoubtedText('§'), statEmpty: q.statEmpty,
+  pct: lang === 'de' ? '9001 %' : '9001%',
+};
+---
+{items.length > 0 && (
+  <section class="sec wof" id="wof" data-edge data-wof data-items={JSON.stringify(items)} data-texts={JSON.stringify(texts)} data-focus-day="3,6">
+    <span class="focus-tag">{ui.home.dayFocus}</span>
+    <div class="wrap">
+      <div class="in">
+        <div class="head">
+          <h2>{q.wofTitle[0]}<br />{q.wofTitle[1]}<br />{q.wofTitle[2]}</h2>
+          <p class="sub">{q.wofIntro}</p>
+          <span class="weekly"><Icon name="calendar" /> {q.newWeek}</span>
+        </div>
+        <div class="card qcard bleed" data-card>
+          <div class="k"><span data-count></span><span data-streak></span></div>
+          <span class="chip chip--new" data-new hidden>{q.newBadge}</span>
+          <p class="stmt" data-q></p>
+          <div class="ans" role="group" aria-label={q.wofLabel}>
+            <button class="btn btn--pink big-btn" type="button" data-pick="0" aria-pressed="false"><Icon name="x" /> {q.wofFake}</button>
+            <button class="btn btn--lime big-btn" type="button" data-pick="1" aria-pressed="false"><Icon name="check" /> {q.wofTrue}</button>
+          </div>
+          <div class="res" data-res hidden aria-live="polite">
+            <p class="verdict"><b data-verdict></b> <span data-why></span></p>
+            <div class="bars">
+              <div class="brow"><span>{q.wofPickedTrue}</span><span class="tr"><i class="fill fill--true" data-bar="1"></i></span><span data-pct="1"></span></div>
+              <div class="brow"><span>{q.wofPickedFake}</span><span class="tr"><i class="fill fill--fake" data-bar="0"></i></span><span data-pct="0"></span></div>
+            </div>
+            <p class="local" data-local hidden>{q.local}</p>
+            <div class="qnext">
+              <a class="src" data-src target="_blank" rel="noopener"><Icon name="badge-check" /> {q.source}</a>
+              <button class="btn" type="button" data-next>{q.next} <Icon name="chevron-right" /></button>
+            </div>
+          </div>
+          <div class="fin" data-fin hidden>
+            <p class="fin-text" data-fin-text></p>
+            <button class="btn" type="button" data-again><Icon name="rotate-ccw" /> {q.again}</button>
+          </div>
+          <div class="dots" aria-hidden="true" data-dots></div>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="st"><span class="lb">{q.fooled}</span><span class="v v--pink" data-st="fooled">–</span><p data-st-text="fooled">{q.statEmpty}</p></div>
+        <div class="st"><span class="lb">{q.doubted}</span><span class="v" data-st="doubted">–</span><p data-st-text="doubted">{q.statEmpty}</p></div>
+        <div class="st"><span class="lb">{q.yours}</span><span class="v" data-st="yours">–</span><p data-st-text="yours">{q.yoursEmpty}</p></div>
+      </div>
+    </div>
+  </section>
+)}
+
+<script>
+  import { answer, myAnswers, tallies, localTally, share, total, type Tally } from '../../scripts/quiz';
+  import { berlinDay } from '../../week';
+
+  type Item = { id: string; from: string; cat: string; answer: boolean; q: string; why: string; src?: { label: string; url: string } };
+  const root = document.querySelector<HTMLElement>('[data-wof]');
+  if (root) {
+    const today = berlinDay();
+    const all: Item[] = JSON.parse(root.dataset.items ?? '[]').filter((x: Item) => x.from <= today);
+    const texts: Record<string, string> = JSON.parse(root.dataset.texts ?? '{}');
+    const newest = all.reduce((m, x) => (x.from > m ? x.from : m), '');
+    const fill = (s: string, v: Record<string, string | number>) => s.replace(/900\d|§/g, (m) => String(v[m] ?? m));
+    const $ = <T extends HTMLElement = HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+    const ROUND = 10;
+    let server: Record<string, Tally> | null = null;
+    let round: Item[] = [];
+    let pos = 0;
+    let streak = 0;
+    let right = 0;
+
+    // Neue Fragen zuerst, dann noch nicht beantwortete, dann der Rest
+    const order = () => {
+      const mine = myAnswers('wof');
+      return [...all].sort((a, b) => Number(a.id in mine) - Number(b.id in mine) || b.from.localeCompare(a.from));
+    };
+    const start = () => {
+      round = order().slice(0, ROUND);
+      pos = 0; streak = 0; right = 0;
+      $('[data-fin]').hidden = true;
+      $('[data-dots]').replaceChildren(...round.map(() => document.createElement('i')));
+      show();
+    };
+    const show = () => {
+      const it = round[pos];
+      $('[data-count]').textContent = fill(texts.question, { 9001: pos + 1, 9002: round.length });
+      $('[data-streak]').textContent = fill(texts.streak, { 9001: streak });
+      $('[data-new]').hidden = it.from !== newest || all.length <= 20;
+      $('[data-q]').textContent = `„${it.q}“`;
+      $('[data-q]').hidden = false;
+      root.querySelectorAll<HTMLButtonElement>('[data-pick]').forEach((b) => { b.disabled = false; b.setAttribute('aria-pressed', 'false'); });
+      $('[data-res]').hidden = true;
+      root.querySelectorAll('[data-dots] i').forEach((d, i) => d.toggleAttribute('data-on', i <= pos));
+    };
+    const reveal = async (pick: number) => {
+      const it = round[pos];
+      const ok = (pick === 1) === it.answer;
+      if (ok) { streak++; right++; } else streak = 0;
+      root.querySelectorAll<HTMLButtonElement>('[data-pick]').forEach((b) => { b.disabled = true; b.setAttribute('aria-pressed', String(b.dataset.pick === String(pick))); });
+      $('[data-verdict]').textContent = `${it.answer ? texts.itsTrue : texts.itsFake}. ${ok ? texts.right : texts.wrong}`;
+      $('[data-verdict]').toggleAttribute('data-ok', ok);
+      $('[data-why]').textContent = it.why;
+      const src = $<HTMLAnchorElement>('[data-src]');
+      src.hidden = !it.src;
+      if (it.src) { src.href = it.src.url; src.title = it.src.label; }
+      $('[data-streak]').textContent = fill(texts.streak, { 9001: streak });
+      $('[data-res]').hidden = false;
+      const counts = (await answer('wof', it.id, pick)) ?? localTally('wof', it.id);
+      if (server) server[it.id] = counts;
+      $('[data-local]').hidden = server !== null;
+      for (const p of [0, 1]) {
+        $(`[data-bar="${p}"]`).style.setProperty('--w', String(share(counts, p)));
+        $(`[data-pct="${p}"]`).textContent = fill(texts.pct, { 9001: share(counts, p) });
+      }
+      stats();
+    };
+    const next = () => {
+      if (pos + 1 < round.length) { pos++; show(); return; }
+      $('[data-res]').hidden = true;
+      $('[data-q]').hidden = true;
+      $('[data-fin-text]').textContent = fill(texts.done, { 9001: right, 9002: round.length });
+      $('[data-fin]').hidden = false;
+    };
+    const stats = () => {
+      // Größter Irrtum: Fake-Aussage mit dem höchsten Anteil „wahr“ (ab 5 Antworten), umgekehrt für wahre Aussagen
+      const pickMax = (truth: boolean, pick: number) => {
+        let best: { it: Item; p: number } | null = null;
+        for (const it of all.filter((x) => x.answer === truth)) {
+          const c = server?.[it.id];
+          if (!c || total(c) < 5) continue;
+          const p = share(c, pick);
+          if (!best || p > best.p) best = { it, p };
+        }
+        return best;
+      };
+      for (const [name, truth, pick, tpl] of [['fooled', false, 1, texts.fooledText], ['doubted', true, 0, texts.doubtedText]] as const) {
+        const b = pickMax(truth, pick);
+        if (!b) continue;
+        $(`[data-st="${name}"]`).textContent = fill(texts.pct, { 9001: b.p });
+        $(`[data-st-text="${name}"]`).textContent = fill(tpl, { '§': b.it.q });
+      }
+      const mine = myAnswers('wof');
+      const answered = all.filter((x) => x.id in mine);
+      if (answered.length) {
+        const ok = answered.filter((x) => (mine[x.id] === 1) === x.answer).length;
+        $('[data-st="yours"]').textContent = `${ok} / ${answered.length}`;
+        $('[data-st-text="yours"]').textContent = answered.length === 1 ? texts.yoursTextOne : fill(texts.yoursText, { 9001: answered.length });
+      }
+    };
+    root.querySelectorAll<HTMLButtonElement>('[data-pick]').forEach((b) => b.addEventListener('click', () => reveal(Number(b.dataset.pick))));
+    $('[data-next]').addEventListener('click', next);
+    $('[data-again]').addEventListener('click', start);
+    if (all.length) start();
+    tallies('wof').then((t) => { server = t; stats(); });
+  }
+</script>
+
+<style>
+  /* „Heute im Fokus“ links, rechts ragt die Quizkarte nach oben */
+  .wof > .focus-tag { right: auto; left: var(--gutter); transform: rotate(-3deg); }
+  .wof {
+    padding-block: var(--space-12);
+    background: var(--dots-strong), linear-gradient(100deg, var(--pink) 0 52%, var(--lime) 52% 100%);
+    background-size: var(--dots-size-md) var(--dots-size-md), auto; color: var(--on-accent); --line: var(--on-accent); --focus: var(--on-accent);
+  }
+  .in { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: var(--space-11); align-items: start; }
+  h2 { margin: 0; font-size: var(--fs-display-2xl); line-height: 0.9; letter-spacing: -0.05em; text-transform: uppercase; }
+  .sub { font-size: var(--fs-lg); font-weight: 600; max-width: 34ch; margin: var(--space-5) 0; }
+  .weekly { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); background: var(--on-accent); color: var(--yellow); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); }
+  .qcard {
+    position: relative; display: flex; flex-direction: column; gap: var(--space-5); padding: var(--space-8);
+    background: var(--surface); color: var(--ink); border: var(--bw-strong) solid var(--on-accent); box-shadow: var(--shadow-2xl);
+    margin-top: calc(-1 * var(--space-12) - var(--edge)); transform: rotate(0.6deg);
+  }
+  .k { display: flex; justify-content: space-between; font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); color: var(--muted); }
+  .qcard .chip--new { position: absolute; top: calc(-1 * var(--space-4)); right: var(--space-6); transform: rotate(4deg); }
+  .stmt { margin: 0; font-family: var(--font-display); font-size: var(--fs-display-sm); font-weight: 700; line-height: 1.12; letter-spacing: -0.02em; }
+  .ans { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+  .big-btn { padding: var(--space-5); font-size: var(--fs-2xl); border-color: var(--on-accent); border-width: var(--bw-strong); }
+  .big-btn:disabled { cursor: default; transform: none; }
+  .big-btn:disabled[aria-pressed='false'] { opacity: 0.4; }
+  .big-btn[aria-pressed='true'] { outline: var(--bw-strong) solid var(--ink); outline-offset: var(--bw-strong); opacity: 1; }
+  .verdict { margin: 0; font-size: var(--fs-md); }
+  .verdict b { display: inline-block; margin-right: var(--space-2); padding: var(--space-1) var(--space-3); border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-sm); background: var(--pink); color: var(--on-accent); font-family: var(--font-display); }
+  .verdict b[data-ok] { background: var(--lime); }
+  .bars { display: grid; gap: var(--space-2); margin-top: var(--space-4); }
+  .brow { display: grid; grid-template-columns: 8rem minmax(0, 1fr) 3.5rem; gap: var(--space-3); align-items: center; font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); }
+  .tr { height: var(--space-5); border: var(--bw-sm) solid var(--line); border-radius: var(--radius-pill); background: var(--bg); overflow: hidden; }
+  .fill { display: block; height: 100%; width: calc(var(--w, 0) * 1%); transition: width var(--dur-slide) var(--ease); background-size: var(--dots-size-sm) var(--dots-size-sm); }
+  .fill--true { background-image: var(--dots); background-color: var(--lime); }
+  .fill--fake { background-image: var(--dots-strong); background-color: var(--pink); }
+  .local { margin: var(--space-2) 0 0; font-size: var(--fs-xs); color: var(--muted); }
+  .qnext { display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); margin-top: var(--space-5); }
+  .src { display: inline-flex; align-items: center; gap: var(--space-1); font-weight: 700; font-size: var(--fs-sm); }
+  .fin { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-4); }
+  .fin-text { margin: 0; font-family: var(--font-display); font-size: var(--fs-display-sm); font-weight: 700; }
+  .dots { display: flex; gap: var(--space-2); }
+  .dots :global(i) { width: var(--space-3); aspect-ratio: 1; border-radius: var(--radius-pill); border: var(--bw-sm) solid var(--line); }
+  .dots :global(i[data-on]) { background: var(--yellow); }
+  .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-7); margin-top: var(--space-11); }
+  .st {
+    display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-6); background: var(--surface); color: var(--ink);
+    border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-lg); box-shadow: var(--shadow-accent);
+  }
+  .st:nth-child(1) { transform: rotate(-1.2deg); }
+  .st:nth-child(3) { transform: rotate(1.2deg); }
+  .lb { font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); }
+  .v { font-family: var(--font-display); font-size: var(--fs-display-lg); font-weight: 700; line-height: 1; letter-spacing: -0.04em; }
+  .v--pink { color: var(--pink-text); }
+  .st p { margin: 0; font-size: var(--fs-md); }
+  @media (max-width: 960px) {
+    .wof { background: var(--dots-strong), linear-gradient(170deg, var(--pink) 0 40%, var(--lime) 40% 100%); background-size: var(--dots-size-md) var(--dots-size-md), auto; }
+    .in { grid-template-columns: minmax(0, 1fr); gap: var(--space-8); }
+    .qcard { margin-top: 0; padding: var(--space-6) var(--space-5); }
+    .stats { grid-template-columns: minmax(0, 1fr); gap: var(--space-5); margin-top: var(--space-9); }
+  }
+  @media (max-width: 520px) {
+    .brow { grid-template-columns: 5.5rem minmax(0, 1fr) 3rem; }
+    .big-btn { font-size: var(--fs-xl); padding: var(--space-4); }
+    .qnext { flex-direction: column; align-items: stretch; }
+  }
+</style>

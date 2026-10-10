@@ -10,13 +10,14 @@ import { t } from '../i18n/ui';
 import { SITE } from '../config';
 import Icon from './Icon.astro';
 import { productArt } from '../product-art';
-interface Props { lang: Lang; products: { name: string; query: string; why: string }[]; category: Category; factKey: string }
-const { lang, products, category, factKey } = Astro.props;
+// wide: über die ganze Seitenbreite und größer, am Ende der Faktseite (Wunsch von Eric, 2026-10-10).
+interface Props { lang: Lang; products: { name: string; query: string; why: string }[]; category: Category; factKey: string; wide?: boolean }
+const { lang, products, category, factKey, wide = false } = Astro.props;
 const ui = t(lang);
 const host = SITE.amazon[lang].host.replace(/^www\./, '');
 ---
 {products.length > 0 && (
-  <aside class="card shop" id="passend" aria-labelledby="shop-title">
+  <aside class:list={['card', 'shop', wide && 'shop--wide']} id="passend" aria-labelledby="shop-title">
     <div class="head">
       <h2 id="shop-title"><Icon name="shopping-cart" /> {ui.productsTitle}</h2>
       <span class="ad-tag">{ui.adLabel}</span>
@@ -46,7 +47,7 @@ const host = SITE.amazon[lang].host.replace(/^www\./, '');
 )}
 
 <style>
-  .shop { position: relative; padding: var(--space-6); margin: var(--space-9) 0; box-shadow: var(--shadow-lg); scroll-margin-top: var(--space-12); }
+  .shop { position: relative; color: var(--ink); padding: var(--space-6); margin: var(--space-9) 0; box-shadow: var(--shadow-lg); scroll-margin-top: var(--space-12); }
   /* Kennzeichnung bleibt groß und kontraststark, nicht versteckt */
   .head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-4); }
   .ad-tag {
@@ -97,6 +98,25 @@ const host = SITE.amazon[lang].host.replace(/^www\./, '');
   .prod:hover .cta { box-shadow: var(--shadow-lg); transform: translate(-2px, -2px); }
 
   .ad { margin: var(--space-5) 0 0; font-size: var(--fs-xs); color: var(--muted); }
+
+  /* Breite Fassung am Ende der Faktseite: größere Bildflächen und Schrift */
+  .shop--wide { margin: 0; padding: var(--space-8); border-width: var(--bw-strong); box-shadow: var(--shadow-2xl); }
+  .shop--wide h2 { font-size: var(--fs-display-sm); }
+  .shop--wide .intro { font-size: var(--fs-lg); }
+  .shop--wide .grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); gap: var(--space-8); }
+  .shop--wide .grid[data-count='1'] { grid-template-columns: minmax(0, 1fr); }
+  .shop--wide .prod { flex-direction: row; border-width: var(--bw-strong); box-shadow: var(--shadow-lg); }
+  .shop--wide .art { flex: 0 0 42%; min-height: 15rem; border-bottom: 0; border-right: var(--bw-strong) solid var(--line); }
+  .shop--wide .emoji { font-size: var(--fs-emoji-xl); }
+  .shop--wide .body { padding: var(--space-6); gap: var(--space-3); }
+  .shop--wide .name { font-size: var(--fs-2xl); }
+  .shop--wide .why { font-size: var(--fs-base); }
+  .shop--wide .ad-tag { font-size: var(--fs-md); }
+  @media (max-width: 760px) {
+    .shop--wide { padding: var(--space-5); }
+    .shop--wide .prod { flex-direction: column; }
+    .shop--wide .art { flex-basis: auto; min-height: 10rem; border-right: 0; border-bottom: var(--bw-strong) solid var(--line); }
+  }
 
   @media (max-width: 560px) {
     .grid[data-count='1'] .prod { flex-direction: column; }

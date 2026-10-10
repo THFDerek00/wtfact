@@ -201,6 +201,34 @@
   --shadow-night-lg: 6px 6px 0 var(--on-night);
   --emoji-shadow: drop-shadow(3px 3px 0 rgb(0 0 0 / 0.25));
 
+  /* Design „E“ (Wunsch von Eric, 2026-10-10): Abschnitte im Wechsel Gelb, Nacht, Papier, Akzent, mit schrägen Kanten.
+     Große Zahlen und Karten ragen über die Kanten hinaus (--bleed), damit die Übergänge fließen.
+     Akzentflächen bekommen immer einen Tinte-Rand plus harten Schatten, weil Gelb neben Lime (1,08:1) und
+     Pink neben Violett (1,05:1) sonst nicht zu unterscheiden sind. Auf der Nacht sind die Schatten farbig. */
+  --edge: clamp(28px, 4.5vw, 72px); /* Höhe der schrägen Kante zwischen zwei Abschnitten */
+  --bleed: clamp(28px, 5vw, 88px); /* so weit ragen Zahlen und Karten in den Nachbarabschnitt */
+  --fs-mega: clamp(96px, 21vw, 340px); /* Wochentag im Kopf, große Zahl beim Fakt des Tages */
+  --fs-huge: clamp(72px, 13vw, 200px);
+  --fs-display-2xl: clamp(40px, 7vw, 96px);
+  --stroke-mega: clamp(4px, 0.6vw, 9px); /* Kontur der Riesenzahlen, damit sie auf jeder Fläche lesbar bleiben */
+  --bw-strong: 3px; /* Tinte-Rand um Akzentflächen */
+  --bw-stripe: 14px; /* gelber Streifen links am Fakt-Text */
+  --shadow-2xl: 12px 12px 0 var(--line);
+  --shadow-accent: 8px 8px 0 var(--on-accent); /* auf Akzentflächen: bleibt auch im Dark Mode dunkel */
+  --shadow-accent-sm: 4px 4px 0 var(--on-accent);
+  --shadow-night-pink: 8px 8px 0 var(--pink);
+  --shadow-night-lime: 8px 8px 0 var(--lime);
+  --night-2: #221e2b; /* Karten auf der Nacht */
+  --night-3: #2e2938;
+  --on-night-faint: #a9a4b6; /* 7,8:1 auf --night */
+  --dots-night-ink: color-mix(in srgb, var(--on-night) 7%, transparent);
+  --dots-night: radial-gradient(var(--dots-night-ink) 22%, transparent 25%);
+  --dots-paper-ink: color-mix(in srgb, var(--ink) 7%, transparent);
+  --dots-paper: radial-gradient(var(--dots-paper-ink) 22%, transparent 25%);
+  --blur-lock: blur(7px); /* noch nicht erschienener Fakt */
+  --dur-rotate: 6s; /* „Noch ein WTF zum Schluss“ wechselt automatisch */
+  --dur-slide: 0.45s;
+
   /* Bewegung */
   --dur: 0.15s;
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -254,6 +282,8 @@
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body { overflow-x: clip; }
+/* Ragende Zahlen und Bänder (.bleed) dürfen über den Rand, aber nie die Seite seitlich verschiebbar machen */
+main, .foot { overflow-x: clip; }
 body {
   margin: 0;
   background: var(--bg);
@@ -285,6 +315,7 @@ h1, h2, h3 { font-family: var(--font-display); line-height: 1.15; letter-spacing
 
 .card {
   background: var(--surface);
+  color: var(--ink); /* auch in farbigen Abschnitten (.sec--yellow usw.) lesbar, hell wie dunkel */
   border: var(--bw) solid var(--line);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
@@ -382,6 +413,51 @@ html[data-sky] .stage { background: var(--sky-stage); }
 .cat-popculture { background: var(--dots-strong), var(--cat-popculture); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
 .accent { background: var(--yellow); color: var(--on-accent); }
 .gold { background: var(--gold-surface); color: var(--on-accent); }
+
+/* Abschnitte im Design „E“ (docs/design-system.md, „Abschnitte und Überhänge“).
+   data-edge zeichnet oben eine schräge Kante in der Farbe des Abschnitts, die in den Abschnitt davor ragt.
+   Bewusst ohne clip-path auf dem Abschnitt selbst, damit große Zahlen und Karten über die Kante ragen dürfen (.bleed). */
+.sec { position: relative; padding-block: var(--space-12); }
+.sec[data-edge]::before {
+  content: ''; position: absolute; left: 0; right: 0; bottom: calc(100% - 1px); height: var(--edge);
+  background: inherit; background-position: inherit; pointer-events: none;
+  clip-path: polygon(0 100%, 100% 0, 100% 100%);
+}
+.sec[data-edge='left']::before { clip-path: polygon(0 0, 100% 100%, 0 100%); }
+.sec--night { background: var(--dots-night), var(--night); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-night); --focus: var(--yellow); --line: var(--on-night); }
+.sec--paper { background: var(--dots-paper), var(--bg); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--ink); }
+.sec--yellow { background: var(--dots), var(--yellow); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-accent); --line: var(--on-accent); --focus: var(--on-accent); }
+.sec--pink { background: var(--dots-strong), var(--pink); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-accent); --line: var(--on-accent); --focus: var(--on-accent); }
+.sec--violet { background: var(--dots), var(--violet); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-accent); --line: var(--on-accent); --focus: var(--on-accent); }
+.sec--lime { background: var(--dots), var(--lime); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-accent); --line: var(--on-accent); --focus: var(--on-accent); }
+/* Ragt über die Kante in den Nachbarabschnitt und liegt dabei obenauf */
+.bleed { position: relative; z-index: 2; }
+/* Überschrift mit Marker-Strich in Pink */
+.mark { background: linear-gradient(transparent 58%, var(--pink) 58% 90%, transparent 90%); }
+.sec--night .mark { background: none; color: var(--yellow); }
+/* Riesen-Schrift mit Kontur, z. B. Wochentag und „400“ */
+.mega {
+  font-family: var(--font-display); font-weight: 800; line-height: 0.8; letter-spacing: -0.06em; white-space: nowrap;
+  color: var(--on-night); -webkit-text-stroke: var(--stroke-mega) var(--on-accent); paint-order: stroke fill;
+}
+/* Link mit dickem Unterstrich (z. B. „Alle Kategorien ansehen“) */
+.more-link {
+  display: inline-flex; align-items: center; gap: var(--space-1); font-family: var(--font-display); font-weight: 700;
+  color: inherit; text-decoration: none; border-bottom: var(--bw-strong) solid var(--pink); padding-bottom: var(--space-1);
+}
+.sec--night .more-link { border-color: var(--yellow); }
+.sec--pink .more-link, .sec--violet .more-link { border-color: var(--on-accent); }
+/* Kopfzeile eines Abschnitts: Überschrift links, Link rechts */
+.sec-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-8); }
+.sec-head h2 { margin: 0; font-size: var(--fs-display-md); }
+/* „Heute im Fokus“: markiert je Wochentag einen Abschnitt (DayHero.astro) */
+.focus-tag {
+  display: none; position: absolute; top: calc(-1 * var(--space-5)); right: var(--gutter); z-index: 3;
+  padding: var(--space-2) var(--space-4); border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-sm);
+  background: var(--yellow); color: var(--on-accent); font-family: var(--font-display); font-weight: 800; font-size: var(--fs-sm);
+  box-shadow: var(--shadow-accent-sm); transform: rotate(3deg);
+}
+[data-focus] > .focus-tag { display: inline-block; }
 
 .sr-only {
   position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;

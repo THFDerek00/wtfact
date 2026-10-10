@@ -4,6 +4,10 @@
 export type IconNode = [tag: string, attrs: Record<string, string>][];
 export const ICONS: Record<string, IconNode> = {
   'badge-check': [["path", {"d": "M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"}], ["path", {"d": "m16 9-5.5 5.5L8 12"}]],
+  'calendar': [["path", {"d": "M8 2v4"}], ["path", {"d": "M16 2v4"}], ["rect", {"width": "18", "height": "18", "x": "3", "y": "4", "rx": "2"}], ["path", {"d": "M3 10h18"}]],
+  'pause': [["rect", {"x": "14", "y": "4", "width": "4", "height": "16", "rx": "1"}], ["rect", {"x": "6", "y": "4", "width": "4", "height": "16", "rx": "1"}]],
+  'rotate-ccw': [["path", {"d": "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"}], ["path", {"d": "M3 3v5h5"}]],
+  'x': [["path", {"d": "M18 6 6 18"}], ["path", {"d": "m6 6 12 12"}]],
   'check': [["path", {"d": "M20 6 9 17l-5-5"}]],
   'chevron-down': [["path", {"d": "m6 9 6 6 6-6"}]],
   'chevron-left': [["path", {"d": "m15 18-6-6 6-6"}]],

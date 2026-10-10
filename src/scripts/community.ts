@@ -87,9 +87,10 @@ export async function ratingOf(key: string) {
 }
 
 export type TopEntry = { key: string; like: number; meh: number };
-/** Die 10 beliebtesten Fakten (Daumen hoch minus runter), oder null ohne Server. */
-export async function topFacts() {
-  const r = await api<TopEntry[]>('top');
+/** Die 10 beliebtesten Fakten (Daumen hoch minus runter), oder null ohne Server.
+ * `since` (JJJJ-MM-TT): nur Fakten ab diesem Tag, z. B. Top 5 der Woche auf der Startseite. */
+export async function topFacts(since?: string) {
+  const r = await api<TopEntry[]>(since ? `top&since=${encodeURIComponent(since)}` : 'top');
   return r.ok ? r.data : null;
 }
 
@@ -128,3 +129,8 @@ export async function vote(poll: string, key: string): Promise<Counts | 'closed'
   if (r.status === 409) return 'closed';
   return localCounts(poll);
 }
+
+/** Zufällige Kennung dieses Browsers (wird beim ersten Aufruf angelegt). Für die Quizspiele (src/scripts/quiz.ts). */
+export const myVoter = () => voterId(load());
+/** Gemeinsamer Zugang zur PHP-API für andere Browser-Teile, gleiche Regeln wie oben (ohne Server: ok=false). */
+export const callApi = api;

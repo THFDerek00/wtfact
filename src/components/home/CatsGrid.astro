@@ -1,0 +1,61 @@
+---
+// Kategorien-Kacheln (Design „E“, Stil aus Entwurf B): Kategoriefarbe mit Punktmuster, Symbol groß in der Ecke.
+// Auf der Startseite kompakt, auf der Kategorien-Seite (/[lang]/kategorien/) groß mit dem neuesten Fakt.
+// Ein Klick filtert „Frisch aus dem Labor“ (Startseite) bzw. führt dorthin (/?cat=…#facts).
+import { CATEGORIES, type Lang } from '../../config';
+import { t } from '../../i18n/ui';
+import { categoryIcon, postUrl, type Post } from '../../lib';
+interface Props { lang: Lang; posts: Post[]; big?: boolean }
+const { lang, posts, big = false } = Astro.props;
+const ui = t(lang);
+const cats = CATEGORIES.map((c) => ({ c, list: posts.filter((p) => p.data.category === c) })).filter((x) => x.list.length > 0);
+---
+<ul class:list={['cats', big && 'cats--big']}>
+  {cats.map(({ c, list }, i) => (
+    <li>
+      <a class:list={['cat', `cat-${c}`, `tilt-${i % 4}`]} href={`/${lang}/?cat=${c}#facts`} data-jump={c}>
+        <img class="corner corner--big" src={categoryIcon(c)} alt="" width="120" height="120" loading="lazy" />
+        <img class="corner corner--small" src={categoryIcon(c)} alt="" width="48" height="48" loading="lazy" />
+        <span class="name">{ui.categories[c]}</span>
+        <span class="count">{ui.factsCount(list.length)}</span>
+        {big && list[0] && <span class="latest"><small>{ui.home.latestIn}</small>{list[0].data.title}</span>}
+      </a>
+      {big && list[0] && <a class="sr-only" href={postUrl(list[0])}>{ui.home.latestIn}: {list[0].data.title}</a>}
+    </li>
+  ))}
+</ul>
+
+<style>
+  .cats { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); gap: var(--space-7) var(--space-6); }
+  .cats--big { grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); gap: var(--space-9) var(--space-8); }
+  .cat {
+    position: relative; display: flex; flex-direction: column; justify-content: flex-end; gap: var(--space-1); min-height: 10rem;
+    padding: var(--space-5); border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-lg); box-shadow: var(--shadow-accent);
+    text-decoration: none; overflow: visible; transition: transform var(--dur) var(--ease-pop), box-shadow var(--dur) var(--ease);
+  }
+  .cats--big .cat { min-height: 16rem; padding: var(--space-7); justify-content: flex-start; }
+  .tilt-0 { transform: rotate(-1deg); }
+  .tilt-1 { transform: rotate(0.8deg); }
+  .tilt-2 { transform: rotate(-0.4deg); }
+  .cat:hover { transform: translate(-3px, -4px) rotate(-2deg); }
+  /* Symbole ragen über die Ecken hinaus */
+  .corner { position: absolute; pointer-events: none; filter: var(--emoji-shadow); }
+  .corner--big { right: calc(-1 * var(--space-4)); bottom: calc(-1 * var(--space-5)); width: 42%; max-width: 8rem; height: auto; transform: rotate(-10deg); }
+  .corner--small { right: 38%; top: calc(-1 * var(--space-5)); width: 16%; max-width: 3rem; height: auto; transform: rotate(14deg); opacity: 0.9; }
+  .cat:hover .corner--big { transform: rotate(4deg) scale(1.08); }
+  .name { position: relative; font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 800; line-height: 1.05; letter-spacing: -0.02em; max-width: 70%; }
+  .cats--big .name { font-size: var(--fs-display-sm); }
+  .count { position: relative; font-size: var(--fs-sm); font-weight: 700; }
+  .latest {
+    position: relative; margin-top: auto; max-width: 72%; padding: var(--space-3) var(--space-4); border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-md);
+    background: var(--surface); color: var(--ink); font-family: var(--font-display); font-weight: 700; line-height: 1.3; box-shadow: var(--shadow-accent-sm);
+  }
+  .latest small { display: block; font-family: var(--font-body); font-weight: 600; font-size: var(--fs-xs); color: var(--muted); margin-bottom: var(--space-1); }
+  @media (max-width: 520px) {
+    .cats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-5) var(--space-4); }
+    .cats--big { grid-template-columns: minmax(0, 1fr); }
+    .cat { min-height: 8rem; padding: var(--space-4); }
+    .name { font-size: var(--fs-lg); }
+    .latest { max-width: 100%; margin-right: var(--space-10); font-size: var(--fs-sm); }
+  }
+</style>

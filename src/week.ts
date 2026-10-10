@@ -153,7 +153,7 @@ export function nextSlotTime(slots: readonly string[], now: number = Date.now())
   return berlinTime(addDays(today, 2), [...slots].sort()[0]);
 }
 
-// ---------- Hall of Fame: Verlauf ----------
+// ---------- WTF-Charts: Verlauf ----------
 
 /** So viele Tage reicht der Verlauf der Fakten des Tages zurück (heute eingeschlossen). */
 export const HISTORY_DAYS = 30;
@@ -175,7 +175,7 @@ export const nextDayStart = (day: string) => Date.parse(`${dayStartUtc(addDays(d
 export type DayPick = { day: string; key: string; like: number; meh: number };
 export type WeekPick = { poll: string; key: string; votes: number; total: number };
 
-/** Top 10 der Hall of Fame: Daumen hoch minus runter, dann mehr Daumen hoch, dann der neuere Fakt.
+/** Top 10 der WTF-Charts: Daumen hoch minus runter, dann mehr Daumen hoch, dann der neuere Fakt.
  * Nur mit mindestens einem Daumen hoch. Gleiche Rechnung wie ?r=top in public/api/index.php. */
 export function topTen(facts: FactMeta[], ratings: Ratings) {
   const dateOf = new Map(facts.map((f) => [f.key, f.date]));

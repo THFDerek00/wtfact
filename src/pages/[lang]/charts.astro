@@ -1,15 +1,16 @@
 ---
-// Hall of Fame: eigene Seite für Fakt des Tages und Fakt der Woche (Wunsch von Eric, 2026-10-02),
+// WTF-Charts (bis 2026-10-10 „Hall of Fame“, umbenannt auf Wunsch von Eric): eigene Seite für Fakt des Tages und Fakt der Woche (Wunsch von Eric, 2026-10-02),
 // mit Top 10 (TopTen.astro), Montags-Abstimmung, Countdowns, Tippspiel „Wer wird morgen Fakt des Tages?“, Verlauf mit
-// Sammelalbum und Kategorien-Rangliste. Auf der Startseite steht nur noch ein kurzer Hinweis (FamePointer.astro).
+// Sammelalbum, Kategorien-Rangliste und Quiz-Auswertung (QuizCharts.astro). Auf der Startseite: WeekBlock.astro.
 // Rechnen und Speichern: src/scripts/fame.ts, Server: GET /api/index.php?r=history (public/api/index.php).
 import Base from '../../layouts/Base.astro';
 import Vote from '../../components/Vote.astro';
 import TopTen from '../../components/TopTen.astro';
+import QuizCharts from '../../components/QuizCharts.astro';
 import LiveCounter from '../../components/LiveCounter.astro';
 import Icon from '../../components/Icon.astro';
 import { LANGS, CATEGORIES, SLOT_TIMES, type Lang } from '../../config';
-import { t } from '../../i18n/ui';
+import { t, chartsPath } from '../../i18n/ui';
 import { postsFor, factInfo, categoryIcon } from '../../lib';
 
 export function getStaticPaths() {
@@ -33,7 +34,7 @@ const texts = {
   tipSaved: f.tipSaved, tipHit: f.tipHit, tipMiss: f.tipMiss('§'), catsMeta: f.catsMeta(9001, 9002),
 };
 ---
-<Base lang={lang} title={f.title} description={f.intro} altUrl={`/${other}/hall-of-fame/`}>
+<Base lang={lang} title={f.title} description={f.intro} altUrl={chartsPath(other)}>
   <div data-fame data-slots={JSON.stringify(SLOT_TIMES)} data-facts={JSON.stringify(facts)} data-texts={JSON.stringify(texts)} data-lang={lang}>
     <section class="stage fame-hero">
       <div class="wrap hero-grid">
@@ -64,6 +65,8 @@ const texts = {
     </section>
 
     <TopTen lang={lang} facts={facts} />
+
+    <QuizCharts lang={lang} />
 
     <div class="wrap vote-wrap"><Vote lang={lang} posts={posts} /></div>
 
