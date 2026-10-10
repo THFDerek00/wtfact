@@ -22,6 +22,15 @@ const other: Lang = lang === 'de' ? 'en' : 'de';
 const otherUrl = altUrl ?? `/${other}/`;
 // Für „Überrasch mich“: alle Beitrags-URLs dieser Sprache
 const allUrls = (await postsFor(lang)).map(postUrl);
+// Hauptmenü: oben auf breiten Bildschirmen, als Leiste unten am Handy (gleiche Ziele, kurze Namen)
+const path = Astro.url.pathname;
+const nav = [
+  { href: `/${lang}/#facts`, label: ui.home.navFacts, tab: ui.home.tabs.facts, icon: 'zap', current: path === `/${lang}/` },
+  { href: `/${lang}/#wof`, label: ui.home.navQuiz, tab: ui.home.tabs.quiz, icon: 'target', current: false },
+  { href: catsPath(lang), label: ui.home.catsAll, tab: ui.home.tabs.cats, icon: 'layout-grid', current: path === catsPath(lang) },
+  { href: chartsPath(lang), label: ui.fame.name, tab: ui.home.tabs.charts, icon: 'trophy', current: path === chartsPath(lang) },
+  { href: `/${lang}/science-jumper/`, label: ui.game.name, tab: ui.home.tabs.game, icon: 'flask-conical', current: path.startsWith(`/${lang}/science-jumper/`) },
+];
 ---
 <!doctype html>
 <html lang={lang}>
@@ -67,14 +76,7 @@ const allUrls = (await postsFor(lang)).map(postUrl);
         </a>
         <p class="slogan">{ui.slogan}</p>
         <nav class="mainnav" aria-label={ui.home.nav}>
-          {[
-            [`/${lang}/#facts`, ui.home.navFacts],
-            [catsPath(lang), ui.home.catsAll],
-            [chartsPath(lang), ui.fame.name],
-            [`/${lang}/science-jumper/`, ui.game.name],
-          ].map(([href, label]) => (
-            <a href={href} aria-current={Astro.url.pathname === href ? 'page' : undefined}>{label}</a>
-          ))}
+          {nav.map((n) => <a href={n.href} aria-current={n.current ? 'page' : undefined}>{n.label}</a>)}
         </nav>
         <div class="actions">
           <button class="btn btn--pink surprise" type="button" data-surprise={JSON.stringify(allUrls)} aria-label={ui.surprise}>
@@ -109,6 +111,11 @@ const allUrls = (await postsFor(lang)).map(postUrl);
         <p class="copy">© {new Date().getFullYear()} {SITE.name}</p>
       </div>
     </footer>
+    <nav class="tabbar" aria-label={ui.home.nav}>
+      {nav.map((n) => (
+        <a href={n.href} aria-current={n.current ? 'page' : undefined}><Icon name={n.icon} /><span>{n.tab}</span></a>
+      ))}
+    </nav>
     <script>
       import { isNew } from '../week';
       // „Neu“ nach 7 Tagen ausblenden, auch wenn die Seite seitdem nicht neu gebaut wurde
@@ -165,6 +172,25 @@ const allUrls = (await postsFor(lang)).map(postUrl);
   .mainnav a { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-md); text-decoration: none; padding-bottom: var(--space-1); border-bottom: var(--bw-strong) solid transparent; }
   .mainnav a:hover, .mainnav a[aria-current='page'] { border-color: var(--pink); }
   @media (max-width: 1060px) { .mainnav { display: none; } }
+  /* Leiste unten am Handy und Tablet: alle Bereiche immer mit einem Daumen erreichbar */
+  .tabbar { display: none; }
+  @media (max-width: 1060px) {
+    .tabbar {
+      position: fixed; inset: auto 0 0; z-index: 6; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+      padding: var(--space-1) var(--space-1) calc(var(--space-1) + env(safe-area-inset-bottom));
+      background: var(--night); border-top: var(--bw-strong) solid var(--on-accent);
+    }
+    .tabbar a {
+      display: flex; flex-direction: column; align-items: center; gap: var(--space-1); min-width: 0; padding: var(--space-2) var(--space-1);
+      border-radius: var(--radius-sm); color: var(--on-night); text-decoration: none;
+      font-family: var(--font-display); font-size: var(--fs-xs); font-weight: 700; line-height: 1.1;
+    }
+    .tabbar a span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .tabbar a :global(.icon) { width: var(--fs-xl); height: var(--fs-xl); }
+    .tabbar a[aria-current='page'] { background: var(--yellow); color: var(--on-accent); }
+    /* Platz, damit die Leiste den Fuß nicht verdeckt */
+    footer.foot { padding-bottom: calc(var(--space-12) + var(--space-12)); }
+  }
   @media (max-width: 1360px) and (min-width: 1061px) { .slogan { display: none; } .mainnav { margin-left: auto; } }
   .surprise { padding: var(--space-2) var(--space-4); font-size: var(--fs-sm); }
   .lang { padding: var(--space-1) var(--space-3); font-size: var(--fs-sm); }

@@ -211,6 +211,7 @@
   --fs-huge: clamp(72px, 13vw, 200px);
   --fs-display-2xl: clamp(40px, 7vw, 96px);
   --stroke-mega: clamp(4px, 0.6vw, 9px); /* Kontur der Riesenzahlen, damit sie auf jeder Fläche lesbar bleiben */
+  --shift-mega: clamp(3px, 0.4vw, 6px); /* Versatz des farbigen Schattens hinter Riesenwörtern und -zahlen: liegt dicht an der Kontur */
   --bw-strong: 3px; /* Tinte-Rand um Akzentflächen */
   --bw-stripe: 14px; /* gelber Streifen links am Fakt-Text */
   --shadow-2xl: 12px 12px 0 var(--line);
