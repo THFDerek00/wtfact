@@ -579,6 +579,33 @@ function spVote() {
   return doc.render();
 }
 
+// Science Jumper: echte Spielszene (Canvas-Aufnahme aus /de/science-jumper/, quelle/science-jumper-szene.png),
+// groß und schräg im gelben Konsolenrahmen wie auf der Seite, darüber ein Riesenwort (Wunsch von Eric, 2026-10-12: „mutiger“).
+function spJumper() {
+  const doc = new Doc(W, PH);
+  const shot = `data:image/png;base64,${fs.readFileSync(path.join(ROOT, OUT, 'quelle/science-jumper-szene.png')).toString('base64')}`;
+  doc.add(doc.area(poly([0, 0], [W, 0], [W, 600], [0, 720]), C.yellow));
+  doc.add(doc.area(poly([0, 720], [W, 600], [W, PH], [0, PH]), NIGHT));
+  doc.add(`<path d="${poly([0, 712], [W, 592], [W, 610], [0, 730])}" fill="${C.ink}"/>`);
+  doc.add(rot(-7, 330, 200, textStroke(text('SPRING!', { x: 70 + 14, y: 300 + 14, size: 250, fill: C.pink }), C.ink, 14)
+    + textStroke(text('SPRING!', { x: 70, y: 300, size: 250, fill: CREAM }), C.ink, 14)));
+  doc.add(pill(doc, 'Science Jumper', 760, 360, { fill: C.cyan, size: 44, a: 6 }));
+  // Spielszene: 1154 × 625 Pixel, schräg im Rahmen
+  const fw = 960, fh = Math.round(fw * 625 / 1154), fx = (W - fw) / 2, fy = 540;
+  const frame = rectD(fx, fy, fw, fh, 34);
+  const cl = doc.clip(frame);
+  doc.add(rot(-3, W / 2, fy + fh / 2,
+    `<path d="${rectD(fx + 22, fy + 22, fw, fh, 34)}" fill="${C.pink}" stroke="${C.ink}" stroke-width="8"/>` +
+    `<image href="${shot}" x="${fx}" y="${fy}" width="${fw}" height="${fh}" preserveAspectRatio="xMidYMid slice" clip-path="url(#${cl})"/>` +
+    `<path d="${frame}" fill="none" stroke="${C.yellow}" stroke-width="18"/><path d="${rectD(fx - 9, fy - 9, fw + 18, fh + 18, 42)}" fill="none" stroke="${C.ink}" stroke-width="6"/>`));
+  doc.add(emoji(doc, '🔥', 14, fy + fh - 150, 190, { rot: -12, shadow: C.ink }));
+  doc.add(emoji(doc, '🧪', 90, 350, 170, { rot: -16, shadow: C.ink }));
+  doc.add(text('Wie weit kommst du?', { x: W / 2, y: fy + fh + 130, size: 66, anchor: 'middle', fill: CREAM }));
+  doc.add(pill(doc, 'Spielen: Link in Bio', W / 2, fy + fh + 190, { fill: C.yellow, size: 42, a: -2, shadow: C.pink }));
+  doc.add(tag(doc, true));
+  return doc.render();
+}
+
 // ---------- Inhalte ----------
 // 50 Fakten-Posts, je Kategorie 5, stärkste zuerst. `big` = Riesenzahl (Layout C), muss mit `must` im Titel stehen.
 const POST_QUEUES = {
@@ -662,9 +689,6 @@ const capPost = (f, i) => `${f.teaser}\n\n${QUESTIONS[i % QUESTIONS.length]}\n\n
 
 // ---------- Erzeugen ----------
 const files = { posts: [], stories: [], extras: [] };
-// Fertiges Bild statt SVG, z. B. der Science-Jumper-Post: echter Screenshot der Spielseite im Handy-Format
-// (Wunsch von Eric, 2026-10-12: „genau wie Science Jumper“). Liegt in quelle/ und wird nur kopiert.
-const putFile = (group, name, src) => { fs.copyFileSync(path.join(ROOT, src), path.join(ROOT, OUT, group, `${name}.png`)); files[group].push(`${group}/${name}.png`); return `${group}/${name}.png`; };
 const put = (group, name, svgStr) => { png(`${OUT}/${group}/${name}.png`, svgStr); files[group].push(`${group}/${name}.png`); return `${group}/${name}.png`; };
 const plan = []; // Feed-Einheiten in Reihenfolge: { kind, files, caption, title }
 
@@ -710,7 +734,7 @@ function main() {
     caption: `Hi! Hier gibt's jeden Tag Fakten, bei denen du erst „WTF?!“ sagst und dann klüger bist. Jeder einzelne mit Quellen.\n\nFolg uns für deine tägliche Dosis. Alle Fakten: Link in Bio.\n\n${TAGS_BASE} #wissen #lernen` });
   extras.push({ kind: 'Anpinnen', title: 'Jeden Montag Abstimmung', files: [put('extras', `${xn()}-anpinnen-montags-abstimmung`, spVote())],
     caption: `Jeden Montag stimmt ihr ab: Welcher Fakt war der beste der letzten 7 Tage? Der Gewinner ist eine Woche lang Fakt der Woche und landet in den WTF-Charts.\n\nAbstimmen: Link in Bio. Montags erinnern wir dich in der Story.\n\n${TAGS_BASE} #abstimmung #faktderwoche` });
-  extras.push({ kind: 'Anpinnen', title: 'Science Jumper', files: [putFile('extras', `${xn()}-anpinnen-science-jumper`, `${OUT}/quelle/science-jumper-spiel.png`)],
+  extras.push({ kind: 'Anpinnen', title: 'Science Jumper', files: [put('extras', `${xn()}-anpinnen-science-jumper`, spJumper())],
     caption: `Auf WTFact gibt's ein Spiel: Science Jumper. Spring als Buch über Flammen, sammle Reagenzgläser und schalte mit jedem Highscore goldene Fakten frei.\n\nWie weit kommst du? Screenshot vom Highscore gern in die Kommentare. Spielen: Link in Bio.\n\n${TAGS_BASE} #browsergame #highscore #sciencejumper` });
   for (const w of WF) {
     const f = fact(w.key), n = xn(), slug = w.key;
