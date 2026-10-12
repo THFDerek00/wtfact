@@ -579,6 +579,17 @@ function spVote() {
   return doc.render();
 }
 
+// Reagenzglas genau wie im Spiel (drawFlask in src/scripts/jumper.ts, Farben --flask, --flask-glow, --orange), Einheit 14 × 30
+const FLASK = '#2f7bff', FLASK_GLOW = '#8ec5ff';
+function gameFlask(x, y, k, a = 0) {
+  const rr = (rx, ry, w, h, r) => `M${rx} ${ry}H${rx + w}V${ry + h - r}A${r} ${r} 0 0 1 ${rx + w - r} ${ry + h}H${rx + r}A${r} ${r} 0 0 1 ${rx} ${ry + h - r}Z`;
+  const body = (dx) => `<g transform="translate(${dx} ${dx})"><path d="${rr(0, 4, 14, 26, 7)}" fill="${C.ink}"/><path d="${rectD(-1, 0, 16, 6, 1.5)}" fill="${C.ink}"/></g>`;
+  const glas = `<path d="${rr(0, 4, 14, 26, 7)}" fill="${CREAM}"/><path d="${rr(1.5, 14, 11, 14.5, 6)}" fill="${FLASK}"/>` +
+    `<rect x="3.5" y="16" width="2" height="8" fill="${FLASK_GLOW}"/><circle cx="9" cy="19" r="1.3" fill="${FLASK_GLOW}"/>` +
+    `<path d="${rr(0, 4, 14, 26, 7)}" fill="none" stroke="${C.ink}" stroke-width="2" stroke-linejoin="round"/>` +
+    `<path d="${rectD(-1, 0, 16, 6, 1.5)}" fill="${C.orange}" stroke="${C.ink}" stroke-width="2" stroke-linejoin="round"/>`;
+  return rot(a, x + 7 * k, y + 15 * k, `<g transform="translate(${r2(x)} ${r2(y)}) scale(${k})">${body(1.6)}${glas}</g>`);
+}
 // Science Jumper: echte Spielszene (Canvas-Aufnahme aus /de/science-jumper/, quelle/science-jumper-szene.png),
 // groß und schräg im gelben Konsolenrahmen wie auf der Seite, darüber ein Riesenwort (Wunsch von Eric, 2026-10-12: „mutiger“).
 function spJumper() {
@@ -599,7 +610,7 @@ function spJumper() {
     `<image href="${shot}" x="${fx}" y="${fy}" width="${fw}" height="${fh}" preserveAspectRatio="xMidYMid slice" clip-path="url(#${cl})"/>` +
     `<path d="${frame}" fill="none" stroke="${C.yellow}" stroke-width="18"/><path d="${rectD(fx - 9, fy - 9, fw + 18, fh + 18, 42)}" fill="none" stroke="${C.ink}" stroke-width="6"/>`));
   doc.add(emoji(doc, '🔥', 14, fy + fh - 150, 190, { rot: -12, shadow: C.ink }));
-  doc.add(emoji(doc, '🧪', 90, 350, 170, { rot: -16, shadow: C.ink }));
+  doc.add(gameFlask(150, 365, 5.6, -16));
   doc.add(text('Wie weit kommst du?', { x: W / 2, y: fy + fh + 130, size: 66, anchor: 'middle', fill: CREAM }));
   doc.add(pill(doc, 'Spielen: Link in Bio', W / 2, fy + fh + 190, { fill: C.yellow, size: 42, a: -2, shadow: C.pink }));
   doc.add(tag(doc, true));
