@@ -339,7 +339,7 @@ function storyWeekWinner() {
   doc.add(tape(doc, 'FAKT DER WOCHE', 960, -6, C.yellow, { h: 110, size: 54 }));
   const h = fit('Der Fakt der Woche steht fest.', { maxW: 920, max: 96, min: 60, maxLines: 3 });
   doc.add(para(h, 80, 1090, CREAM));
-  doc.add(para(fit('Ihr habt gestern abgestimmt. Welcher Fakt gewonnen hat, steht in der Hall of Fame.', { maxW: 920, max: 36, min: 28, font: TEXT, lh: 1.4, maxLines: 3 }), 80, 1110 + h.h, NIGHT_MUTED));
+  doc.add(para(fit('Ihr habt gestern abgestimmt. Welcher Fakt gewonnen hat, steht in den WTF-Charts.', { maxW: 920, max: 36, min: 28, font: TEXT, lh: 1.4, maxLines: 3 }), 80, 1110 + h.h, NIGHT_MUTED));
   doc.add(stickerHint(doc, 'Zum Gewinner', 1480, true));
   doc.add(tag(doc, true));
   return doc.render();
@@ -566,7 +566,7 @@ function spVote() {
   doc.add(emoji(doc, '🗳️', 720, -70, 420, { rot: 12 }));
   const h = fit('Jeden Montag wählt ihr den Fakt der Woche.', { maxW: 600, max: 80, min: 50, maxLines: 5 });
   doc.add(para(h, 80, 120, C.ink));
-  const steps = [['Montag', 'Abstimmen: Welcher Fakt war der beste der letzten 7 Tage?', C.yellow], ['Dienstag', 'Der Gewinner wird für eine Woche Fakt der Woche.', C.lime], ['Für immer', 'Alle Sieger landen in der Hall of Fame.', C.cyan]];
+  const steps = [['Montag', 'Abstimmen: Welcher Fakt war der beste der letzten 7 Tage?', C.yellow], ['Dienstag', 'Der Gewinner wird für eine Woche Fakt der Woche.', C.lime], ['Für immer', 'Alle Sieger landen in den WTF-Charts.', C.cyan]];
   steps.forEach(([d, t, c], i) => {
     const y = 560 + i * 210, a = [-3, 2, -2][i];
     const tt = fit(t, { maxW: 560, max: 36, min: 26, font: TEXT, lh: 1.35, maxLines: 3 });
@@ -575,24 +575,6 @@ function spVote() {
       para(tt, (i === 1 ? 140 : 60) + 330, y + 85 - tt.h / 2, i === 1 ? CREAM : C.ink)));
   });
   doc.add(text('Abstimmen: Link in Bio', { x: W / 2, y: 1270, size: 36, anchor: 'middle' }));
-  doc.add(tag(doc, false));
-  return doc.render();
-}
-function spJumper() {
-  const doc = new Doc(W, PH);
-  doc.add(doc.area(poly([0, 0], [W, 0], [W, 760], [0, 640]), NIGHT));
-  doc.add(doc.area(poly([0, 640], [W, 760], [W, PH], [0, PH]), C.yellow));
-  doc.add(`<path d="${poly([0, 630], [W, 750], [W, 770], [0, 650])}" fill="${C.ink}"/>`);
-  doc.add(emoji(doc, '📕', 120, 330, 260, { rot: -14, shadow: C.pink }));
-  doc.add(emoji(doc, '🔥', 470, 470, 200, { shadow: C.pink }));
-  doc.add(emoji(doc, '🔥', 640, 500, 170, { shadow: C.pink }));
-  doc.add(emoji(doc, '🧪', 860, 220, 230, { rot: 14, shadow: C.cyan }));
-  doc.add(emoji(doc, '⭐', 860, 470, 150, { rot: -10, shadow: C.pink }));
-  doc.add(rot(-4, W / 2, 180, text('Science Jumper', { x: W / 2, y: 220, size: 110, anchor: 'middle', fill: C.yellow })));
-  const h = fit('Spring über die Flammen, sammle Reagenzgläser.', { maxW: 920, max: 70, min: 48, maxLines: 3 });
-  doc.add(para(h, 80, 820, C.ink));
-  doc.add(para(fit('Mit jedem Highscore schaltest du Gold-Fakten frei. Gratis im Browser, ohne Anmeldung.', { maxW: 920, max: 36, min: 28, font: TEXT, lh: 1.4, maxLines: 3 }), 80, 840 + h.h, C.ink));
-  doc.add(pill(doc, 'Spielen: Link in Bio', W / 2, 1180, { fill: NIGHT, ink: CREAM, size: 40, a: -2, shadow: C.pink }));
   doc.add(tag(doc, false));
   return doc.render();
 }
@@ -680,6 +662,9 @@ const capPost = (f, i) => `${f.teaser}\n\n${QUESTIONS[i % QUESTIONS.length]}\n\n
 
 // ---------- Erzeugen ----------
 const files = { posts: [], stories: [], extras: [] };
+// Fertiges Bild statt SVG, z. B. der Science-Jumper-Post: echter Screenshot der Spielseite im Handy-Format
+// (Wunsch von Eric, 2026-10-12: „genau wie Science Jumper“). Liegt in quelle/ und wird nur kopiert.
+const putFile = (group, name, src) => { fs.copyFileSync(path.join(ROOT, src), path.join(ROOT, OUT, group, `${name}.png`)); files[group].push(`${group}/${name}.png`); return `${group}/${name}.png`; };
 const put = (group, name, svgStr) => { png(`${OUT}/${group}/${name}.png`, svgStr); files[group].push(`${group}/${name}.png`); return `${group}/${name}.png`; };
 const plan = []; // Feed-Einheiten in Reihenfolge: { kind, files, caption, title }
 
@@ -706,11 +691,11 @@ function main() {
   });
   // Stories
   const stories = [
-    ['01-montag-abstimmung-a', storyMonday1(), 'Montag, Abstimmung (Variante A)', 'Link-Sticker auf die Hall of Fame (Abstimmung).'],
-    ['02-montag-abstimmung-b', storyMonday2(), 'Montag, Abstimmung (Variante B)', 'Link-Sticker auf die Hall of Fame (Abstimmung).'],
+    ['01-montag-abstimmung-a', storyMonday1(), 'Montag, Abstimmung (Variante A)', 'Link-Sticker auf die WTF-Charts (Abstimmung).'],
+    ['02-montag-abstimmung-b', storyMonday2(), 'Montag, Abstimmung (Variante B)', 'Link-Sticker auf die WTF-Charts (Abstimmung).'],
     ['03-montag-abstimmung-c', storyMonday3(), 'Montag, Abstimmung (Variante C)', 'Link-Sticker in das helle Feld unten.'],
-    ['04-montag-abstimmung-d', storyMonday4(), 'Montag, Abstimmung (Variante D)', 'Link-Sticker auf die Hall of Fame (Abstimmung).'],
-    ['05-dienstag-fakt-der-woche', storyWeekWinner(), 'Dienstag, Fakt der Woche steht fest', 'Link-Sticker auf die Hall of Fame.'],
+    ['04-montag-abstimmung-d', storyMonday4(), 'Montag, Abstimmung (Variante D)', 'Link-Sticker auf die WTF-Charts (Abstimmung).'],
+    ['05-dienstag-fakt-der-woche', storyWeekWinner(), 'Dienstag, Fakt der Woche steht fest', 'Link-Sticker auf die WTF-Charts.'],
     ['06-neuer-fakt-hell', storyNew1(), 'Neuer Fakt online (hell)', 'Link-Sticker auf den neuesten Fakt oder die Startseite.'],
     ['07-neuer-fakt-dunkel', storyNew2(), 'Neuer Fakt online (dunkel)', 'Link-Sticker auf den neuesten Fakt oder die Startseite.'],
     ['08-wtf-skala-babyknochen', storyScale(fact('baby-bones')), 'WTF-Skala: Babyknochen', 'Emoji-Regler-Sticker (🤯) unter die Frage, Link-Sticker optional.'],
@@ -724,8 +709,8 @@ function main() {
   extras.push({ kind: 'Anpinnen', title: 'Was ist WTFact?', files: [put('extras', `${xn()}-anpinnen-was-ist-wtfact`, spAbout(['wombat-cubes', 'honey-forever', 'pringles-can'].map(fact)))],
     caption: `Hi! Hier gibt's jeden Tag Fakten, bei denen du erst „WTF?!“ sagst und dann klüger bist. Jeder einzelne mit Quellen.\n\nFolg uns für deine tägliche Dosis. Alle Fakten: Link in Bio.\n\n${TAGS_BASE} #wissen #lernen` });
   extras.push({ kind: 'Anpinnen', title: 'Jeden Montag Abstimmung', files: [put('extras', `${xn()}-anpinnen-montags-abstimmung`, spVote())],
-    caption: `Jeden Montag stimmt ihr ab: Welcher Fakt war der beste der letzten 7 Tage? Der Gewinner ist eine Woche lang Fakt der Woche und landet in der Hall of Fame.\n\nAbstimmen: Link in Bio. Montags erinnern wir dich in der Story.\n\n${TAGS_BASE} #abstimmung #faktderwoche` });
-  extras.push({ kind: 'Anpinnen', title: 'Science Jumper', files: [put('extras', `${xn()}-anpinnen-science-jumper`, spJumper())],
+    caption: `Jeden Montag stimmt ihr ab: Welcher Fakt war der beste der letzten 7 Tage? Der Gewinner ist eine Woche lang Fakt der Woche und landet in den WTF-Charts.\n\nAbstimmen: Link in Bio. Montags erinnern wir dich in der Story.\n\n${TAGS_BASE} #abstimmung #faktderwoche` });
+  extras.push({ kind: 'Anpinnen', title: 'Science Jumper', files: [putFile('extras', `${xn()}-anpinnen-science-jumper`, `${OUT}/quelle/science-jumper-spiel.png`)],
     caption: `Auf WTFact gibt's ein Spiel: Science Jumper. Spring als Buch über Flammen, sammle Reagenzgläser und schalte mit jedem Highscore goldene Fakten frei.\n\nWie weit kommst du? Screenshot vom Highscore gern in die Kommentare. Spielen: Link in Bio.\n\n${TAGS_BASE} #browsergame #highscore #sciencejumper` });
   for (const w of WF) {
     const f = fact(w.key), n = xn(), slug = w.key;
@@ -810,8 +795,8 @@ function writePlan(posts, stories, extras) {
   lines.push('Alles fertig zum Posten: 50 Fakten-Posts, 10 Stories, 25 Extras. Alle Fakten kommen von der Seite und haben dort ihre Quellen. Erzeugt von `brand/build-social-insta.mjs` im Repo.', '');
   lines.push('## So wenig Aufwand wie möglich', '');
   lines.push('1. **Dienstag und Freitag:** den nächsten Feed-Post aus der Liste unten posten. Bild(er) hochladen, Caption kopieren, fertig. Bei mehreren Bildern alle in der Reihenfolge 1, 2, 3 … als Karussell hochladen.');
-  lines.push('2. **Montag morgens:** die Montags-Story posten (vier Varianten, die sich abwechseln) und einen Link-Sticker auf die Hall of Fame setzen, dort ist die Abstimmung.');
-  lines.push('3. **Optional dienstags:** Story 05 „Fakt der Woche steht fest“ mit Link-Sticker auf die Hall of Fame.');
+  lines.push('2. **Montag morgens:** die Montags-Story posten (vier Varianten, die sich abwechseln) und einen Link-Sticker auf die WTF-Charts setzen, dort ist die Abstimmung.');
+  lines.push('3. **Optional dienstags:** Story 05 „Fakt der Woche steht fest“ mit Link-Sticker auf die WTF-Charts.');
   lines.push('4. **Optional donnerstags:** eine Extra-Story aus `stories/06` bis `10` oder einfach den letzten Feed-Post in die Story teilen (Papierflieger unter dem Post, „Zu deiner Story hinzufügen“). Das kostet zehn Sekunden.');
   lines.push('5. **Anpinnen:** Die ersten drei Feed-Posts (Was ist WTFact?, Montags-Abstimmung, Science Jumper) nach dem Posten oben im Profil anpinnen (… am Post, „An Profil anheften“).', '');
   lines.push('Faustregel, wenn mal eine Woche ausfällt: einfach mit der nächsten Nummer weitermachen. Die Liste hat kein Verfallsdatum, Daten unten sind nur ein Vorschlag.', '');

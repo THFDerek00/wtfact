@@ -5,8 +5,8 @@ Alles fertig zum Posten: 50 Fakten-Posts, 10 Stories, 25 Extras. Alle Fakten kom
 ## So wenig Aufwand wie möglich
 
 1. **Dienstag und Freitag:** den nächsten Feed-Post aus der Liste unten posten. Bild(er) hochladen, Caption kopieren, fertig. Bei mehreren Bildern alle in der Reihenfolge 1, 2, 3 … als Karussell hochladen.
-2. **Montag morgens:** die Montags-Story posten (vier Varianten, die sich abwechseln) und einen Link-Sticker auf die Hall of Fame setzen, dort ist die Abstimmung.
-3. **Optional dienstags:** Story 05 „Fakt der Woche steht fest“ mit Link-Sticker auf die Hall of Fame.
+2. **Montag morgens:** die Montags-Story posten (vier Varianten, die sich abwechseln) und einen Link-Sticker auf die WTF-Charts setzen, dort ist die Abstimmung.
+3. **Optional dienstags:** Story 05 „Fakt der Woche steht fest“ mit Link-Sticker auf die WTF-Charts.
 4. **Optional donnerstags:** eine Extra-Story aus `stories/06` bis `10` oder einfach den letzten Feed-Post in die Story teilen (Papierflieger unter dem Post, „Zu deiner Story hinzufügen“). Das kostet zehn Sekunden.
 5. **Anpinnen:** Die ersten drei Feed-Posts (Was ist WTFact?, Montags-Abstimmung, Science Jumper) nach dem Posten oben im Profil anpinnen (… am Post, „An Profil anheften“).
 
@@ -59,11 +59,11 @@ Faustregel, wenn mal eine Woche ausfällt: einfach mit der nächsten Nummer weit
 
 ## Stories
 
-- `stories/01-montag-abstimmung-a.png`: Montag, Abstimmung (Variante A). Link-Sticker auf die Hall of Fame (Abstimmung).
-- `stories/02-montag-abstimmung-b.png`: Montag, Abstimmung (Variante B). Link-Sticker auf die Hall of Fame (Abstimmung).
+- `stories/01-montag-abstimmung-a.png`: Montag, Abstimmung (Variante A). Link-Sticker auf die WTF-Charts (Abstimmung).
+- `stories/02-montag-abstimmung-b.png`: Montag, Abstimmung (Variante B). Link-Sticker auf die WTF-Charts (Abstimmung).
 - `stories/03-montag-abstimmung-c.png`: Montag, Abstimmung (Variante C). Link-Sticker in das helle Feld unten.
-- `stories/04-montag-abstimmung-d.png`: Montag, Abstimmung (Variante D). Link-Sticker auf die Hall of Fame (Abstimmung).
-- `stories/05-dienstag-fakt-der-woche.png`: Dienstag, Fakt der Woche steht fest. Link-Sticker auf die Hall of Fame.
+- `stories/04-montag-abstimmung-d.png`: Montag, Abstimmung (Variante D). Link-Sticker auf die WTF-Charts (Abstimmung).
+- `stories/05-dienstag-fakt-der-woche.png`: Dienstag, Fakt der Woche steht fest. Link-Sticker auf die WTF-Charts.
 - `stories/06-neuer-fakt-hell.png`: Neuer Fakt online (hell). Link-Sticker auf den neuesten Fakt oder die Startseite.
 - `stories/07-neuer-fakt-dunkel.png`: Neuer Fakt online (dunkel). Link-Sticker auf den neuesten Fakt oder die Startseite.
 - `stories/08-wtf-skala-babyknochen.png`: WTF-Skala: Babyknochen. Emoji-Regler-Sticker (🤯) unter die Frage, Link-Sticker optional.
@@ -105,7 +105,7 @@ Ganzer Fakt + Quellen: Link in Bio.
 `extras/02-anpinnen-montags-abstimmung.png`
 
 ```
-Jeden Montag stimmt ihr ab: Welcher Fakt war der beste der letzten 7 Tage? Der Gewinner ist eine Woche lang Fakt der Woche und landet in der Hall of Fame.
+Jeden Montag stimmt ihr ab: Welcher Fakt war der beste der letzten 7 Tage? Der Gewinner ist eine Woche lang Fakt der Woche und landet in den WTF-Charts.
 
 Abstimmen: Link in Bio. Montags erinnern wir dich in der Story.
 
