@@ -1,7 +1,7 @@
 -- WTFact-Fakt „Der Laborgeist war ein Ventilator mit 19 Hertz“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
-INSERT INTO facts (key, date, category, emoji, draft) VALUES
-  ('infrasound-ghost', NULL, 'horror', '👻', 0);
+INSERT INTO facts (key, date, category, emoji, draft, slot) VALUES
+  ('infrasound-ghost', '2026-10-15T22:06:36+02:00', 'horror', '👻', 0, 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (
