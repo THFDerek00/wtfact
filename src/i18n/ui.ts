@@ -7,7 +7,7 @@ export const ui = {
     slogan: 'Und ja, das stimmt wirklich.',
     sloganFull: 'WTFact?! Und ja, das stimmt wirklich.',
     latest: 'Neueste Fakten',
-    readMore: 'Weiterlesen',
+    readMore: 'Fakt lesen',
     latestFact: 'Neuester Fakt',
     allCategories: 'Alle',
     filterLabel: 'Nach Kategorie filtern',
@@ -52,7 +52,7 @@ export const ui = {
     surprise: 'Überrasch mich',
     rabbitHole: 'Such dir dein Rabbit Hole aus',
     factsCount: (n: number) => (n === 1 ? '1 Fakt' : `${n} Fakten`),
-    loadMore: 'Mehr Fakten laden',
+    loadMore: 'Weitere Fakten anzeigen',
     factNo: 'Fakt',
     tickerLabel: 'Schnelle Fakten',
     // Extras in der Seitenleiste (Wunsch von Eric, 2026-10-09): LiveCounter.astro und FactRoulette.astro
@@ -208,15 +208,14 @@ export const ui = {
         'Freitag! Das sind die Top 5 der Woche.',
         'Samstag heißt: 5 neue Fragen bei Wahr oder Fake und Was war zuerst.',
       ],
-      dayCtas: ['Kategorien ansehen', 'Jetzt abstimmen', 'Fakt der Woche lesen', 'Wahr oder Fake spielen', 'Zum Duell', 'Zu den Top 5', 'Neue Fragen spielen'],
+      dayCtas: ['Alle Kategorien ansehen', 'Jetzt abstimmen', 'Fakt der Woche lesen', 'Wahr oder Fake spielen', 'Was war zuerst? spielen', 'Top 5 der Woche ansehen', 'Neue Quizfragen spielen'],
       dayFocus: 'Heute im Fokus',
-      updates: 'Wechselt jeden Tag um Mitternacht',
-      go: 'Los geht’s',
+      go: 'Zu den neuen Fakten',
       fotd: 'Fakt des Tages',
       readFull: 'Ganzen Fakt lesen',
       todayTitle: ['Heute', 'neu'],
       recentTitle: ['Zuletzt', 'neu'],
-      allFacts: 'Alle Fakten',
+      allFacts: 'Alle Fakten durchstöbern',
       soon: 'Bald',
       lockedTitle: 'Der nächste Fakt ist noch unter Verschluss',
       lockAt: (time: string) => `Erscheint heute um ${time} Uhr`,
@@ -228,6 +227,7 @@ export const ui = {
       allCategories: 'Alle Kategorien ansehen',
       weekTop: 'Top 5 der Woche',
       weekTopIntro: 'Die Fakten der letzten 7 Tage mit den meisten Daumen hoch.',
+      weekCharts: 'Alle Ranglisten in den WTF-Charts',
       weekTopEmpty: 'Noch keine Bewertungen diese Woche. Gib unter einem Fakt den ersten Daumen.',
       nextVote: 'Nächste Abstimmung',
       nextVoteTitle: 'Am Montag wählst du den nächsten Fakt der Woche.',
@@ -294,6 +294,12 @@ export const ui = {
       about: 'um',
       bc: 'v. Chr.',
       mya: 'vor § Mio. Jahren',
+      // Eigene Quiz-Seite /de/quiz/ (Wunsch von Eric, 2026-10-15: Menüpunkt „Quiz“ führt auf eine Seite statt nach unten)
+      pageTitle: 'Quiz',
+      pageKicker: '2 Spiele, jeden Samstag 5 neue Fragen',
+      pageIntro: 'Wahr oder Fake? und Was war zuerst? Nach jeder Antwort siehst du die Auflösung mit Quelle und wie die anderen getippt haben.',
+      playWof: 'Wahr oder Fake? spielen',
+      playFirst: 'Was war zuerst? spielen',
     },
     factPage: {
       guessKicker: 'Erst raten, dann lesen',
@@ -373,7 +379,7 @@ export const ui = {
     slogan: "And yes, it's actually true.",
     sloganFull: "WTFact?! And yes, it's actually true.",
     latest: 'Latest facts',
-    readMore: 'Read more',
+    readMore: 'Read the fact',
     latestFact: 'Latest fact',
     allCategories: 'All',
     filterLabel: 'Filter by category',
@@ -417,7 +423,7 @@ export const ui = {
     surprise: 'Surprise me',
     rabbitHole: 'Pick your rabbit hole',
     factsCount: (n: number) => (n === 1 ? '1 fact' : `${n} facts`),
-    loadMore: 'Load more facts',
+    loadMore: 'Show more facts',
     factNo: 'Fact',
     tickerLabel: 'Quick facts',
     live: {
@@ -571,15 +577,14 @@ export const ui = {
         "It's Friday! Here's the top 5 of the week.",
         'Saturday means 5 new questions in True or fake and What came first.',
       ],
-      dayCtas: ['Browse categories', 'Vote now', 'Read the fact of the week', 'Play True or fake', 'To the duel', 'See the top 5', 'Play the new questions'],
+      dayCtas: ['See all categories', 'Vote now', 'Read the fact of the week', 'Play True or fake', 'Play What came first?', 'See the top 5 of the week', 'Play the new quiz questions'],
       dayFocus: 'Today’s focus',
-      updates: 'Changes every day at midnight',
-      go: "Let's go",
+      go: "To today's new facts",
       fotd: 'Fact of the day',
       readFull: 'Read the full fact',
       todayTitle: ['New', 'today'],
       recentTitle: ['Latest', 'facts'],
-      allFacts: 'All facts',
+      allFacts: 'Browse all facts',
       soon: 'Soon',
       lockedTitle: 'The next fact is still under wraps',
       lockAt: (time: string) => `Out today at ${time} (German time)`,
@@ -591,6 +596,7 @@ export const ui = {
       allCategories: 'See all categories',
       weekTop: 'Top 5 of the week',
       weekTopIntro: 'The facts of the last 7 days with the most thumbs up.',
+      weekCharts: 'All rankings in the WTF Charts',
       weekTopEmpty: 'No ratings this week yet. Give the first thumbs up under a fact.',
       nextVote: 'Next vote',
       nextVoteTitle: 'On Monday you pick the next fact of the week.',
@@ -656,6 +662,11 @@ export const ui = {
       about: 'c.',
       bc: 'BC',
       mya: '§ million years ago',
+      pageTitle: 'Quiz',
+      pageKicker: '2 games, 5 new questions every Saturday',
+      pageIntro: 'True or fake? and What came first? After every answer you get the solution with a source and see how everyone else guessed.',
+      playWof: 'Play True or fake?',
+      playFirst: 'Play What came first?',
     },
     factPage: {
       guessKicker: 'Guess first, then read',
@@ -739,6 +750,8 @@ export const catsSlug = (lang: Lang) => (lang === 'de' ? 'kategorien' : 'categor
 export const catsPath = (lang: Lang) => `/${lang}/${catsSlug(lang)}/`;
 /** WTF-Charts, früher „Hall of Fame“ (Umbenennung auf Wunsch von Eric, 2026-10-10). Alte Adresse leitet weiter (astro.config.mjs). */
 export const chartsPath = (lang: Lang) => `/${lang}/charts/`;
+/** Quiz-Seite mit Wahr oder Fake und Was war zuerst, gleiche Adresse in beiden Sprachen */
+export const quizPath = (lang: Lang) => `/${lang}/quiz/`;
 
 export const categorySlug = (lang: Lang, c: Category) => t(lang).categories[c].toLowerCase();
 

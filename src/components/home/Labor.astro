@@ -1,23 +1,25 @@
 ---
 // „Frisch aus dem Labor“ (Design „E“, Karten aus Entwurf A): alle Fakten als Kacheln auf Papier, mit Filter nach Kategorie.
-// Drei Kachel-Arten im Wechsel: Kategoriefarbe mit Emoji, große Zahl aus dem Fakt, Papier mit gelbem Streifen.
+// Alle Kacheln gleich gebaut (Wunsch von Eric, 2026-10-15): Kategoriefarbe, Emoji, Titel im weißen Kasten.
+// Erste Seite: 15 Fakten + Werbekarte = 4 volle Reihen à 4 (Desktop). Tablet (3 Spalten) und Handy (2 Spalten,
+// Werbung über die ganze Breite) halten den 15. bis „Weitere Fakten“ zurück, damit jede Reihe voll ist.
+// Filter: festes Raster für „Alle“ + 15 Kategorien, damit keine Kategorie allein in einer Zeile steht:
+// Desktop 2 × 8, Tablet 4 × 4, Handy „Alle“ über die ganze Breite und darunter 5 × 3.
 // ?cat=<kategorie> in der Adresse filtert direkt (Links von der Kategorien-Seite). Werbekarte bleibt an Platz 3 (AdCard.astro).
 import type { Lang } from '../../config';
 import { CATEGORIES } from '../../config';
 import { t } from '../../i18n/ui';
-import { postUrl, factNumber, bigNumber, type Post } from '../../lib';
+import { postUrl, factNumber, type Post } from '../../lib';
 import NewBadge from '../NewBadge.astro';
 import AdCard from '../AdCard.astro';
 import Icon from '../Icon.astro';
 interface Props { lang: Lang; posts: Post[]; catsUrl: string }
 const { lang, posts, catsUrl } = Astro.props;
 const ui = t(lang);
-const PAGE = 12;
+const PAGE = 15;
 const count = (c: string) => posts.filter((p) => p.data.category === c).length;
 const cats = CATEGORIES.filter((c) => count(c) > 0);
 const hero = posts[0];
-// Kachel-Art: jede dritte Papier, jede dritte mit großer Zahl (falls der Fakt eine hat), sonst Kategoriefarbe.
-const kind = (p: Post, i: number) => (i % 3 === 1 && bigNumber(p) ? 'num' : i % 3 === 2 ? 'paper' : 'cat');
 ---
 <section class="sec sec--paper labor" id="facts" data-edge="left">
   <div class="wrap">
@@ -26,25 +28,22 @@ const kind = (p: Post, i: number) => (i % 3 === 1 && bigNumber(p) ? 'num' : i % 
       <a class="more-link" href={catsUrl}>{ui.home.allCategories} <Icon name="chevron-right" /></a>
     </div>
     <div class="filters" role="group" aria-label={ui.filterLabel}>
-      <button class="chip" data-filter="all" type="button" aria-pressed="true">{ui.allCategories}</button>
+      <button class="chip all" data-filter="all" type="button" aria-pressed="true">{ui.allCategories}</button>
       {cats.map((c) => (
         <button class:list={['chip', `cat-${c}`]} data-filter={c} type="button" aria-pressed="false">{ui.categories[c]}</button>
       ))}
     </div>
-    <div class="grid">
+    <div class="grid paged" data-grid>
       {posts.map((p, i) => {
-        const k = kind(p, i);
-        const big = k === 'num' ? bigNumber(p) : null;
         const d = p.data;
         return (
           <>
-            <a href={postUrl(p)} class:list={['tile', `tile--${k}`, k !== 'paper' && `cat-${d.category}`, `tilt-${i % 4}`]} data-cat={d.category} data-page={i >= PAGE ? 'later' : undefined} hidden={i >= PAGE}>
+            <a href={postUrl(p)} class:list={['tile', `cat-${d.category}`, `tilt-${i % 4}`]} data-cat={d.category} data-page={i >= PAGE ? 'later' : undefined} data-trim={i === PAGE - 1 ? '' : undefined} hidden={i >= PAGE}>
               <span class="top">
-                <span class:list={['chip', k === 'paper' ? `cat-${d.category}` : 'chip-light']}>{ui.categories[d.category]}</span>
+                <span class="chip chip-light">{ui.categories[d.category]}</span>
                 <NewBadge lang={lang} date={d.date} />
               </span>
-              {big && <span class="big" aria-hidden="true" data-len={Math.min(big.show.length, 7)}>{big.show}{big.below && <small>{big.below}</small>}</span>}
-              {!big && <span class="emoji" aria-hidden="true">{d.emoji}</span>}
+              <span class="emoji" aria-hidden="true">{d.emoji}</span>
               <span class="title">{d.title}</span>
               <span class="foot"><span>#{String(factNumber(p, posts)).padStart(3, '0')}</span><span class="go">{ui.readMore} <Icon name="chevron-right" /></span></span>
             </a>
@@ -67,8 +66,10 @@ const kind = (p: Post, i: number) => (i % 3 === 1 && bigNumber(p) ? 'num' : i % 
     const buttons = root.querySelectorAll<HTMLButtonElement>('[data-filter]');
     const cards = root.querySelectorAll<HTMLElement>('.grid [data-cat]');
     const more = root.querySelector<HTMLButtonElement>('[data-loadmore]');
+    const grid = root.querySelector<HTMLElement>('[data-grid]');
     let expanded = false;
     const apply = (filter: string) => {
+      grid?.classList.toggle('paged', filter === 'all' && !expanded);
       buttons.forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.filter === filter)));
       cards.forEach((card) => {
         const matches = filter === 'all' || card.dataset.cat === filter;
@@ -97,52 +98,46 @@ const kind = (p: Post, i: number) => (i % 3 === 1 && bigNumber(p) ? 'num' : i % 
 <style>
   /* Unten Platz für die Quizkarte, die von unten in den Abschnitt ragt (TrueOrFake.astro) */
   .labor { scroll-margin-top: var(--space-10); padding-bottom: calc(2 * var(--space-12)); }
-  .filters { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-9); }
-  .filters .chip { cursor: pointer; padding: var(--space-2) var(--space-4); font-size: var(--fs-sm); box-shadow: var(--shadow-xs); }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 270px), 1fr)); gap: var(--space-8) var(--space-7); align-items: stretch; }
+  .filters { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: var(--space-2); margin-bottom: var(--space-9); }
+  .filters .chip { cursor: pointer; justify-content: center; text-align: center; padding: var(--space-2) var(--space-3); font-size: var(--fs-sm); box-shadow: var(--shadow-xs); }
+  @media (max-width: 1060px) { .filters { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  @media (max-width: 600px) {
+    .filters { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .filters .all { grid-column: 1 / -1; }
+    .filters .chip { padding-inline: var(--space-2); font-size: var(--fs-xs); }
+  }
+  .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-8) var(--space-7); align-items: stretch; }
+  @media (max-width: 1060px) {
+    .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    /* 3 Spalten (Tablet) und 2 Spalten mit breiter Werbung (Handy): 14 Fakten bis „Weitere Fakten“, sonst bleibt eine Kachel allein */
+    .grid.paged [data-trim] { display: none; }
+  }
   .tile {
     position: relative; display: flex; flex-direction: column; gap: var(--space-3); min-height: 21rem; padding: var(--space-5);
-    border: var(--bw-strong) solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+    border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
     text-decoration: none; overflow: hidden;
     transition: transform var(--dur) var(--ease-pop), box-shadow var(--dur) var(--ease);
   }
   .tile:hover { transform: translate(-3px, -4px) rotate(-1.5deg); box-shadow: var(--shadow-2xl); }
   .tilt-1 { transform: rotate(0.8deg); }
   .tilt-3 { transform: rotate(-0.8deg); }
-  .tile[class*='cat-'] { border-color: var(--on-accent); }
   .top { display: flex; flex-wrap: wrap; gap: var(--space-2); position: relative; z-index: 1; }
   .chip-light { background: var(--surface); color: var(--ink); }
   .emoji { position: absolute; right: calc(-1 * var(--space-4)); top: var(--space-10); font-size: var(--fs-emoji-xl); line-height: 1; transform: rotate(12deg); filter: var(--emoji-shadow); transition: transform var(--dur) var(--ease-pop); }
   .tile:hover .emoji { transform: rotate(-6deg) scale(1.08); }
-  .big {
-    margin: var(--space-2) 0 0 calc(-1 * var(--space-2)); font-family: var(--font-display); font-weight: 800; line-height: 0.85; letter-spacing: -0.05em;
-    font-size: calc(var(--fs-huge) * 0.62 * var(--fit, 1)); color: var(--on-night); -webkit-text-stroke: var(--bw-strong) var(--on-accent); paint-order: stroke fill;
-    text-shadow: var(--space-1) var(--space-1) 0 var(--on-accent);
-  }
-  .big[data-len='4'] { --fit: 0.85; }
-  .big[data-len='5'] { --fit: 0.7; }
-  .big[data-len='6'], .big[data-len='7'] { --fit: 0.56; }
-  .big small { display: block; margin-top: var(--space-2); font-size: var(--fs-xl); letter-spacing: -0.01em; -webkit-text-stroke: 0; color: var(--on-accent); text-shadow: none; }
   .title {
     margin-top: auto; position: relative; z-index: 1; font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 700; line-height: 1.15; letter-spacing: -0.02em;
   }
-  .tile--cat .title { padding: var(--space-3) var(--space-4); background: var(--surface); color: var(--ink); border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-md); }
-  .tile--num .title { font-size: var(--fs-lg); }
-  .tile--paper { background: var(--surface); color: var(--ink); border-left: var(--bw-stripe) solid var(--yellow); }
-  .tile--paper .title { font-size: var(--fs-2xl); margin-top: var(--space-4); }
-  .tile--paper .emoji { top: auto; bottom: var(--space-10); opacity: 0.9; font-size: var(--fs-emoji-md); }
+  .title { hyphens: auto; overflow-wrap: break-word; padding: var(--space-3) var(--space-4); background: var(--surface); color: var(--ink); border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-md); }
   .foot { display: flex; justify-content: space-between; align-items: center; gap: var(--space-2); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); position: relative; z-index: 1; }
   .go { display: inline-flex; align-items: center; gap: var(--space-1); }
-  .tile--paper .go { color: var(--pink-text); }
   .grid :global(.ad) { border-radius: var(--radius-lg); }
   .loadmore { display: flex; justify-content: center; margin-top: var(--space-10); }
   @media (max-width: 520px) {
     .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
     .tile { min-height: 15rem; padding: var(--space-3); gap: var(--space-2); }
-    .tile .title, .tile--paper .title { font-size: var(--fs-md); }
+    .title { font-size: var(--fs-md); padding: var(--space-2); }
     .emoji { font-size: var(--fs-emoji-md); top: var(--space-9); }
-    .big { font-size: calc(var(--fs-huge) * 0.45 * var(--fit, 1)); }
-    .tile--cat .title { padding: var(--space-2); }
     .foot span:first-child { display: none; }
     .grid :global(.ad) { grid-column: 1 / -1; }
   }
