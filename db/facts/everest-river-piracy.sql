@@ -1,7 +1,7 @@
 -- WTFact-Fakt „Ein Fluss hat den Mount Everest bis zu 50 Meter höher gemacht“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
 INSERT INTO facts (key, date, category, emoji, draft, slot) VALUES
-  ('everest-river-piracy', '2026-10-15T22:04:19+02:00', 'science', '🏔️', 1, 0);
+  ('everest-river-piracy', '2026-10-16T08:00:00+02:00', 'science', '🏔️', 0, 1);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (
