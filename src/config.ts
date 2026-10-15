@@ -16,7 +16,7 @@ export const SITE = {
   consent: {
     // Google Analytics 4 (Statistik mit Herkunft, Verweildauer, Search-Console-Anbindung).
     // analytics.google.com > Verwaltung > Datenstreams > Web > „Mess-ID“, Form G-XXXXXXXXXX.
-    ga4: '',
+    ga4: 'G-NKFN3T4ZJH',
     // Meta-Pixel (misst, wer über Instagram-/Facebook-Werbung kommt, und baut Zielgruppen für Werbung auf).
     // business.facebook.com > Events Manager > Datenquellen > Pixel, „Pixel-ID“ (nur Ziffern).
     metaPixel: '',
