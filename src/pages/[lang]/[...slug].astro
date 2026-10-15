@@ -44,7 +44,7 @@ const big = bigNumber(post);
 const guess = guessFor(post);
 const sideTile = (p: Post) => ({ p, big: bigNumber(p) });
 ---
-<Base lang={lang} title={d.title} description={d.teaser} altUrl={alt ? postUrl(alt) : undefined} image={ogPath(post)}>
+<Base lang={lang} title={d.title} description={d.teaser} altUrl={alt ? postUrl(alt) : undefined} image={ogPath(post)} section="facts">
   <div class="progress" aria-hidden="true"><span></span></div>
 
   <section class="sec sec--night fhero">

@@ -20,7 +20,6 @@ const hrefs = [catsUrl, '#vote', '#week', '#wof', '#first', '#week', '#wof'];
 <section class="sec sec--yellow day-hero" data-day-hero data-weekday={wd} data-lang={lang}>
   <div class="wrap top-row">
     <span class="pill" data-date>{dateText}</span>
-    <span class="upd">{h.updates}</span>
   </div>
   <p class="mega day-word" aria-hidden="true" data-day-word data-len={h.days[wd].length}>{h.days[wd]}</p>
   <div class="wrap row">
@@ -68,7 +67,6 @@ const hrefs = [catsUrl, '#vote', '#week', '#wof', '#first', '#week', '#wof'];
     background: var(--on-accent); color: var(--yellow); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lg);
     transform: rotate(-2deg);
   }
-  .upd { font-size: var(--fs-sm); font-weight: 600; }
   .day-word {
     margin: var(--space-4) calc(-1 * var(--space-6)) 0; font-size: calc(var(--fs-mega) * var(--fit, 1)); text-transform: uppercase;
     text-shadow: var(--shift-mega) var(--shift-mega) 0 var(--day-accent, var(--pink));

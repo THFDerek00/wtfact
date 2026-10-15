@@ -4,7 +4,7 @@ import NightSky from '../components/NightSky.astro';
 import Icon from '../components/Icon.astro';
 import CookieConsent from '../components/CookieConsent.astro';
 import { SITE, type Lang } from '../config';
-import { t, catsPath, chartsPath } from '../i18n/ui';
+import { t, catsPath, chartsPath, quizPath } from '../i18n/ui';
 import { postsFor, postUrl } from '../lib';
 
 interface Props {
@@ -13,8 +13,10 @@ interface Props {
   description?: string;
   altUrl?: string;
   image?: string;
+  /** Aktiver Menüpunkt, falls er sich nicht aus der Adresse ergibt (z. B. „facts“ auf einer Fakt-Seite) */
+  section?: 'facts' | 'quiz' | 'cats' | 'charts' | 'game';
 }
-const { lang, title, description, altUrl, image = `/og-default-${Astro.props.lang}.png` } = Astro.props;
+const { lang, title, description, altUrl, section, image = `/og-default-${Astro.props.lang}.png` } = Astro.props;
 const ui = t(lang);
 // Browser-Tab zeigt immer nur den Namen; og:title und Beschreibung bleiben aussagekräftig
 const desc = description ?? ui.tagline;
@@ -23,15 +25,16 @@ const other: Lang = lang === 'de' ? 'en' : 'de';
 const otherUrl = altUrl ?? `/${other}/`;
 // Für „Überrasch mich“: alle Beitrags-URLs dieser Sprache
 const allUrls = (await postsFor(lang)).map(postUrl);
-// Hauptmenü: oben auf breiten Bildschirmen, als Leiste unten am Handy (gleiche Ziele, kurze Namen)
+// Hauptmenü: oben auf breiten Bildschirmen, als Leiste unten am Handy (gleiche Ziele, kurze Namen).
+// Jeder Punkt führt auf eine eigene Seite (kein Springen innerhalb der Startseite), der aktive Bereich ist markiert.
 const path = Astro.url.pathname;
 const nav = [
-  { href: `/${lang}/#facts`, label: ui.home.navFacts, tab: ui.home.tabs.facts, icon: 'zap', current: path === `/${lang}/` },
-  { href: `/${lang}/#wof`, label: ui.home.navQuiz, tab: ui.home.tabs.quiz, icon: 'target', current: false },
-  { href: catsPath(lang), label: ui.home.catsAll, tab: ui.home.tabs.cats, icon: 'layout-grid', current: path === catsPath(lang) },
-  { href: chartsPath(lang), label: ui.fame.name, tab: ui.home.tabs.charts, icon: 'trophy', current: path === chartsPath(lang) },
-  { href: `/${lang}/science-jumper/`, label: ui.game.name, tab: ui.home.tabs.game, icon: 'flask-conical', current: path.startsWith(`/${lang}/science-jumper/`) },
-];
+  { id: 'facts', href: `/${lang}/`, label: ui.home.navFacts, tab: ui.home.tabs.facts, icon: 'zap' },
+  { id: 'quiz', href: quizPath(lang), label: ui.home.navQuiz, tab: ui.home.tabs.quiz, icon: 'target' },
+  { id: 'cats', href: catsPath(lang), label: ui.home.catsAll, tab: ui.home.tabs.cats, icon: 'layout-grid' },
+  { id: 'charts', href: chartsPath(lang), label: ui.fame.name, tab: ui.home.tabs.charts, icon: 'trophy' },
+  { id: 'game', href: `/${lang}/science-jumper/`, label: ui.game.name, tab: ui.home.tabs.game, icon: 'flask-conical' },
+].map((n) => ({ ...n, current: section ? section === n.id : n.id === 'facts' ? path === n.href : path.startsWith(n.href) }));
 ---
 <!doctype html>
 <html lang={lang}>
@@ -101,6 +104,7 @@ const nav = [
         <p class="note">{ui.tagline}</p>
         <p class="note">{ui.affiliateFooter} {ui.madeWith}</p>
         <nav>
+          <a href={quizPath(lang)}>{ui.home.navQuiz}</a>
           <a href={chartsPath(lang)}>{ui.fame.name}</a>
           <a href={catsPath(lang)}>{ui.home.catsAll}</a>
           <a href={`/${lang}/science-jumper/`}>{ui.game.name}</a>
@@ -173,7 +177,9 @@ const nav = [
   /* Hauptmenü (Design „E“): nur auf breiten Bildschirmen, schmal reichen Logo, Zufall und Fußzeile */
   .mainnav { display: flex; gap: var(--space-5); margin-right: var(--space-4); }
   .mainnav a { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-md); text-decoration: none; padding-bottom: var(--space-1); border-bottom: var(--bw-strong) solid transparent; }
-  .mainnav a:hover, .mainnav a[aria-current='page'] { border-color: var(--pink); }
+  /* Hover nur angedeutet, damit der aktive Bereich (pink) eindeutig bleibt */
+  .mainnav a:hover { border-color: color-mix(in srgb, var(--pink) 40%, transparent); }
+  .mainnav a[aria-current='page'] { border-color: var(--pink); color: var(--pink-text); }
   @media (max-width: 1060px) { .mainnav { display: none; } }
   /* Leiste unten am Handy und Tablet: alle Bereiche immer mit einem Daumen erreichbar */
   .tabbar { display: none; }
@@ -190,7 +196,15 @@ const nav = [
     }
     .tabbar a span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .tabbar a :global(.icon) { width: var(--fs-xl); height: var(--fs-xl); }
+    /* Gleiche Rückmeldung für jeden Punkt: Antippen drückt ein, aktiver Bereich gelb mit Strich oben */
+    .tabbar a { position: relative; transition: background var(--dur) var(--ease), transform var(--dur) var(--ease); }
+    .tabbar a:hover { background: color-mix(in srgb, var(--on-night) 12%, transparent); }
+    .tabbar a:active { transform: scale(0.94); }
     .tabbar a[aria-current='page'] { background: var(--yellow); color: var(--on-accent); }
+    .tabbar a[aria-current='page']::before {
+      content: ''; position: absolute; inset: calc(-1 * var(--space-1)) var(--space-3) auto; height: var(--bw-strong);
+      border-radius: var(--radius-pill); background: var(--pink);
+    }
     /* Platz, damit die Leiste den Fuß nicht verdeckt */
     footer.foot { padding-bottom: calc(var(--space-12) + var(--space-12)); }
   }
