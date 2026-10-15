@@ -1,7 +1,7 @@
 -- WTFact-Fakt „Warum bei der Schlafparalyse etwas auf deiner Brust zu sitzen scheint“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
-INSERT INTO facts (key, date, category, emoji, draft) VALUES
-  ('sleep-paralysis-nightmare', NULL, 'horror', '🌙', 0);
+INSERT INTO facts (key, date, category, emoji, draft, slot) VALUES
+  ('sleep-paralysis-nightmare', '2026-10-15T22:06:48+02:00', 'horror', '🌙', 0, 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (
