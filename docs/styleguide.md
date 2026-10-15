@@ -54,6 +54,15 @@ Build automatisch. Wer hier eine Zahl ändert, ändert sie auch dort.
   no advertising tone and no product comparisons.
 - Category "popculture" is about films, TV, music and video games: how they were made, records and odd backstories.
   No spoilers in the headline or hook, no gossip about private lives.
+- Category "horror" (Grusel) is about the creepy and uncanny: eerie animals and fungi, the science of fear and
+  "hauntings", folklore and monster legends, the history of horror novels and films. Goosebumps, not gore: no graphic
+  violence, no real crimes, murders, accidents or disasters with victims, and no deaths as the hook. Suitable for 16-year-olds.
+- Category "holiday" (Feiertage) is special: a post only appears on its holiday (dates and themes in
+  `src/data/holidays.ts`) and is about that day: its origin, customs and surprising history, in Germany or abroad.
+  The generator never picks this category on its own. Holiday posts are the big event of their day and may break
+  the usual structure: 200 to 650 words, 1 to 4 "##" subheadings, 0 to 2 "> " blockquotes, 2 to 4 Amazon picks. [geprüft]
+  Amazon picks may be higher-end than usual (quality decoration, a well-made gift, a premium kitchen tool for the
+  holiday's dish) and must fit the holiday. Truth and source rules apply exactly as for every other post.
 
 ## Structure
 

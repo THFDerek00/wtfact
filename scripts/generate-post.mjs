@@ -26,7 +26,9 @@ import { build, open, readFacts, saveFact } from './facts-db.mjs';
 const MODEL = 'claude-opus-5-5';
 const CONFIG = fs.readFileSync('src/config.ts', 'utf8');
 const listIn = (name) => [...CONFIG.match(new RegExp(`${name}\\s*=\\s*\\[([^\\]]*)\\]`))[1].matchAll(/'([^']+)'/g)].map((m) => m[1]);
-const CATEGORIES = listIn('CATEGORIES');
+// Feiertage (SPECIAL_CATEGORIES) bekommen nur zum Termin einen Fakt, nie aus der täglichen Abwechslung.
+const SPECIAL = listIn('SPECIAL_CATEGORIES');
+const CATEGORIES = listIn('CATEGORIES').filter((c) => !SPECIAL.includes(c));
 const FACTS_PER_DAY = Number(CONFIG.match(/FACTS_PER_DAY\s*=\s*(\d+)/)[1]);
 const TZ = 'Europe/Berlin';
 

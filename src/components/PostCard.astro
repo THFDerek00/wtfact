@@ -1,6 +1,7 @@
 ---
 import type { Post } from '../lib';
-import { langOf, postUrl } from '../lib';
+import { langOf, postUrl, festFor } from '../lib';
+import FestDeco from './FestDeco.astro';
 import { t } from '../i18n/ui';
 import NewBadge from './NewBadge.astro';
 import Icon from './Icon.astro';
@@ -9,9 +10,12 @@ const { post, no, hidden = false } = Astro.props;
 const lang = langOf(post);
 const ui = t(lang);
 const d = post.data;
+// Feiertags- und Grusel-Fakten: Bildfläche in der Farbwelt des Themas (src/data/holidays.ts)
+const fest = festFor(post);
 ---
 <a href={postUrl(post)} class="card post" data-cat={d.category} data-page={hidden ? 'later' : undefined} hidden={hidden}>
-  <div class:list={['art', `cat-${d.category}`]} aria-hidden="true">
+  <div class:list={['art', fest ? 'fest-sky' : `cat-${d.category}`]} data-fest={fest?.theme} aria-hidden="true">
+    {fest && <FestDeco deco={fest.deco} />}
     {no && <span class="no">#{String(no).padStart(3, '0')}</span>}
     <span class="emoji">{d.emoji}</span>
   </div>
@@ -36,7 +40,7 @@ const d = post.data;
     position: relative; display: grid; place-items: center; aspect-ratio: 16 / 9;
     border-bottom: var(--bw) solid var(--line);
   }
-  .emoji { font-size: var(--fs-emoji-md); transform: rotate(-8deg); filter: var(--emoji-shadow); transition: transform var(--dur) var(--ease-pop); }
+  .emoji { position: relative; font-size: var(--fs-emoji-md); transform: rotate(-8deg); filter: var(--emoji-shadow); transition: transform var(--dur) var(--ease-pop); }
   .post:hover .emoji { transform: rotate(8deg) scale(1.15); }
   .no {
     position: absolute; top: var(--space-3); left: var(--space-3);
@@ -51,7 +55,7 @@ const d = post.data;
   @media (max-width: 560px) {
     .post { flex-direction: row; }
     .art { flex: 0 0 104px; aspect-ratio: auto; border-bottom: 0; border-right: var(--bw) solid var(--line); }
-    .emoji { font-size: var(--fs-emoji-sm); }
+    .emoji { position: relative; font-size: var(--fs-emoji-sm); }
     .no { top: var(--space-2); left: var(--space-2); }
     .body { padding: var(--space-3) var(--space-4) var(--space-4); }
     h3 { font-size: var(--fs-lg); }

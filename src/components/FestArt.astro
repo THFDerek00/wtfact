@@ -1,0 +1,39 @@
+---
+// Riesiges Motiv eines Feiertags (Wunsch von Eric, 2026-10-15: „am Tag der Deutschen Einheit eine riesige
+// Deutschlandflagge, an Halloween ein Kürbis“). Startseite am Feiertag und Kopf der Feiertags-Faktseite.
+// Jedes Fest zeigt seine eigene Grafik (`art` in src/data/holidays.ts, gezeichnet in src/data/fest-art.ts) riesig
+// mit Leuchten dahinter; die Einheit hat eine wehende Flagge. Ohne Grafik bleibt das Emoji als Notlösung.
+import FestIcon from './FestIcon.astro';
+import { isFestArt } from '../data/fest-art';
+interface Props { theme: string; emoji: string; art?: string }
+const { theme, emoji, art } = Astro.props;
+---
+{theme === 'einheit' ? (
+  <span class="art flag" aria-hidden="true"><i></i><i></i><i></i></span>
+) : (
+  <span class="art glow" aria-hidden="true"><span class="big">{art && isFestArt(art) ? <FestIcon name={art} /> : emoji}</span></span>
+)}
+
+<style>
+  .art { position: relative; display: block; pointer-events: none; }
+  /* Flagge: drei Streifen, leicht gekippt und gewellt */
+  .flag {
+    display: grid; grid-template-rows: repeat(3, 1fr); width: 100%; aspect-ratio: 5 / 3;
+    border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-md); overflow: hidden;
+    box-shadow: var(--shadow-on-night); transform: rotate(-4deg) skewY(-3deg);
+    animation: fest-wave var(--dur-fest-float) var(--ease) infinite;
+  }
+  .flag i:nth-child(1) { background: var(--flag-de-black); }
+  .flag i:nth-child(2) { background: var(--flag-de-red); }
+  .flag i:nth-child(3) { background: var(--flag-de-gold); }
+  .glow { display: grid; place-items: center; aspect-ratio: 1; }
+  .glow::before {
+    content: ''; position: absolute; inset: 6%; border-radius: var(--radius-pill);
+    background: radial-gradient(circle, color-mix(in srgb, var(--fest-a) 70%, transparent) 0%, color-mix(in srgb, var(--fest-b) 30%, transparent) 45%, transparent 70%);
+  }
+  .big {
+    position: relative; font-size: var(--fs-fest-art); line-height: 1; filter: var(--emoji-shadow);
+    transform: rotate(-8deg); animation: fest-float var(--dur-fest-float) var(--ease) infinite;
+  }
+  .big :global(.fi) { display: block; width: 1em; height: 1em; filter: var(--fest-art-shadow); }
+</style>

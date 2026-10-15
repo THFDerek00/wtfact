@@ -4,23 +4,34 @@
 // Raster (Wunsch von Eric, 2026-10-15): neuester Fakt groß (2 × 2), zweit- und drittneuester als breite Karten (2 × 1)
 // rechts daneben, darunter acht kleine Karten, dann die Werbung als Band über die ganze Breite. Die Karten sehen am
 // Desktop aus wie am Handy (kompakt, Titel im weißen Kasten). Handy und Tablet: 2 Spalten, der neueste über die ganze Breite.
-// Filter: festes Raster für „Alle“ + 15 Kategorien, damit keine Kategorie allein in einer Zeile steht:
-// Desktop 2 × 8, Tablet 4 × 4, Handy „Alle“ über die ganze Breite und darunter 5 × 3.
+// Filter: Raster aus „Alle“ + Kategorien, damit keine Kategorie allein in einer Zeile steht. Bei 15 Kategorien:
+// Desktop 2 × 8, Tablet 4 × 4, Handy „Alle“ über die ganze Breite und darunter 5 × 3. Seit Grusel und Feiertage
+// (2026-10-15) rechnet die Komponente die Spalten aus der Zahl der Filter aus (Desktop 2 Zeilen, Tablet 4 bis 6 Spalten).
 // ?cat=<kategorie> in der Adresse filtert direkt (Links von der Kategorien-Seite). Beim Filtern sind alle Karten klein.
 import type { Lang } from '../../config';
 import { CATEGORIES } from '../../config';
 import { t } from '../../i18n/ui';
-import { postUrl, factNumber, type Post } from '../../lib';
+import { postUrl, factNumber, festFor, type Post } from '../../lib';
+import { berlinDay, postDay } from '../../week';
+import FestDeco from '../FestDeco.astro';
+import FestIcon from '../FestIcon.astro';
 import NewBadge from '../NewBadge.astro';
 import AdCard from '../AdCard.astro';
 import Icon from '../Icon.astro';
 interface Props { lang: Lang; posts: Post[]; catsUrl: string }
-const { lang, posts, catsUrl } = Astro.props;
+const { lang, posts: all, catsUrl } = Astro.props;
+// Am Feiertag steht der Feiertags-Fakt den ganzen Tag als große Karte vorn (Wunsch von Eric, 2026-10-15).
+const today = berlinDay();
+const pinned = all.find((p) => p.data.category === 'holiday' && postDay(p.data.date) === today);
+const posts = pinned ? [pinned, ...all.filter((p) => p !== pinned)] : all;
 const ui = t(lang);
 const PAGE = 11;
 const count = (c: string) => posts.filter((p) => p.data.category === c).length;
 const cats = CATEGORIES.filter((c) => count(c) > 0);
 const hero = posts[0];
+const n = cats.length + 1;
+const tablet = [4, 6, 5].reduce((best, c) => ((c - (n % c)) % c < (best - (n % best)) % best ? c : best));
+const filterVars = { fDesk: Math.ceil(n / 2), fTab: tablet, fAllSpan: (n - 1) % 3 === 0 ? '1 / -1' : 'auto' };
 ---
 <section class="sec sec--paper labor" id="facts" data-edge="left">
   <div class="wrap">
@@ -37,16 +48,19 @@ const hero = posts[0];
     <div class="grid paged all" data-grid>
       {posts.map((p, i) => {
         const d = p.data;
+        // Feiertags- und Grusel-Fakten: Karte in der Farbwelt des Themas mit Deko (src/data/holidays.ts)
+        const fest = festFor(p);
         return (
           <>
-            <a href={postUrl(p)} class:list={['tile', `cat-${d.category}`, `tilt-${i % 4}`, i === 0 && 'tile--big', (i === 1 || i === 2) && 'tile--wide']} data-cat={d.category} data-page={i >= PAGE ? 'later' : undefined} hidden={i >= PAGE}>
+            <a href={postUrl(p)} data-fest={fest?.theme} class:list={['tile', fest ? 'fest-sky' : `cat-${d.category}`, `tilt-${i % 4}`, i === 0 && 'tile--big', (i === 1 || i === 2) && 'tile--wide']} data-cat={d.category} data-page={i >= PAGE ? 'later' : undefined} hidden={i >= PAGE}>
+              {fest && <FestDeco deco={fest.deco} />}
               <span class="top">
-                <span class="chip chip-light">{ui.categories[d.category]}</span>
+                <span class="chip chip-light">{fest?.holiday ? fest.holiday[lang] : ui.categories[d.category]}</span>
                 <NewBadge lang={lang} date={d.date} />
               </span>
-              <span class="emoji" aria-hidden="true">{d.emoji}</span>
+              <span class="emoji" aria-hidden="true">{fest?.holiday?.art ? <FestIcon name={fest.holiday.art} /> : d.emoji}</span>
               <span class="title">{d.title}</span>
-              <span class="foot"><span>#{String(factNumber(p, posts)).padStart(3, '0')}</span><span class="go">{ui.readMore} <Icon name="chevron-right" /></span></span>
+              <span class="foot"><span>#{String(factNumber(p, all)).padStart(3, '0')}</span><span class="go">{ui.readMore} <Icon name="chevron-right" /></span></span>
             </a>
             {i === PAGE - 1 && hero?.data.products[0] && (
               <AdCard lang={lang} product={hero.data.products[0]} category={hero.data.category} factKey={hero.data.translationKey} factTitle={hero.data.title} />
@@ -97,15 +111,15 @@ const hero = posts[0];
   }
 </script>
 
-<style>
+<style define:vars={filterVars}>
   /* Unten Platz für die Quizkarte, die von unten in den Abschnitt ragt (TrueOrFake.astro) */
   .labor { scroll-margin-top: var(--space-10); padding-bottom: calc(2 * var(--space-12)); }
-  .filters { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: var(--space-2); margin-bottom: var(--space-9); }
+  .filters { display: grid; grid-template-columns: repeat(var(--fDesk), minmax(0, 1fr)); gap: var(--space-2); margin-bottom: var(--space-9); }
   .filters .chip { cursor: pointer; justify-content: center; text-align: center; padding: var(--space-2) var(--space-3); font-size: var(--fs-sm); box-shadow: var(--shadow-xs); }
-  @media (max-width: 1060px) { .filters { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  @media (max-width: 1060px) { .filters { grid-template-columns: repeat(var(--fTab), minmax(0, 1fr)); } }
   @media (max-width: 600px) {
     .filters { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .filters .all { grid-column: 1 / -1; }
+    .filters .all { grid-column: var(--fAllSpan); }
     .filters .chip { padding-inline: var(--space-2); font-size: var(--fs-xs); }
   }
   .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-6) var(--space-5); align-items: stretch; }
@@ -116,6 +130,7 @@ const hero = posts[0];
     text-decoration: none; overflow: hidden;
     transition: transform var(--dur) var(--ease-pop), box-shadow var(--dur) var(--ease);
   }
+  .tile[data-fest] { border-color: var(--fest-a); }
   .tile:hover { transform: translate(-3px, -4px) rotate(-1.5deg); box-shadow: var(--shadow-2xl); }
   .tilt-1 { transform: rotate(0.8deg); }
   .tilt-3 { transform: rotate(-0.8deg); }

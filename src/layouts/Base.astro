@@ -6,6 +6,9 @@ import CookieConsent from '../components/CookieConsent.astro';
 import { SITE, type Lang } from '../config';
 import { t, catsPath, chartsPath, quizPath } from '../i18n/ui';
 import { postsFor, postUrl } from '../lib';
+import FestDeco from '../components/FestDeco.astro';
+import { holidayOn, festOfHoliday } from '../data/holidays';
+import { berlinDay } from '../week';
 
 interface Props {
   lang: Lang;
@@ -15,8 +18,15 @@ interface Props {
   image?: string;
   /** Aktiver Menüpunkt, falls er sich nicht aus der Adresse ergibt (z. B. „facts“ auf einer Fakt-Seite) */
   section?: 'facts' | 'quiz' | 'cats' | 'charts' | 'game';
+  /** Farbwelt eines Feiertags- oder Grusel-Fakts (src/data/holidays.ts), färbt die ganze Seite um */
+  fest?: string;
 }
-const { lang, title, description, altUrl, section, image = `/og-default-${Astro.props.lang}.png` } = Astro.props;
+const { lang, title, description, altUrl, section, fest, image = `/og-default-${Astro.props.lang}.png` } = Astro.props;
+// Am Feiertag selbst (Wunsch von Eric, 2026-10-15) trägt die ganze Seite die Farben und die Deko des Festes.
+// Der Browser nimmt beides am nächsten Tag wieder weg, auch wenn die Seite noch nicht neu gebaut wurde (Skript unten).
+const today = berlinDay();
+const holidayToday = holidayOn(today);
+const siteFest = holidayToday ? festOfHoliday(holidayToday) : undefined;
 const ui = t(lang);
 // Browser-Tab zeigt immer nur den Namen; og:title und Beschreibung bleiben aussagekräftig
 const desc = description ?? ui.tagline;
@@ -70,8 +80,9 @@ const nav = [
     <meta name="robots" content="max-image-preview:large" />
     {SITE.umami.websiteId && <script is:inline defer src={SITE.umami.script} data-website-id={SITE.umami.websiteId} data-domains="wtfact.xyz"></script>}
   </head>
-  <body>
+  <body data-fest={fest ?? siteFest?.theme} data-fest-day={siteFest && !fest ? today : undefined}>
     <NightSky />
+    {siteFest && <FestDeco deco={siteFest.deco} size="page" day={today} />}
     <a class="skip" href="#main">{ui.skip}</a>
     <header class="top">
       <div class="wrap bar">
@@ -124,7 +135,11 @@ const nav = [
     </nav>
     <CookieConsent lang={lang} />
     <script>
-      import { isNew } from '../week';
+      import { isNew, berlinDay } from '../week';
+      // Feiertags-Farben und -Deko nur am Feiertag selbst
+      const festDay = document.body.dataset.festDay;
+      if (festDay && festDay !== berlinDay()) delete document.body.dataset.fest;
+      document.querySelectorAll<HTMLElement>('[data-fest-deco]').forEach((el) => el.dataset.festDeco !== berlinDay() && el.remove());
       // „Neu“ nach 7 Tagen ausblenden, auch wenn die Seite seitdem nicht neu gebaut wurde
       document.querySelectorAll<HTMLElement>('[data-new-date]').forEach((el) => (el.hidden = !isNew(el.dataset.newDate ?? '')));
       // Hell/Dunkel-Umschalter: ohne eigene Wahl gilt die Systemeinstellung

@@ -1,6 +1,7 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
 import { SITE, type Lang } from './config';
 import { postDay, berlinDay } from './week';
+import { festOf } from './data/holidays';
 
 export type Post = CollectionEntry<'posts'>;
 
@@ -29,6 +30,9 @@ export const readingMinutes = (body = '') => Math.max(1, Math.round(body.split(/
 
 /** Laufende Nummer eines Beitrags innerhalb seiner Sprache, ältester = 1. `all` ist postsFor(lang). */
 export const factNumber = (p: Post, all: Post[]) => all.length - all.findIndex((o) => o.id === p.id);
+
+/** Farbwelt und Deko eines Feiertags- oder Grusel-Fakts (src/data/holidays.ts), sonst undefined. */
+export const festFor = (p: Post) => festOf(p.data.category, postDay(p.data.date));
 
 export const categoryIcon = (c: string) => `/brand/icons/${c}.svg`;
 

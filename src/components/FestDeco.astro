@@ -1,0 +1,46 @@
+---
+// Deko für Feiertags- und Grusel-Fakten (Wunsch von Eric, 2026-10-15): eigene Grafiken des Themas (Kürbisse, Fledermäuse …,
+// src/data/fest-art.ts)
+// liegen verstreut über Karte oder Kopf der Seite und schweben langsam. Rein dekorativ, für Screenreader unsichtbar.
+// Das Elternelement braucht position: relative. size="page": feste Ebene über der ganzen Seite am Feiertag selbst
+// (Base.astro), die Emojis sitzen dann links und rechts am Rand, damit Texte frei bleiben.
+import FestIcon from './FestIcon.astro';
+interface Props { deco: string[]; size?: 'sm' | 'lg' | 'page'; day?: string }
+const { deco, size = 'sm', day } = Astro.props;
+// Feste Plätze am Rand, damit Titel und Text frei bleiben.
+const spots = size === 'page' ? 8 : size === 'lg' ? 6 : 4;
+const items = Array.from({ length: spots }, (_, i) => deco[i % deco.length]);
+---
+<span class:list={['deco', `deco--${size}`]} aria-hidden="true" data-fest-deco={day}>
+  {items.map((e, i) => <span class:list={['d', `d${i}`]}><FestIcon name={e} /></span>)}
+</span>
+
+<style>
+  .deco { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+  .d {
+    position: absolute; line-height: 1; opacity: var(--fest-deco-opacity);
+    animation: fest-float var(--dur-fest-float) var(--ease) infinite;
+  }
+  .deco--sm .d { font-size: var(--fs-xl); }
+  .deco--lg .d { font-size: var(--fs-emoji-sm); }
+  .d0 { top: 6%; left: 46%; rotate: -14deg; }
+  .d1 { top: 38%; left: 4%; rotate: 10deg; animation-delay: calc(var(--dur-fest-float) / -3); }
+  .d2 { bottom: 30%; right: 6%; rotate: 16deg; animation-delay: calc(var(--dur-fest-float) / -2); }
+  .d3 { top: 4%; right: 24%; rotate: 8deg; animation-delay: calc(var(--dur-fest-float) / -5); }
+  .d4 { bottom: 8%; left: 38%; rotate: -8deg; animation-delay: calc(var(--dur-fest-float) / -4); }
+  .d5 { top: 58%; right: 34%; rotate: -18deg; animation-delay: calc(var(--dur-fest-float) / -1.5); }
+  .deco--page { position: fixed; z-index: 4; }
+  .deco--page .d { font-size: var(--fs-emoji-sm); opacity: var(--fest-deco-page-opacity); }
+  .deco--page .d0 { top: 14%; left: 1%; }
+  .deco--page .d1 { top: 34%; left: auto; right: 1%; }
+  .deco--page .d2 { top: 52%; bottom: auto; left: 1.5%; right: auto; }
+  .deco--page .d3 { top: 70%; right: 1.5%; }
+  .deco--page .d4 { top: 86%; bottom: auto; left: 2%; }
+  .deco--page .d5 { top: 20%; right: 2%; }
+  .deco--page .d6 { top: 62%; left: 0.5%; rotate: 12deg; }
+  .deco--page .d7 { top: 92%; right: 3%; rotate: -10deg; }
+  .deco--lg .d0 { left: 6%; top: 10%; }
+  .deco--lg .d1 { left: 40%; top: 8%; }
+  .deco--lg .d3 { right: 4%; top: 50%; }
+  .deco--lg .d4 { left: 3%; bottom: 14%; }
+</style>

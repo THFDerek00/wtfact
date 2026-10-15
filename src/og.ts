@@ -17,6 +17,7 @@ const fonts = [
 const CAT_COLORS: Record<string, string> = {
   science: '#3ddcff', history: '#ff8a3d', tech: '#9b6bff', nature: '#b6f23a', body: '#ff3d7f', weird: '#ffd23f', survival: '#3de0b0', food: '#ff5947', language: '#e7a6ff', sport: '#5c95ff',
   space: '#a5b4ff', animals: '#f2c46d', mind: '#ff9ed2', brands: '#8ee59b', popculture: '#ffbe98',
+  horror: '#e8dcc0', holiday: '#ff6be6',
 };
 
 // Punktmuster wie auf jeder Kategorie-Fläche der Seite (--dots / --dots-strong in global.css):

@@ -32,6 +32,7 @@ const ERRORS: Record<string, string> = {
   'signed-out': 'Du bist abgemeldet.',
   past: 'Dieser Zeitpunkt ist schon vorbei.',
   'already-live': 'Der Fakt ist schon veröffentlicht. Nimm ihn erst offline.',
+  'holiday-fixed': 'Feiertags-Fakten sind fest auf ihren Feiertag gelegt und lassen sich nicht verschieben.',
   'not-deletable': 'Löschen geht nur bei Fakten im Pool oder offline.',
   conflict: 'Gleichzeitig hat sich etwas im Repository geändert. Bitte noch einmal versuchen.',
   'github-denied': 'GitHub lehnt den Zugriff ab. Ist der Token gültig und hat er die nötigen Rechte?',
@@ -133,7 +134,9 @@ function isoWeek(day: string) {
 
 // ---------- Karten ----------
 
-const movable = (f: Fact) => f.status === 'pool' || f.status === 'planned' || f.status === 'offline';
+// Feiertags-Fakten sind fest auf ihren Feiertag gelegt (src/data/holidays.ts), die API lehnt Umplanen ab.
+const fixedHoliday = (f: Fact) => f.category === 'holiday';
+const movable = (f: Fact) => !fixedHoliday(f) && (f.status === 'pool' || f.status === 'planned' || f.status === 'offline');
 
 function factCard(f: Fact, opts: { removable?: boolean } = {}) {
   const li = document.createElement('li');
@@ -711,12 +714,12 @@ function row(f: Fact) {
   meh.textContent = String(f.meh);
   const actions = document.createElement('div');
   actions.className = 'cell-actions';
-  if (f.status === 'pool' || f.status === 'planned') {
+  if ((f.status === 'pool' || f.status === 'planned') && !fixedHoliday(f)) {
     actions.append(
       actionBtn('Sofort veröffentlichen', () => confirm(`„${f.title}“ jetzt veröffentlichen?`) && act('publish-now', { key: f.key }, `„${f.title}“ wird jetzt veröffentlicht.`), 'btn--lime'),
     );
   }
-  if (f.status === 'planned') actions.append(actionBtn('In den Pool', () => act('unschedule', { key: f.key }, `„${f.title}“ ist zurück im Pool.`)));
+  if (f.status === 'planned' && !fixedHoliday(f)) actions.append(actionBtn('In den Pool', () => act('unschedule', { key: f.key }, `„${f.title}“ ist zurück im Pool.`)));
   if (f.status === 'live' || f.status === 'due')
     actions.append(actionBtn('Offline nehmen', () => confirm(`„${f.title}“ von der Seite nehmen?`) && act('draft', { key: f.key, draft: true }, `„${f.title}“ wird von der Seite genommen.`)));
   if (f.status === 'offline') actions.append(actionBtn('Wieder online', () => act('draft', { key: f.key, draft: false }, `„${f.title}“ kommt wieder auf die Seite.`)));

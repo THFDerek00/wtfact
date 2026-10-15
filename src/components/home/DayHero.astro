@@ -4,20 +4,65 @@
 // Jeder Wochentag hat eigene Farbe, eigene Überschrift und einen Abschnitt „im Fokus“ (data-focus-day an den Abschnitten):
 // Montag Abstimmung, Dienstag Fakt der Woche, Mittwoch Wahr oder Fake, Donnerstag Was war zuerst, Freitag Top 5,
 // Samstag neue Quizfragen, Sonntag Kategorien.
+// Am Feiertag (Wunsch von Eric, 2026-10-15) übernimmt das Fest den Kopf: Name des Festes riesig, riesiges Motiv
+// (Kürbis, Flagge …), Farben und Deko des Themas und der Feiertags-Fakt des Tages groß in der Mitte.
+// Am nächsten Tag schaltet der Browser von selbst zurück auf den Wochentag.
 import type { Lang } from '../../config';
 import { t } from '../../i18n/ui';
-import { berlinDay } from '../../week';
+import { berlinDay, postDay } from '../../week';
+import { holidayOn, festOfHoliday } from '../../data/holidays';
+import { postUrl, type Post } from '../../lib';
 import Icon from '../Icon.astro';
-interface Props { lang: Lang; catsUrl: string }
-const { lang, catsUrl } = Astro.props;
+import FestDeco from '../FestDeco.astro';
+import FestArt from '../FestArt.astro';
+import FestWord from '../FestWord.astro';
+import FestIcon from '../FestIcon.astro';
+interface Props { lang: Lang; catsUrl: string; posts: Post[] }
+const { lang, catsUrl, posts } = Astro.props;
 const ui = t(lang);
 const h = ui.home;
 const today = berlinDay();
 const wd = new Date(`${today}T12:00:00Z`).getUTCDay();
 const dateText = new Intl.DateTimeFormat(lang === 'de' ? 'de-DE' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${today}T12:00:00Z`));
 const hrefs = [catsUrl, '#vote', '#week', '#wof', '#first', '#week', '#wof'];
+const holiday = holidayOn(today);
+const fest = holiday && festOfHoliday(holiday);
+const festFact = holiday && posts.find((p) => p.data.category === 'holiday' && postDay(p.data.date) === today);
+const festName = holiday?.[lang] ?? '';
+const festWord = holiday?.word?.[lang] ?? festName;
 ---
-<section class="sec sec--yellow day-hero" data-day-hero data-weekday={wd} data-lang={lang}>
+{fest && holiday && (
+  <section class="sec fest-sky fest-hero" data-fest={fest.theme} data-fest-hero={today}>
+    <FestDeco deco={fest.deco} size="lg" />
+    <div class="wrap top-row">
+      <span class="pill">{dateText}</span>
+    </div>
+    <FestWord word={festWord} look={holiday.look} class="fest-big" />
+    <div class="wrap fest-row">
+      <div class="fest-art"><FestArt theme={fest.theme} emoji={holiday.emoji} art={holiday.art} /></div>
+      <div class="card fest-card">
+        <span class="sticker">{ui.fest.greeting(festName)}</span>
+        {festFact ? (
+          <>
+            <span class="chip fest-chip">{holiday.art && <FestIcon name={holiday.art} class="chip-art" />} {ui.fest.holiday}</span>
+            <h1><a href={postUrl(festFact)}>{festFact.data.title}</a></h1>
+            <p class="fest-hook">{festFact.data.hook}</p>
+            <div class="acts">
+              <a class="btn fest-btn" href={postUrl(festFact)}>{ui.fest.read} <Icon name="chevron-right" /></a>
+              <a class="btn btn--ghost" href="#today">{ui.fest.more} <Icon name="chevron-down" /></a>
+            </div>
+          </>
+        ) : (
+          <>
+            <h1>{ui.fest.greeting(festName)}</h1>
+            <div class="acts"><a class="btn btn--ghost" href="#today">{ui.fest.more} <Icon name="chevron-down" /></a></div>
+          </>
+        )}
+      </div>
+    </div>
+  </section>
+)}
+<section class="sec sec--yellow day-hero" data-day-hero data-weekday={wd} data-lang={lang} hidden={!!fest}>
   <div class="wrap top-row">
     <span class="pill" data-date>{dateText}</span>
   </div>
@@ -37,6 +82,12 @@ const hrefs = [catsUrl, '#vote', '#week', '#wof', '#first', '#week', '#wof'];
 
 <script>
   import { berlinDay, nextDayStart } from '../../week';
+  // Feiertags-Kopf nur am Feiertag selbst, danach wieder der Wochentag
+  const festHero = document.querySelector<HTMLElement>('[data-fest-hero]');
+  if (festHero && festHero.dataset.festHero !== berlinDay()) {
+    festHero.remove();
+    document.querySelector<HTMLElement>('[data-day-hero]')?.removeAttribute('hidden');
+  }
   const root = document.querySelector<HTMLElement>('[data-day-hero]');
   if (root) {
     const lang = root.dataset.lang === 'en' ? 'en-GB' : 'de-DE';
@@ -60,6 +111,29 @@ const hrefs = [catsUrl, '#vote', '#week', '#wof', '#first', '#week', '#wof'];
 </script>
 
 <style>
+  .day-hero[hidden] { display: none; }
+  /* Feiertags-Kopf */
+  .fest-hero { position: relative; padding: var(--space-8) 0 calc(var(--space-12) + var(--bleed)); overflow: clip; }
+  .fest-hero .top-row, .fest-hero :global(.fest-word), .fest-row { position: relative; z-index: 1; }
+  .fest-chip :global(.chip-art) { font-size: var(--fs-md); filter: none; }
+  .fest-hero .pill { background: var(--fest-a); color: var(--on-accent); }
+  .fest-row { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: var(--space-8); align-items: center; margin-top: var(--space-6); }
+  .fest-art { max-width: 30rem; justify-self: center; width: 100%; }
+  .fest-card {
+    position: relative; display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-9) var(--space-7) var(--space-7);
+    background: var(--surface); color: var(--ink); border: var(--bw-strong) solid var(--on-accent); box-shadow: var(--shadow-on-night); transform: rotate(-1deg);
+  }
+  .fest-card .sticker { position: absolute; top: calc(-1 * var(--space-5)); left: var(--space-6); background: var(--fest-b); font-family: var(--font-display); font-weight: 800; font-size: var(--fs-xl); border: var(--bw-sm) solid var(--on-accent); }
+  .fest-chip { align-self: flex-start; background: var(--fest-a); color: var(--on-accent); border-color: var(--on-accent); }
+  .fest-card h1 { margin: 0; max-width: none; padding: 0; background: none; border: 0; box-shadow: none; transform: none; font-size: var(--fs-display-md); }
+  .fest-card h1 a { color: inherit; text-decoration: none; }
+  .fest-card h1 a:hover { text-decoration: underline; }
+  .fest-hook { margin: 0; color: var(--muted); font-size: var(--fs-lg); }
+  .fest-btn { background: var(--fest-a); color: var(--on-accent); }
+  @media (max-width: 860px) {
+    .fest-row { grid-template-columns: minmax(0, 1fr); }
+    .fest-art { max-width: 18rem; }
+  }
   .day-hero { padding: var(--space-8) 0 calc(var(--space-12) + var(--bleed)); overflow: clip; border-bottom: none; }
   .top-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
   .pill {
