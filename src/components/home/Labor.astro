@@ -1,11 +1,12 @@
 ---
 // „Frisch aus dem Labor“ (Design „E“, Karten aus Entwurf A): alle Fakten als Kacheln auf Papier, mit Filter nach Kategorie.
 // Alle Kacheln gleich gebaut (Wunsch von Eric, 2026-10-15): Kategoriefarbe, Emoji, Titel im weißen Kasten.
-// Erste Seite: 15 Fakten + Werbekarte = 4 volle Reihen à 4 (Desktop). Tablet (3 Spalten) und Handy (2 Spalten,
-// Werbung über die ganze Breite) halten den 15. bis „Weitere Fakten“ zurück, damit jede Reihe voll ist.
+// Raster (Wunsch von Eric, 2026-10-15): neuester Fakt groß (2 × 2), zweit- und drittneuester als breite Karten (2 × 1)
+// rechts daneben, darunter acht kleine Karten, dann die Werbung als Band über die ganze Breite. Die Karten sehen am
+// Desktop aus wie am Handy (kompakt, Titel im weißen Kasten). Handy und Tablet: 2 Spalten, der neueste über die ganze Breite.
 // Filter: festes Raster für „Alle“ + 15 Kategorien, damit keine Kategorie allein in einer Zeile steht:
 // Desktop 2 × 8, Tablet 4 × 4, Handy „Alle“ über die ganze Breite und darunter 5 × 3.
-// ?cat=<kategorie> in der Adresse filtert direkt (Links von der Kategorien-Seite). Werbekarte bleibt an Platz 3 (AdCard.astro).
+// ?cat=<kategorie> in der Adresse filtert direkt (Links von der Kategorien-Seite). Beim Filtern sind alle Karten klein.
 import type { Lang } from '../../config';
 import { CATEGORIES } from '../../config';
 import { t } from '../../i18n/ui';
@@ -16,7 +17,7 @@ import Icon from '../Icon.astro';
 interface Props { lang: Lang; posts: Post[]; catsUrl: string }
 const { lang, posts, catsUrl } = Astro.props;
 const ui = t(lang);
-const PAGE = 15;
+const PAGE = 11;
 const count = (c: string) => posts.filter((p) => p.data.category === c).length;
 const cats = CATEGORIES.filter((c) => count(c) > 0);
 const hero = posts[0];
@@ -33,12 +34,12 @@ const hero = posts[0];
         <button class:list={['chip', `cat-${c}`]} data-filter={c} type="button" aria-pressed="false">{ui.categories[c]}</button>
       ))}
     </div>
-    <div class="grid paged" data-grid>
+    <div class="grid paged all" data-grid>
       {posts.map((p, i) => {
         const d = p.data;
         return (
           <>
-            <a href={postUrl(p)} class:list={['tile', `cat-${d.category}`, `tilt-${i % 4}`]} data-cat={d.category} data-page={i >= PAGE ? 'later' : undefined} data-trim={i === PAGE - 1 ? '' : undefined} hidden={i >= PAGE}>
+            <a href={postUrl(p)} class:list={['tile', `cat-${d.category}`, `tilt-${i % 4}`, i === 0 && 'tile--big', (i === 1 || i === 2) && 'tile--wide']} data-cat={d.category} data-page={i >= PAGE ? 'later' : undefined} hidden={i >= PAGE}>
               <span class="top">
                 <span class="chip chip-light">{ui.categories[d.category]}</span>
                 <NewBadge lang={lang} date={d.date} />
@@ -47,7 +48,7 @@ const hero = posts[0];
               <span class="title">{d.title}</span>
               <span class="foot"><span>#{String(factNumber(p, posts)).padStart(3, '0')}</span><span class="go">{ui.readMore} <Icon name="chevron-right" /></span></span>
             </a>
-            {i === 1 && hero?.data.products[0] && (
+            {i === PAGE - 1 && hero?.data.products[0] && (
               <AdCard lang={lang} product={hero.data.products[0]} category={hero.data.category} factKey={hero.data.translationKey} factTitle={hero.data.title} />
             )}
           </>
@@ -70,6 +71,7 @@ const hero = posts[0];
     let expanded = false;
     const apply = (filter: string) => {
       grid?.classList.toggle('paged', filter === 'all' && !expanded);
+      grid?.classList.toggle('all', filter === 'all');
       buttons.forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.filter === filter)));
       cards.forEach((card) => {
         const matches = filter === 'all' || card.dataset.cat === filter;
@@ -106,14 +108,10 @@ const hero = posts[0];
     .filters .all { grid-column: 1 / -1; }
     .filters .chip { padding-inline: var(--space-2); font-size: var(--fs-xs); }
   }
-  .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-8) var(--space-7); align-items: stretch; }
-  @media (max-width: 1060px) {
-    .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    /* 3 Spalten (Tablet) und 2 Spalten mit breiter Werbung (Handy): 14 Fakten bis „Weitere Fakten“, sonst bleibt eine Kachel allein */
-    .grid.paged [data-trim] { display: none; }
-  }
+  .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-6) var(--space-5); align-items: stretch; }
+  /* Karten wie am Handy: kompakt, Emoji in der Ecke, Titel im weißen Kasten */
   .tile {
-    position: relative; display: flex; flex-direction: column; gap: var(--space-3); min-height: 21rem; padding: var(--space-5);
+    position: relative; display: flex; flex-direction: column; gap: var(--space-2); min-height: 15rem; padding: var(--space-4);
     border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
     text-decoration: none; overflow: hidden;
     transition: transform var(--dur) var(--ease-pop), box-shadow var(--dur) var(--ease);
@@ -123,22 +121,43 @@ const hero = posts[0];
   .tilt-3 { transform: rotate(-0.8deg); }
   .top { display: flex; flex-wrap: wrap; gap: var(--space-2); position: relative; z-index: 1; }
   .chip-light { background: var(--surface); color: var(--ink); }
-  .emoji { position: absolute; right: calc(-1 * var(--space-4)); top: var(--space-10); font-size: var(--fs-emoji-xl); line-height: 1; transform: rotate(12deg); filter: var(--emoji-shadow); transition: transform var(--dur) var(--ease-pop); }
+  .emoji { position: absolute; right: calc(-1 * var(--space-4)); top: var(--space-9); font-size: var(--fs-emoji-md); line-height: 1; transform: rotate(12deg); filter: var(--emoji-shadow); transition: transform var(--dur) var(--ease-pop); }
   .tile:hover .emoji { transform: rotate(-6deg) scale(1.08); }
   .title {
-    margin-top: auto; position: relative; z-index: 1; font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 700; line-height: 1.15; letter-spacing: -0.02em;
+    margin-top: auto; position: relative; z-index: 1; padding: var(--space-2) var(--space-3);
+    background: var(--surface); color: var(--ink); border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-md);
+    font-family: var(--font-display); font-size: var(--fs-lg); font-weight: 700; line-height: 1.15; letter-spacing: -0.02em;
+    hyphens: auto; overflow-wrap: break-word;
   }
-  .title { hyphens: auto; overflow-wrap: break-word; padding: var(--space-3) var(--space-4); background: var(--surface); color: var(--ink); border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-md); }
-  .foot { display: flex; justify-content: space-between; align-items: center; gap: var(--space-2); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); position: relative; z-index: 1; }
+  .foot { display: flex; justify-content: flex-end; align-items: center; gap: var(--space-2); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); position: relative; z-index: 1; }
+  .foot span:first-child { display: none; }
   .go { display: inline-flex; align-items: center; gap: var(--space-1); }
-  .grid :global(.ad) { border-radius: var(--radius-lg); }
+  /* Die drei neuesten (nur ohne Filter): groß links, zwei breite rechts daneben */
+  .all .tile--big { grid-column: span 2; grid-row: span 2; padding: var(--space-6); }
+  .all .tile--big .emoji { font-size: var(--fs-emoji-2xl); top: var(--space-12); right: calc(-1 * var(--space-2)); }
+  .all .tile--big .title { font-size: var(--fs-3xl); padding: var(--space-4) var(--space-5); }
+  .all .tile--big .foot { font-size: var(--fs-md); }
+  .all .tile--wide { grid-column: span 2; min-height: 0; }
+  .all .tile--wide .title { font-size: var(--fs-xl); max-width: 80%; }
+  /* Werbung als breites Band unter den ersten elf Fakten */
+  .grid :global(.ad) { grid-column: 1 / -1; border-radius: var(--radius-lg); }
+  @media (min-width: 561px) {
+    .grid :global(.ad) { flex-direction: row; }
+    .grid :global(.ad .art) { flex: 0 0 30%; aspect-ratio: auto; border-bottom: 0; border-right: var(--bw) solid var(--line); }
+  }
   .loadmore { display: flex; justify-content: center; margin-top: var(--space-10); }
-  @media (max-width: 520px) {
+  @media (max-width: 1060px) {
     .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
-    .tile { min-height: 15rem; padding: var(--space-3); gap: var(--space-2); }
-    .title { font-size: var(--fs-md); padding: var(--space-2); }
-    .emoji { font-size: var(--fs-emoji-md); top: var(--space-9); }
-    .foot span:first-child { display: none; }
-    .grid :global(.ad) { grid-column: 1 / -1; }
+    .all .tile--big { grid-row: auto; min-height: 18rem; padding: var(--space-4); }
+    .all .tile--big .title { font-size: var(--fs-2xl); }
+    .all .tile--big .emoji { font-size: var(--fs-emoji-lg); top: var(--space-9); }
+    .all .tile--wide { grid-column: auto; min-height: 15rem; }
+    .all .tile--wide .title { font-size: var(--fs-lg); max-width: none; }
+  }
+  @media (max-width: 520px) {
+    .tile { padding: var(--space-3); }
+    .emoji { top: var(--space-9); }
+    .title, .all .tile--wide .title { font-size: var(--fs-md); padding: var(--space-2); }
+    .all .tile--big .title { font-size: var(--fs-xl); padding: var(--space-3); }
   }
 </style>
