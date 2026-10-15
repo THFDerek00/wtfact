@@ -663,6 +663,11 @@ html[data-sky] .stage { background: var(--sky-stage); }
   --shadow-night-lime: var(--space-2) var(--space-2) 0 var(--fest-a);
   --fest-icon-shadow: drop-shadow(var(--space-1) var(--space-1) 0 var(--fest-a));
   --fest-art-shadow: drop-shadow(var(--space-3) var(--space-3) 0 var(--fest-b));
+  /* Feiertags-Werbung (ProductBox): Schatten und Strahlen in den Farben des Fests */
+  --shadow-fest-lg: var(--space-2) var(--space-2) 0 var(--fest-b);
+  --shadow-fest-xl: var(--space-3) var(--space-3) 0 var(--fest-b);
+  --shadow-fest-2xl: var(--space-4) var(--space-4) 0 var(--fest-a);
+  --fest-rays: repeating-conic-gradient(from 0deg at 50% 50%, color-mix(in srgb, var(--fest-a) 22%, transparent) 0deg 9deg, transparent 9deg 18deg);
   --fest-sky: radial-gradient(circle at 82% 18%, color-mix(in srgb, var(--fest-a) 55%, transparent) 0%, color-mix(in srgb, var(--fest-b) 18%, transparent) calc(var(--fest-glow-size) / 2), transparent var(--fest-glow-size)), var(--dots-night), var(--fest-night);
 }
 [data-fest='fest'] { --fest-night: var(--fest-fest-night); --fest-a: var(--fest-fest-a); --fest-b: var(--fest-fest-b); }

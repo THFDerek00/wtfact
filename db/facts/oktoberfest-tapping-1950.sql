@@ -30,8 +30,8 @@ Wenn heute also ein Schlag danebengeht: Das gehört seit 1950 zur Tradition.'
 
 INSERT INTO products (fact, lang, pos, name, query, why) VALUES
   ('oktoberfest-tapping-1950', 'de', 1, 'Steinkrug mit Zinndeckel, 1 Liter', 'Steinkrug Zinndeckel 1 Liter', 'Ein schwerer Keramikkrug mit Deckel, der das Bier kühl hält und ein Leben lang im Schrank stehen kann.'),
-  ('oktoberfest-tapping-1950', 'de', 2, 'Zapfset mit Holzschlegel und Messinghahn', 'Zapfhahn Messing Holzfass Schlegel', 'Damit kannst du ein kleines Holzfass zuhause selbst anstechen, ganz wie im Festzelt.'),
-  ('oktoberfest-tapping-1950', 'de', 3, 'Backbuch für bayerische Brezen', 'Backbuch Brezen bayerisch', 'Erklärt Schritt für Schritt, wie Laugenbrezen mit Biss und glänzender Kruste gelingen.');
+  ('oktoberfest-tapping-1950', 'de', 2, 'Eichenholzfass mit Messinghahn und Schlegel, 5 Liter', 'Holzfass Eiche 5 Liter Zapfhahn Messing', 'Ein echtes kleines Fass aus Eiche, das du zuhause mit dem Schlegel anstichst, ganz wie im Festzelt.'),
+  ('oktoberfest-tapping-1950', 'de', 3, 'Maßkrüge aus Glas im Sechserset', 'Maßkrug Glas 1 Liter 6er Set', 'Sechs echte Wiesn-Maßkrüge, damit die ganze Runde beim Anstich mit anstoßen kann.');
 
 INSERT INTO sources (fact, lang, pos, label, url) VALUES
   ('oktoberfest-tapping-1950', 'de', 1, 'muenchen.de: O''zapft is: Der Oktoberfest-Anstich', 'https://www.muenchen.de/veranstaltungen/oktoberfest/der-anstich'),
@@ -65,8 +65,8 @@ So if a stroke misses today: that has been part of the tradition since 1950.'
 
 INSERT INTO products (fact, lang, pos, name, query, why) VALUES
   ('oktoberfest-tapping-1950', 'en', 1, 'Stoneware beer stein with pewter lid, 1 liter', 'stoneware beer stein pewter lid 1 liter', 'A heavy ceramic stein with a lid that keeps beer cool and can stay on the shelf for a lifetime.'),
-  ('oktoberfest-tapping-1950', 'en', 2, 'Tapping set with wooden mallet and brass tap', 'brass beer tap wooden keg mallet', 'Lets you tap a small wooden keg at home, just like in the beer tent.'),
-  ('oktoberfest-tapping-1950', 'en', 3, 'Baking book for Bavarian pretzels', 'Bavarian pretzel baking book', 'Explains step by step how to make lye pretzels with bite and a glossy crust.');
+  ('oktoberfest-tapping-1950', 'en', 2, 'Oak barrel with brass tap and mallet, 5 liters', 'oak barrel 5 liter brass tap', 'A real little oak keg you tap at home with the mallet, just like in the beer tent.'),
+  ('oktoberfest-tapping-1950', 'en', 3, 'Set of six 1-liter glass beer mugs', '1 liter glass beer mug set of 6', 'Six proper Oktoberfest mugs so the whole group can clink glasses at the tapping.');
 
 INSERT INTO sources (fact, lang, pos, label, url) VALUES
   ('oktoberfest-tapping-1950', 'en', 1, 'muenchen.de: O''zapft is: Der Oktoberfest-Anstich', 'https://www.muenchen.de/veranstaltungen/oktoberfest/der-anstich'),

@@ -48,7 +48,9 @@ const sideTile = (p: Post) => ({ p, big: bigNumber(p) });
 // Feiertags- und Grusel-Fakten: ganze Seite in der Farbwelt des Themas, Deko im Kopf, Band mit dem Feiertag.
 const fest = festFor(post);
 const festName = fest?.holiday ? fest.holiday[lang] : fest ? ui.fest.grusel : '';
-const tapeText = fest ? Array(6).fill(festName).join(' · ') : Array(5).fill(ui.slogan).join(' · ');
+// Das Band läuft über die ganze Breite: so oft wiederholen, dass es auch auf breiten Bildschirmen nicht abreißt (Eric, 2026-10-15).
+const tapeWord = fest ? festName : ui.slogan;
+const tapeText = Array(Math.max(5, Math.ceil(400 / (tapeWord.length + 3)))).fill(tapeWord).join(' · ');
 ---
 <Base lang={lang} title={d.title} description={d.teaser} altUrl={alt ? postUrl(alt) : undefined} image={ogPath(post)} section="facts" fest={fest?.theme}>
   <div class="progress" aria-hidden="true"><span></span></div>
@@ -123,8 +125,9 @@ const tapeText = fest ? Array(6).fill(festName).join(' · ') : Array(5).fill(ui.
   </section>
 
   {d.products.length > 0 && (
-    <section class="sec sec--yellow adband" data-edge>
-      <div class="wrap"><ProductBox lang={lang} products={d.products} category={d.category} factKey={d.translationKey} wide /></div>
+    <section class:list={['sec', 'adband', fest?.holiday ? 'fest-sky' : 'sec--yellow']} data-edge>
+      <div class="wrap"><ProductBox lang={lang} products={d.products} category={d.category} factKey={d.translationKey} wide
+        fest={fest?.holiday ? { name: festName, icon: fest.holiday.art ?? fest.holiday.emoji } : undefined} /></div>
     </section>
   )}
 

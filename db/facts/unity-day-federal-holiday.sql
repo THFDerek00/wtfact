@@ -29,8 +29,8 @@ Der Feiertag, der für alle gleich ist, ist also auch der, über den die Länder
 );
 
 INSERT INTO products (fact, lang, pos, name, query, why) VALUES
-  ('unity-day-federal-holiday', 'de', 1, 'Puzzle Deutschlandkarte mit Bundesländern', 'Puzzle Deutschlandkarte Bundesländer', 'Macht aus 16 Bundesländern ein Puzzle, das man auch zu zweit gut legen kann.'),
-  ('unity-day-federal-holiday', 'de', 2, 'Sachbuch zur Geschichte der Deutschen Einheit', 'Buch Geschichte Deutsche Einheit 1990', 'Erzählt die Monate zwischen Mauerfall und Einheit kompakt und gut lesbar.');
+  ('unity-day-federal-holiday', 'de', 1, 'Puzzle Deutschlandkarte mit 2000 Teilen', 'Puzzle 2000 Teile Deutschlandkarte', 'Ein großes Puzzle mit allen 16 Bundesländern, an dem man gemeinsam einen ganzen Feiertag sitzen kann.'),
+  ('unity-day-federal-holiday', 'de', 2, 'Bildband zu Mauerfall und Deutscher Einheit', 'Bildband Mauerfall Wiedervereinigung', 'Große Fotos aus den Monaten zwischen Mauerfall und Einheit, ein Buch zum Aufheben.');
 
 INSERT INTO sources (fact, lang, pos, label, url) VALUES
   ('unity-day-federal-holiday', 'de', 1, 'BMI: Nationale Feiertage', 'https://www.bmi.bund.de/DE/themen/verfassung/staatliche-symbole/nationale-feiertage/nationale-feiertage-node.html'),
@@ -62,8 +62,8 @@ So the one holiday everyone in Germany shares is also the one the states don''t 
 );
 
 INSERT INTO products (fact, lang, pos, name, query, why) VALUES
-  ('unity-day-federal-holiday', 'en', 1, 'Germany map jigsaw puzzle with states', 'Germany map jigsaw puzzle', 'Turns all 16 German states into a puzzle that works well for two people.'),
-  ('unity-day-federal-holiday', 'en', 2, 'History book on German reunification', 'German reunification history book', 'Covers the months between the fall of the Wall and unification in a compact, readable way.');
+  ('unity-day-federal-holiday', 'en', 1, '2000-piece Germany map jigsaw puzzle', '2000 piece Germany map puzzle', 'A big puzzle with all 16 German states that can fill a whole holiday afternoon.'),
+  ('unity-day-federal-holiday', 'en', 2, 'Photo book on the fall of the Wall and reunification', 'fall of the Berlin Wall photo book', 'Large photos from the months between the fall of the Wall and reunification, a book to keep.');
 
 INSERT INTO sources (fact, lang, pos, label, url) VALUES
   ('unity-day-federal-holiday', 'en', 1, 'BMI: Nationale Feiertage', 'https://www.bmi.bund.de/DE/themen/verfassung/staatliche-symbole/nationale-feiertage/nationale-feiertage-node.html'),

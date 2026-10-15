@@ -10,25 +10,29 @@ import { t } from '../i18n/ui';
 import { SITE } from '../config';
 import Icon from './Icon.astro';
 import { productArt } from '../product-art';
+import FestIcon from './FestIcon.astro';
+// fest: Feiertags-Fakt (Eric, 2026-10-15): hochwertige Auswahl in der Farbwelt des Feiertags, dunkle Bühne mit
+// Strahlen hinter jedem Stück und der Feiertags-Grafik am Titel. Kennzeichnung als Werbung bleibt gleich.
 // wide: über die ganze Seitenbreite und größer, am Ende der Faktseite (Wunsch von Eric, 2026-10-10).
-interface Props { lang: Lang; products: { name: string; query: string; why: string }[]; category: Category; factKey: string; wide?: boolean }
-const { lang, products, category, factKey, wide = false } = Astro.props;
+interface Props { lang: Lang; products: { name: string; query: string; why: string }[]; category: Category; factKey: string; wide?: boolean; fest?: { name: string; icon: string } }
+const { lang, products, category, factKey, wide = false, fest } = Astro.props;
 const ui = t(lang);
 const host = SITE.amazon[lang].host.replace(/^www\./, '');
 ---
 {products.length > 0 && (
-  <aside class:list={['card', 'shop', wide && 'shop--wide']} id="passend" aria-labelledby="shop-title">
+  <aside class:list={['card', 'shop', wide && 'shop--wide', fest && 'shop--fest']} id="passend" aria-labelledby="shop-title">
+    {fest && <p class="fest-kicker"><FestIcon name={fest.icon} /> {fest.name}</p>}
     <div class="head">
-      <h2 id="shop-title"><Icon name="shopping-cart" /> {ui.productsTitle}</h2>
+      <h2 id="shop-title">{fest ? ui.fest.picksTitle : <><Icon name="shopping-cart" /> {ui.productsTitle}</>}</h2>
       <span class="ad-tag">{ui.adLabel}</span>
     </div>
-    <p class="intro">{ui.productsIntro}</p>
+    <p class="intro">{fest ? ui.fest.picksIntro : ui.productsIntro}</p>
     <ul class="grid" data-count={products.length}>
       {products.map((p) => { const art = productArt(p.name); return (
         <li>
           <a class="prod" href={amazonUrl(lang, p.query)} rel="sponsored nofollow noopener" target="_blank"
             data-umami-event="amazon" data-umami-event-fact={factKey} data-umami-event-place="box">
-            <span class:list={['art', `cat-${category}`]} aria-hidden="true">
+            <span class:list={['art', !fest && `cat-${category}`]} aria-hidden="true">
               <span class="emoji">{art.main}</span>
               {art.topic && <span class="topic">{art.topic}</span>}
               <span class="host">{host}</span>
@@ -36,7 +40,7 @@ const host = SITE.amazon[lang].host.replace(/^www\./, '');
             <span class="body">
               <strong class="name">{p.name}</strong>
               <span class="why">{p.why}</span>
-              <span class="btn btn--orange cta">{ui.productsCta} <Icon name="external-link" /></span>
+              <span class:list={['btn', fest ? 'btn--fest' : 'btn--orange', 'cta']}>{ui.productsCta} <Icon name="external-link" /></span>
             </span>
           </a>
         </li>
@@ -92,7 +96,7 @@ const host = SITE.amazon[lang].host.replace(/^www\./, '');
     font-family: var(--font-display); font-size: var(--fs-xs); font-weight: 700;
   }
   .body { display: flex; flex-direction: column; gap: var(--space-2); flex: 1; padding: var(--space-4) var(--space-5) var(--space-5); }
-  .name { font-family: var(--font-display); font-size: var(--fs-xl); line-height: 1.15; letter-spacing: -0.01em; }
+  .name { font-family: var(--font-display); font-size: var(--fs-xl); line-height: 1.15; letter-spacing: -0.01em; overflow-wrap: break-word; hyphens: auto; }
   .why { font-size: var(--fs-md); color: var(--muted); }
   .cta { align-self: flex-start; margin-top: auto; }
   .prod:hover .cta { box-shadow: var(--shadow-lg); transform: translate(-2px, -2px); }
@@ -117,6 +121,25 @@ const host = SITE.amazon[lang].host.replace(/^www\./, '');
     .shop--wide .prod { flex-direction: column; }
     .shop--wide .art { flex-basis: auto; min-height: 10rem; border-right: 0; border-bottom: var(--bw-strong) solid var(--line); }
   }
+
+  /* Feiertag: dunkle Karte mit Rahmen und Schatten in den Farben des Fests, Strahlen hinter den Stücken */
+  .shop--fest { background: var(--night-2); color: var(--on-night); border-color: var(--fest-a); box-shadow: var(--shadow-fest-2xl); }
+  .shop--fest .intro, .shop--fest .ad { color: var(--on-night-muted); }
+  .shop--fest .ad-tag { background: var(--fest-a); color: var(--on-accent); border-color: var(--on-accent); }
+  .fest-kicker {
+    display: inline-flex; align-items: center; gap: var(--space-2); margin: 0 0 var(--space-3); padding: var(--space-1) var(--space-3);
+    border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-pill); background: var(--fest-b); color: var(--on-accent);
+    font-family: var(--font-display); font-size: var(--fs-md); font-weight: 800; transform: rotate(-2deg);
+  }
+  .shop--fest .prod { border-color: var(--fest-a); box-shadow: var(--shadow-fest-lg); }
+  .shop--fest .prod:hover { box-shadow: var(--shadow-fest-xl); }
+  .shop--fest .art { overflow: hidden; background: var(--fest-sky); border-color: var(--fest-a); }
+  .shop--fest .art::before { content: ''; position: absolute; inset: -40%; background: var(--fest-rays); animation: fest-spin var(--dur-rays) linear infinite; }
+  .shop--fest .emoji { position: relative; filter: drop-shadow(var(--space-2) var(--space-2) 0 var(--fest-b)); }
+  .shop--fest .host { background: var(--fest-a); color: var(--on-accent); }
+  .btn--fest { background: var(--fest-a); color: var(--on-accent); }
+  @keyframes fest-spin { to { transform: rotate(1turn); } }
+  @media (prefers-reduced-motion: reduce) { .shop--fest .art::before { animation: none; } }
 
   @media (max-width: 560px) {
     .grid[data-count='1'] .prod { flex-direction: column; }
