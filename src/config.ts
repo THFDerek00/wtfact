@@ -22,7 +22,7 @@ export const SITE = {
     metaPixel: '',
     // Microsoft Clarity (Heatmaps und Sitzungsaufzeichnungen: wo Leute scrollen, klicken, abspringen).
     // clarity.microsoft.com > Projekt anlegen > Settings > Overview > „Project ID“.
-    clarity: '',
+    clarity: 'yy6aef6abo',
   } as { ga4: string; metaPixel: string; clarity: string },
   // Angaben für das Impressum (Pflicht in Deutschland, § 5 DDG).
   owner: {
