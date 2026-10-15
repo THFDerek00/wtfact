@@ -145,6 +145,8 @@ Farben, Schrift, Abstände und Bausteine sind in `docs/design-system.md` beschri
   Samstag als `from` anhängen; `npm run check` (`scripts/check-quiz.mjs`) prüft Aufbau und Quellen und warnt, wenn weniger
   als 2 Samstage vorbereitet sind. Antworten zählt `POST /api/index.php?r=answer`, Auswertung `GET ?r=quiz&game=wof|first`;
   dieselbe Route speichert auch Schätzfrage (`guess`) und WTF-Barometer (`baro`) der Faktseiten.
+  Die Statistik-Kacheln nutzen die Antworten aller Besucher: Ab 5 Antworten (`MIN_SINGLE` in `src/scripts/quiz.ts`)
+  zeigt eine Kachel die auffälligste einzelne Frage, vorher alle Fragen zusammen. Ohne Antwort steht „?“ mit Hinweis.
 - **Neu:** Fakten der letzten 7 Tage (heute eingeschlossen) tragen das Etikett „Neu“ (`src/components/NewBadge.astro`).
   Der Browser prüft das nach, damit es auch ohne neuen Build verschwindet.
 

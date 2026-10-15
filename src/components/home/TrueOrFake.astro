@@ -19,6 +19,7 @@ const texts = {
   question: q.question(9001, 9002), streak: q.streak(9001), right: q.right, wrong: q.wrong, itsTrue: q.itsTrue, itsFake: q.itsFake,
   done: q.done(9001, 9002), yoursText: q.yoursText(9001), yoursTextOne: q.yoursText(1), yoursEmpty: q.yoursEmpty,
   fooledText: q.statFooledText('§'), doubtedText: q.statDoubtedText('§'), statEmpty: q.statEmpty,
+  pooled: q.statPooled(9001), pooledOne: q.statPooled(1),
   pct: lang === 'de' ? '9001 %' : '9001%',
 };
 ---
@@ -60,16 +61,16 @@ const texts = {
         </div>
       </div>
       <div class="stats">
-        <div class="st"><span class="lb">{q.fooled}</span><span class="v v--pink" data-st="fooled">–</span><p data-st-text="fooled">{q.statEmpty}</p></div>
-        <div class="st"><span class="lb">{q.doubted}</span><span class="v" data-st="doubted">–</span><p data-st-text="doubted">{q.statEmpty}</p></div>
-        <div class="st"><span class="lb">{q.yours}</span><span class="v" data-st="yours">–</span><p data-st-text="yours">{q.yoursEmpty}</p></div>
+        <div class="st"><span class="lb">{q.fooled}</span><span class="v v--pink" data-st="fooled">?</span><p data-st-text="fooled">{q.statEmpty}</p></div>
+        <div class="st"><span class="lb">{q.doubted}</span><span class="v" data-st="doubted">?</span><p data-st-text="doubted">{q.statEmpty}</p></div>
+        <div class="st"><span class="lb">{q.yours}</span><span class="v" data-st="yours">?</span><p data-st-text="yours">{q.yoursEmpty}</p></div>
       </div>
     </div>
   </section>
 )}
 
 <script>
-  import { answer, myAnswers, tallies, localTally, share, total, type Tally } from '../../scripts/quiz';
+  import { answer, myAnswers, tallies, localTally, localTallies, pool, share, total, MIN_SINGLE, type Tally } from '../../scripts/quiz';
   import { berlinDay } from '../../week';
 
   type Item = { id: string; from: string; cat: string; answer: boolean; q: string; why: string; src?: { label: string; url: string } };
@@ -141,22 +142,28 @@ const texts = {
       $('[data-fin]').hidden = false;
     };
     const stats = () => {
-      // Größter Irrtum: Fake-Aussage mit dem höchsten Anteil „wahr“ (ab 5 Antworten), umgekehrt für wahre Aussagen
-      const pickMax = (truth: boolean, pick: number) => {
+      // Antworten aller Besucher (Server), ohne Server nur die eigenen aus diesem Browser
+      const counts = server ?? localTallies('wof');
+      // Größter Irrtum: Fake-Aussage mit dem höchsten Anteil „wahr“ (ab MIN_SINGLE Antworten), umgekehrt für wahre Aussagen.
+      // Hat noch keine Aussage so viele, zählen alle Aussagen der Sorte zusammen.
+      for (const [name, truth, pick, tpl] of [['fooled', false, 1, texts.fooledText], ['doubted', true, 0, texts.doubtedText]] as const) {
+        const items = all.filter((x) => x.answer === truth);
         let best: { it: Item; p: number } | null = null;
-        for (const it of all.filter((x) => x.answer === truth)) {
-          const c = server?.[it.id];
-          if (!c || total(c) < 5) continue;
+        for (const it of items) {
+          const c = counts[it.id];
+          if (!c || total(c) < MIN_SINGLE) continue;
           const p = share(c, pick);
           if (!best || p > best.p) best = { it, p };
         }
-        return best;
-      };
-      for (const [name, truth, pick, tpl] of [['fooled', false, 1, texts.fooledText], ['doubted', true, 0, texts.doubtedText]] as const) {
-        const b = pickMax(truth, pick);
-        if (!b) continue;
-        $(`[data-st="${name}"]`).textContent = fill(texts.pct, { 9001: b.p });
-        $(`[data-st-text="${name}"]`).textContent = fill(tpl, { '§': b.it.q });
+        const sum = pool(items.map((x) => counts[x.id]));
+        const n = total(sum);
+        const [v, text] = best
+          ? [fill(texts.pct, { 9001: best.p }), fill(tpl, { '§': best.it.q })]
+          : n
+            ? [fill(texts.pct, { 9001: share(sum, pick) }), n === 1 ? texts.pooledOne : fill(texts.pooled, { 9001: n })]
+            : ['?', texts.statEmpty];
+        $(`[data-st="${name}"]`).textContent = v;
+        $(`[data-st-text="${name}"]`).textContent = text;
       }
       const mine = myAnswers('wof');
       const answered = all.filter((x) => x.id in mine);
