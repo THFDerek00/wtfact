@@ -48,10 +48,25 @@ function kick_if_due(PDO $db): ?string
         if ($f['status'] === 'due') $reason = 'due';
         if ($f['status'] === 'offline' && in_array($f['key'], $live, true)) $reason = 'offline';
     }
+    if (!$reason && fest_stale()) $reason = 'holiday';
     if (!$reason) return null;
     if (time() - (int) (meta_get('dispatched_at') ?? 0) < DISPATCH_GAP) return 'waiting';
     meta_set('dispatched_at', (string) time());
     return gh_dispatch() ? 'started' : 'failed';
+}
+
+/**
+ * Feiertag (Wunsch von Eric, 2026-10-15): Um 0 Uhr am Feiertag stellt die Seite auf das Design des Festes um, am Tag
+ * danach zurück. fest.json vom letzten Upload sagt, an welchem Tag gebaut wurde und welche Tage Feiertage sind.
+ */
+function fest_stale(): bool
+{
+    $raw = @file_get_contents(site_dir() . '/fest.json');
+    $fest = $raw === false ? null : json_decode($raw, true);
+    if (!is_array($fest) || !isset($fest['built'], $fest['holidays']) || !is_array($fest['holidays'])) return false;
+    $today = now()->format('Y-m-d');
+    $built = (string) $fest['built'];
+    return $built !== $today && (in_array($today, $fest['holidays'], true) || in_array($built, $fest['holidays'], true));
 }
 
 function require_key(): string
