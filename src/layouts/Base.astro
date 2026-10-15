@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import NightSky from '../components/NightSky.astro';
 import Icon from '../components/Icon.astro';
+import CookieConsent from '../components/CookieConsent.astro';
 import { SITE, type Lang } from '../config';
 import { t, catsPath, chartsPath } from '../i18n/ui';
 import { postsFor, postUrl } from '../lib';
@@ -107,6 +108,7 @@ const nav = [
           <a href={`/${lang}/korrekturen/`}>{ui.corrections}</a>
           <a href={`/${lang}/impressum/`}>{ui.imprint}</a>
           <a href={`/${lang}/datenschutz/`}>{ui.privacy}</a>
+          <button class="linkish" type="button" data-consent-open hidden>{ui.consent.settings}</button>
         </nav>
         <p class="copy">© {new Date().getFullYear()} {SITE.name}</p>
       </div>
@@ -116,6 +118,7 @@ const nav = [
         <a href={n.href} aria-current={n.current ? 'page' : undefined}><Icon name={n.icon} /><span>{n.tab}</span></a>
       ))}
     </nav>
+    <CookieConsent lang={lang} />
     <script>
       import { isNew } from '../week';
       // „Neu“ nach 7 Tagen ausblenden, auch wenn die Seite seitdem nicht neu gebaut wurde
@@ -212,7 +215,7 @@ const nav = [
   .note + .note { margin-top: var(--space-2); }
   .note { margin: 0; max-width: 62ch; }
   .foot nav { display: flex; flex-wrap: wrap; gap: var(--space-5); margin: var(--space-5) 0; }
-  .foot nav a { font-weight: 600; }
+  .foot nav a, .foot nav .linkish { font-weight: 600; }
   .copy { margin: 0; font-weight: 600; }
   @media (max-width: 760px) {
     .slogan { display: none; }

@@ -322,6 +322,9 @@ h1, h2, h3 { font-family: var(--font-display); line-height: 1.15; letter-spacing
   box-shadow: var(--shadow-md);
 }
 
+/* Knopf, der wie ein Link aussieht (z. B. „Cookie-Einstellungen“ in der Fußzeile) */
+.linkish { padding: 0; border: 0; background: none; color: inherit; font: inherit; text-decoration: underline; cursor: pointer; }
+
 /* Chip: neutral auf Fläche, mit .cat-* farbig */
 .chip {
   display: inline-flex; align-items: center; gap: var(--space-2);

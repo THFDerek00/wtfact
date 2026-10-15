@@ -10,6 +10,20 @@ export const SITE = {
   // Einrichten: cloud.umami.is > Add website > wtfact.xyz, die „Website ID“ hier eintragen.
   // Klicks auf Amazon-Links zählen als Ereignis „amazon“ (mit Fakt und Platz), siehe ProductBox und ProductTeaser.
   umami: { websiteId: '', script: 'https://cloud.umami.is/script.js' },
+  // Dienste mit Cookies, die erst nach „Alle akzeptieren“ im Cookie-Banner laden (Wunsch von Eric, 2026-10-15).
+  // Leer = Dienst aus. Ist keiner eingetragen, gibt es nichts zuzustimmen und es erscheint auch kein Banner.
+  // Banner: src/components/CookieConsent.astro, Laden der Dienste: src/scripts/consent.ts.
+  consent: {
+    // Google Analytics 4 (Statistik mit Herkunft, Verweildauer, Search-Console-Anbindung).
+    // analytics.google.com > Verwaltung > Datenstreams > Web > „Mess-ID“, Form G-XXXXXXXXXX.
+    ga4: 'G-NKFN3T4ZJH',
+    // Meta-Pixel (misst, wer über Instagram-/Facebook-Werbung kommt, und baut Zielgruppen für Werbung auf).
+    // business.facebook.com > Events Manager > Datenquellen > Pixel, „Pixel-ID“ (nur Ziffern).
+    metaPixel: '',
+    // Microsoft Clarity (Heatmaps und Sitzungsaufzeichnungen: wo Leute scrollen, klicken, abspringen).
+    // clarity.microsoft.com > Projekt anlegen > Settings > Overview > „Project ID“.
+    clarity: 'yy6aef6abo',
+  } as { ga4: string; metaPixel: string; clarity: string },
   // Angaben für das Impressum (Pflicht in Deutschland, § 5 DDG).
   owner: {
     name: 'Eric Steingröver',
