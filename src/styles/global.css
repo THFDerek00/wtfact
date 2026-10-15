@@ -1,5 +1,29 @@
 @import '@fontsource-variable/space-grotesk';
 @import '@fontsource-variable/inter';
+/* Schriften der Feiertags-Schriftzüge (FestWord.astro). Der Browser lädt eine Schrift erst, wenn sie auf der Seite vorkommt. */
+@import '@fontsource/creepster/latin-400.css';
+@import '@fontsource/unifrakturmaguntia/latin-400.css';
+@import '@fontsource/pirata-one/latin-400.css';
+@import '@fontsource/mountains-of-christmas/latin-700.css';
+@import '@fontsource/lobster/latin-400.css';
+@import '@fontsource/monoton/latin-400.css';
+@import '@fontsource/cinzel-decorative/latin-900.css';
+@import '@fontsource/rye/latin-400.css';
+@import '@fontsource/bungee-shade/latin-400.css';
+@import '@fontsource/bungee-inline/latin-400.css';
+@import '@fontsource/sancreek/latin-400.css';
+@import '@fontsource/henny-penny/latin-400.css';
+@import '@fontsource/orbitron/latin-900.css';
+@import '@fontsource/bangers/latin-400.css';
+@import '@fontsource/yatra-one/latin-400.css';
+@import '@fontsource/pacifico/latin-400.css';
+@import '@fontsource/amatic-sc/latin-700.css';
+@import '@fontsource/abril-fatface/latin-400.css';
+@import '@fontsource/rubik-wet-paint/latin-400.css';
+@import '@fontsource/fascinate/latin-400.css';
+@import '@fontsource/righteous/latin-400.css';
+@import '@fontsource/cherry-bomb-one/latin-400.css';
+@import '@fontsource/uncial-antiqua/latin-400.css';
 
 /*
   Design-Tokens. Farben, Größen, Abstände, Radien, Schatten und Zeiten werden
@@ -82,9 +106,132 @@
   --fest-perseiden-night: #0a0f2c;
   --fest-perseiden-a: #9fd3ff;
   --fest-perseiden-b: #ffe28a;
+  --fest-advent-night: #0f2a1d;
+  --fest-advent-a: #ffcf5a;
+  --fest-advent-b: #ff8a80;
+  --fest-nikolaus-night: #3a0d12;
+  --fest-nikolaus-a: #ffd27a;
+  --fest-nikolaus-b: #ffb3a7;
+  --fest-wintersonne-night: #0b1633;
+  --fest-wintersonne-a: #bfe3ff;
+  --fest-wintersonne-b: #ffe7a3;
+  --fest-weihnacht-night: #0d2a17;
+  --fest-weihnacht-a: #ffd34d;
+  --fest-weihnacht-b: #ff7b72;
+  --fest-silvester-night: #0b0f2e;
+  --fest-silvester-a: #ffd54a;
+  --fest-silvester-b: #ff7ad9;
+  --fest-neujahr-night: #0e2a1a;
+  --fest-neujahr-a: #9ef07a;
+  --fest-neujahr-b: #ffb3c7;
+  --fest-koenige-night: #23103f;
+  --fest-koenige-a: #ffd34d;
+  --fest-koenige-b: #d7b8ff;
+  --fest-lunar-night: #3a0707;
+  --fest-lunar-a: #ffcc4d;
+  --fest-lunar-b: #ff8a6b;
+  --fest-karneval-night: #2a0c3d;
+  --fest-karneval-a: #ffe14a;
+  --fest-karneval-b: #7ef0a0;
+  --fest-valentin-night: #3a0a1e;
+  --fest-valentin-a: #ff8fb8;
+  --fest-valentin-b: #ffd1dc;
+  --fest-pi-night: #0d1b3a;
+  --fest-pi-a: #7fe3ff;
+  --fest-pi-b: #ffe27a;
+  --fest-patrick-night: #0b2a17;
+  --fest-patrick-a: #7fe08a;
+  --fest-patrick-b: #ffd34d;
+  --fest-holi-night: #2a0b3d;
+  --fest-holi-a: #ff8ad8;
+  --fest-holi-b: #ffe14a;
+  --fest-ostern-night: #12303a;
+  --fest-ostern-a: #ffe46b;
+  --fest-ostern-b: #ffb3d1;
+  --fest-aprilscherz-night: #2b0f3a;
+  --fest-aprilscherz-a: #c6ff5a;
+  --fest-aprilscherz-b: #ffab5c;
+  --fest-erde-night: #0b2b2a;
+  --fest-erde-a: #8fe388;
+  --fest-erde-b: #8fd3ff;
+  --fest-koningsdag-night: #0f1d3d;
+  --fest-koningsdag-a: #ff9d3d;
+  --fest-koningsdag-b: #ffd59a;
+  --fest-walpurgis-night: #160a1f;
+  --fest-walpurgis-a: #ff9a3d;
+  --fest-walpurgis-b: #b6f27a;
+  --fest-weltraum-night: #05070f;
+  --fest-weltraum-a: #ffe14a;
+  --fest-weltraum-b: #7fe3ff;
+  --fest-cinco-night: #0b2b2a;
+  --fest-cinco-a: #ffc23d;
+  --fest-cinco-b: #ff8fb8;
+  --fest-vatertag-night: #10233a;
+  --fest-vatertag-a: #ffc56b;
+  --fest-vatertag-b: #a8e6a0;
+  --fest-muttertag-night: #3a1030;
+  --fest-muttertag-a: #ff9ccd;
+  --fest-muttertag-b: #ffe28a;
+  --fest-drachenboot-night: #062a2a;
+  --fest-drachenboot-a: #ff8a6b;
+  --fest-drachenboot-b: #ffd34d;
+  --fest-sommer-night: #3a1a05;
+  --fest-sommer-a: #ffe14a;
+  --fest-sommer-b: #ffab5c;
+  --fest-mittsommer-night: #0b1f45;
+  --fest-mittsommer-a: #ffe14a;
+  --fest-mittsommer-b: #ffc2d9;
+  --fest-july-night: #0d1640;
+  --fest-july-a: #ff8a8a;
+  --fest-july-b: #9fd0ff;
+  --fest-bastille-night: #0d1640;
+  --fest-bastille-a: #9fc3ff;
+  --fest-bastille-b: #ff9a8a;
   --flag-de-black: #000000;
   --flag-de-red: #dd0000;
   --flag-de-gold: #ffcc00;
+  /* Bildfarben der eigenen Feiertags-Grafiken (src/data/fest-art.ts, Wunsch von Eric, 2026-10-15) */
+  --art-pumpkin: #ff7a1a;
+  --art-pumpkin-line: #c2510a;
+  --art-leaf: #4f9a3a;
+  --art-glow: #ffd84d;
+  --art-bat: #241a2e;
+  --art-ghost: #f6f3ff;
+  --art-dove: #ffffff;
+  --art-tomato: #e8321e;
+  --art-highlight: #ffffff;
+  --art-beer: #f5b021;
+  --art-beer-line: #c98410;
+  --art-foam: #fffaf0;
+  --art-pretzel: #a65f2a;
+  --art-moon: #ffe08a;
+  --art-moon-shade: #f0c252;
+  --art-lantern: #e0312b;
+  --art-cake: #d9913f;
+  --art-cake-line: #9c5a1c;
+  --art-star: #ffe28a;
+  --art-red: #e8322b;
+  --art-red-dark: #a31d18;
+  --art-green: #3f9b48;
+  --art-green-dark: #24642c;
+  --art-blue: #3a7bd5;
+  --art-navy: #1f3a8a;
+  --art-sky: #8fd3ff;
+  --art-yellow: #ffd23f;
+  --art-orange: #ff8a3d;
+  --art-pink: #ff7fb0;
+  --art-purple: #8e5bd8;
+  --art-brown: #9a5b2c;
+  --art-brown-dark: #5e3416;
+  --art-wood: #c98a4b;
+  --art-white: #ffffff;
+  --art-gray: #a7adb6;
+  --art-skin: #f4c9a0;
+  --art-black: #1b1b1f;
+  --fest-o-size: 0.66em; /* Grafik statt O im Riesenschriftzug, relativ zur Schrift */
+  --fest-o-gap: 0.02em;
+  --fest-icon-line: 3; /* Konturstärke der Feiertags-Grafiken im 64er-Raster */
+  --dur-fest-burst: 2.6s; /* Feuerwerk: aufgehen und verglühen */
   --fs-fest-art: clamp(140px, 26vw, 380px); /* riesiges Motiv des Feiertags (Kürbis, Laterne …) */
   --fest-glow-size: 46%; /* Leuchten (Mond, Laterne, Kürbis) oben rechts im Kopf einer Themen-Seite */
   --fest-deco-opacity: 0.85;
@@ -188,6 +335,30 @@
   /* Schrift */
   --font-display: 'Space Grotesk Variable', system-ui, sans-serif;
   --font-body: 'Inter Variable', system-ui, sans-serif;
+  /* Schriften für die Riesenschriftzüge der Feiertage (FestWord.astro) */
+  --font-fest-spooky: 'Creepster', var(--font-display);
+  --font-fest-fraktur: 'UnifrakturMaguntia', var(--font-display);
+  --font-fest-pirate: 'Pirata One', var(--font-display);
+  --font-fest-christmas: 'Mountains of Christmas', var(--font-display);
+  --font-fest-lobster: 'Lobster', var(--font-display);
+  --font-fest-monoton: 'Monoton', var(--font-display);
+  --font-fest-cinzel: 'Cinzel Decorative', var(--font-display);
+  --font-fest-rye: 'Rye', var(--font-display);
+  --font-fest-bungee-shade: 'Bungee Shade', var(--font-display);
+  --font-fest-bungee-inline: 'Bungee Inline', var(--font-display);
+  --font-fest-sancreek: 'Sancreek', var(--font-display);
+  --font-fest-hennypenny: 'Henny Penny', var(--font-display);
+  --font-fest-orbitron: 'Orbitron', var(--font-display);
+  --font-fest-bangers: 'Bangers', var(--font-display);
+  --font-fest-yatra: 'Yatra One', var(--font-display);
+  --font-fest-pacifico: 'Pacifico', var(--font-display);
+  --font-fest-amatic: 'Amatic SC', var(--font-display);
+  --font-fest-abril: 'Abril Fatface', var(--font-display);
+  --font-fest-wetpaint: 'Rubik Wet Paint', var(--font-display);
+  --font-fest-fascinate: 'Fascinate', var(--font-display);
+  --font-fest-righteous: 'Righteous', var(--font-display);
+  --font-fest-cherry: 'Cherry Bomb One', var(--font-display);
+  --font-fest-uncial: 'Uncial Antiqua', var(--font-display);
   --fs-xs: 13px;
   --fs-sm: 14px;
   --fs-md: 15px;
@@ -490,6 +661,8 @@ html[data-sky] .stage { background: var(--sky-stage); }
   --shadow-on-night: var(--space-2) var(--space-2) 0 var(--fest-a);
   --shadow-night-pink: var(--space-2) var(--space-2) 0 var(--fest-b);
   --shadow-night-lime: var(--space-2) var(--space-2) 0 var(--fest-a);
+  --fest-icon-shadow: drop-shadow(var(--space-1) var(--space-1) 0 var(--fest-a));
+  --fest-art-shadow: drop-shadow(var(--space-3) var(--space-3) 0 var(--fest-b));
   --fest-sky: radial-gradient(circle at 82% 18%, color-mix(in srgb, var(--fest-a) 55%, transparent) 0%, color-mix(in srgb, var(--fest-b) 18%, transparent) calc(var(--fest-glow-size) / 2), transparent var(--fest-glow-size)), var(--dots-night), var(--fest-night);
 }
 [data-fest='fest'] { --fest-night: var(--fest-fest-night); --fest-a: var(--fest-fest-a); --fest-b: var(--fest-fest-b); }
@@ -505,11 +678,39 @@ html[data-sky] .stage { background: var(--sky-stage); }
 [data-fest='pirat'] { --fest-night: var(--fest-pirat-night); --fest-a: var(--fest-pirat-a); --fest-b: var(--fest-pirat-b); }
 [data-fest='tomatina'] { --fest-night: var(--fest-tomatina-night); --fest-a: var(--fest-tomatina-a); --fest-b: var(--fest-tomatina-b); }
 [data-fest='perseiden'] { --fest-night: var(--fest-perseiden-night); --fest-a: var(--fest-perseiden-a); --fest-b: var(--fest-perseiden-b); }
+[data-fest='advent'] { --fest-night: var(--fest-advent-night); --fest-a: var(--fest-advent-a); --fest-b: var(--fest-advent-b); }
+[data-fest='nikolaus'] { --fest-night: var(--fest-nikolaus-night); --fest-a: var(--fest-nikolaus-a); --fest-b: var(--fest-nikolaus-b); }
+[data-fest='wintersonne'] { --fest-night: var(--fest-wintersonne-night); --fest-a: var(--fest-wintersonne-a); --fest-b: var(--fest-wintersonne-b); }
+[data-fest='weihnacht'] { --fest-night: var(--fest-weihnacht-night); --fest-a: var(--fest-weihnacht-a); --fest-b: var(--fest-weihnacht-b); }
+[data-fest='silvester'] { --fest-night: var(--fest-silvester-night); --fest-a: var(--fest-silvester-a); --fest-b: var(--fest-silvester-b); }
+[data-fest='neujahr'] { --fest-night: var(--fest-neujahr-night); --fest-a: var(--fest-neujahr-a); --fest-b: var(--fest-neujahr-b); }
+[data-fest='koenige'] { --fest-night: var(--fest-koenige-night); --fest-a: var(--fest-koenige-a); --fest-b: var(--fest-koenige-b); }
+[data-fest='lunar'] { --fest-night: var(--fest-lunar-night); --fest-a: var(--fest-lunar-a); --fest-b: var(--fest-lunar-b); }
+[data-fest='karneval'] { --fest-night: var(--fest-karneval-night); --fest-a: var(--fest-karneval-a); --fest-b: var(--fest-karneval-b); }
+[data-fest='valentin'] { --fest-night: var(--fest-valentin-night); --fest-a: var(--fest-valentin-a); --fest-b: var(--fest-valentin-b); }
+[data-fest='pi'] { --fest-night: var(--fest-pi-night); --fest-a: var(--fest-pi-a); --fest-b: var(--fest-pi-b); }
+[data-fest='patrick'] { --fest-night: var(--fest-patrick-night); --fest-a: var(--fest-patrick-a); --fest-b: var(--fest-patrick-b); }
+[data-fest='holi'] { --fest-night: var(--fest-holi-night); --fest-a: var(--fest-holi-a); --fest-b: var(--fest-holi-b); }
+[data-fest='ostern'] { --fest-night: var(--fest-ostern-night); --fest-a: var(--fest-ostern-a); --fest-b: var(--fest-ostern-b); }
+[data-fest='aprilscherz'] { --fest-night: var(--fest-aprilscherz-night); --fest-a: var(--fest-aprilscherz-a); --fest-b: var(--fest-aprilscherz-b); }
+[data-fest='erde'] { --fest-night: var(--fest-erde-night); --fest-a: var(--fest-erde-a); --fest-b: var(--fest-erde-b); }
+[data-fest='koningsdag'] { --fest-night: var(--fest-koningsdag-night); --fest-a: var(--fest-koningsdag-a); --fest-b: var(--fest-koningsdag-b); }
+[data-fest='walpurgis'] { --fest-night: var(--fest-walpurgis-night); --fest-a: var(--fest-walpurgis-a); --fest-b: var(--fest-walpurgis-b); }
+[data-fest='weltraum'] { --fest-night: var(--fest-weltraum-night); --fest-a: var(--fest-weltraum-a); --fest-b: var(--fest-weltraum-b); }
+[data-fest='cinco'] { --fest-night: var(--fest-cinco-night); --fest-a: var(--fest-cinco-a); --fest-b: var(--fest-cinco-b); }
+[data-fest='vatertag'] { --fest-night: var(--fest-vatertag-night); --fest-a: var(--fest-vatertag-a); --fest-b: var(--fest-vatertag-b); }
+[data-fest='muttertag'] { --fest-night: var(--fest-muttertag-night); --fest-a: var(--fest-muttertag-a); --fest-b: var(--fest-muttertag-b); }
+[data-fest='drachenboot'] { --fest-night: var(--fest-drachenboot-night); --fest-a: var(--fest-drachenboot-a); --fest-b: var(--fest-drachenboot-b); }
+[data-fest='sommer'] { --fest-night: var(--fest-sommer-night); --fest-a: var(--fest-sommer-a); --fest-b: var(--fest-sommer-b); }
+[data-fest='mittsommer'] { --fest-night: var(--fest-mittsommer-night); --fest-a: var(--fest-mittsommer-a); --fest-b: var(--fest-mittsommer-b); }
+[data-fest='july'] { --fest-night: var(--fest-july-night); --fest-a: var(--fest-july-a); --fest-b: var(--fest-july-b); }
+[data-fest='bastille'] { --fest-night: var(--fest-bastille-night); --fest-a: var(--fest-bastille-a); --fest-b: var(--fest-bastille-b); }
 /* Themen-Fläche (Karten, Kopf der Faktseite): Bühne in Themenfarbe mit Leuchten oben rechts */
 /* Akzentfläche in Themenfarbe (z. B. der große Emoji-Block im Kopf der Faktseite) */
 .fest-a { background: var(--dots-strong), var(--fest-a); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
 .fest-sky { background: var(--fest-sky); background-size: auto, var(--dots-size-md) var(--dots-size-md); color: var(--on-night); }
 @keyframes fest-wave { 0%, 100% { rotate: 0deg; } 50% { rotate: 2deg; } }
+@keyframes fest-burst { 0% { scale: 0.2; opacity: 0; } 25% { scale: 1; opacity: 1; } 70% { opacity: 1; } 100% { scale: 1.12; opacity: 0; } }
 @keyframes fest-float { 0%, 100% { translate: 0 0; } 50% { translate: 0 calc(-1 * var(--space-3)); } }
 
 /* Abschnitte im Design „E“ (docs/design-system.md, „Abschnitte und Überhänge“).

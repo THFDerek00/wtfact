@@ -1,8 +1,10 @@
 ---
-// Deko für Feiertags- und Grusel-Fakten (Wunsch von Eric, 2026-10-15): Emojis des Themas (Kürbisse, Fledermäuse …)
+// Deko für Feiertags- und Grusel-Fakten (Wunsch von Eric, 2026-10-15): eigene Grafiken des Themas (Kürbisse, Fledermäuse …,
+// src/data/fest-art.ts)
 // liegen verstreut über Karte oder Kopf der Seite und schweben langsam. Rein dekorativ, für Screenreader unsichtbar.
 // Das Elternelement braucht position: relative. size="page": feste Ebene über der ganzen Seite am Feiertag selbst
 // (Base.astro), die Emojis sitzen dann links und rechts am Rand, damit Texte frei bleiben.
+import FestIcon from './FestIcon.astro';
 interface Props { deco: string[]; size?: 'sm' | 'lg' | 'page'; day?: string }
 const { deco, size = 'sm', day } = Astro.props;
 // Feste Plätze am Rand, damit Titel und Text frei bleiben.
@@ -10,13 +12,13 @@ const spots = size === 'page' ? 8 : size === 'lg' ? 6 : 4;
 const items = Array.from({ length: spots }, (_, i) => deco[i % deco.length]);
 ---
 <span class:list={['deco', `deco--${size}`]} aria-hidden="true" data-fest-deco={day}>
-  {items.map((e, i) => <span class:list={['d', `d${i}`]}>{e}</span>)}
+  {items.map((e, i) => <span class:list={['d', `d${i}`]}><FestIcon name={e} /></span>)}
 </span>
 
 <style>
   .deco { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
   .d {
-    position: absolute; line-height: 1; opacity: var(--fest-deco-opacity); filter: var(--emoji-shadow);
+    position: absolute; line-height: 1; opacity: var(--fest-deco-opacity);
     animation: fest-float var(--dur-fest-float) var(--ease) infinite;
   }
   .deco--sm .d { font-size: var(--fs-xl); }
@@ -28,7 +30,7 @@ const items = Array.from({ length: spots }, (_, i) => deco[i % deco.length]);
   .d4 { bottom: 8%; left: 38%; rotate: -8deg; animation-delay: calc(var(--dur-fest-float) / -4); }
   .d5 { top: 58%; right: 34%; rotate: -18deg; animation-delay: calc(var(--dur-fest-float) / -1.5); }
   .deco--page { position: fixed; z-index: 4; }
-  .deco--page .d { font-size: var(--fs-2xl); opacity: var(--fest-deco-page-opacity); }
+  .deco--page .d { font-size: var(--fs-emoji-sm); opacity: var(--fest-deco-page-opacity); }
   .deco--page .d0 { top: 14%; left: 1%; }
   .deco--page .d1 { top: 34%; left: auto; right: 1%; }
   .deco--page .d2 { top: 52%; bottom: auto; left: 1.5%; right: auto; }

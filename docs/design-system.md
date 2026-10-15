@@ -15,7 +15,7 @@ Stil: Neo-Brutalismus. Dicke Ränder, harte Schatten ohne Weichzeichner, knallig
 | Fokus | `--focus`, `--bw-focus` | Globaler `:focus-visible`-Ring |
 | Akzente | `--pink`, `--yellow`, `--cyan`, `--lime`, `--violet`, `--orange`, `--teal`, `--tomato`, `--lilac`, `--blue` | Nur als Fläche |
 | Kategorien | `--cat-science` … `--cat-sport`, `--cat-horror` (`--bone`), `--cat-holiday` (`--confetti`) | Kategorie umfärben = nur dieses Token ändern |
-| Farbwelten | `--fest-<thema>-night`, `--fest-<thema>-a`, `--fest-<thema>-b`, `--fest-glow-size`, `--fest-deco-opacity`, `--dur-fest-float` | Feiertags- und Grusel-Fakten, siehe „Farbwelten“ unten |
+| Farbwelten | `--fest-<thema>-night`, `--fest-<thema>-a`, `--fest-<thema>-b`, `--fest-glow-size`, `--fest-deco-opacity`, `--dur-fest-float`, `--dur-fest-burst`, `--art-*`, `--font-fest-*`, `--fest-o-size` | Feiertags- und Grusel-Fakten, siehe „Farbwelten“ unten |
 | Punktmuster | `--dots`, `--dots-ink` (dunkle Punkte), `--dots-strong`, `--dots-ink-strong` (kräftigere dunkle Punkte für warme Farben), `--dots-size` (Standard `--dots-size-md` 16px), `--dots-size-sm` (Chips, Sterne), `--dots-size-lg` (Banner) | Liegt auf jeder Kategorie-Fläche, siehe „Punktmuster“ unten |
 | Gold-Fakten | `--gold`, `--gold-light`, `--gold-deep`, `--gold-surface` (Verlauf), `--gold-foil` (Blattgold für Etikett, Medaille, Titel), `--gold-glow`, `--gold-rays`, `--gold-shine`, `--shadow-gold`, `--shadow-gold-xl`, `--medal-size`, `--medal-size-lg`, `--dur-rays`, `--dur-shine`, `--star-size-sm/md/lg`, `--star-edge`, `--dur-twinkle`, `--locked` | Goldene Karten im Science Jumper; Text darauf ist `--on-accent`. Sterne bekommen ihre Farbe über die `.cat-*`-Klasse, neue Kategorien funktionieren also automatisch |
 | Spiel | `--flask`, `--flask-glow`, `--book-*`, `--wood*`, `--metal`, `--brick*`, `--roof*`, `--smoke` | Reagenzgläser, Buch, Kisten, Fässer und Häuser im Science Jumper. Das Spiel liest alle Farben per `getComputedStyle` aus den Tokens |
@@ -110,14 +110,23 @@ Wunsch von Eric (2026-10-02). Abläufe und Einrichtung: `README.md`.
 Wunsch von Eric, 2026-10-15: Feiertags-Fakten (Kategorie `holiday`) sehen aus wie ihr Fest, z. B. Halloween in Orange und Schwarz mit
 Kürbissen und Fledermäusen. Grusel-Fakten (`horror`) haben immer das Thema „grusel“ (Schwarz, Giftgrün, Geisterlila).
 
-- Welcher Feiertag an welchem Tag welches Thema und welche Deko-Emojis hat, steht in `src/data/holidays.ts` (`HOLIDAYS`, `THEMES`).
-  Feiertage ohne eigenes Thema nehmen „fest“ (Konfetti).
+- Welcher Feiertag an welchem Tag welches Thema, welche Deko (`deco`), welches Riesenmotiv (`art`) und welchen Schriftzug (`look`)
+  hat, steht in `src/data/holidays.ts` (`HOLIDAYS`, `THEMES`). Jeder Feiertag hat ein eigenes Thema; „fest“ ist nur die Notlösung.
 - Ein Thema sind drei Tokens in `:root` (`--fest-<thema>-night` für die Bühne, `-a` und `-b` für Akzentflächen) plus eine Zeile
   `[data-fest='<thema>']`. `data-fest` steht auf `<body>` der Faktseite (Prop `fest` in `Base.astro`) und auf einzelnen Karten.
   Darin nehmen `--night`, `--yellow`, `--orange`, `--lime`, `--pink`, `--violet` und die farbigen Schatten der Bühne die Themenfarben an.
   Papier, Text und Dunkelmodus bleiben unverändert.
 - `.fest-sky`: Bühne in Themenfarbe mit Leuchten oben rechts (Karten im Labor, Kopf der Faktseite). `.fest-a`: Akzentfläche mit Punktmuster.
-- `FestDeco.astro`: verstreute Emojis des Themas, schweben langsam (`--dur-fest-float`), bei „Bewegung reduzieren“ still.
+- Eigene Grafiken statt Emojis (Wunsch von Eric, 2026-10-15): jede Grafik ist ein SVG im 64er-Raster in `src/data/fest-art*.ts`,
+  gezeichnet im Aufkleber-Stil (dicke dunkle Kontur, flache Farben, versetzter Schatten `--fest-icon-shadow` in Themenfarbe a).
+  Farben nie ins SVG schreiben: Klassen aus `FestIcon.astro` (`o`, `f-<farbe>`, `s-<farbe>`, Themenfarben `fa`/`fb`), Bildfarben als
+  `--art-*`-Tokens. `FestIcon.astro` zeigt eine Grafik (ohne Treffer das Emoji). Der Build prüft, dass jede Grafik, die ein Feiertag
+  nennt, gezeichnet ist.
+- `FestDeco.astro`: verstreute Grafiken des Themas, schweben langsam (`--dur-fest-float`), bei „Bewegung reduzieren“ still.
+  Feuerwerk geht auf und verglüht (`--dur-fest-burst`).
+- `FestWord.astro`: Riesenschriftzug des Feiertags mit eigener Schrift (`--font-fest-*`, Schriften aus `@fontsource`, nur geladen,
+  wenn sie vorkommen), Schrift- und Schattenfarbe aus `look.ink`/`look.shade`; `look.o` ersetzt jedes O durch eine Grafik
+  (Halloween: Kürbis). `FestArt.astro`: riesiges Motiv (`art`), an der Einheit die wehende Flagge.
 - Der Build prüft: jedes Thema aus `THEMES` hat seine drei Tokens und seinen Block, dunkle Schrift auf `-a`/`-b` und helle auf `-night` mit mindestens 4.5:1.
 
 ## Punktmuster auf Kategorie-Flächen

@@ -14,6 +14,7 @@ import { t } from '../../i18n/ui';
 import { postUrl, factNumber, festFor, type Post } from '../../lib';
 import { berlinDay, postDay } from '../../week';
 import FestDeco from '../FestDeco.astro';
+import FestIcon from '../FestIcon.astro';
 import NewBadge from '../NewBadge.astro';
 import AdCard from '../AdCard.astro';
 import Icon from '../Icon.astro';
@@ -54,10 +55,10 @@ const filterVars = { fDesk: Math.ceil(n / 2), fTab: tablet, fAllSpan: (n - 1) % 
             <a href={postUrl(p)} data-fest={fest?.theme} class:list={['tile', fest ? 'fest-sky' : `cat-${d.category}`, `tilt-${i % 4}`, i === 0 && 'tile--big', (i === 1 || i === 2) && 'tile--wide']} data-cat={d.category} data-page={i >= PAGE ? 'later' : undefined} hidden={i >= PAGE}>
               {fest && <FestDeco deco={fest.deco} />}
               <span class="top">
-                <span class="chip chip-light">{fest?.holiday ? `${fest.holiday.emoji} ${fest.holiday[lang]}` : ui.categories[d.category]}</span>
+                <span class="chip chip-light">{fest?.holiday ? fest.holiday[lang] : ui.categories[d.category]}</span>
                 <NewBadge lang={lang} date={d.date} />
               </span>
-              <span class="emoji" aria-hidden="true">{d.emoji}</span>
+              <span class="emoji" aria-hidden="true">{fest?.holiday?.art ? <FestIcon name={fest.holiday.art} /> : d.emoji}</span>
               <span class="title">{d.title}</span>
               <span class="foot"><span>#{String(factNumber(p, all)).padStart(3, '0')}</span><span class="go">{ui.readMore} <Icon name="chevron-right" /></span></span>
             </a>

@@ -15,6 +15,8 @@ import { postUrl, type Post } from '../../lib';
 import Icon from '../Icon.astro';
 import FestDeco from '../FestDeco.astro';
 import FestArt from '../FestArt.astro';
+import FestWord from '../FestWord.astro';
+import FestIcon from '../FestIcon.astro';
 interface Props { lang: Lang; catsUrl: string; posts: Post[] }
 const { lang, catsUrl, posts } = Astro.props;
 const ui = t(lang);
@@ -35,14 +37,14 @@ const festWord = holiday?.word?.[lang] ?? festName;
     <div class="wrap top-row">
       <span class="pill">{dateText}</span>
     </div>
-    <p class="mega fest-word" aria-hidden="true" data-len={Math.min(festWord.length, 14)}>{festWord}</p>
+    <FestWord word={festWord} look={holiday.look} class="fest-big" />
     <div class="wrap fest-row">
-      <div class="fest-art"><FestArt theme={fest.theme} emoji={holiday.emoji} /></div>
+      <div class="fest-art"><FestArt theme={fest.theme} emoji={holiday.emoji} art={holiday.art} /></div>
       <div class="card fest-card">
         <span class="sticker">{ui.fest.greeting(festName)}</span>
         {festFact ? (
           <>
-            <span class="chip fest-chip">{holiday.emoji} {ui.fest.holiday}</span>
+            <span class="chip fest-chip">{holiday.art && <FestIcon name={holiday.art} class="chip-art" />} {ui.fest.holiday}</span>
             <h1><a href={postUrl(festFact)}>{festFact.data.title}</a></h1>
             <p class="fest-hook">{festFact.data.hook}</p>
             <div class="acts">
@@ -112,15 +114,9 @@ const festWord = holiday?.word?.[lang] ?? festName;
   .day-hero[hidden] { display: none; }
   /* Feiertags-Kopf */
   .fest-hero { position: relative; padding: var(--space-8) 0 calc(var(--space-12) + var(--bleed)); overflow: clip; }
-  .fest-hero .top-row, .fest-word, .fest-row { position: relative; z-index: 1; }
+  .fest-hero .top-row, .fest-hero :global(.fest-word), .fest-row { position: relative; z-index: 1; }
+  .fest-chip :global(.chip-art) { font-size: var(--fs-md); filter: none; }
   .fest-hero .pill { background: var(--fest-a); color: var(--on-accent); }
-  .fest-word {
-    margin: var(--space-4) calc(-1 * var(--space-6)) 0; font-size: calc(var(--fs-mega) * var(--fit, 1)); text-transform: uppercase;
-    text-shadow: var(--shift-mega) var(--shift-mega) 0 var(--fest-b); transform: rotate(-3deg); transform-origin: left center;
-  }
-  .fest-word[data-len='8'], .fest-word[data-len='9'] { --fit: 0.8; }
-  .fest-word[data-len='10'], .fest-word[data-len='11'] { --fit: 0.66; }
-  .fest-word[data-len='12'], .fest-word[data-len='13'], .fest-word[data-len='14'] { --fit: 0.5; }
   .fest-row { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: var(--space-8); align-items: center; margin-top: var(--space-6); }
   .fest-art { max-width: 30rem; justify-self: center; width: 100%; }
   .fest-card {
@@ -137,7 +133,6 @@ const festWord = holiday?.word?.[lang] ?? festName;
   @media (max-width: 860px) {
     .fest-row { grid-template-columns: minmax(0, 1fr); }
     .fest-art { max-width: 18rem; }
-    .fest-word { margin-inline: calc(-1 * var(--space-2)); }
   }
   .day-hero { padding: var(--space-8) 0 calc(var(--space-12) + var(--bleed)); overflow: clip; border-bottom: none; }
   .top-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }

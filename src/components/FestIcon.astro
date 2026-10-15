@@ -1,0 +1,97 @@
+---
+// Eine eigene Feiertags-Grafik (src/data/fest-art.ts) oder, falls es dazu keine gibt, das Emoji.
+// Größe über font-size des Elternelements: die Grafik ist 1.2em groß.
+import { FEST_ART } from '../data/fest-art';
+interface Props { name: string; class?: string }
+const { name, class: cls } = Astro.props;
+const svg = FEST_ART[name];
+---
+{svg
+  ? <svg class:list={['fi', `fi--${name}`, cls]} viewBox="0 0 64 64" aria-hidden="true" set:html={svg} />
+  : <span class:list={['fe', cls]} aria-hidden="true">{name}</span>}
+
+<style>
+  .fi { width: 1.2em; height: 1.2em; overflow: visible; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; filter: var(--fest-icon-shadow, none); }
+  .fi--firework, .fi--sparkle, .fi--web, .fi--meteor { filter: none; }
+  .fi :global(.o) { stroke: var(--on-accent); stroke-width: var(--fest-icon-line); }
+  .fi :global(.o-pretzel) { fill: none; stroke: var(--art-pretzel); stroke-width: 8; }
+  .fi :global(.t-dark) { stroke: var(--on-accent); stroke-width: 2; }
+  .fi :global(.t-dark-thick) { stroke: var(--on-accent); stroke-width: 4; }
+  .fi :global(.t-leaf) { stroke: var(--art-leaf); }
+  .fi :global(.t-pumpkin) { stroke: var(--art-pumpkin-line); stroke-width: 2; }
+  .fi :global(.t-white) { stroke: var(--on-night); }
+  .fi :global(.t-gold) { stroke: var(--art-glow); stroke-width: 2; }
+  .fi :global(.t-beer) { stroke: var(--art-beer-line); stroke-width: 2; }
+  .fi :global(.t-cake) { fill: none; stroke: var(--art-cake-line); stroke-width: 2; }
+  .fi :global(.t-legs) { stroke: var(--art-bat); stroke-width: 3; }
+  .fi :global(.tw) { stroke: var(--on-night); stroke-width: 1.5; opacity: 0.85; }
+  .fi :global(.sa) { stroke: var(--fest-a); stroke-width: 3.5; }
+  .fi :global(.sb) { stroke: var(--fest-b); stroke-width: 3.5; }
+  .fi :global(.tail-a) { stroke: var(--fest-a); stroke-width: 5; opacity: 0.85; }
+  .fi :global(.tail-b) { stroke: var(--on-night); stroke-width: 2; opacity: 0.6; }
+  .fi :global(.fa) { fill: var(--fest-a); }
+  .fi :global(.fb) { fill: var(--fest-b); }
+  .fi :global(.fn) { fill: var(--fest-night); }
+  .fi :global(.fw) { fill: var(--on-night); }
+  .fi :global(.fk) { fill: var(--on-accent); }
+  .fi :global(.fnone) { fill: none; }
+  .fi :global(.fbrick) { fill: var(--brick); }
+  .fi :global(.fdove) { fill: var(--art-dove); }
+  .fi :global(.fleaf) { fill: var(--art-leaf); }
+  .fi :global(.fpumpkin) { fill: var(--art-pumpkin); }
+  .fi :global(.fglow) { fill: var(--art-glow); }
+  .fi :global(.fbat) { fill: var(--art-bat); }
+  .fi :global(.fghost) { fill: var(--art-ghost); }
+  .fi :global(.fmoon) { fill: var(--art-moon); }
+  .fi :global(.fmoon-shade) { fill: var(--art-moon-shade); }
+  .fi :global(.flantern) { fill: var(--art-lantern); }
+  .fi :global(.fgold) { fill: var(--art-glow); }
+  .fi :global(.fcake) { fill: var(--art-cake); }
+  .fi :global(.fbeer) { fill: var(--art-beer); }
+  .fi :global(.ffoam) { fill: var(--art-foam); }
+  .fi :global(.ftomato) { fill: var(--art-tomato); }
+  .fi :global(.fhighlight) { fill: var(--art-highlight); opacity: 0.7; }
+  .fi :global(.fstar) { fill: var(--art-star); }
+  .fi :global(.fde-black) { fill: var(--flag-de-black); }
+  .fi :global(.fde-red) { fill: var(--flag-de-red); }
+  .fi :global(.fde-gold) { fill: var(--flag-de-gold); }
+  .fi :global(.f-red) { fill: var(--art-red); }
+  .fi :global(.s-red) { stroke: var(--art-red); }
+  .fi :global(.f-red-dark) { fill: var(--art-red-dark); }
+  .fi :global(.s-red-dark) { stroke: var(--art-red-dark); }
+  .fi :global(.f-green) { fill: var(--art-green); }
+  .fi :global(.s-green) { stroke: var(--art-green); }
+  .fi :global(.f-green-dark) { fill: var(--art-green-dark); }
+  .fi :global(.s-green-dark) { stroke: var(--art-green-dark); }
+  .fi :global(.f-blue) { fill: var(--art-blue); }
+  .fi :global(.s-blue) { stroke: var(--art-blue); }
+  .fi :global(.f-navy) { fill: var(--art-navy); }
+  .fi :global(.s-navy) { stroke: var(--art-navy); }
+  .fi :global(.f-sky) { fill: var(--art-sky); }
+  .fi :global(.s-sky) { stroke: var(--art-sky); }
+  .fi :global(.f-yellow) { fill: var(--art-yellow); }
+  .fi :global(.s-yellow) { stroke: var(--art-yellow); }
+  .fi :global(.f-orange) { fill: var(--art-orange); }
+  .fi :global(.s-orange) { stroke: var(--art-orange); }
+  .fi :global(.f-pink) { fill: var(--art-pink); }
+  .fi :global(.s-pink) { stroke: var(--art-pink); }
+  .fi :global(.f-purple) { fill: var(--art-purple); }
+  .fi :global(.s-purple) { stroke: var(--art-purple); }
+  .fi :global(.f-brown) { fill: var(--art-brown); }
+  .fi :global(.s-brown) { stroke: var(--art-brown); }
+  .fi :global(.f-brown-dark) { fill: var(--art-brown-dark); }
+  .fi :global(.s-brown-dark) { stroke: var(--art-brown-dark); }
+  .fi :global(.f-wood) { fill: var(--art-wood); }
+  .fi :global(.s-wood) { stroke: var(--art-wood); }
+  .fi :global(.f-white) { fill: var(--art-white); }
+  .fi :global(.s-white) { stroke: var(--art-white); }
+  .fi :global(.f-gray) { fill: var(--art-gray); }
+  .fi :global(.s-gray) { stroke: var(--art-gray); }
+  .fi :global(.f-skin) { fill: var(--art-skin); }
+  .fi :global(.s-skin) { stroke: var(--art-skin); }
+  .fi :global(.f-black) { fill: var(--art-black); }
+  .fi :global(.s-black) { stroke: var(--art-black); }
+  .fi :global(.burst) { transform-box: fill-box; transform-origin: center; animation: fest-burst var(--dur-fest-burst) var(--ease) infinite; }
+  @media (prefers-reduced-motion: reduce) { .fi :global(.burst) { animation: none; } }
+  .fe { line-height: 1; }
+</style>

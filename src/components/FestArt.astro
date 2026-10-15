@@ -1,14 +1,17 @@
 ---
 // Riesiges Motiv eines Feiertags (Wunsch von Eric, 2026-10-15: „am Tag der Deutschen Einheit eine riesige
 // Deutschlandflagge, an Halloween ein Kürbis“). Startseite am Feiertag und Kopf der Feiertags-Faktseite.
-// Die meisten Feste zeigen ihr Emoji riesig mit Leuchten dahinter; einzelne Themen haben ein eigenes Motiv.
-interface Props { theme: string; emoji: string }
-const { theme, emoji } = Astro.props;
+// Jedes Fest zeigt seine eigene Grafik (`art` in src/data/holidays.ts, gezeichnet in src/data/fest-art.ts) riesig
+// mit Leuchten dahinter; die Einheit hat eine wehende Flagge. Ohne Grafik bleibt das Emoji als Notlösung.
+import FestIcon from './FestIcon.astro';
+import { isFestArt } from '../data/fest-art';
+interface Props { theme: string; emoji: string; art?: string }
+const { theme, emoji, art } = Astro.props;
 ---
 {theme === 'einheit' ? (
   <span class="art flag" aria-hidden="true"><i></i><i></i><i></i></span>
 ) : (
-  <span class="art glow" aria-hidden="true"><span class="big">{emoji}</span></span>
+  <span class="art glow" aria-hidden="true"><span class="big">{art && isFestArt(art) ? <FestIcon name={art} /> : emoji}</span></span>
 )}
 
 <style>
@@ -32,4 +35,5 @@ const { theme, emoji } = Astro.props;
     position: relative; font-size: var(--fs-fest-art); line-height: 1; filter: var(--emoji-shadow);
     transform: rotate(-8deg); animation: fest-float var(--dur-fest-float) var(--ease) infinite;
   }
+  .big :global(.fi) { display: block; width: 1em; height: 1em; filter: var(--fest-art-shadow); }
 </style>

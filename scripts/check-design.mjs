@@ -224,6 +224,14 @@ for (const [key, variant] of catDots) {
   }
 }
 
+// Jede Grafik, die ein Feiertag nennt (deco, art, look.o), muss in src/data/fest-art*.ts gezeichnet sein.
+const artSrc = readdirSync(join(ROOT, 'src/data')).filter((f) => /^fest-art.*\.ts$/.test(f)).map((f) => readFileSync(join(ROOT, 'src/data', f), 'utf8')).join('\n');
+const artKeys = new Set([...artSrc.matchAll(/^\s{2}'?([\w-]+)'?:\s/gm)].map((m) => m[1]));
+const holidaySrc = readFileSync(join(ROOT, 'src/data/holidays.ts'), 'utf8');
+const artUsed = [...holidaySrc.matchAll(/deco: \[([^\]]*)\]|art: '([\w-]+)'|\bo: '([\w-]+)'/g)]
+  .flatMap((m) => (m[1] !== undefined ? [...m[1].matchAll(/'([^']+)'/g)].map((x) => x[1]) : [m[2] ?? m[3]]));
+for (const k of new Set(artUsed)) if (!artKeys.has(k)) errors.push(`src/data/holidays.ts: Grafik "${k}" gibt es nicht in src/data/fest-art*.ts.`);
+
 // --- 5. Farbwelten für Feiertage und Grusel (src/data/holidays.ts) ------------
 // Jedes Thema braucht drei Tokens und einen [data-fest='…']-Block. Auf -a und -b steht dunkle Schrift (--on-accent),
 // auf -night helle (--on-night), beides mindestens 4.5:1.

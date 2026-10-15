@@ -47,7 +47,7 @@ const guess = guessFor(post);
 const sideTile = (p: Post) => ({ p, big: bigNumber(p) });
 // Feiertags- und Grusel-Fakten: ganze Seite in der Farbwelt des Themas, Deko im Kopf, Band mit dem Feiertag.
 const fest = festFor(post);
-const festName = fest?.holiday ? `${fest.holiday.emoji} ${fest.holiday[lang]}` : fest ? `${fest.deco[0]} ${ui.fest.grusel}` : '';
+const festName = fest?.holiday ? fest.holiday[lang] : fest ? ui.fest.grusel : '';
 const tapeText = fest ? Array(6).fill(festName).join(' · ') : Array(5).fill(ui.slogan).join(' · ');
 ---
 <Base lang={lang} title={d.title} description={d.teaser} altUrl={alt ? postUrl(alt) : undefined} image={ogPath(post)} section="facts" fest={fest?.theme}>
@@ -59,7 +59,7 @@ const tapeText = fest ? Array(6).fill(festName).join(' · ') : Array(5).fill(ui.
       <a class="crumb" href={`/${lang}/?cat=${d.category}#facts`}>{ui.categories[d.category]} <Icon name="chevron-right" /></a>
       {!fest?.holiday && <span class:list={['slab', fest ? 'fest-a' : `cat-${d.category}`]} aria-hidden="true"><span>{d.emoji}</span></span>}
       {fest?.holiday
-        ? <div class="fest-art bleed"><FestArt theme={fest.theme} emoji={fest.holiday.emoji} /></div>
+        ? <div class="fest-art bleed"><FestArt theme={fest.theme} emoji={fest.holiday.emoji} art={fest.holiday.art} /></div>
         : big
         ? <p class="mega big bleed" aria-hidden="true" data-len={Math.min(big.show.length, 8)}>{big.show}{big.below && <span class="unit">{big.below}</span>}</p>
         : <p class="big-emoji bleed" aria-hidden="true">{d.emoji}</p>}

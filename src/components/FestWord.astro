@@ -1,0 +1,91 @@
+---
+// Riesenschriftzug eines Feiertags (Wunsch von Eric, 2026-10-15: „erstelle die Schrift selber, so dass z. B. das
+// geschriebene Halloween gruselig aussieht, das O ist ein Kürbis, Schrift orange, Schatten schwarz“).
+// Jeder Feiertag hat eine eigene Schrift und Farbe (`look` in src/data/holidays.ts); wo `look.o` gesetzt ist,
+// wird jedes O durch die Grafik ersetzt. Rein dekorativ: Der Name steht zusätzlich lesbar auf der Seite.
+import type { FestLook } from '../data/holidays';
+import FestIcon from './FestIcon.astro';
+interface Props { word: string; look?: FestLook; class?: string }
+const { word, look = { font: 'display' }, class: cls } = Astro.props;
+const parts = look.o ? word.split(/([oO])/).filter(Boolean) : [word];
+---
+<p
+  class:list={['fest-word', cls]}
+  aria-hidden="true"
+  data-font={look.font}
+  data-ink={look.ink ?? 'w'}
+  data-shade={look.shade ?? 'b'}
+  data-fill={look.fill}
+  data-trail={look.trail ? '' : undefined}
+  data-len={Math.min(word.length, 14)}
+>{parts.map((p) => (look.o && /^[oO]$/.test(p)
+  ? <span class="o-letter"><FestIcon name={look.o} /></span>
+  : <span class="run">{p}</span>))}</p>
+
+<style>
+  .fest-word {
+    margin: var(--space-4) calc(-1 * var(--space-6)) 0; font-family: var(--font-display); font-weight: 800; line-height: 0.9;
+    letter-spacing: -0.04em; white-space: nowrap; text-transform: uppercase;
+    font-size: calc(var(--fs-mega) * var(--fit, 1) * var(--font-fit, 1));
+    color: var(--ink-fest); transform: rotate(-3deg); transform-origin: left center;
+    text-shadow: var(--shift-mega) var(--shift-mega) 0 var(--shade-fest);
+  }
+  .fest-word[data-len='8'], .fest-word[data-len='9'] { --fit: 0.8; }
+  .fest-word[data-len='10'], .fest-word[data-len='11'] { --fit: 0.66; }
+  .fest-word[data-len='12'], .fest-word[data-len='13'], .fest-word[data-len='14'] { --fit: 0.5; }
+  [data-ink='w'] { --ink-fest: var(--on-night); }
+  [data-ink='a'] { --ink-fest: var(--fest-a); }
+  [data-ink='b'] { --ink-fest: var(--fest-b); }
+  [data-shade='a'] { --shade-fest: var(--fest-a); }
+  [data-shade='b'] { --shade-fest: var(--fest-b); }
+  /* Schwarzer Schatten: mehrfach versetzt (wirkt plastisch) und ein Leuchten der Schriftfarbe, damit er sich von der Nacht abhebt */
+  [data-shade='k'] {
+    text-shadow:
+      var(--shift-mega) var(--shift-mega) 0 var(--on-accent),
+      calc(2 * var(--shift-mega)) calc(2 * var(--shift-mega)) 0 var(--on-accent),
+      calc(3 * var(--shift-mega)) calc(3 * var(--shift-mega)) 0 var(--on-accent),
+      0 0 calc(6 * var(--shift-mega)) color-mix(in srgb, var(--ink-fest) 55%, transparent);
+  }
+  /* Sternschnuppen-Schweif */
+  [data-trail] {
+    text-shadow:
+      calc(-2 * var(--shift-mega)) calc(2 * var(--shift-mega)) 0 color-mix(in srgb, var(--fest-a) 80%, transparent),
+      calc(-4 * var(--shift-mega)) calc(4 * var(--shift-mega)) 0 color-mix(in srgb, var(--fest-a) 50%, transparent),
+      calc(-6 * var(--shift-mega)) calc(6 * var(--shift-mega)) 0 color-mix(in srgb, var(--fest-a) 25%, transparent);
+  }
+  /* Einheit: Buchstaben in Schwarz-Rot-Gold mit hellem Rand */
+  [data-fill='flag-de'] .run {
+    background: linear-gradient(var(--flag-de-black) 0 36%, var(--flag-de-red) 36% 66%, var(--flag-de-gold) 66%);
+    background-clip: text; -webkit-background-clip: text; color: transparent;
+    -webkit-text-stroke: var(--bw-sm) var(--on-night);
+  }
+  [data-fill='flag-de'] { text-shadow: none; filter: drop-shadow(var(--shift-mega) var(--shift-mega) 0 var(--fest-b)); }
+  .o-letter { display: inline-block; font-size: var(--fest-o-size); line-height: 1; vertical-align: calc(-1 * var(--fest-o-gap)); margin-inline: var(--fest-o-gap); transform: rotate(8deg); }
+  .o-letter :global(.fi) { display: block; }
+
+  /* Schriften: Breite angleichen, manche bleiben in Groß- und Kleinbuchstaben */
+  [data-font='spooky'] { font-family: var(--font-fest-spooky); font-weight: 400; letter-spacing: 0.01em; --font-fit: 0.95; }
+  [data-font='fraktur'] { font-family: var(--font-fest-fraktur); font-weight: 400; letter-spacing: 0; text-transform: none; }
+  [data-font='pirate'] { font-family: var(--font-fest-pirate); font-weight: 400; letter-spacing: 0; }
+  [data-font='christmas'] { font-family: var(--font-fest-christmas); font-weight: 700; letter-spacing: 0; text-transform: none; }
+  [data-font='lobster'] { font-family: var(--font-fest-lobster); font-weight: 400; letter-spacing: 0; text-transform: none; }
+  [data-font='monoton'] { font-family: var(--font-fest-monoton); font-weight: 400; letter-spacing: 0; --font-fit: 0.72; }
+  [data-font='cinzel'] { font-family: var(--font-fest-cinzel); font-weight: 900; letter-spacing: 0; --font-fit: 0.7; }
+  [data-font='rye'] { font-family: var(--font-fest-rye); font-weight: 400; letter-spacing: 0; --font-fit: 0.78; }
+  [data-font='bungee-shade'] { font-family: var(--font-fest-bungee-shade); font-weight: 400; letter-spacing: 0; --font-fit: 0.72; }
+  [data-font='bungee-inline'] { font-family: var(--font-fest-bungee-inline); font-weight: 400; letter-spacing: 0; --font-fit: 0.76; }
+  [data-font='sancreek'] { font-family: var(--font-fest-sancreek); font-weight: 400; letter-spacing: 0; --font-fit: 0.85; }
+  [data-font='hennypenny'] { font-family: var(--font-fest-hennypenny); font-weight: 400; letter-spacing: 0; --font-fit: 0.85; }
+  [data-font='orbitron'] { font-family: var(--font-fest-orbitron); font-weight: 900; letter-spacing: 0; --font-fit: 0.72; }
+  [data-font='bangers'] { font-family: var(--font-fest-bangers); font-weight: 400; letter-spacing: 0.02em; }
+  [data-font='yatra'] { font-family: var(--font-fest-yatra); font-weight: 400; letter-spacing: 0; }
+  [data-font='pacifico'] { font-family: var(--font-fest-pacifico); font-weight: 400; letter-spacing: 0; text-transform: none; --font-fit: 0.8; }
+  [data-font='amatic'] { font-family: var(--font-fest-amatic); font-weight: 700; letter-spacing: 0.02em; --font-fit: 1.25; }
+  [data-font='abril'] { font-family: var(--font-fest-abril); font-weight: 400; letter-spacing: 0; --font-fit: 0.85; }
+  [data-font='wetpaint'] { font-family: var(--font-fest-wetpaint); font-weight: 400; letter-spacing: 0; --font-fit: 0.85; }
+  [data-font='fascinate'] { font-family: var(--font-fest-fascinate); font-weight: 400; letter-spacing: 0; --font-fit: 0.72; }
+  [data-font='righteous'] { font-family: var(--font-fest-righteous); font-weight: 400; letter-spacing: 0; --font-fit: 0.9; }
+  [data-font='cherry'] { font-family: var(--font-fest-cherry); font-weight: 400; letter-spacing: 0; --font-fit: 0.9; }
+  [data-font='uncial'] { font-family: var(--font-fest-uncial); font-weight: 400; letter-spacing: 0; text-transform: none; --font-fit: 0.8; }
+  @media (max-width: 860px) { .fest-word { margin-inline: calc(-1 * var(--space-2)); } }
+</style>
