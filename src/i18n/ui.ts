@@ -75,7 +75,7 @@ export const ui = {
     darkMode: 'Dunkler Modus',
     newBadge: 'Neu',
     // Feiertags- und Grusel-Fakten (FestDeco, Faktseite, Karten)
-    fest: { holiday: 'Feiertags-Fakt', on: (name: string) => `Feiertag: ${name}`, grusel: 'Grusel-Fakt', greeting: (name: string) => `Heute ist ${name}!`, read: 'Feiertags-Fakt lesen', more: 'Alle neuen Fakten' },
+    fest: { holiday: 'Feiertags-Fakt', on: (name: string) => `Feiertag: ${name}`, grusel: 'Grusel-Fakt', greeting: (name: string) => `Heute ist ${name}!`, read: 'Feiertags-Fakt lesen', more: 'Alle neuen Fakten', picksTitle: 'Feiertags-Auswahl', picksIntro: 'Zum Feiertag darf es etwas Besonderes sein: schöne Stücke, die lange Freude machen.' },
     swipe: {
       label: 'Wie findest du diesen Fakt?',
       hint: 'Zieh die Karte nach oben links oder oben rechts.',
@@ -447,7 +447,7 @@ export const ui = {
     skip: 'Skip to content',
     darkMode: 'Dark mode',
     newBadge: 'New',
-    fest: { holiday: 'Holiday fact', on: (name: string) => `Holiday: ${name}`, grusel: 'Creepy fact', greeting: (name: string) => `Today is ${name}!`, read: 'Read the holiday fact', more: 'All new facts' },
+    fest: { holiday: 'Holiday fact', on: (name: string) => `Holiday: ${name}`, grusel: 'Creepy fact', greeting: (name: string) => `Today is ${name}!`, read: 'Read the holiday fact', more: 'All new facts', picksTitle: 'Holiday picks', picksIntro: 'For the holiday, something special: well-made things that last.' },
     swipe: {
       label: 'How do you like this fact?',
       hint: 'Drag the card up and to the left or up and to the right.',

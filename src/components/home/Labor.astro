@@ -31,7 +31,7 @@ const cats = CATEGORIES.filter((c) => count(c) > 0);
 const hero = posts[0];
 const n = cats.length + 1;
 const tablet = [4, 6, 5].reduce((best, c) => ((c - (n % c)) % c < (best - (n % best)) % best ? c : best));
-const filterVars = { fDesk: Math.ceil(n / 2), fTab: tablet, fAllSpan: (n - 1) % 3 === 0 ? '1 / -1' : 'auto' };
+const filterVars = { fDesk: Math.ceil(n / 3), fTab: tablet, fAllSpan: (n - 1) % 3 === 0 ? '1 / -1' : 'auto' };
 ---
 <section class="sec sec--paper labor" id="facts" data-edge="left">
   <div class="wrap">
@@ -114,7 +114,8 @@ const filterVars = { fDesk: Math.ceil(n / 2), fTab: tablet, fAllSpan: (n - 1) % 
 <style define:vars={filterVars}>
   /* Unten Platz für die Quizkarte, die von unten in den Abschnitt ragt (TrueOrFake.astro) */
   .labor { scroll-margin-top: var(--space-10); padding-bottom: calc(2 * var(--space-12)); }
-  .filters { display: grid; grid-template-columns: repeat(var(--fDesk), minmax(0, 1fr)); gap: var(--space-2); margin-bottom: var(--space-9); }
+  /* Alle Knöpfe gleich groß (Eric, 2026-10-15): Reihen so hoch wie der höchste Knopf, drei Reihen auf dem Desktop, damit nichts umbricht */
+  .filters { display: grid; grid-template-columns: repeat(var(--fDesk), minmax(0, 1fr)); grid-auto-rows: 1fr; gap: var(--space-2); margin-bottom: var(--space-9); }
   .filters .chip { cursor: pointer; justify-content: center; text-align: center; padding: var(--space-2) var(--space-3); font-size: var(--fs-sm); box-shadow: var(--shadow-xs); }
   @media (max-width: 1060px) { .filters { grid-template-columns: repeat(var(--fTab), minmax(0, 1fr)); } }
   @media (max-width: 600px) {

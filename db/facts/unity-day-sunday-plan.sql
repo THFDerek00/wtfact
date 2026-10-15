@@ -36,7 +36,7 @@ Der Feiertag, der Deutschland zusammenhält, hat also selbst nur knapp seinen Pl
 
 INSERT INTO products (fact, lang, pos, name, query, why) VALUES
   ('unity-day-sunday-plan', 'de', 1, 'Großer Bildband Deutschland von oben', 'Bildband Deutschland von oben', 'Luftaufnahmen von der Küste bis zu den Alpen, schwer, großformatig und schön zum Durchblättern.'),
-  ('unity-day-sunday-plan', 'de', 2, 'Brettspiel Deutschlandreise', 'Brettspiel Deutschlandreise', 'Ein Klassiker, bei dem man quer durchs Land reist und nebenbei Städte lernt.'),
+  ('unity-day-sunday-plan', 'de', 2, 'Reliefkarte Deutschland als Wandbild', 'Reliefkarte Deutschland Wandbild', 'Zeigt Berge, Flüsse und alle 16 Bundesländer zum Anfassen und macht sich gut an jeder Wand.'),
   ('unity-day-sunday-plan', 'de', 3, 'Deutschlandfahne aus wetterfestem Stoff', 'Deutschland Fahne wetterfest genäht', 'Eine solide genähte Fahne hält deutlich länger durch als die billigen bedruckten Varianten.');
 
 INSERT INTO sources (fact, lang, pos, label, url) VALUES
@@ -77,8 +77,8 @@ So the holiday that holds Germany together only just held on to its own spot in 
 
 INSERT INTO products (fact, lang, pos, name, query, why) VALUES
   ('unity-day-sunday-plan', 'en', 1, 'Large photo book of Germany from above', 'Germany from above photo book', 'Aerial shots from the coast to the Alps, heavy, large-format and great to leaf through.'),
-  ('unity-day-sunday-plan', 'en', 2, 'Germany travel board game', 'Germany travel board game', 'A game where you travel across the country and pick up its cities along the way.'),
-  ('unity-day-sunday-plan', 'en', 3, 'Weatherproof sewn German flag', 'Germany flag sewn weatherproof', 'A properly sewn flag lasts much longer than the cheap printed kind.');
+  ('unity-day-sunday-plan', 'en', 2, 'Raised relief map of Germany for the wall', 'Germany relief map wall', 'Shows mountains, rivers and all 16 states in 3D and looks great on any wall.'),
+  ('unity-day-sunday-plan', 'en', 3, 'Weatherproof German flag', 'German flag weatherproof sewn', 'A solidly sewn flag lasts far longer than the cheap printed versions.');
 
 INSERT INTO sources (fact, lang, pos, label, url) VALUES
   ('unity-day-sunday-plan', 'en', 1, 'CORRECTIV: Nein, der Tag der Deutschen Einheit soll nicht abgeschafft werden', 'https://correctiv.org/faktencheck/2025/03/28/nein-der-tag-der-deutschen-einheit-soll-nicht-abgeschafft-werden/'),

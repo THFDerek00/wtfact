@@ -5,6 +5,18 @@
 // Neue Produkte ohne Treffer bekommen 🛍️; dann hier eine Regel ergänzen. Reihenfolge zählt: Erste passende Regel gewinnt.
 
 const RULES: [RegExp, string][] = [
+  // Feiertags-Auswahl (hochwertige Stücke zu den Feiertags-Fakten)
+  [/maßkr|steinkrug|beer stein|beer mug/, '🍺'],
+  [/holzfass|\bfass\b|barrel|\bkeg\b/, '🛢️'],
+  [/teeset|teeservice|tea set/, '🍵'],
+  [/laterne|lantern/, '🏮'],
+  [/teleskop|telescope/, '🔭'],
+  [/sternenhimmel-projektor|planetarium/, '🌌'],
+  [/gasbrenner|gas burner/, '🔥'],
+  [/paella/, '🥘'],
+  [/hochleistungsmixer|blender/, '🍅'],
+  [/reliefkarte deutschland|relief map of germany|deutschlandkarte|germany map/, '🗺️'],
+  [/deutschlandfahne|german flag/, '🇩🇪'],
   // Tiere (vor Kuscheltier, damit der Hai ein Hai bleibt)
   [/bärtierchen|tardigrade/, '🦠'],
   [/mikrobe|microbe|bakteri|gefährten|multitudes/, '🦠'],

@@ -36,8 +36,8 @@ Aus einer Rauferei am Gemüsestand wurde also ein Fest mit Ticketpflicht. Die To
 
 INSERT INTO products (fact, lang, pos, name, query, why) VALUES
   ('tomatina-tomato-funeral', 'de', 1, 'Paella-Pfanne aus Carbonstahl, 46 cm', 'Paella Pfanne Carbonstahl 46 cm', 'Eine echte Paellera aus Valencias Heimat, groß genug für eine ganze Runde Gäste.'),
-  ('tomatina-tomato-funeral', 'de', 2, 'Hochleistungsmixer für Gazpacho und Salmorejo', 'Hochleistungsmixer Standmixer', 'Ein starker Standmixer macht aus reifen Tomaten in Sekunden eine samtige kalte Suppe.'),
-  ('tomatina-tomato-funeral', 'de', 3, 'Spanisches Kochbuch mit Tapas und Paella', 'spanisches Kochbuch Tapas Paella', 'Sammelt die Klassiker der spanischen Küche, von Tapas bis zur Paella.');
+  ('tomatina-tomato-funeral', 'de', 2, 'Paella-Gasbrenner mit Dreibein', 'Paella Gasbrenner Dreibein Set', 'Mit dem Ringbrenner gart die Paella wie in Spanien gleichmäßig im Freien, samt knuspriger Kruste am Boden.'),
+  ('tomatina-tomato-funeral', 'de', 3, 'Hochleistungsmixer für Gazpacho und Salmorejo', 'Hochleistungsmixer Standmixer', 'Ein starker Standmixer macht aus reifen Tomaten in Sekunden eine samtige kalte Suppe.');
 
 INSERT INTO sources (fact, lang, pos, label, url) VALUES
   ('tomatina-tomato-funeral', 'de', 1, 'Público: La Tomatina: todo comenzó con una pelea cerca de un puesto de verduras', 'https://www.publico.es/sociedad/tomatina-comenzo-pelea-cerca-puesto-verduras.html'),
@@ -78,8 +78,8 @@ So a scuffle at a vegetable stall turned into a festival you need a ticket for. 
 
 INSERT INTO products (fact, lang, pos, name, query, why) VALUES
   ('tomatina-tomato-funeral', 'en', 1, 'Carbon steel paella pan, 46 cm', 'carbon steel paella pan 46 cm', 'A proper paellera from Valencia''s home turf, big enough for a whole group of guests.'),
-  ('tomatina-tomato-funeral', 'en', 2, 'High-performance blender for gazpacho and salmorejo', 'high performance countertop blender', 'A powerful blender turns ripe tomatoes into a silky cold soup in seconds.'),
-  ('tomatina-tomato-funeral', 'en', 3, 'Spanish cookbook with tapas and paella', 'Spanish cookbook tapas paella', 'Collects the classics of Spanish cooking, from tapas to paella.');
+  ('tomatina-tomato-funeral', 'en', 2, 'Paella gas burner with tripod', 'paella gas burner tripod set', 'The ring burner cooks the paella evenly outdoors, the Spanish way, crispy crust included.'),
+  ('tomatina-tomato-funeral', 'en', 3, 'High-performance blender for gazpacho and salmorejo', 'high performance countertop blender', 'A powerful blender turns ripe tomatoes into a silky cold soup in seconds.');
 
 INSERT INTO sources (fact, lang, pos, label, url) VALUES
   ('tomatina-tomato-funeral', 'en', 1, 'Público: La Tomatina: todo comenzó con una pelea cerca de un puesto de verduras', 'https://www.publico.es/sociedad/tomatina-comenzo-pelea-cerca-puesto-verduras.html'),

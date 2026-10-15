@@ -33,9 +33,9 @@ Wenn du heute Abend in den Vollmond schaust, siehst du also nicht nur die Heimat
 );
 
 INSERT INTO products (fact, lang, pos, name, query, why) VALUES
-  ('mid-autumn-moon-missions', 'de', 1, 'Mondkuchen-Form mit Stempeln', 'Mondkuchen Form Stempel', 'Mit wechselbaren Stempeln drückst du die typischen Muster selbst in den Teig.'),
-  ('mid-autumn-moon-missions', 'de', 2, '3D-Mondlampe mit Holzständer', '3D Mondlampe Holzständer', 'Eine Kugel mit der echten Mondoberfläche, die warm leuchtet, auch wenn draußen Wolken sind.'),
-  ('mid-autumn-moon-missions', 'de', 3, 'Teeservice aus Porzellan im chinesischen Stil', 'chinesisches Teeservice Porzellan', 'Zum Mondkuchen gehört Tee, und ein schönes Set macht aus der Teepause ein kleines Ritual.');
+  ('mid-autumn-moon-missions', 'de', 1, 'Große 3D-Mondlampe, 20 cm, mit Holzständer', '3D Mondlampe 20 cm Holzständer Fernbedienung', 'Eine große Kugel mit der echten Mondoberfläche, die warm leuchtet und das ganze Jahr ans Mondfest erinnert.'),
+  ('mid-autumn-moon-missions', 'de', 2, 'Gongfu-Teeset mit Teetablett aus Holz', 'Gongfu Teeset Teetablett Holz', 'Zum Mondkuchen gehört Tee, und mit Tablett, Kanne und Schälchen wird daraus eine echte Teezeremonie.'),
+  ('mid-autumn-moon-missions', 'de', 3, 'Handbemalte Laterne aus Seide', 'chinesische Seidenlaterne handbemalt', 'Laternen gehören zum Mondfest, und eine handbemalte aus Seide ist schön genug, um sie danach hängen zu lassen.');
 
 INSERT INTO sources (fact, lang, pos, label, url) VALUES
   ('mid-autumn-moon-missions', 'de', 1, 'EarthDate: Chinese Moon Missions', 'https://www.earthdate.org/episodes/chinese-moon-missions'),
@@ -73,9 +73,9 @@ So when you look at the full moon tonight, you''re seeing not only a goddess''s 
 );
 
 INSERT INTO products (fact, lang, pos, name, query, why) VALUES
-  ('mid-autumn-moon-missions', 'en', 1, 'Mooncake mold with stamps', 'mooncake mold stamps', 'Interchangeable stamps let you press the classic patterns into the dough yourself.'),
-  ('mid-autumn-moon-missions', 'en', 2, '3D moon lamp with wooden stand', '3D moon lamp wooden stand', 'A sphere with the real lunar surface that glows warmly, even when it''s cloudy outside.'),
-  ('mid-autumn-moon-missions', 'en', 3, 'Chinese-style porcelain tea set', 'Chinese porcelain tea set', 'Mooncakes call for tea, and a beautiful set turns a tea break into a small ritual.');
+  ('mid-autumn-moon-missions', 'en', 1, 'Large 3D moon lamp, 20 cm, with wooden stand', '3D moon lamp 20 cm wooden stand remote', 'A big globe with the real lunar surface that glows warmly and keeps the festival around all year.'),
+  ('mid-autumn-moon-missions', 'en', 2, 'Gongfu tea set with wooden tea tray', 'gongfu tea set wooden tea tray', 'Mooncakes call for tea, and a tray, pot and cups turn it into a proper tea ceremony.'),
+  ('mid-autumn-moon-missions', 'en', 3, 'Hand-painted silk lantern', 'hand painted Chinese silk lantern', 'Lanterns belong to the festival, and a hand-painted silk one is pretty enough to keep hanging afterwards.');
 
 INSERT INTO sources (fact, lang, pos, label, url) VALUES
   ('mid-autumn-moon-missions', 'en', 1, 'EarthDate: Chinese Moon Missions', 'https://www.earthdate.org/episodes/chinese-moon-missions'),

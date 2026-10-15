@@ -35,9 +35,9 @@ Leg dich heute Nacht also irgendwo hin, wo es dunkel ist. Der Komet liefert, du 
 );
 
 INSERT INTO products (fact, lang, pos, name, query, why) VALUES
-  ('perseids-sand-grains', 'de', 1, 'Fernglas 10x50 für Astronomie', 'Fernglas 10x50 Astronomie', 'Große Linsen sammeln viel Licht und zeigen dir Mondkrater, Sternhaufen und die Milchstraße.'),
-  ('perseids-sand-grains', 'de', 2, 'Drehbare Sternkarte', 'drehbare Sternkarte', 'Stellst du Datum und Uhrzeit ein, zeigt sie dir, wo Perseus und die anderen Sternbilder stehen.'),
-  ('perseids-sand-grains', 'de', 3, 'Isolierte Picknickdecke mit wasserdichter Unterseite', 'Picknickdecke wasserdicht isoliert groß', 'Hält feuchtes Gras und Kälte ab, wenn du stundenlang auf der Wiese liegst und in den Himmel schaust.');
+  ('perseids-sand-grains', 'de', 1, 'Dobson-Teleskop mit 200 mm Spiegel', 'Dobson Teleskop 200 mm', 'Ein großer Spiegel für Mondkrater, Saturnringe und Galaxien, ohne komplizierte Montierung.'),
+  ('perseids-sand-grains', 'de', 2, 'Großfernglas 15x70 mit Stativadapter', 'Fernglas 15x70 Astronomie Stativadapter', 'Riesige Linsen sammeln viel Licht und zeigen dir den Himmel heller, als du ihn je gesehen hast.'),
+  ('perseids-sand-grains', 'de', 3, 'Sternenhimmel-Projektor für zu Hause', 'Sternenhimmel Projektor Planetarium', 'Bringt Sternbilder und die Milchstraße an die Zimmerdecke, auch wenn draußen Wolken sind.');
 
 INSERT INTO sources (fact, lang, pos, label, url) VALUES
   ('perseids-sand-grains', 'de', 1, 'NASA Science: Perseids', 'https://science.nasa.gov/solar-system/meteors-meteorites/perseids/'),
@@ -77,9 +77,9 @@ So lie down somewhere dark tonight. The comet delivers, you just have to look up
 );
 
 INSERT INTO products (fact, lang, pos, name, query, why) VALUES
-  ('perseids-sand-grains', 'en', 1, '10x50 binoculars for astronomy', '10x50 astronomy binoculars', 'Large lenses gather plenty of light and show you lunar craters, star clusters and the Milky Way.'),
-  ('perseids-sand-grains', 'en', 2, 'Planisphere star finder', 'planisphere star finder', 'Set the date and time, and it shows you where Perseus and the other constellations are.'),
-  ('perseids-sand-grains', 'en', 3, 'Insulated waterproof picnic blanket', 'large insulated waterproof picnic blanket', 'Keeps out damp grass and cold while you lie on the lawn for hours looking up at the sky.');
+  ('perseids-sand-grains', 'en', 1, 'Dobsonian telescope with 200 mm mirror', 'Dobsonian telescope 200mm', 'A big mirror for lunar craters, Saturn''s rings and galaxies, without a complicated mount.'),
+  ('perseids-sand-grains', 'en', 2, '15x70 astronomy binoculars with tripod adapter', '15x70 astronomy binoculars tripod adapter', 'Huge lenses gather lots of light and show you the sky brighter than you have ever seen it.'),
+  ('perseids-sand-grains', 'en', 3, 'Home planetarium star projector', 'home planetarium star projector', 'Puts constellations and the Milky Way on your ceiling, even when it is cloudy outside.');
 
 INSERT INTO sources (fact, lang, pos, label, url) VALUES
   ('perseids-sand-grains', 'en', 1, 'NASA Science: Perseids', 'https://science.nasa.gov/solar-system/meteors-meteorites/perseids/'),

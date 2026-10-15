@@ -127,6 +127,9 @@ Kürbissen und Fledermäusen. Grusel-Fakten (`horror`) haben immer das Thema „
 - `FestWord.astro`: Riesenschriftzug des Feiertags mit eigener Schrift (`--font-fest-*`, Schriften aus `@fontsource`, nur geladen,
   wenn sie vorkommen), Schrift- und Schattenfarbe aus `look.ink`/`look.shade`; `look.o` ersetzt jedes O durch eine Grafik
   (Halloween: Kürbis). `FestArt.astro`: riesiges Motiv (`art`), an der Einheit die wehende Flagge.
+- Werbung auf Feiertags-Fakten (Eric, 2026-10-15): `ProductBox` mit `fest` zeigt die „Feiertags-Auswahl“ auf dunkler Festbühne
+  (`--shadow-fest-*`, Strahlen `--fest-rays`, Etikett mit der Feiertags-Grafik). Die Stücke sind hochwertiger als sonst (Styleguide).
+- Das schräge Band auf der Faktseite wiederholt sein Wort so oft, dass es auch auf breiten Bildschirmen bis zum Rand reicht.
 - Der Build prüft: jedes Thema aus `THEMES` hat seine drei Tokens und seinen Block, dunkle Schrift auf `-a`/`-b` und helle auf `-night` mit mindestens 4.5:1.
 
 ## Punktmuster auf Kategorie-Flächen
