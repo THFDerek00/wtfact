@@ -60,7 +60,8 @@ jobs:
           SITE: ${{ vars.SITE_URL || 'https://wtfact.xyz' }}
         run: |
           curl -fsS --max-time 20 "$SITE/facts.json" -o "$RUNNER_TEMP/live.json" || echo "facts.json nicht erreichbar."
-          node --disable-warning=ExperimentalWarning scripts/due-check.mjs "$RUNNER_TEMP/live.json"
+          curl -fsS --max-time 20 "$SITE/fest.json" -o "$RUNNER_TEMP/fest.json" || echo "fest.json nicht erreichbar."
+          node --disable-warning=ExperimentalWarning scripts/due-check.mjs "$RUNNER_TEMP/live.json" "$RUNNER_TEMP/fest.json"
 
   deploy:
     needs: check

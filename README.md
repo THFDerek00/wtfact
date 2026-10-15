@@ -85,7 +85,14 @@ Zwei Kategorien vom 2026-10-15 (Wunsch von Eric):
   bekannte internationale Feste) und Farbwelt je Fest: `src/data/holidays.ts`. Karte und Faktseite färben sich im Stil des Festes
   (Design: `docs/design-system.md`, „Farbwelten“). Der Fakt bekommt als `date` den Feiertag (Sonderveröffentlichung, `slot` 0, 00:00 Uhr Berliner Zeit).
   `npm run check` lehnt Feiertags-Fakten an anderen Tagen ab; im Dashboard lassen sie sich nicht verschieben oder vorziehen,
-  nur offline nehmen. Generator und Wochenlauf schreiben keine Feiertags-Fakten (`SPECIAL_CATEGORIES` in `src/config.ts`).
+  nur offline nehmen. In die tägliche Abwechslung kommen Feiertage nie (`SPECIAL_CATEGORIES` in `src/config.ts`).
+- **Sonderfakt am Feiertag** (Wunsch von Eric, 2026-10-15): Der Wochenlauf schaut, welche Feiertage in seiner Woche liegen.
+  Liegt für einen schon ein Fakt bereit (Kategorie `holiday`, auf den Tag datiert), bleibt es dabei. Sonst schreibt er einen
+  Sonderfakt, datiert auf 0 Uhr am Feiertag mit `slot` 0, zusätzlich zu den 21 Fakten im selben PR. Von Hand:
+  `node scripts/generate-post.mjs --holiday` schreibt den Fakt für den nächsten Feiertag der kommenden 7 Tage ohne Fakt.
+- **Umstellung um 0 Uhr:** Die Seite schreibt bei jedem Bau `fest.json` (Bautag und alle Feiertage). Ist heute oder am Bautag
+  ein Feiertag und wurde nicht heute gebaut, lädt das Dashboard (geplante Aufgabe in Plesk) bzw. der stündliche Lauf neu hoch.
+  So wechselt die Seite kurz nach 0 Uhr ins Design des Festes und am Tag danach zurück, auch ohne fälligen Fakt.
 - **Grusel** (`horror`): normale Kategorie mit eigener Farbwelt (Schwarz, Giftgrün, Geisterlila). Regeln: `docs/styleguide.md`.
 
 ## Fakten-Datenbank

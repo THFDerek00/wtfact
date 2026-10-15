@@ -1,6 +1,8 @@
 // Schreibt den nächsten WTFact-Beitrag des Tages auf Deutsch und Englisch.
-// Aufruf: ANTHROPIC_API_KEY=... node scripts/generate-post.mjs [--pool]
+// Aufruf: ANTHROPIC_API_KEY=... node scripts/generate-post.mjs [--pool | --holiday]
 // Mit --pool landet der Fakt ohne Termin im Pool des Dashboards (Wochenvorrat, siehe README „Dashboard“).
+// Mit --holiday schreibt er den Sonderfakt für den nächsten Feiertag der kommenden 7 Tage (src/data/holidays.ts),
+// der noch keinen hat, eingeplant auf 0 Uhr am Feiertag (slot 0). Gibt es für jeden schon einen, passiert nichts.
 //
 // Pro Tag gibt es FACTS_PER_DAY Beiträge (src/config.ts), jeder Aufruf schreibt den nächsten
 // fehlenden. Jeder Beitrag des Tages hat eine eigene Kategorie, und keine davon war am Vortag dran.
@@ -67,14 +69,42 @@ const berlinNow = () => {
 // Fakten im Pool, bei Gleichstand die, die am längsten nicht erschienen ist.
 const POOL = process.argv.includes('--pool');
 
+// --holiday (Wunsch von Eric, 2026-10-15): Feiertage bekommen einen Sonderfakt um 0 Uhr. Schon vorbereitete Fakten
+// (Kategorie holiday, auf den Feiertag datiert) haben Vorrang, dann wird für diesen Tag nichts geschrieben.
+const HOLIDAY_MODE = process.argv.includes('--holiday');
+const HOLIDAYS_SRC = fs.readFileSync('src/data/holidays.ts', 'utf8');
+const holidays = [...HOLIDAYS_SRC.matchAll(/\{ id: '([\w-]+)', de: '([^']+)', en: '([^']+)'.*?dates: \[([^\]]*)\]/g)].map((m) => ({
+  id: m[1], de: m[2], en: m[3], dates: [...m[4].matchAll(/'(\d{4}-\d{2}-\d{2})'/g)].map((d) => d[1]),
+}));
+let holidayTarget = null;
+if (HOLIDAY_MODE) {
+  const coming = Array.from({ length: 8 }, (_, i) => berlinDay(new Date(Date.parse(`${today}T12:00:00Z`) + i * 86_400_000)));
+  const covered = new Set(existing.filter((p) => p.category === 'holiday' && !p.pool).map((p) => berlinDay(new Date(p.date))));
+  for (const day of coming) {
+    const h = holidays.find((x) => x.dates.includes(day));
+    if (!h) continue;
+    if (covered.has(day)) { console.log(`${day} (${h.de}): Feiertags-Fakt liegt schon bereit.`); continue; }
+    holidayTarget = { ...h, day };
+    break;
+  }
+  if (!holidayTarget) { console.log('Kein Feiertag in den nächsten 7 Tagen ohne Fakt. Nichts zu tun.'); process.exit(0); }
+  console.log(`Sonderfakt für ${holidayTarget.de} am ${holidayTarget.day}.`);
+}
+// 0 Uhr deutscher Zeit an einem Tag, mit dem Versatz, der um diese Uhrzeit gilt (Sommer-/Winterzeit).
+const berlinMidnight = (day) => {
+  const off = new Intl.DateTimeFormat('en-US', { timeZone: TZ, timeZoneName: 'longOffset' })
+    .formatToParts(new Date(`${day}T00:00:00Z`)).find((p) => p.type === 'timeZoneName').value.replace('GMT', '') || '+00:00';
+  return `${day}T00:00:00${off}`;
+};
+
 const todays = existing.filter((p) => p.day === today);
-if (!POOL && todays.length >= FACTS_PER_DAY) {
+if (!POOL && !HOLIDAY_MODE && todays.length >= FACTS_PER_DAY) {
   console.log(`Für ${today} gibt es schon ${todays.length} Beiträge. Nichts zu tun.`);
   process.exit(0);
 }
 
 // Gesperrt: Kategorien vom Vortag und die, die heute schon dran waren (im Pool-Modus keine).
-const blocked = new Set(POOL ? [] : existing.filter((p) => p.day === yesterday || p.day === today).map((p) => p.category));
+const blocked = new Set(POOL || HOLIDAY_MODE ? [] : existing.filter((p) => p.day === yesterday || p.day === today).map((p) => p.category));
 const allowed = CATEGORIES.filter((c) => !blocked.has(c));
 if (!allowed.length) {
   console.error(`Keine Kategorie frei (gesperrt: ${[...blocked].join(', ')}).`);
@@ -84,8 +114,8 @@ if (!allowed.length) {
 const lastUsed = Object.fromEntries(CATEGORIES.map((c) => [c, '0000']));
 for (const p of existing) if (!(POOL && p.pool) && p.date > (lastUsed[p.category] ?? '')) lastUsed[p.category] = p.date;
 const inPool = (c) => existing.filter((p) => p.pool && p.category === c).length;
-const category = allowed.sort((a, b) => (POOL ? inPool(a) - inPool(b) : 0) || lastUsed[a].localeCompare(lastUsed[b]))[0];
-console.log(
+const category = HOLIDAY_MODE ? 'holiday' : allowed.sort((a, b) => (POOL ? inPool(a) - inPool(b) : 0) || lastUsed[a].localeCompare(lastUsed[b]))[0];
+if (!HOLIDAY_MODE) console.log(
   POOL
     ? `Fakt für den Pool, Kategorie ${category} (${inPool(category)} schon im Pool).`
     : `Beitrag ${todays.length + 1} von ${FACTS_PER_DAY} für ${today}, Kategorie ${category} (gesperrt: ${[...blocked].join(', ') || 'keine'}).`,
@@ -111,13 +141,15 @@ const research = await client.beta.messages.create({
   messages: [
     {
       role: 'user',
-      content: `Today is ${today}. Find one fresh, mind-blowing fact for the category "${category}" and write the English post.
+      content: `Today is ${today}. ${holidayTarget
+        ? `Write the special holiday post for ${holidayTarget.en} (German: ${holidayTarget.de}) on ${holidayTarget.day}, category "holiday". It goes live at midnight on that day as the big event of the day. Find one fresh, mind-blowing fact about this holiday (origin, customs, surprising history) and write the English post. Follow the holiday rules of the style guide (length, structure, 2 to 4 higher-end Amazon picks that fit the holiday).`
+        : `Find one fresh, mind-blowing fact for the category "${category}" and write the English post.`}
 
 Do NOT repeat or closely resemble any of these existing posts:
 ${recentTitles}
 
 Output: headline, one-sentence teaser, one-sentence hook (the core fact), the full post in Markdown,
-2 product ideas (name, Amazon search query, one-line reason) and the source URLs you actually used.`,
+${holidayTarget ? '2 to 4' : '2'} product ideas (name, Amazon search query, one-line reason) and the source URLs you actually used.`,
     },
   ],
 });
@@ -268,16 +300,18 @@ const slugify = (s) =>
 // Adressen sind je Sprache eindeutig. Ist eine schon vergeben, kommt das Datum dazu.
 const taken = (lang, slug) => facts.some((f) => f[lang]?.slug === slug);
 const createdAt = berlinNow();
-const fact = { key: post.translationKey, date: POOL ? null : createdAt, category, emoji: post.emoji, draft: false };
+const fact = holidayTarget
+  ? { key: post.translationKey, date: berlinMidnight(holidayTarget.day), category, emoji: post.emoji, draft: false, slot: 0 }
+  : { key: post.translationKey, date: POOL ? null : createdAt, category, emoji: post.emoji, draft: false };
 for (const lang of ['de', 'en']) {
   const v = post[lang];
   let slug = slugify(v.slug) || post.translationKey;
   if (taken(lang, slug)) slug = `${slug}-${today}`;
-  fact[lang] = { slug, title: v.title, teaser: v.teaser, hook: v.hook, body: v.body.trim(), products: v.products.slice(0, 3), sources };
+  fact[lang] = { slug, title: v.title, teaser: v.teaser, hook: v.hook, body: v.body.trim(), products: v.products.slice(0, holidayTarget ? 4 : 3), sources };
 }
 const file = saveFact(db, fact);
 db.close();
 console.log('Gespeichert:', file);
 
 // Für den Workflow: eine Zeile pro Beitrag mit Zeitpunkt, Titel und Datei (Tabulator-getrennt).
-if (process.env.POSTS_MANIFEST) fs.appendFileSync(process.env.POSTS_MANIFEST, [createdAt, post.de.title, file].join('\t') + '\n');
+if (process.env.POSTS_MANIFEST) fs.appendFileSync(process.env.POSTS_MANIFEST, [fact.date ?? createdAt, post.de.title, file].join('\t') + '\n');
