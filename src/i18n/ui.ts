@@ -761,4 +761,4 @@ export const quizPath = (lang: Lang) => `/${lang}/quiz/`;
 export const categorySlug = (lang: Lang, c: Category) => t(lang).categories[c].toLowerCase();
 
 export const dateFmt = (lang: Lang, d: Date) =>
-  d.toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+  d.toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Berlin' });
