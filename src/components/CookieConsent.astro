@@ -1,0 +1,47 @@
+---
+// Cookie-Banner (Wunsch von Eric, 2026-10-15): zwei gleichwertige Knöpfe „Nur notwendige“ und „Alle akzeptieren“,
+// gleiche Größe und Farbe, damit keine Wahl bevorzugt wirkt (§ 25 TDDDG, DSGVO). Erscheint nur, wenn in SITE.consent
+// mindestens ein Dienst eingetragen ist; die Dienste lädt src/scripts/consent.ts erst nach „Alle akzeptieren“.
+// Wieder öffnen: jedes Element mit data-consent-open (Fußzeile, Datenschutzerklärung).
+import { SITE, type Lang } from '../config';
+import { t } from '../i18n/ui';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const ui = t(lang).consent;
+const services = Object.fromEntries(Object.entries(SITE.consent).filter(([, id]) => id));
+const keys = Object.keys(services) as (keyof typeof SITE.consent)[];
+---
+{keys.length > 0 && (
+  <section class="consent card" role="dialog" aria-labelledby="consent-title" data-consent={JSON.stringify(services)} hidden>
+    <h2 id="consent-title">{ui.title}</h2>
+    <p>{ui.text}</p>
+    <ul>{keys.map((k) => <li>{ui.services[k]}</li>)}</ul>
+    <p>{`${ui.after} `}<a href={`/${lang}/datenschutz/`}>{ui.more}</a>.</p>
+    <div class="choices">
+      <button class="btn" type="button" data-consent-choice="necessary">{ui.necessary}</button>
+      <button class="btn" type="button" data-consent-choice="all">{ui.all}</button>
+    </div>
+  </section>
+)}
+
+<script>
+  import '../scripts/consent';
+</script>
+
+<style>
+  .consent {
+    position: fixed; z-index: 7; right: var(--gutter); bottom: var(--space-5);
+    width: min(36rem, 100% - 2 * var(--gutter)); max-height: calc(100dvh - 2 * var(--space-5)); overflow-y: auto;
+    padding: var(--space-5) var(--space-6); box-shadow: var(--shadow-lg); font-size: var(--fs-sm);
+  }
+  .consent[hidden] { display: none; }
+  h2 { margin: 0 0 var(--space-2); font-size: var(--fs-lg); }
+  p { margin: 0 0 var(--space-3); }
+  ul { margin: 0 0 var(--space-3); padding-left: var(--space-5); }
+  /* Gleichwertig: beide Knöpfe gleich breit, gleiche Farbe, gleiche Schrift */
+  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+  .choices .btn { width: 100%; }
+  /* Über der Leiste unten am Handy */
+  @media (max-width: 1060px) { .consent { bottom: calc(var(--space-12) + var(--space-5)); max-height: calc(100dvh - var(--space-12) - 2 * var(--space-5)); } }
+  @media (max-width: 420px) { .choices { grid-template-columns: 1fr; } }
+</style>

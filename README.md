@@ -7,6 +7,7 @@ Zweisprachige Fakten-Website (Deutsch/Englisch), gebaut mit Astro.
   Ein Fakt hat einen `key`, der die deutsche und englische Version verbindet.
 - Amazon-Tags, Impressumsangaben: `src/config.ts`.
 - Besucherstatistik (Umami, cookielos): Website-ID in `src/config.ts` (`umami.websiteId`) eintragen, leer = aus. Klicks auf Amazon-Links zählen als Ereignis `amazon`.
+- Cookie-Banner und Dienste mit Cookies (Google Analytics, Meta-Pixel, Microsoft Clarity): IDs in `src/config.ts` (`consent`) eintragen, leer = aus. Ist keine ID eingetragen, erscheint kein Banner. Die Dienste laden erst nach „Alle akzeptieren“, die Datenschutzerklärung ergänzt sich automatisch.
 - Domain: `astro.config.mjs` (`site`).
 
 ## Dashboard (steuerung.wtfact.xyz)
