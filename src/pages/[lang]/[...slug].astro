@@ -10,9 +10,11 @@ import ShareBar from '../../components/ShareBar.astro';
 import NewBadge from '../../components/NewBadge.astro';
 import Thumbs from '../../components/Thumbs.astro';
 import Icon from '../../components/Icon.astro';
+import FestDeco from '../../components/FestDeco.astro';
+import FestArt from '../../components/FestArt.astro';
 import { LANGS } from '../../config';
 import { t, dateFmt } from '../../i18n/ui';
-import { postsFor, langOf, slugOf, postUrl, translationOf, readingMinutes, factNumber, bigNumber, guessFor, type Post } from '../../lib';
+import { postsFor, langOf, slugOf, postUrl, translationOf, readingMinutes, factNumber, bigNumber, guessFor, festFor, type Post } from '../../lib';
 import { ogPath } from '../../og';
 
 export async function getStaticPaths() {
@@ -43,15 +45,22 @@ const no = String(factNumber(post, all)).padStart(3, '0');
 const big = bigNumber(post);
 const guess = guessFor(post);
 const sideTile = (p: Post) => ({ p, big: bigNumber(p) });
+// Feiertags- und Grusel-Fakten: ganze Seite in der Farbwelt des Themas, Deko im Kopf, Band mit dem Feiertag.
+const fest = festFor(post);
+const festName = fest?.holiday ? `${fest.holiday.emoji} ${fest.holiday[lang]}` : fest ? `${fest.deco[0]} ${ui.fest.grusel}` : '';
+const tapeText = fest ? Array(6).fill(festName).join(' · ') : Array(5).fill(ui.slogan).join(' · ');
 ---
-<Base lang={lang} title={d.title} description={d.teaser} altUrl={alt ? postUrl(alt) : undefined} image={ogPath(post)} section="facts">
+<Base lang={lang} title={d.title} description={d.teaser} altUrl={alt ? postUrl(alt) : undefined} image={ogPath(post)} section="facts" fest={fest?.theme}>
   <div class="progress" aria-hidden="true"><span></span></div>
 
-  <section class="sec sec--night fhero">
+  <section class:list={['sec', 'sec--night', 'fhero', fest && 'fest-sky']}>
+    {fest && <FestDeco deco={fest.deco} size="lg" />}
     <div class="wrap poster">
       <a class="crumb" href={`/${lang}/?cat=${d.category}#facts`}>{ui.categories[d.category]} <Icon name="chevron-right" /></a>
-      <span class:list={['slab', `cat-${d.category}`]} aria-hidden="true"><span>{d.emoji}</span></span>
-      {big
+      {!fest?.holiday && <span class:list={['slab', fest ? 'fest-a' : `cat-${d.category}`]} aria-hidden="true"><span>{d.emoji}</span></span>}
+      {fest?.holiday
+        ? <div class="fest-art bleed"><FestArt theme={fest.theme} emoji={fest.holiday.emoji} /></div>
+        : big
         ? <p class="mega big bleed" aria-hidden="true" data-len={Math.min(big.show.length, 8)}>{big.show}{big.below && <span class="unit">{big.below}</span>}</p>
         : <p class="big-emoji bleed" aria-hidden="true">{d.emoji}</p>}
       <div class="card hcard bleed">
@@ -60,6 +69,7 @@ const sideTile = (p: Post) => ({ p, big: bigNumber(p) });
           <span class:list={['chip', `cat-${d.category}`]}>{ui.categories[d.category]}</span>
           <span class="chip">{ui.factNo} #{no}</span>
           <NewBadge lang={lang} date={d.date} />
+          {fest?.holiday && <span class="chip fest-chip">{ui.fest.on(fest.holiday[lang])}</span>}
         </div>
         <h1>{d.title}</h1>
         <p class="hook" data-fact-key={d.translationKey}>{d.hook}</p>
@@ -67,7 +77,7 @@ const sideTile = (p: Post) => ({ p, big: bigNumber(p) });
       </div>
     </div>
   </section>
-  <div class="tape bleed" aria-hidden="true"><span>{ui.slogan} · {ui.slogan} · {ui.slogan} · {ui.slogan} · {ui.slogan}</span></div>
+  <div class="tape bleed" aria-hidden="true"><span>{tapeText}</span></div>
 
   <section class="sec sec--paper body-sec">
     <div class="wrap">
@@ -297,6 +307,9 @@ const sideTile = (p: Post) => ({ p, big: bigNumber(p) });
     margin-bottom: calc(-1 * var(--space-12) - var(--space-12)); background: var(--surface); color: var(--ink); border: var(--bw-strong) solid var(--on-accent); box-shadow: var(--shadow-2xl);
   }
   .hcard .sticker { position: absolute; top: calc(-1 * var(--space-5)); left: var(--space-6); font-family: var(--font-display); font-weight: 800; font-size: var(--fs-xl); border: var(--bw-sm) solid var(--on-accent); }
+  /* Feiertags-Fakt: riesiges Motiv des Festes statt Zahl und Emoji-Block */
+  .fest-art { grid-column: 1; align-self: center; width: 100%; max-width: 34rem; }
+  .fest-chip { background: var(--fest-a); color: var(--on-accent); border-color: var(--on-accent); }
   .meta { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
   h1 { margin: var(--space-2) 0 0; font-size: var(--fs-display-md); line-height: 1.05; letter-spacing: -0.03em; }
   .hook { margin: 0; font-size: var(--fs-lg); color: var(--muted); }

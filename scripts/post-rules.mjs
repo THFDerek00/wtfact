@@ -2,6 +2,9 @@
 // vorhandenen Beiträge bei jedem Build (check-posts.mjs). Siehe docs/styleguide.md.
 
 export const LIMITS = { minWords: 250, maxWords: 450, minHeadings: 2, maxHeadings: 3, products: 2, minSources: 2, sourcesBesideWikipedia: 2 };
+// Feiertags-Fakten sind etwas Besonderes und dürfen mehr (Wunsch von Eric, 2026-10-15): länger, freiere Gliederung,
+// bis zu 4 Produkte. Wahrheit und Quellen gelten genauso.
+export const HOLIDAY_LIMITS = { minWords: 200, maxWords: 650, minHeadings: 1, maxHeadings: 4, minQuotes: 0, maxQuotes: 2, minProducts: 2, maxProducts: 4 };
 
 const FILLER = /\b(verrückt\w*|crazy|wild)\b/gi;
 const NEXT_TIME = /\b(next time|nächste[ns]? mal)\b/i;
@@ -26,16 +29,18 @@ export function checkPost(p) {
   const problems = [];
   const body = p.body.trim();
 
+  const H = p.category === 'holiday' ? HOLIDAY_LIMITS : { ...LIMITS, minQuotes: 1, maxQuotes: 1, minProducts: LIMITS.products, maxProducts: LIMITS.products };
   const words = countWords(body);
-  if (words < LIMITS.minWords || words > LIMITS.maxWords)
-    problems.push(`${words} Wörter, erlaubt sind ${LIMITS.minWords} bis ${LIMITS.maxWords}`);
+  if (words < H.minWords || words > H.maxWords)
+    problems.push(`${words} Wörter, erlaubt sind ${H.minWords} bis ${H.maxWords}`);
 
   const headings = body.match(/^## /gm)?.length ?? 0;
-  if (headings < LIMITS.minHeadings || headings > LIMITS.maxHeadings)
-    problems.push(`${headings} Zwischenüberschriften, erlaubt sind ${LIMITS.minHeadings} bis ${LIMITS.maxHeadings}`);
+  if (headings < H.minHeadings || headings > H.maxHeadings)
+    problems.push(`${headings} Zwischenüberschriften, erlaubt sind ${H.minHeadings} bis ${H.maxHeadings}`);
 
   const quotes = body.split(/\n\s*\n/).filter((b) => b.trimStart().startsWith('>')).length;
-  if (quotes !== 1) problems.push(`${quotes} Zitatblöcke, erwartet ist genau einer`);
+  if (quotes < H.minQuotes || quotes > H.maxQuotes)
+    problems.push(H.minQuotes === H.maxQuotes ? `${quotes} Zitatblöcke, erwartet ist genau einer` : `${quotes} Zitatblöcke, erlaubt sind ${H.minQuotes} bis ${H.maxQuotes}`);
 
   if (EMOJI.test(body)) problems.push('Emoji im Text');
 
@@ -48,7 +53,8 @@ export function checkPost(p) {
   const bodyNumbers = new Set(numbers(body));
   for (const n of numbers(p.title)) if (!bodyNumbers.has(n)) problems.push(`Zahl ${n} aus der Überschrift steht nicht im Text`);
 
-  if (p.products.length !== LIMITS.products) problems.push(`${p.products.length} Produkte, erwartet sind ${LIMITS.products}`);
+  if (p.products.length < H.minProducts || p.products.length > H.maxProducts)
+    problems.push(H.minProducts === H.maxProducts ? `${p.products.length} Produkte, erwartet sind ${H.minProducts}` : `${p.products.length} Produkte, erlaubt sind ${H.minProducts} bis ${H.maxProducts}`);
   for (const pr of p.products) if (!pr.name || !pr.query || !pr.why) problems.push(`Produkt unvollständig: ${pr.name || '(ohne Namen)'}`);
 
   const https = p.sources.filter((s) => s.label && /^https:\/\//.test(s.url));

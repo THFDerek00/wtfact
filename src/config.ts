@@ -38,8 +38,15 @@ export const SITE = {
 export const LANGS = ['de', 'en'] as const;
 export type Lang = (typeof LANGS)[number];
 
-export const CATEGORIES = ['science', 'history', 'tech', 'nature', 'body', 'weird', 'survival', 'food', 'language', 'sport', 'space', 'animals', 'mind', 'brands', 'popculture'] as const;
+export const CATEGORIES = ['science', 'history', 'tech', 'nature', 'body', 'weird', 'survival', 'food', 'language', 'sport', 'space', 'animals', 'mind', 'brands', 'popculture', 'horror', 'holiday'] as const;
 export type Category = (typeof CATEGORIES)[number];
+
+// Feiertage (Wunsch von Eric, 2026-10-15): bekommen nur an besonderen Tagen einen Fakt, je mit eigener Farbwelt.
+// Termine und Themen: src/data/holidays.ts. Der Generator und der Wochenlauf schreiben hier nichts, die Fakten
+// entstehen gezielt zum Termin. Im Dashboard sind sie fest auf ihren Tag gelegt.
+export const SPECIAL_CATEGORIES = ['holiday'] as const satisfies readonly Category[];
+// Kategorien für die tägliche Abwechslung (Generator, Wochenlauf).
+export const REGULAR_CATEGORIES = CATEGORIES.filter((c) => !(SPECIAL_CATEGORIES as readonly string[]).includes(c));
 
 // So viele neue Fakten schreibt Claude jeden Morgen (je als eigener PR, Eric führt sie selbst zusammen).
 // Mit dem Dashboard (README „Dashboard“) gibt es stattdessen 3 feste Zeiten pro Tag, siehe SLOT_TIMES.

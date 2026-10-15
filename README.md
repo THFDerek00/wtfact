@@ -77,6 +77,17 @@ Fakt ohne Termin im Pool (Kategorie = die mit den wenigsten Fakten im Pool). Jed
 4. Ein Faktencheck-Durchgang öffnet jede Quelle und prüft jede Aussage, die Überschrift und die Quellentitel.
 5. Nur wenn alles passt, wird der Beitrag in der Datenbank gespeichert (Datei `db/facts/<key>.sql`).
 
+## Feiertage und Grusel
+
+Zwei Kategorien vom 2026-10-15 (Wunsch von Eric):
+
+- **Feiertage** (`holiday`): Ein Fakt erscheint nur an seinem Feiertag. Kalender mit 2 bis 6 Terminen pro Monat (deutsche und
+  bekannte internationale Feste) und Farbwelt je Fest: `src/data/holidays.ts`. Karte und Faktseite färben sich im Stil des Festes
+  (Design: `docs/design-system.md`, „Farbwelten“). Der Fakt bekommt als `date` den Feiertag (Sonderveröffentlichung, `slot` 0, 00:00 Uhr Berliner Zeit).
+  `npm run check` lehnt Feiertags-Fakten an anderen Tagen ab; im Dashboard lassen sie sich nicht verschieben oder vorziehen,
+  nur offline nehmen. Generator und Wochenlauf schreiben keine Feiertags-Fakten (`SPECIAL_CATEGORIES` in `src/config.ts`).
+- **Grusel** (`horror`): normale Kategorie mit eigener Farbwelt (Schwarz, Giftgrün, Geisterlila). Regeln: `docs/styleguide.md`.
+
 ## Fakten-Datenbank
 
 Alle Inhalte stehen in SQLite:

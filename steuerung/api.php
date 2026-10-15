@@ -68,6 +68,13 @@ function current_status(PDO $db, string $key): array
     return [$f, fact_status($f, now(), live_keys())];
 }
 
+// Feiertags-Fakten (Kategorie „holiday“) sind fest auf ihren Feiertag gelegt (src/data/holidays.ts) und lassen sich
+// nicht umplanen, in den Pool legen oder vorziehen. Offline nehmen und wieder online geht.
+function fixed_holiday(array $f): void
+{
+    if ($f['category'] === 'holiday') fail('holiday-fixed');
+}
+
 if ($route === 'session' && $method === 'GET') {
     out(signed_in() ? ['user' => $_SESSION['user'], 'csrf' => csrf()] : ['user' => null]);
 }
@@ -145,6 +152,7 @@ if ($route === 'schedule' && $method === 'POST') {
     $date = $at->format('Y-m-d\TH:i:sP');
     change_facts(function (PDO $db) use ($key, $day, $slot, $date, $at) {
         [$f, $st] = current_status($db, $key);
+        fixed_holiday($f);
         if ($st === 'live' || $st === 'due') fail('already-live');
         $changes = [$key => ['date' => $date, 'slot' => $slot, 'draft' => 0]];
         $title = fact_title($db, $key);
@@ -169,7 +177,8 @@ if ($route === 'schedule' && $method === 'POST') {
 if ($route === 'unschedule' && $method === 'POST') {
     $key = require_key();
     change_facts(function (PDO $db) use ($key) {
-        [, $st] = current_status($db, $key);
+        [$f, $st] = current_status($db, $key);
+        fixed_holiday($f);
         if ($st === 'live' || $st === 'due') fail('already-live');
         if ($st === 'pool') return [[], ''];
         return [[$key => ['date' => null, 'slot' => null, 'draft' => 0]], 'Zurück in den Pool: ' . fact_title($db, $key)];
@@ -181,7 +190,8 @@ if ($route === 'publish-now' && $method === 'POST') {
     $key = require_key();
     $date = now()->format('Y-m-d\TH:i:sP');
     change_facts(function (PDO $db) use ($key, $date) {
-        [, $st] = current_status($db, $key);
+        [$f, $st] = current_status($db, $key);
+        fixed_holiday($f);
         if ($st === 'live' || $st === 'due') return [[], ''];
         return [[$key => ['date' => $date, 'slot' => 0, 'draft' => 0]], 'Sofort veröffentlicht: ' . fact_title($db, $key)];
     });

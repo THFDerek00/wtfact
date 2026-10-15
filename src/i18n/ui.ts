@@ -44,6 +44,7 @@ export const ui = {
       nature: 'Natur', body: 'Körper', weird: 'Kurioses', survival: 'Survival',
       food: 'Essen', language: 'Sprache', sport: 'Sport',
       space: 'Weltall', animals: 'Tiere', mind: 'Gehirn & Psyche', brands: 'Marken & Erfindungen', popculture: 'Film, Musik & Games',
+      horror: 'Grusel', holiday: 'Feiertage',
     } satisfies Record<Category, string>,
     notFound: 'Dieser Fakt existiert nicht. Noch nicht.',
     hero: ['Jeden Tag neue Fakten, die dich', '„WTF?!“', 'sagen lassen.'],
@@ -73,6 +74,8 @@ export const ui = {
     skip: 'Zum Inhalt springen',
     darkMode: 'Dunkler Modus',
     newBadge: 'Neu',
+    // Feiertags- und Grusel-Fakten (FestDeco, Faktseite, Karten)
+    fest: { holiday: 'Feiertags-Fakt', on: (name: string) => `Feiertag: ${name}`, grusel: 'Grusel-Fakt', greeting: (name: string) => `Heute ist ${name}!`, read: 'Feiertags-Fakt lesen', more: 'Alle neuen Fakten' },
     swipe: {
       label: 'Wie findest du diesen Fakt?',
       hint: 'Zieh die Karte nach oben links oder oben rechts.',
@@ -415,6 +418,7 @@ export const ui = {
       nature: 'Nature', body: 'Body', weird: 'Weird', survival: 'Survival',
       food: 'Food', language: 'Language', sport: 'Sport',
       space: 'Space', animals: 'Animals', mind: 'Mind & Brain', brands: 'Brands & Inventions', popculture: 'Film, Music & Games',
+      horror: 'Creepy', holiday: 'Holidays',
     } satisfies Record<Category, string>,
     notFound: 'This fact does not exist. Yet.',
     hero: ['New facts every day that make you go', '“WTF?!”', ''],
@@ -443,6 +447,7 @@ export const ui = {
     skip: 'Skip to content',
     darkMode: 'Dark mode',
     newBadge: 'New',
+    fest: { holiday: 'Holiday fact', on: (name: string) => `Holiday: ${name}`, grusel: 'Creepy fact', greeting: (name: string) => `Today is ${name}!`, read: 'Read the holiday fact', more: 'All new facts' },
     swipe: {
       label: 'How do you like this fact?',
       hint: 'Drag the card up and to the left or up and to the right.',

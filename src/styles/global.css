@@ -35,6 +35,61 @@
   --bubblegum: #ff9ed2;
   --mint: #8ee59b;
   --peach: #ffbe98;
+  /* Zwei Akzente für Grusel und Feiertage (Wunsch von Eric, 2026-10-15) */
+  --bone: #e8dcc0;
+  --confetti: #ff6be6;
+
+  /* Farbwelten (Wunsch von Eric, 2026-10-15): Feiertags-Fakten und Grusel-Fakten färben Karte und Seite um.
+     Je Thema drei Farben: -night (dunkle Bühne), -a und -b (Akzentflächen, dunkle Schrift darauf).
+     Das Thema selbst steht unten als [data-fest='…'] und biegt die normalen Tokens darauf um.
+     Welche Themen es gibt und welcher Feiertag welches nimmt: src/data/holidays.ts. */
+  --fest-fest-night: #1a1030;
+  --fest-fest-a: #ffd23f;
+  --fest-fest-b: #ff6b9a;
+  --fest-grusel-night: #070d0b;
+  --fest-grusel-a: #9cff57;
+  --fest-grusel-b: #c7b9ff;
+  --fest-halloween-night: #140c06;
+  --fest-halloween-a: #ff7a1a;
+  --fest-halloween-b: #b07cff;
+  --fest-muertos-night: #2a0a3a;
+  --fest-muertos-a: #ffb627;
+  --fest-muertos-b: #ff5fa2;
+  --fest-diwali-night: #1d0b3f;
+  --fest-diwali-a: #ffc53d;
+  --fest-diwali-b: #f08cff;
+  --fest-martin-night: #0e1b3d;
+  --fest-martin-a: #ffa53d;
+  --fest-martin-b: #ffe08a;
+  --fest-thanksgiving-night: #2b1608;
+  --fest-thanksgiving-a: #e8892c;
+  --fest-thanksgiving-b: #f2c14e;
+  --fest-einheit-night: #141414;
+  --fest-einheit-a: #ffce3a;
+  --fest-einheit-b: #ff5a4f;
+  --fest-mondfest-night: #0d1640;
+  --fest-mondfest-a: #ffd36b;
+  --fest-mondfest-b: #ff7a66;
+  --fest-oktoberfest-night: #0f2748;
+  --fest-oktoberfest-a: #7ec8ff;
+  --fest-oktoberfest-b: #ffd166;
+  --fest-pirat-night: #0b1a24;
+  --fest-pirat-a: #e8c872;
+  --fest-pirat-b: #ff8a6b;
+  --fest-tomatina-night: #3a0b08;
+  --fest-tomatina-a: #ff5a3c;
+  --fest-tomatina-b: #ffd166;
+  --fest-perseiden-night: #0a0f2c;
+  --fest-perseiden-a: #9fd3ff;
+  --fest-perseiden-b: #ffe28a;
+  --flag-de-black: #000000;
+  --flag-de-red: #dd0000;
+  --flag-de-gold: #ffcc00;
+  --fs-fest-art: clamp(140px, 26vw, 380px); /* riesiges Motiv des Feiertags (Kürbis, Laterne …) */
+  --fest-glow-size: 46%; /* Leuchten (Mond, Laterne, Kürbis) oben rechts im Kopf einer Themen-Seite */
+  --fest-deco-opacity: 0.85;
+  --fest-deco-page-opacity: 0.7; /* Deko auf allen Seiten am Feiertag: dezenter */
+  --dur-fest-float: 7s; /* Deko schwebt langsam auf und ab */
 
   /* Bühne: dunkle Fläche für Hero, Ticker und Footer (in beiden Modi dunkel) */
   --night: #16131c;
@@ -66,6 +121,8 @@
   --cat-mind: var(--bubblegum);
   --cat-brands: var(--mint);
   --cat-popculture: var(--peach);
+  --cat-horror: var(--bone);
+  --cat-holiday: var(--confetti);
 
   /* Punktmuster: liegt auf JEDER Kategorie-Fläche (über .cat-*).
      Rasterweite pro Ort über --dots-size umstellen (sm auf Chips/Sternen, lg auf großen Bannern). */
@@ -415,8 +472,45 @@ html[data-sky] .stage { background: var(--sky-stage); }
 .cat-mind { background: var(--dots-strong), var(--cat-mind); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
 .cat-brands { background: var(--dots), var(--cat-brands); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
 .cat-popculture { background: var(--dots-strong), var(--cat-popculture); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
+.cat-horror { background: var(--dots), var(--cat-horror); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
+.cat-holiday { background: var(--dots), var(--cat-holiday); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
 .accent { background: var(--yellow); color: var(--on-accent); }
 .gold { background: var(--gold-surface); color: var(--on-accent); }
+
+/* Farbwelten für Feiertags- und Grusel-Fakten (src/data/holidays.ts). data-fest steht auf <body> der Faktseite
+   und auf einzelnen Karten. Die Bühne (--night) und die Akzentflächen (Gelb, Pink, Lime, Violett) nehmen die
+   Farben des Themas an, Papier und Text bleiben, damit Lesbarkeit und Dunkelmodus gleich funktionieren.
+   Neues Thema = drei Tokens oben plus eine Zeile hier (der Build prüft, dass jedes Thema aus holidays.ts eine hat). */
+[data-fest] {
+  --yellow: var(--fest-a); --orange: var(--fest-a); --lime: var(--fest-a);
+  --pink: var(--fest-b); --violet: var(--fest-b);
+  --night: var(--fest-night); --night-2: color-mix(in srgb, var(--fest-night) 82%, var(--on-night));
+  --sky-stage: var(--fest-night);
+  /* Farbige Schatten auf der Bühne neu ansetzen, sonst behalten sie die Farben aus :root */
+  --shadow-on-night: var(--space-2) var(--space-2) 0 var(--fest-a);
+  --shadow-night-pink: var(--space-2) var(--space-2) 0 var(--fest-b);
+  --shadow-night-lime: var(--space-2) var(--space-2) 0 var(--fest-a);
+  --fest-sky: radial-gradient(circle at 82% 18%, color-mix(in srgb, var(--fest-a) 55%, transparent) 0%, color-mix(in srgb, var(--fest-b) 18%, transparent) calc(var(--fest-glow-size) / 2), transparent var(--fest-glow-size)), var(--dots-night), var(--fest-night);
+}
+[data-fest='fest'] { --fest-night: var(--fest-fest-night); --fest-a: var(--fest-fest-a); --fest-b: var(--fest-fest-b); }
+[data-fest='grusel'] { --fest-night: var(--fest-grusel-night); --fest-a: var(--fest-grusel-a); --fest-b: var(--fest-grusel-b); }
+[data-fest='halloween'] { --fest-night: var(--fest-halloween-night); --fest-a: var(--fest-halloween-a); --fest-b: var(--fest-halloween-b); }
+[data-fest='muertos'] { --fest-night: var(--fest-muertos-night); --fest-a: var(--fest-muertos-a); --fest-b: var(--fest-muertos-b); }
+[data-fest='diwali'] { --fest-night: var(--fest-diwali-night); --fest-a: var(--fest-diwali-a); --fest-b: var(--fest-diwali-b); }
+[data-fest='martin'] { --fest-night: var(--fest-martin-night); --fest-a: var(--fest-martin-a); --fest-b: var(--fest-martin-b); }
+[data-fest='thanksgiving'] { --fest-night: var(--fest-thanksgiving-night); --fest-a: var(--fest-thanksgiving-a); --fest-b: var(--fest-thanksgiving-b); }
+[data-fest='einheit'] { --fest-night: var(--fest-einheit-night); --fest-a: var(--fest-einheit-a); --fest-b: var(--fest-einheit-b); }
+[data-fest='mondfest'] { --fest-night: var(--fest-mondfest-night); --fest-a: var(--fest-mondfest-a); --fest-b: var(--fest-mondfest-b); }
+[data-fest='oktoberfest'] { --fest-night: var(--fest-oktoberfest-night); --fest-a: var(--fest-oktoberfest-a); --fest-b: var(--fest-oktoberfest-b); }
+[data-fest='pirat'] { --fest-night: var(--fest-pirat-night); --fest-a: var(--fest-pirat-a); --fest-b: var(--fest-pirat-b); }
+[data-fest='tomatina'] { --fest-night: var(--fest-tomatina-night); --fest-a: var(--fest-tomatina-a); --fest-b: var(--fest-tomatina-b); }
+[data-fest='perseiden'] { --fest-night: var(--fest-perseiden-night); --fest-a: var(--fest-perseiden-a); --fest-b: var(--fest-perseiden-b); }
+/* Themen-Fläche (Karten, Kopf der Faktseite): Bühne in Themenfarbe mit Leuchten oben rechts */
+/* Akzentfläche in Themenfarbe (z. B. der große Emoji-Block im Kopf der Faktseite) */
+.fest-a { background: var(--dots-strong), var(--fest-a); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
+.fest-sky { background: var(--fest-sky); background-size: auto, var(--dots-size-md) var(--dots-size-md); color: var(--on-night); }
+@keyframes fest-wave { 0%, 100% { rotate: 0deg; } 50% { rotate: 2deg; } }
+@keyframes fest-float { 0%, 100% { translate: 0 0; } 50% { translate: 0 calc(-1 * var(--space-3)); } }
 
 /* Abschnitte im Design „E“ (docs/design-system.md, „Abschnitte und Überhänge“).
    data-edge zeichnet oben eine schräge Kante in der Farbe des Abschnitts, die in den Abschnitt davor ragt.
