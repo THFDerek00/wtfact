@@ -167,8 +167,18 @@ const total = shown.length + upcoming.length;
     transition: transform var(--dur) var(--ease-pop);
   }
   .thumb:hover { transform: scale(1.1) rotate(-6deg); }
-  .thumb[data-rate='like'][aria-pressed='true'] { background: var(--lime); color: var(--on-accent); border-color: var(--on-accent); }
-  .thumb[data-rate='meh'][aria-pressed='true'] { background: var(--pink); color: var(--on-accent); border-color: var(--on-accent); }
+  /* Eigene Wahl: dunkle Scheibe mit farbigem Daumen und gelbem ✓, damit sie auf jeder Folie auffällt
+     (lime auf der lime Folie war kaum zu sehen, Eric 2026-10-15). Auf der Nacht hält der helle Rand sie sichtbar. */
+  .thumb[aria-pressed='true'] { position: relative; background: var(--on-accent); border-color: var(--on-accent); box-shadow: var(--shadow-accent-sm); }
+  .thumb[data-rate='like'][aria-pressed='true'] { color: var(--lime); }
+  .thumb[data-rate='meh'][aria-pressed='true'] { color: var(--pink); }
+  .slide:nth-child(even) .thumb[aria-pressed='true'] { border-color: var(--on-night); box-shadow: none; }
+  .slide:nth-child(3n) .thumb[aria-pressed='true'] { border-color: var(--on-accent); box-shadow: var(--shadow-accent-sm); }
+  .thumb[aria-pressed='true']::after {
+    content: '✓'; position: absolute; top: calc(-1 * var(--space-2)); right: calc(-1 * var(--space-2));
+    display: grid; place-items: center; width: var(--space-5); aspect-ratio: 1; border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-pill);
+    background: var(--yellow); color: var(--on-accent); font-size: var(--fs-xs); font-weight: 800; line-height: 1;
+  }
   .read { display: inline-flex; align-items: center; gap: var(--space-1); font-family: var(--font-display); font-weight: 700; }
   /* Gesperrte Folie */
   .slide.lock, .slide.lock:nth-child(even), .slide.lock:nth-child(3n) { background: var(--dots-night), var(--night-2); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-night); border-color: var(--on-night); box-shadow: var(--shadow-night-lime); }

@@ -20,6 +20,7 @@ const items = liveItems(FIRST, addDays(berlinDay(), 6)).map((x) => ({
 const texts = {
   round: q.round(9001, 9002), right: q.right, wrong: q.wrong, pct: q.pctOthers(9001), about: q.about, bc: q.bc, mya: q.mya,
   years: q.yearsApart(9001), yearOne: q.yearsApart(1), closest: q.closestText('§', '¶'), yoursEmpty: q.yoursEmpty,
+  statEmpty: q.statEmpty, pooled: q.statPooledFirst(9001), pooledOne: q.statPooledFirst(1),
   wrongPct: lang === 'de' ? '9001 %' : '9001%', done: q.done(9001, 9002), locale: lang === 'de' ? 'de-DE' : 'en-US',
 };
 ---
@@ -54,16 +55,16 @@ const texts = {
       </div>
       <div class="fin" data-fin hidden><p data-fin-text></p><button class="btn" type="button" data-again><Icon name="rotate-ccw" /> {q.again}</button></div>
       <div class="stats">
-        <div class="st"><span class="lb">{q.firstWrongPct}</span><span class="v v--pink" data-st="wrong">–</span><p data-st-text="wrong">{q.statEmpty}</p></div>
+        <div class="st"><span class="lb">{q.firstWrongPct}</span><span class="v v--pink" data-st="wrong">?</span><p data-st-text="wrong">{q.statEmpty}</p></div>
         <div class="st"><span class="lb">{q.closest}</span><span class="v" data-st="closest">–</span><p data-st-text="closest"></p></div>
-        <div class="st"><span class="lb">{q.yourRounds}</span><span class="v" data-st="yours">–</span><p data-st-text="yours">{q.yoursEmpty}</p></div>
+        <div class="st"><span class="lb">{q.yourRounds}</span><span class="v" data-st="yours">?</span><p data-st-text="yours">{q.yoursEmpty}</p></div>
       </div>
     </div>
   </section>
 )}
 
 <script>
-  import { answer, myAnswers, tallies, localTally, share, total, yearText, type Tally } from '../../scripts/quiz';
+  import { answer, myAnswers, tallies, localTally, localTallies, share, total, yearText, MIN_SINGLE, type Tally } from '../../scripts/quiz';
   import { berlinDay } from '../../week';
 
   type Side = { cat: string; year: number; approx: boolean; label: string; icon: string };
@@ -135,11 +136,7 @@ const texts = {
       $('[data-res]').hidden = false;
       const counts = (await answer('first', it.id, pick)) ?? localTally('first', it.id);
       if (server) server[it.id] = counts;
-      const wrong = 100 - share(counts, win);
-      if (total(counts) > 0) {
-        $('[data-st="wrong"]').textContent = fill(texts.wrongPct, { 9001: wrong });
-        $('[data-st-text="wrong"]').textContent = `${it.a.label} / ${it.b.label}`;
-      }
+      hardest();
       yours();
     };
     const next = () => {
@@ -164,17 +161,29 @@ const texts = {
       const [p, q] = closest.a.year < closest.b.year ? [closest.a, closest.b] : [closest.b, closest.a];
       $('[data-st-text="closest"]').textContent = fill(texts.closest, { '§': `${p.label} (${yt(p)})`, '¶': `${q.label} (${yt(q)})` });
     }
+    // Schwerstes Duell ab MIN_SINGLE Antworten; vorher alle Duelle zusammen (Anteil falscher Tipps über alle Antworten).
+    // Antworten aller Besucher vom Server, ohne Server nur die eigenen aus diesem Browser.
     const hardest = () => {
+      const counts = server ?? localTallies('first');
       let best: { it: Item; p: number } | null = null;
+      let wrong = 0;
+      let n = 0;
       for (const it of all) {
-        const c = server?.[it.id];
-        if (!c || total(c) < 5) continue;
+        const c = counts[it.id];
+        if (!c) continue;
+        n += total(c);
+        wrong += total(c) - (c[older(it)] ?? 0);
+        if (total(c) < MIN_SINGLE) continue;
         const p = 100 - share(c, older(it));
         if (!best || p > best.p) best = { it, p };
       }
-      if (!best) return;
-      $('[data-st="wrong"]').textContent = fill(texts.wrongPct, { 9001: best.p });
-      $('[data-st-text="wrong"]').textContent = `${best.it.a.label} / ${best.it.b.label}`;
+      const [v, text] = best
+        ? [fill(texts.wrongPct, { 9001: best.p }), `${best.it.a.label} / ${best.it.b.label}`]
+        : n
+          ? [fill(texts.wrongPct, { 9001: Math.round((wrong / n) * 100) }), n === 1 ? texts.pooledOne : fill(texts.pooled, { 9001: n })]
+          : ['?', texts.statEmpty];
+      $('[data-st="wrong"]').textContent = v;
+      $('[data-st-text="wrong"]').textContent = text;
     };
     (['a', 'b'] as const).forEach((side, i) => btn(side).addEventListener('click', () => reveal(i)));
     $('[data-next]').addEventListener('click', next);

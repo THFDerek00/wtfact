@@ -54,6 +54,21 @@ export function localTally(game: Game, id: string): Tally {
   return mine === undefined ? {} : { [mine]: 1 };
 }
 
+/** Zählungen aller Fragen nur aus diesem Browser, wenn der Server fehlt. */
+export function localTallies(game: Game): Record<string, Tally> {
+  return Object.fromEntries(Object.entries(myAnswers(game)).map(([id, pick]) => [id, { [pick]: 1 }]));
+}
+
+/** Mehrere Zählungen zusammenlegen, z. B. alle Fake-Aussagen zu einer Gesamtzählung. */
+export function pool(list: (Tally | undefined)[]): Tally {
+  const out: Tally = {};
+  for (const t of list) for (const [pick, n] of Object.entries(t ?? {})) out[pick] = (out[pick] ?? 0) + n;
+  return out;
+}
+
+/** Ab so vielen Antworten bekommt eine einzelne Frage ihre eigene Auswertung, vorher zählen alle Fragen zusammen. */
+export const MIN_SINGLE = 5;
+
 export const total = (t: Tally = {}) => Object.values(t).reduce((a, b) => a + b, 0);
 export const share = (t: Tally = {}, pick: number) => (total(t) ? Math.round(((t[pick] ?? 0) / total(t)) * 100) : 0);
 
