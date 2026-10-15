@@ -1,7 +1,7 @@
 -- WTFact-Fakt „Schleimaale verwandeln Wasser in Sekundenbruchteilen in Glibber“
 -- Eine Datei pro Fakt. Wird von npm run db:build in db/wtfact.sqlite geladen (Schema: db/facts-schema.sql).
-INSERT INTO facts (key, date, category, emoji, draft) VALUES
-  ('hagfish-slime', NULL, 'horror', '🐟', 0);
+INSERT INTO facts (key, date, category, emoji, draft, slot) VALUES
+  ('hagfish-slime', '2026-10-15T22:06:01+02:00', 'horror', '🐟', 0, 0);
 
 -- de
 INSERT INTO texts (fact, lang, slug, title, teaser, hook, body) VALUES (
