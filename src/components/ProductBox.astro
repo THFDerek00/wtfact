@@ -24,7 +24,7 @@ const host = SITE.amazon[lang].host.replace(/^www\./, '');
     {fest && <p class="fest-kicker"><FestIcon name={fest.icon} /> {fest.name}</p>}
     <div class="head">
       <h2 id="shop-title">{fest ? ui.fest.picksTitle : <><Icon name="shopping-cart" /> {ui.productsTitle}</>}</h2>
-      <span class="ad-tag">{ui.adLabel}</span>
+      <span class="pick-label">{ui.adLabel}</span>
     </div>
     <p class="intro">{fest ? ui.fest.picksIntro : ui.productsIntro}</p>
     <ul class="grid" data-count={products.length}>
@@ -46,7 +46,7 @@ const host = SITE.amazon[lang].host.replace(/^www\./, '');
         </li>
       ); })}
     </ul>
-    <p class="ad">{ui.affiliateShort}</p>
+    <p class="fineprint">{ui.affiliateShort}</p>
   </aside>
 )}
 
@@ -54,7 +54,7 @@ const host = SITE.amazon[lang].host.replace(/^www\./, '');
   .shop { position: relative; color: var(--ink); padding: var(--space-6); margin: var(--space-9) 0; box-shadow: var(--shadow-lg); scroll-margin-top: var(--space-12); }
   /* Kennzeichnung bleibt groß und kontraststark, nicht versteckt */
   .head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-4); }
-  .ad-tag {
+  .pick-label {
     padding: 0 var(--space-2); border: var(--bw-sm) solid var(--line); border-radius: var(--radius-sm);
     background: var(--night); color: var(--on-night);
     font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em;
@@ -101,7 +101,7 @@ const host = SITE.amazon[lang].host.replace(/^www\./, '');
   .cta { align-self: flex-start; margin-top: auto; }
   .prod:hover .cta { box-shadow: var(--shadow-lg); transform: translate(-2px, -2px); }
 
-  .ad { margin: var(--space-5) 0 0; font-size: var(--fs-xs); color: var(--muted); }
+  .fineprint { margin: var(--space-5) 0 0; font-size: var(--fs-xs); color: var(--muted); }
 
   /* Breite Fassung am Ende der Faktseite: größere Bildflächen und Schrift */
   .shop--wide { margin: 0; padding: var(--space-8); border-width: var(--bw-strong); box-shadow: var(--shadow-2xl); }
@@ -115,7 +115,7 @@ const host = SITE.amazon[lang].host.replace(/^www\./, '');
   .shop--wide .body { padding: var(--space-6); gap: var(--space-3); }
   .shop--wide .name { font-size: var(--fs-2xl); }
   .shop--wide .why { font-size: var(--fs-base); }
-  .shop--wide .ad-tag { font-size: var(--fs-md); }
+  .shop--wide .pick-label { font-size: var(--fs-md); }
   @media (max-width: 760px) {
     .shop--wide { padding: var(--space-5); }
     .shop--wide .prod { flex-direction: column; }
@@ -124,8 +124,8 @@ const host = SITE.amazon[lang].host.replace(/^www\./, '');
 
   /* Feiertag: dunkle Karte mit Rahmen und Schatten in den Farben des Fests, Strahlen hinter den Stücken */
   .shop--fest { background: var(--night-2); color: var(--on-night); border-color: var(--fest-a); box-shadow: var(--shadow-fest-2xl); }
-  .shop--fest .intro, .shop--fest .ad { color: var(--on-night-muted); }
-  .shop--fest .ad-tag { background: var(--fest-a); color: var(--on-accent); border-color: var(--on-accent); }
+  .shop--fest .intro, .shop--fest .fineprint { color: var(--on-night-muted); }
+  .shop--fest .pick-label { background: var(--fest-a); color: var(--on-accent); border-color: var(--on-accent); }
   .fest-kicker {
     display: inline-flex; align-items: center; gap: var(--space-2); margin: 0 0 var(--space-3); padding: var(--space-1) var(--space-3);
     border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-pill); background: var(--fest-b); color: var(--on-accent);

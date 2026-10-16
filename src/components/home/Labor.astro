@@ -156,10 +156,10 @@ const filterVars = { fDesk: Math.ceil(n / 3), fTab: tablet, fAllSpan: (n - 1) % 
   .all .tile--wide { grid-column: span 2; min-height: 0; }
   .all .tile--wide .title { font-size: var(--fs-xl); max-width: 80%; }
   /* Werbung als breites Band unter den ersten elf Fakten */
-  .grid :global(.ad) { grid-column: 1 / -1; border-radius: var(--radius-lg); }
+  .grid :global(.pickcard) { grid-column: 1 / -1; border-radius: var(--radius-lg); }
   @media (min-width: 561px) {
-    .grid :global(.ad) { flex-direction: row; }
-    .grid :global(.ad .art) { flex: 0 0 30%; aspect-ratio: auto; border-bottom: 0; border-right: var(--bw) solid var(--line); }
+    .grid :global(.pickcard) { flex-direction: row; }
+    .grid :global(.pickcard .art) { flex: 0 0 30%; aspect-ratio: auto; border-bottom: 0; border-right: var(--bw) solid var(--line); }
   }
   .loadmore { display: flex; justify-content: center; margin-top: var(--space-10); }
   @media (max-width: 1060px) {
