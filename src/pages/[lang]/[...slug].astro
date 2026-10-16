@@ -125,7 +125,7 @@ const tapeText = Array(Math.max(5, Math.ceil(400 / (tapeWord.length + 3)))).fill
   </section>
 
   {d.products.length > 0 && (
-    <section class:list={['sec', 'adband', fest?.holiday ? 'fest-sky' : 'sec--yellow']} data-edge>
+    <section class:list={['sec', 'pickband', fest?.holiday ? 'fest-sky' : 'sec--yellow']} data-edge>
       <div class="wrap"><ProductBox lang={lang} products={d.products} category={d.category} factKey={d.translationKey} wide
         fest={fest?.holiday ? { name: festName, icon: fest.holiday.art ?? fest.holiday.emoji } : undefined} /></div>
     </section>
@@ -392,7 +392,7 @@ const tapeText = Array(Math.max(5, Math.ceil(400 / (tapeWord.length + 3)))).fill
   .s-title { margin-top: auto; font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lg); line-height: 1.2; position: relative; }
 
   /* Werbung über die ganze Breite */
-  .adband { padding-block: calc(var(--space-12) + var(--space-4)); }
+  .pickband { padding-block: calc(var(--space-12) + var(--space-4)); }
 
   /* Beweise */
   .proofs { padding-block: calc(var(--space-12) + var(--space-4)) var(--space-12); }

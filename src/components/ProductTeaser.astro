@@ -23,7 +23,7 @@ const art = productArt(product.name);
 <aside class="teaser card" data-place={place} data-product-teaser={place}>
   <div class="head">
     <span class="label"><Icon name="shopping-cart" /> {ui.productsTitle}</span>
-    <span class="ad-tag">{ui.adLabel}</span>
+    <span class="pick-label">{ui.adLabel}</span>
   </div>
   <a
     class="prod" href={amazonUrl(lang, product.query)} rel="sponsored nofollow noopener" target="_blank"
@@ -54,7 +54,7 @@ const art = productArt(product.name);
 
   .head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-3); }
   .label { display: inline-flex; align-items: center; gap: var(--space-1); font-family: var(--font-display); font-size: var(--fs-md); font-weight: 700; }
-  .ad-tag {
+  .pick-label {
     padding: 0 var(--space-2); border: var(--bw-sm) solid var(--line); border-radius: var(--radius-sm);
     background: var(--night); color: var(--on-night);
     font-family: var(--font-display); font-size: var(--fs-xs); font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em;

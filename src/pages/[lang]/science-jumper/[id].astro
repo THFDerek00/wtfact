@@ -103,17 +103,17 @@ const game = `/${lang}/science-jumper/`;
           <aside class="treasure" aria-labelledby="treasure-title">
             <div class="treasure-head">
               <p class="treasure-kicker" id="treasure-title"><span aria-hidden="true">✦</span> {g.adKicker}</p>
-              <span class="ad-tag">{ui.adLabel}</span>
+              <span class="pick-label">{ui.adLabel}</span>
             </div>
-            <a class="treasure-card" data-f="ad" rel="sponsored nofollow noopener" target="_blank" data-umami-event="amazon" data-umami-event-fact={`gold-${f.id}`} data-umami-event-place="gold">
-              <span class="treasure-art" aria-hidden="true"><span class="halo"></span><span class="treasure-emoji" data-f="ad-emoji"></span></span>
+            <a class="treasure-card" data-f="pick" rel="sponsored nofollow noopener" target="_blank" data-umami-event="amazon" data-umami-event-fact={`gold-${f.id}`} data-umami-event-place="gold">
+              <span class="treasure-art" aria-hidden="true"><span class="halo"></span><span class="treasure-emoji" data-f="pick-emoji"></span></span>
               <span class="treasure-body">
-                <span class="treasure-name" data-f="ad-name"></span>
-                <span class="treasure-why" data-f="ad-why"></span>
+                <span class="treasure-name" data-f="pick-name"></span>
+                <span class="treasure-why" data-f="pick-why"></span>
                 <span class="btn gold-btn treasure-cta">{ui.productsCta} <Icon name="external-link" /></span>
               </span>
             </a>
-            <p class="ad-note">{ui.affiliateShort}</p>
+            <p class="pick-note">{ui.affiliateShort}</p>
           </aside>
         )}
 
@@ -193,12 +193,12 @@ const game = `/${lang}/science-jumper/`;
         li.append(a);
         list.append(li);
       }
-      const ad = q('ad') as HTMLAnchorElement | null;
+      const ad = q('pick') as HTMLAnchorElement | null;
       if (ad && fact.product) {
         ad.href = fact.product.url;
-        q('ad-emoji')!.textContent = fact.product.emoji;
-        q('ad-name')!.textContent = fact.product.name;
-        q('ad-why')!.textContent = fact.product.why;
+        q('pick-emoji')!.textContent = fact.product.emoji;
+        q('pick-name')!.textContent = fact.product.name;
+        q('pick-why')!.textContent = fact.product.why;
       }
       document.querySelector<HTMLElement>('[data-locked]')!.hidden = true;
       document.querySelector<HTMLElement>('[data-open]')!.hidden = false;
@@ -388,7 +388,7 @@ const game = `/${lang}/science-jumper/`;
   .treasure { margin: var(--space-12) 0 var(--space-8); }
   .treasure-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-4); margin-bottom: var(--space-4); }
   .treasure-kicker { margin: 0; font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 800; text-transform: uppercase; letter-spacing: 0.14em; color: var(--gold-light); }
-  .ad-tag {
+  .pick-label {
     padding: 0 var(--space-2); border: var(--bw-sm) solid var(--gold); border-radius: var(--radius-sm);
     background: var(--night); color: var(--on-night);
     font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em;
@@ -407,7 +407,7 @@ const game = `/${lang}/science-jumper/`;
   .treasure-name { font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 700; line-height: 1.15; letter-spacing: -0.01em; }
   .treasure-why { color: var(--on-night-muted); font-size: var(--fs-md); }
   .treasure-cta { align-self: flex-start; margin-top: auto; }
-  .ad-note { margin: var(--space-3) 0 0; font-size: var(--fs-xs); color: var(--on-night-muted); }
+  .pick-note { margin: var(--space-3) 0 0; font-size: var(--fs-xs); color: var(--on-night-muted); }
 
   .share-row { display: flex; justify-content: center; }
 

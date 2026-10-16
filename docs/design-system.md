@@ -127,6 +127,7 @@ Kürbissen und Fledermäusen. Grusel-Fakten (`horror`) haben immer das Thema „
 - `FestWord.astro`: Riesenschriftzug des Feiertags mit eigener Schrift (`--font-fest-*`, Schriften aus `@fontsource`, nur geladen,
   wenn sie vorkommen), Schrift- und Schattenfarbe aus `look.ink`/`look.shade`; `look.o` ersetzt jedes O durch eine Grafik
   (Halloween: Kürbis). `FestArt.astro`: riesiges Motiv (`art`), an der Einheit die wehende Flagge.
+- Werbeboxen (Eric, 2026-10-16): Klassennamen nie mit „ad“ (`ad`, `ad-tag`, `adband`), sonst blenden Werbeblocker die Boxen aus. Heute `pick-label`, `pickband`, `pickcard`, `fineprint`. Die Kennzeichnung „Werbung“ bleibt sichtbar.
 - Werbung auf Feiertags-Fakten (Eric, 2026-10-15): `ProductBox` mit `fest` zeigt die „Feiertags-Auswahl“ auf dunkler Festbühne
   (`--shadow-fest-*`, Strahlen `--fest-rays`, Etikett mit der Feiertags-Grafik). Die Stücke sind hochwertiger als sonst (Styleguide).
 - Das schräge Band auf der Faktseite wiederholt sein Wort so oft, dass es auch auf breiten Bildschirmen bis zum Rand reicht.
