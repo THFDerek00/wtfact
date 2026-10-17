@@ -159,7 +159,6 @@ function reelFrame(t) {
       if (y >= RAMP.y0 - 115) {
         const dy = RAMP.y0 - 115 - p.y, hit = T1 + 1.7 + (-300 + Math.sqrt(300 * 300 + 4 * 1500 * dy)) / 3000;
         doc.add(cloud(x, RAMP.y0 - 60, 120 + seg(t, hit, hit + 0.5) * 120, { opacity: 1 - seg(t, hit + 0.8, T2) }));
-        doc.add(stamp(doc, 'PLUMPS!', 540, 860, t, hit, { size: 110, a: -8, fill: C.pink }));
       }
     }
     return finish(doc, [T1 + 2.35]);
