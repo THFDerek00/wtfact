@@ -11,6 +11,7 @@ import TrueOrFake from '../../components/home/TrueOrFake.astro';
 import WhatFirst from '../../components/home/WhatFirst.astro';
 import WeekBlock from '../../components/home/WeekBlock.astro';
 import CatsGrid from '../../components/home/CatsGrid.astro';
+import SpecialTeaser from '../../components/home/SpecialTeaser.astro';
 import Vote from '../../components/Vote.astro';
 import Icon from '../../components/Icon.astro';
 import { LANGS, type Lang } from '../../config';
@@ -34,6 +35,7 @@ const chartsUrl = chartsPath(lang);
   </section>
   <FactOfDay lang={lang} posts={posts} />
   <TodayNew lang={lang} posts={posts} allUrl="#facts" />
+  <SpecialTeaser lang={lang} />
   <Labor lang={lang} posts={posts} catsUrl={catsUrl} />
   <TrueOrFake lang={lang} />
   <WhatFirst lang={lang} />

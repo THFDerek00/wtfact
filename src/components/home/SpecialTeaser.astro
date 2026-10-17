@@ -1,0 +1,32 @@
+---
+// Hinweis auf die Sonderseite zum neuen Tesla Roadster (Wunsch von Eric, 2026-10-17), nur auf der deutschen Startseite.
+// Lime-Abschnitt zwischen „Heute neu“ und Labor; zum Entfernen die Zeile in src/pages/[lang]/index.astro löschen.
+import Icon from '../Icon.astro';
+import type { Lang } from '../../config';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+---
+{lang === 'de' && (
+  <section class="sec sec--lime special" data-edge>
+    <div class="wrap row">
+      <span class="emoji" aria-hidden="true">🐌</span>
+      <div class="text">
+        <span class="chip chip--new">Sonderseite</span>
+        <h2>Kann ein Auto kopfüber fahren?</h2>
+        <p>Was der neue Tesla Roadster wirklich gezeigt hat, was nur behauptet ist, und warum eine Schnecke das schon immer kann.</p>
+      </div>
+      <a class="btn" href="/de/kopfueber/">Zum Faktencheck <Icon name="chevron-right" /></a>
+    </div>
+  </section>
+)}
+<style>
+  .special { padding-block: var(--space-10) calc(var(--space-10) + var(--edge)); }
+  .row { display: grid; grid-template-columns: auto 1fr auto; gap: var(--space-6); align-items: center; }
+  .emoji { display: inline-block; justify-self: start; font-size: var(--fs-emoji-lg); transform: scaleX(-1) rotate(-8deg); }
+  h2 { margin: var(--space-2) 0; font-size: var(--fs-display-sm); }
+  p { margin: 0; max-width: var(--measure); font-weight: 600; }
+  @media (max-width: 760px) {
+    .row { grid-template-columns: 1fr; }
+    .emoji { font-size: var(--fs-emoji-md); }
+  }
+</style>
