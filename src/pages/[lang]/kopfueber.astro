@@ -1,0 +1,137 @@
+---
+// ENTWURF Sonderseite zum neuen Tesla Roadster (Oktober 2026), nur zur Abstimmung mit Eric, noch nicht verlinkt.
+// Abschnitte im Design „E“: Nacht Kopf → Lime Gezeigt/Behauptet → Papier Physik → Gelb Bonus → Werbung → Nacht Weltall → Papier Quellen.
+import Base from '../../layouts/Base.astro';
+import ProductBox from '../../components/ProductBox.astro';
+import type { Lang } from '../../config';
+export function getStaticPaths() { return [{ params: { lang: 'de' } }]; }
+const lang = Astro.params.lang as Lang;
+const shown = [
+  'Eine gekrümmte Rampe hoch und kopfüber an ihrer Unterseite entlang, gehalten von einem Lüfter, der das Auto ansaugt',
+  'Ein kurzer Sprung mit Druckluftdüsen über fünf andere Teslas',
+  'Landung auf den Rädern in einer Wolke aus weißem Nebel',
+  'Niemand saß drin: Die Stunts liefen ohne Fahrer, mit einem Prototyp',
+];
+const claimed = [
+  'Von 0 auf knapp 100 km/h (60 mph) in unter einer Sekunde',
+  'Rund 480 Kilometer (300 Meilen) Reichweite',
+  'Bis zu 2 g Abtrieb durch den Lüfter',
+  'Auslieferung ab 2028, angekündigt war das Auto einmal für 2020',
+];
+const products = [
+  { name: 'Ferngesteuertes Modellauto, das an der Wand fährt', query: 'wall climbing rc car', why: 'Saugt sich mit einem Lüfter fest, genau wie der Roadster auf der Rampe.' },
+  { name: 'Modellauto Tesla Roadster', query: 'tesla roadster modellauto', why: 'Fürs Regal, bis der echte 2028 vielleicht kommt.' },
+  { name: 'Buch: Physik für Neugierige', query: 'physik buch kinder experimente', why: 'Warum Luft kühlt, wenn sie ausströmt, und andere Alltagsrätsel.' },
+];
+const sources = [
+  ['TechCrunch, 15.10.2026', 'https://techcrunch.com/2026/10/15/tesla-reveals-spacex-powered-roadster-that-flies-and-falls-with-style/'],
+  ['Mezha, Was beim Event gezeigt wurde', 'https://mezha.net/eng/news/4afc084b_tesla_showed_a_roadster/'],
+  ['Motor Sport Magazine, Großer Preis von Schweden 1978', 'https://www.motorsportmagazine.com/special-article/the-75-greatest-grands-prix/6/75-1978-swedish-gp-brabham-fan-car-wins-its-one-and-only-race/'],
+  ['Stanford University, Schneckenschleim', 'https://news.stanford.edu/pr/2011/pr-snail-slime-trails-040611.html'],
+];
+---
+<Base lang={lang} title="Kann ein Auto kopfüber fahren?" description="Was der neue Tesla Roadster wirklich gezeigt hat, was nur behauptet ist, und die Physik dahinter.">
+  <section class="sec sec--night hero">
+    <div class="wrap hero-grid">
+      <div>
+        <p class="chips"><span class="chip cat-tech">Technik</span> <span class="chip chip--new">Sonderseite</span></p>
+        <h1>Kann ein Auto <span class="mark">kopfüber</span> fahren?</h1>
+        <p class="lead">Der neue Tesla Roadster ist bei seiner Vorstellung an der Unterseite einer Rampe entlanggefahren und über fünf Autos gesprungen. Hier steht, was davon wirklich zu sehen war, was nur angekündigt ist, und warum eine Schnecke das schon immer kann.</p>
+        <a class="btn" href="#check">Zum Faktencheck</a>
+      </div>
+      <img class="art bleed" src="/roadster-entwurf/hero.png" alt="Gezeichnete Rampe im WTFact-Stil, eine Schnecke kriecht kopfüber an der Unterseite" width="540" height="960" />
+    </div>
+  </section>
+
+  <section class="sec sec--lime" data-edge id="check">
+    <div class="wrap">
+      <div class="sec-head"><h2>Gezeigt vs. behauptet</h2></div>
+      <div class="cols">
+        <div class="card list">
+          <h3>Gezeigt am 15. Oktober 2026</h3>
+          <ul>{shown.map((s) => <li><span class="dot ok" aria-hidden="true">✓</span>{s}</li>)}</ul>
+        </div>
+        <div class="card list">
+          <h3>Nur behauptet, bisher nicht geprüft</h3>
+          <ul>{claimed.map((s) => <li><span class="dot q" aria-hidden="true">?</span>{s}</li>)}</ul>
+        </div>
+      </div>
+      <p class="note">Was es noch nicht gibt: längere Flüge, eine Zulassung für Straße oder Luft und einen Verkaufspreis. Bisher kann man nur reservieren, ab 50.000 Dollar.</p>
+    </div>
+  </section>
+
+  <section class="sec sec--paper" data-edge="left">
+    <div class="wrap prose">
+      <h2>Wie ein Auto an der Decke klebt</h2>
+      <p>Ein Lüfter unter dem Auto saugt die Luft zwischen Boden und Fahrbahn ab. Dort entsteht Unterdruck, und der Luftdruck von außen drückt das Auto gegen die Fahrbahn. Ist diese Kraft größer als das Gewicht, hält das Auto auch kopfüber. Tesla spricht von bis zu 2 g, also dem doppelten Gewicht des Autos.</p>
+      <h2>Woher kommt der weiße Nebel?</h2>
+      <p>Für den Sprung nutzte der Prototyp Düsen mit Druckluft aus Hochdrucktanks. Strömt Druckluft aus, kühlt sie stark ab. Der Wasserdampf in der Umgebung kondensiert dann zu winzigen Tröpfchen, und genau die sieht man als weiße Wolke.</p>
+    </div>
+  </section>
+
+  <section class="sec sec--yellow" data-edge>
+    <div class="wrap bonus">
+      <span class="bonus-emoji" aria-hidden="true">🏎️</span>
+      <div>
+        <h2>Der Trick ist von 1978</h2>
+        <p>Das Formel-1-Auto Brabham BT46B saugte sich mit einem Lüfter am Boden fest. Niki Lauda gewann damit am 17. Juni 1978 den Großen Preis von Schweden, danach zog das Team den „Staubsauger“ nach nur einem Rennen zurück.</p>
+      </div>
+      <span class="bonus-emoji" aria-hidden="true">🐌</span>
+      <div>
+        <h2>Die Schnecke kann es ohne Lüfter</h2>
+        <p>Schneckenschleim klebt und lässt die Schnecke trotzdem gleiten. Damit kriecht sie Wände hoch und kopfüber an der Decke entlang.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec sec--paper">
+    <div class="wrap"><ProductBox lang={lang} products={products} category="tech" factKey="roadster-kopfueber" wide /></div>
+  </section>
+
+  <section class="sec sec--night" data-edge>
+    <div class="wrap space">
+      <p class="mega" aria-hidden="true">2018</p>
+      <div>
+        <h2>Ein Tesla fliegt schon</h2>
+        <p>Seit Februar 2018 kreist ein alter Tesla Roadster um die Sonne. SpaceX schoss Elon Musks eigenes Auto beim ersten Flug der Falcon Heavy ins All, mit einer Puppe im Raumanzug am Steuer.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec sec--paper" data-edge="left">
+    <div class="wrap prose">
+      <h2>Quellen</h2>
+      <ol class="sources">{sources.map(([n, u]) => <li><a href={u} rel="noopener" target="_blank">{n}</a></li>)}</ol>
+    </div>
+  </section>
+</Base>
+<style>
+  .hero-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: var(--space-8); align-items: center; }
+  .hero h1 { font-size: var(--fs-display-2xl); line-height: 1; margin: var(--space-4) 0; }
+  .lead { font-size: var(--fs-lg); color: var(--on-night-muted); max-width: var(--measure); }
+  .chips { display: flex; gap: var(--space-2); margin: 0; }
+  .art { width: 100%; height: auto; border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-md); box-shadow: var(--shadow-night-lime); transform: rotate(3deg); margin-bottom: calc(-1 * var(--bleed)); }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); }
+  .list { padding: var(--space-6); }
+  .list h3 { margin-top: 0; font-size: var(--fs-xl); }
+  .list ul { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-4); }
+  .list li { display: grid; grid-template-columns: auto 1fr; gap: var(--space-3); align-items: start; font-weight: 600; }
+  .dot { display: inline-grid; place-items: center; width: var(--space-8); height: var(--space-8); border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-pill); font-family: var(--font-display); font-weight: 800; color: var(--on-accent); }
+  .dot.ok { background: var(--yellow); }
+  .dot.q { background: var(--pink); }
+  .note { margin-top: var(--space-6); font-weight: 700; font-size: var(--fs-lg); }
+  .bonus { display: grid; grid-template-columns: auto 1fr; gap: var(--space-6) var(--space-8); align-items: center; }
+  .bonus h2 { margin: 0 0 var(--space-2); }
+  .bonus p { margin: 0; max-width: var(--measure); }
+  .bonus-emoji { font-size: var(--fs-emoji-xl); }
+  .space { display: grid; grid-template-columns: auto 1fr; gap: var(--space-8); align-items: center; }
+  .space .mega { font-size: var(--fs-huge); margin: 0; text-shadow: var(--shift-mega) var(--shift-mega) 0 var(--pink); }
+  .space p { color: var(--on-night-muted); max-width: var(--measure); }
+  .sources a { color: var(--pink-text); }
+  @media (max-width: 760px) {
+    .hero-grid, .cols, .space, .bonus { grid-template-columns: 1fr; }
+    .bonus-emoji { font-size: var(--fs-emoji-lg); }
+    .art { max-width: 70%; justify-self: center; }
+    .space .mega { font-size: var(--fs-mega); }
+  }
+</style>
