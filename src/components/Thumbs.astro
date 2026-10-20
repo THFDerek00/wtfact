@@ -20,7 +20,7 @@ const share = ui.share(9001);
   data-thanks={ui.thanks} data-local={ui.local} data-share={share} data-first={ui.first}
 >
   <span class="label">{ui.label}</span>
-  <h2 class="q">{question}</h2>
+  <h2 class="q head-small">{question}</h2>
   <div class="row" role="group" aria-label={question}>
     <button class="vote vote--meh" type="button" data-verdict="meh" aria-pressed="false">
       <Icon name="thumbs-down" /> <span class="sr-only">{ui.down}</span> <span class="n" data-count="meh">0</span>
