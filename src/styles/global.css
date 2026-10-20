@@ -125,6 +125,10 @@
   --fest-popculture-night: #241006;
   --fest-popculture-a: #ffbe98;
   --fest-popculture-b: #ff3d7f;
+  /* Thema „quiz“ für „Was war zuerst?“ (2026-10-20): dunkles Violett mit violettem Leuchten */
+  --fest-quiz-night: #130b2a;
+  --fest-quiz-a: #9b6bff;
+  --fest-quiz-b: #ffd23f;
   --fest-halloween-night: #140c06;
   --fest-halloween-a: #ff7a1a;
   --fest-halloween-b: #b07cff;
@@ -765,6 +769,7 @@ html[data-sky] .stage { background: var(--sky-stage); }
 [data-fest='mind'] { --fest-night: var(--fest-mind-night); --fest-a: var(--fest-mind-a); --fest-b: var(--fest-mind-b); }
 [data-fest='brands'] { --fest-night: var(--fest-brands-night); --fest-a: var(--fest-brands-a); --fest-b: var(--fest-brands-b); }
 [data-fest='popculture'] { --fest-night: var(--fest-popculture-night); --fest-a: var(--fest-popculture-a); --fest-b: var(--fest-popculture-b); }
+[data-fest='quiz'] { --fest-night: var(--fest-quiz-night); --fest-a: var(--fest-quiz-a); --fest-b: var(--fest-quiz-b); }
 [data-fest='halloween'] { --fest-night: var(--fest-halloween-night); --fest-a: var(--fest-halloween-a); --fest-b: var(--fest-halloween-b); }
 [data-fest='muertos'] { --fest-night: var(--fest-muertos-night); --fest-a: var(--fest-muertos-a); --fest-b: var(--fest-muertos-b); }
 [data-fest='diwali'] { --fest-night: var(--fest-diwali-night); --fest-a: var(--fest-diwali-a); --fest-b: var(--fest-diwali-b); }

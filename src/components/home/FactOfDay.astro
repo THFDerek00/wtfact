@@ -3,11 +3,15 @@
 // Eine Vorlage für jeden Fakt (Wunsch von Eric: „einheitlich austauschbar“). Welcher Fakt heute vorne steht,
 // rechnet src/scripts/fame.ts im Browser aus; gerendert werden alle Kandidaten der letzten Tage, sichtbar ist einer.
 // Die Zahl ragt oben in den gelben Kopf und unten in den nächsten Abschnitt.
+// Seit 2026-10-20 (Wunsch von Eric, Entwurf B): der ganze Abschnitt in der Farbwelt der Kategorie (src/data/holidays.ts),
+// mit Leuchten, Deko, Zahlenschatten, Schild und Kartenrand in den Themenfarben.
 import type { Lang } from '../../config';
 import { t } from '../../i18n/ui';
 import { postUrl, bigNumber, factInfo, festFor, type Post } from '../../lib';
 import { berlinDay, addDays, postDay, pickFactOfDay } from '../../week';
 import Icon from '../Icon.astro';
+import FestDeco from '../FestDeco.astro';
+import { festOf } from '../../data/holidays';
 interface Props { lang: Lang; posts: Post[] }
 const { lang, posts } = Astro.props;
 const ui = t(lang);
@@ -15,20 +19,23 @@ const today = berlinDay();
 // Kandidaten: Fakten von vorgestern bis heute, damit auch eine Seite vom Vortag den richtigen zeigen kann.
 const cands = posts.filter((p) => postDay(p.data.date) >= addDays(today, -2));
 const pick = pickFactOfDay(cands.map(factInfo), {}, today)?.key ?? cands[0]?.data.translationKey;
+const pf = festOf(cands.find((p) => p.data.translationKey === pick)?.data.category ?? '', '');
 ---
 {cands.length > 0 && (
-  <section class="sec sec--night fotd" data-edge data-fotd data-facts={JSON.stringify(cands.map(factInfo))} aria-label={ui.home.fotd}>
+  <section class="sec sec--night fotd" data-fest={pf?.theme} data-edge data-fotd data-facts={JSON.stringify(cands.map(factInfo))} aria-label={ui.home.fotd}>
     {cands.map((p) => {
       const d = p.data;
       const big = bigNumber(p);
+      const f = festOf(d.category, '');
       return (
-        <article class="wrap poster" data-fotd-key={d.translationKey} hidden={d.translationKey !== pick}>
+        <article class="wrap poster" data-theme={f?.theme} data-fotd-key={d.translationKey} hidden={d.translationKey !== pick}>
+          <span class="fotd-deco"><FestDeco deco={f?.deco ?? []} size="lg" /></span>
           <div class="left">
             {big
               ? <p class="mega big bleed" aria-hidden="true" data-len={Math.min(big.show.length, 8)}>{big.show}{big.below && <span class="unit">{big.below}</span>}</p>
               : <p class="big-emoji bleed" aria-hidden="true">{d.emoji}</p>}
             <span class="label">{ui.home.fotd}</span>
-            {big && <span class:list={['slab', `cat-${d.category}`]} aria-hidden="true"><span class="slab-emoji">{d.emoji}</span></span>}
+            {big && <span class:list={['slab', 'fest-sky']} data-fest={f?.theme} aria-hidden="true"><FestDeco deco={f?.deco ?? []} /><span class="slab-emoji">{d.emoji}</span></span>}
           </div>
           <a class="card fcard bleed" href={postUrl(p)}>
             <span class="sticker">WTF?!</span>
@@ -51,12 +58,17 @@ const pick = pickFactOfDay(cands.map(factInfo), {}, today)?.key ?? cands[0]?.dat
       const el = daily && root.querySelector<HTMLElement>(`[data-fotd-key="${daily.key}"]`);
       if (!el) return;
       root.querySelectorAll<HTMLElement>('[data-fotd-key]').forEach((a) => (a.hidden = a !== el));
+      // Farbwelt des Abschnitts folgt dem Fakt, der wirklich vorne steht
+      if (el.dataset.theme) root.dataset.fest = el.dataset.theme;
     });
   }
 </script>
 
 <style>
-  .fotd { padding: 0 0 var(--space-12); }
+  .fotd { padding: 0 0 var(--space-12); background: var(--fest-sky); background-size: auto, var(--dots-size-md) var(--dots-size-md); }
+  .fotd-deco { position: absolute; inset: 0 calc(-1 * var(--space-6)); }
+  .slab[data-fest] { position: relative; border-color: var(--fest-a); box-shadow: var(--space-2) var(--space-2) 0 var(--fest-b); }
+  .slab-emoji { position: relative; }
   .poster {
     position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: var(--space-10);
     align-items: start;
@@ -69,6 +81,7 @@ const pick = pickFactOfDay(cands.map(factInfo), {}, today)?.key ?? cands[0]?.dat
     font-family: var(--font-display); font-weight: 800; font-size: var(--fs-lg); text-transform: uppercase; letter-spacing: 0.04em;
     box-shadow: var(--shadow-night-pink); transform: rotate(-3deg);
   }
+  .fotd .label { background: var(--fest-a); box-shadow: var(--space-1) var(--space-1) 0 var(--fest-b); }
   .slab {
     align-self: stretch; margin: var(--space-4) var(--space-8) 0 var(--space-6); height: 16rem;
     border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-lg); box-shadow: var(--shadow-night-lime);
@@ -78,7 +91,7 @@ const pick = pickFactOfDay(cands.map(factInfo), {}, today)?.key ?? cands[0]?.dat
   /* Die Zahl: oben in den gelben Kopf hinein, Kontur in Tinte, Schatten pink */
   .big {
     margin: calc(-1 * var(--bleed) - var(--space-12)) 0 0 calc(-1 * var(--space-2));
-    font-size: calc(var(--fs-mega) * var(--fit, 1)); text-shadow: var(--shift-mega) var(--shift-mega) 0 var(--pink);
+    font-size: calc(var(--fs-mega) * var(--fit, 1)); text-shadow: var(--shift-mega) var(--shift-mega) 0 var(--fest-a);
   }
   .big[data-len='4'] { --fit: 0.85; }
   .big[data-len='5'] { --fit: 0.72; }
@@ -89,7 +102,7 @@ const pick = pickFactOfDay(cands.map(factInfo), {}, today)?.key ?? cands[0]?.dat
   .fcard {
     position: relative; display: flex; flex-direction: column; gap: var(--space-3);
     margin: calc(-1 * var(--bleed)) 0 calc(-1 * var(--bleed) - var(--space-12)); padding: var(--space-8) var(--space-7) var(--space-7);
-    background: var(--surface); color: var(--ink); border: var(--bw-strong) solid var(--on-accent); box-shadow: var(--shadow-2xl);
+    background: var(--surface); color: var(--ink); border: var(--bw-strong) solid var(--fest-a); box-shadow: var(--space-4) var(--space-4) 0 var(--fest-a);
     text-decoration: none; transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
   }
   .fcard:hover { transform: translate(-3px, -3px) rotate(-0.4deg); }

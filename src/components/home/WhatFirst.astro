@@ -1,12 +1,15 @@
 ---
 // „Was war zuerst?“ (Design „E“, Wunsch von Eric, 2026-10-10): Runden mit je 6 Duellen. Tippen auf das ältere Ereignis,
 // danach Jahreszahlen, Gewinner und wie viele der anderen richtig lagen. Fragen: src/data/quiz.ts (jeden Samstag 5 neue).
+// Seit 2026-10-20 (Wunsch von Eric): dunkle Bühne im Thema „quiz“ mit violettem Leuchten und schwebenden Fragezeichen,
+// die beiden Karten in der Farbwelt ihrer Kategorie wie die Faktenkarten.
 import type { Lang } from '../../config';
 import { t } from '../../i18n/ui';
 import { FIRST, liveItems } from '../../data/quiz';
 import { berlinDay, addDays } from '../../week';
 import { categoryIcon } from '../../lib';
 import Icon from '../Icon.astro';
+import FestDeco from '../FestDeco.astro';
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const ui = t(lang);
@@ -25,8 +28,9 @@ const texts = {
 };
 ---
 {items.length > 0 && (
-  <section class="sec sec--violet first" id="first" data-edge="left" data-first data-items={JSON.stringify(items)} data-texts={JSON.stringify(texts)} data-focus-day="4,6">
+  <section class="sec fest-sky first" data-fest="quiz" id="first" data-edge="left" data-first data-items={JSON.stringify(items)} data-texts={JSON.stringify(texts)} data-focus-day="4,6">
     <span class="focus-tag">{ui.home.dayFocus}</span>
+    <FestDeco deco={['question', 'hourglass', 'sparkle', 'star', 'question', 'sparkle']} size="lg" />
     <div class="wrap">
       <div class="sec-head">
         <h2>{q.firstTitle}</h2>
@@ -105,6 +109,8 @@ const texts = {
         b.setAttribute('aria-pressed', 'false');
         b.removeAttribute('data-result');
         b.querySelector<HTMLElement>('[data-tile]')!.className = `t cat-${s.cat}`;
+        // Farbwelt der Kategorie wie in src/data/holidays.ts (festOf)
+        b.dataset.fest = s.cat === 'horror' ? 'grusel' : s.cat === 'holiday' ? 'fest' : s.cat;
         b.querySelector<HTMLImageElement>('[data-icon]')!.src = s.icon;
         b.querySelector('[data-label]')!.textContent = s.label;
         b.querySelector<HTMLElement>('[data-year]')!.hidden = true;
@@ -252,4 +258,10 @@ const texts = {
     .st:nth-child(2) { transform: none; }
     .round { flex-direction: column; align-items: flex-start; }
   }
+  /* Dunkle Bühne (Thema „quiz“) und Karten in der Farbwelt ihrer Kategorie */
+  .first { --line: var(--on-night); }
+  .first > .wrap { position: relative; z-index: 1; }
+  .pg :global(i) { border-color: var(--on-night); }
+  .weekly { background: var(--fest-a); color: var(--on-accent); }
+  .opt[data-fest] { background: var(--fest-sky); background-size: auto, var(--dots-size-md) var(--dots-size-md); color: var(--on-night); border-color: var(--fest-a); box-shadow: var(--space-2) var(--space-2) 0 var(--on-accent); }
 </style>

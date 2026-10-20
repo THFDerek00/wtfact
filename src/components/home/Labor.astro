@@ -13,6 +13,7 @@ import { CATEGORIES } from '../../config';
 import { t } from '../../i18n/ui';
 import { postUrl, factNumber, festFor, type Post } from '../../lib';
 import { berlinDay, postDay } from '../../week';
+import { festOf } from '../../data/holidays';
 import FestDeco from '../FestDeco.astro';
 import FestIcon from '../FestIcon.astro';
 import NewBadge from '../NewBadge.astro';
@@ -42,7 +43,7 @@ const filterVars = { fDesk: Math.ceil(n / 3), fTab: tablet, fAllSpan: (n - 1) % 
     <div class="filters" role="group" aria-label={ui.filterLabel}>
       <button class="chip all" data-filter="all" type="button" aria-pressed="true">{ui.allCategories}</button>
       {cats.map((c) => (
-        <button class:list={['chip', `cat-${c}`]} data-filter={c} type="button" aria-pressed="false">{ui.categories[c]}</button>
+        <button class:list={['chip', `cat-${c}`]} data-fest={festOf(c, '')?.theme} data-filter={c} type="button" aria-pressed="false"><span class="f-ico" aria-hidden="true"><FestIcon name={festOf(c, '')?.deco[0] ?? 'sparkle'} /></span>{ui.categories[c]}</button>
       ))}
     </div>
     <div class="grid paged all" data-grid>
@@ -156,11 +157,7 @@ const filterVars = { fDesk: Math.ceil(n / 3), fTab: tablet, fAllSpan: (n - 1) % 
   .all .tile--wide { grid-column: span 2; min-height: 0; }
   .all .tile--wide .title { font-size: var(--fs-xl); max-width: 80%; }
   /* Werbung als breites Band unter den ersten elf Fakten */
-  .grid :global(.pickcard) { grid-column: 1 / -1; border-radius: var(--radius-lg); }
-  @media (min-width: 561px) {
-    .grid :global(.pickcard) { flex-direction: row; }
-    .grid :global(.pickcard .art) { flex: 0 0 30%; aspect-ratio: auto; border-bottom: 0; border-right: var(--bw) solid var(--line); }
-  }
+  .grid :global(.pickcard) { grid-column: 1 / -1; }
   .loadmore { display: flex; justify-content: center; margin-top: var(--space-10); }
   @media (max-width: 1060px) {
     .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
@@ -176,4 +173,8 @@ const filterVars = { fDesk: Math.ceil(n / 3), fTab: tablet, fAllSpan: (n - 1) % 
     .title, .all .tile--wide .title { font-size: var(--fs-md); padding: var(--space-2); }
     .all .tile--big .title { font-size: var(--fs-xl); padding: var(--space-3); }
   }
+  /* Filter seit 2026-10-20 (Wunsch von Eric, Entwurf B): Bühne in der Farbwelt der Kategorie mit kleiner Grafik */
+  .filters .chip[data-fest] { background: var(--fest-sky); background-size: auto, var(--dots-size-md) var(--dots-size-md); color: var(--on-night); border: var(--bw) solid var(--fest-a); box-shadow: var(--space-1) var(--space-1) 0 var(--fest-b); }
+  .filters .f-ico { display: inline-grid; font-size: var(--fs-sm); }
+  .filters .chip[data-fest][aria-pressed='true'] { outline: var(--bw) solid var(--fest-a); outline-offset: var(--space-1); }
 </style>
