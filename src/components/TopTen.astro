@@ -39,6 +39,7 @@ const ui = t(lang).top;
           const a = document.createElement('a');
           a.className = 'card row';
           a.href = f.url;
+          a.dataset.fest = f.cat === 'horror' ? 'grusel' : f.cat === 'holiday' ? 'fest' : f.cat;
           const no = document.createElement('span');
           no.className = 'no';
           no.textContent = String(i + 1);
@@ -75,8 +76,11 @@ const ui = t(lang).top;
     text-decoration: none; transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
   }
   .list :global(.row:hover) { transform: translate(-2px, -2px); box-shadow: var(--shadow-lg); }
+  .list :global(.row[data-fest]) { background: var(--fest-sky); background-size: auto, var(--dots-size-md) var(--dots-size-md); color: var(--on-night); border-color: var(--fest-a); box-shadow: var(--space-1) var(--space-1) 0 var(--fest-a); --line: var(--on-night); }
+  .list :global(li:nth-child(odd) .row) { transform: rotate(-0.4deg); }
+  .list :global(li:nth-child(-n+3) .row) { padding-block: var(--space-4); border-width: var(--bw-strong); box-shadow: var(--space-2) var(--space-2) 0 var(--fest-a); }
+  .list :global(.row[data-fest] .no) { color: var(--fest-a); }
   .list :global(.no) { font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 800; min-width: 2ch; text-align: right; }
-  .list :global(li:first-child .no) { color: var(--pink-text); }
   .list :global(.emoji) {
     flex: 0 0 auto; display: grid; place-items: center; width: var(--space-10); height: var(--space-10);
     border: var(--bw-sm) solid var(--line); border-radius: var(--radius-sm); font-size: var(--fs-xl);

@@ -129,6 +129,10 @@
   --fest-quiz-night: #130b2a;
   --fest-quiz-a: #9b6bff;
   --fest-quiz-b: #ffd23f;
+  /* Thema „wof“ für „Wahr oder Fake?“: Lime (wahr) und Pink (Fake) leuchten auf dunkler Bühne */
+  --fest-wof-night: #0d0a14;
+  --fest-wof-a: #b6f23a;
+  --fest-wof-b: #ff3d7f;
   --fest-halloween-night: #140c06;
   --fest-halloween-a: #ff7a1a;
   --fest-halloween-b: #b07cff;
@@ -750,7 +754,7 @@ html[data-sky] .stage { background: var(--sky-stage); }
   --shadow-fest-xl: var(--space-3) var(--space-3) 0 var(--fest-b);
   --shadow-fest-2xl: var(--space-4) var(--space-4) 0 var(--fest-a);
   --fest-rays: repeating-conic-gradient(from 0deg at 50% 50%, color-mix(in srgb, var(--fest-a) 22%, transparent) 0deg 9deg, transparent 9deg 18deg);
-  --fest-sky: radial-gradient(circle at 82% 18%, color-mix(in srgb, var(--fest-a) 55%, transparent) 0%, color-mix(in srgb, var(--fest-b) 18%, transparent) calc(var(--fest-glow-size) / 2), transparent var(--fest-glow-size)), var(--dots-night), var(--fest-night);
+  --fest-sky: radial-gradient(circle at 82% var(--fest-glow-y, 18%), color-mix(in srgb, var(--fest-a) 55%, transparent) 0%, color-mix(in srgb, var(--fest-b) 18%, transparent) calc(var(--fest-glow-size) / 2), transparent var(--fest-glow-size)), var(--dots-night), var(--fest-night);
 }
 [data-fest='fest'] { --fest-night: var(--fest-fest-night); --fest-a: var(--fest-fest-a); --fest-b: var(--fest-fest-b); }
 [data-fest='grusel'] { --fest-night: var(--fest-grusel-night); --fest-a: var(--fest-grusel-a); --fest-b: var(--fest-grusel-b); }
@@ -770,6 +774,7 @@ html[data-sky] .stage { background: var(--sky-stage); }
 [data-fest='brands'] { --fest-night: var(--fest-brands-night); --fest-a: var(--fest-brands-a); --fest-b: var(--fest-brands-b); }
 [data-fest='popculture'] { --fest-night: var(--fest-popculture-night); --fest-a: var(--fest-popculture-a); --fest-b: var(--fest-popculture-b); }
 [data-fest='quiz'] { --fest-night: var(--fest-quiz-night); --fest-a: var(--fest-quiz-a); --fest-b: var(--fest-quiz-b); }
+[data-fest='wof'] { --fest-night: var(--fest-wof-night); --fest-a: var(--fest-wof-a); --fest-b: var(--fest-wof-b); }
 [data-fest='halloween'] { --fest-night: var(--fest-halloween-night); --fest-a: var(--fest-halloween-a); --fest-b: var(--fest-halloween-b); }
 [data-fest='muertos'] { --fest-night: var(--fest-muertos-night); --fest-a: var(--fest-muertos-a); --fest-b: var(--fest-muertos-b); }
 [data-fest='diwali'] { --fest-night: var(--fest-diwali-night); --fest-a: var(--fest-diwali-a); --fest-b: var(--fest-diwali-b); }
@@ -826,6 +831,8 @@ html[data-sky] .stage { background: var(--sky-stage); }
   clip-path: polygon(0 100%, 100% 0, 100% 100%);
 }
 .sec[data-edge='left']::before { clip-path: polygon(0 0, 100% 100%, 0 100%); }
+/* Dunkle Themen-Bühne: Kante nur in Nachtfarbe, sonst schneidet das Leuchten oben eine harte Linie */
+.fest-sky[data-edge]::before { background: var(--dots-night), var(--fest-night); background-size: var(--dots-size-md) var(--dots-size-md); }
 .sec--night { background: var(--dots-night), var(--night); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-night); --focus: var(--yellow); --line: var(--on-night); }
 .sec--paper { background: var(--dots-paper), var(--bg); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--ink); }
 .sec--yellow { background: var(--dots), var(--yellow); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-accent); --line: var(--on-accent); --focus: var(--on-accent); }

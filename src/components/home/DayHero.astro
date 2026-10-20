@@ -1,16 +1,17 @@
 ---
-// Kopf der Startseite (Design „E“, Wunsch von Eric, 2026-10-10): gelbe Fläche mit heutigem Wochentag und Datum.
+// Kopf der Startseite (Design „E“, Wunsch von Eric, 2026-10-10): heutiger Wochentag und Datum.
+// Seit 2026-10-20 (Wunsch von Eric, Entwurf A) eine dunkle Bühne in der „Farbe des Tages“: jeden Tag die nächste Kategorie.
 // Wechselt jeden Tag um Mitternacht (deutsche Zeit) im Browser, auch wenn die Seite nicht neu gebaut wurde.
-// Jeder Wochentag hat eigene Farbe, eigene Überschrift und einen Abschnitt „im Fokus“ (data-focus-day an den Abschnitten):
+// Jeder Wochentag hat eigene Überschrift und einen Abschnitt „im Fokus“ (data-focus-day an den Abschnitten):
 // Montag Abstimmung, Dienstag Fakt der Woche, Mittwoch Wahr oder Fake, Donnerstag Was war zuerst, Freitag Top 5,
 // Samstag neue Quizfragen, Sonntag Kategorien.
 // Am Feiertag (Wunsch von Eric, 2026-10-15) übernimmt das Fest den Kopf: Name des Festes riesig, riesiges Motiv
 // (Kürbis, Flagge …), Farben und Deko des Themas und der Feiertags-Fakt des Tages groß in der Mitte.
 // Am nächsten Tag schaltet der Browser von selbst zurück auf den Wochentag.
-import type { Lang } from '../../config';
+import { CATEGORIES, type Lang } from '../../config';
 import { t } from '../../i18n/ui';
 import { berlinDay, postDay } from '../../week';
-import { holidayOn, festOfHoliday } from '../../data/holidays';
+import { holidayOn, festOfHoliday, festOf } from '../../data/holidays';
 import { postUrl, type Post } from '../../lib';
 import Icon from '../Icon.astro';
 import FestDeco from '../FestDeco.astro';
@@ -30,6 +31,11 @@ const fest = holiday && festOfHoliday(holiday);
 const festFact = holiday && posts.find((p) => p.data.category === 'holiday' && postDay(p.data.date) === today);
 const festName = holiday?.[lang] ?? '';
 const festWord = holiday?.word?.[lang] ?? festName;
+// Farbe des Tages: jeden Tag die nächste Kategorie, nach 16 Tagen war jede einmal dran (keine wird bevorzugt).
+const dayCats = CATEGORIES.filter((c) => c !== 'holiday');
+const themeOf = (c: string) => (c === 'horror' ? 'grusel' : c);
+const dayNo = (day: string) => Math.floor(Date.parse(`${day}T12:00:00Z`) / 86400000) % dayCats.length;
+const di = dayNo(today);
 ---
 {fest && holiday && (
   <section class="sec fest-sky fest-hero" data-fest={fest.theme} data-fest-hero={today}>
@@ -62,9 +68,11 @@ const festWord = holiday?.word?.[lang] ?? festName;
     </div>
   </section>
 )}
-<section class="sec sec--yellow day-hero" data-day-hero data-weekday={wd} data-lang={lang} hidden={!!fest}>
+<section class="sec fest-sky day-hero" data-day-hero data-weekday={wd} data-fest={themeOf(dayCats[di])} data-themes={dayCats.map(themeOf).join(',')} data-lang={lang} hidden={!!fest}>
+  {dayCats.map((c, i) => <span class="day-deco" data-deco={i} hidden={i !== di}><FestDeco deco={festOf(c, '')?.deco ?? []} size="lg" /></span>)}
   <div class="wrap top-row">
     <span class="pill" data-date>{dateText}</span>
+    {dayCats.map((c, i) => <span class="cat-pill" data-deco={i} hidden={i !== di}>{h.dayColour}: {ui.categories[c]}</span>)}
   </div>
   <p class="mega day-word" aria-hidden="true" data-day-word data-len={h.days[wd].length}>{h.days[wd]}</p>
   <div class="wrap row">
@@ -96,6 +104,10 @@ const festWord = holiday?.word?.[lang] ?? festName;
       const noon = new Date(`${today}T12:00:00Z`);
       const wd = noon.getUTCDay();
       root.dataset.weekday = String(wd);
+      const themes = root.dataset.themes!.split(',');
+      const di = String(Math.floor(noon.getTime() / 86400000) % themes.length);
+      root.dataset.fest = themes[+di];
+      root.querySelectorAll<HTMLElement>('[data-deco]').forEach((d) => (d.hidden = d.dataset.deco !== di));
       root.querySelector('[data-date]')!.textContent = new Intl.DateTimeFormat(lang, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(noon);
       const word = root.querySelector<HTMLElement>('[data-day-word]')!;
       word.textContent = new Intl.DateTimeFormat(lang, { weekday: 'long', timeZone: 'UTC' }).format(noon);
@@ -134,16 +146,18 @@ const festWord = holiday?.word?.[lang] ?? festName;
     .fest-row { grid-template-columns: minmax(0, 1fr); }
     .fest-art { max-width: 18rem; }
   }
-  .day-hero { padding: var(--space-8) 0 calc(var(--space-12) + var(--bleed)); overflow: clip; border-bottom: none; }
+  .day-hero { position: relative; padding: var(--space-8) 0 calc(var(--space-12) + var(--bleed)); overflow: clip; border-bottom: none; }
+  .day-hero .top-row, .day-hero .day-word, .day-hero .row { position: relative; z-index: 1; }
   .top-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
   .pill {
     display: inline-block; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill);
-    background: var(--on-accent); color: var(--yellow); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lg);
+    background: var(--fest-a); color: var(--on-accent); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lg);
     transform: rotate(-2deg);
   }
+  .cat-pill { padding: var(--space-1) var(--space-3); border: var(--bw-sm) solid var(--fest-a); border-radius: var(--radius-pill); color: var(--fest-a); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); transform: rotate(-2deg); }
   .day-word {
     margin: var(--space-4) calc(-1 * var(--space-6)) 0; font-size: calc(var(--fs-mega) * var(--fit, 1)); text-transform: uppercase;
-    text-shadow: var(--shift-mega) var(--shift-mega) 0 var(--day-accent, var(--pink));
+    text-shadow: var(--shift-mega) var(--shift-mega) 0 var(--fest-a);
     transform: rotate(-3deg); transform-origin: left center;
   }
   /* Lange Wochentage etwas kleiner, damit das Wort lesbar bleibt und trotzdem über den Rand ragt */
@@ -156,20 +170,13 @@ const festWord = holiday?.word?.[lang] ?? festName;
   .variant[hidden] { display: none; }
   h1 {
     margin: 0; max-width: 20ch; font-size: var(--fs-display-lg); line-height: 1.02; letter-spacing: -0.04em;
-    padding: var(--space-4) var(--space-5); background: var(--yellow); border: var(--bw-strong) solid var(--on-accent);
-    border-radius: var(--radius-md); box-shadow: var(--shadow-accent); transform: rotate(-1deg);
+    padding: var(--space-4) var(--space-5); background: var(--surface); border: var(--bw-strong) solid var(--on-accent);
+    border-radius: var(--radius-md); box-shadow: var(--shadow-on-night); transform: rotate(-1deg);
   }
   .acts { display: flex; flex-wrap: wrap; gap: var(--space-3); }
-  .acts .btn { border-color: var(--on-accent); box-shadow: var(--shadow-accent-sm); }
+  .acts .btn { border-color: var(--on-accent); box-shadow: var(--shadow-night-sm); }
+  .acts .btn--pink { background: var(--fest-a); color: var(--on-accent); }
   .acts .btn--ghost { background: var(--surface); color: var(--ink); }
-  /* Farbe je Wochentag: Schatten des Riesenworts */
-  [data-weekday='1'] { --day-accent: var(--pink); }
-  [data-weekday='2'] { --day-accent: var(--lime); }
-  [data-weekday='3'] { --day-accent: var(--cyan); }
-  [data-weekday='4'] { --day-accent: var(--violet); }
-  [data-weekday='5'] { --day-accent: var(--orange); }
-  [data-weekday='6'] { --day-accent: var(--teal); }
-  [data-weekday='0'] { --day-accent: var(--blue); }
   @media (max-width: 760px) {
     .day-hero { padding-top: var(--space-5); }
     .day-word { margin-inline: calc(-1 * var(--space-2)); }

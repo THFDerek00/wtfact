@@ -1,10 +1,11 @@
 ---
 // Quiz-Seite /de/quiz/ und /en/quiz/ (Wunsch von Eric, 2026-10-15): Der Menüpunkt „Quiz“ führt hierher statt auf die
-// Startseite. Gelber Kopf wie die Kategorien-Seite, darunter dieselben Spiele wie auf der Startseite (Wahr oder Fake, Was war zuerst).
+// Startseite. Kopf als dunkle Bühne im Thema „quiz“ wie „Was war zuerst?“, darunter dieselben Spiele wie auf der Startseite (Wahr oder Fake, Was war zuerst).
 import Base from '../../layouts/Base.astro';
 import TrueOrFake from '../../components/home/TrueOrFake.astro';
 import WhatFirst from '../../components/home/WhatFirst.astro';
 import Icon from '../../components/Icon.astro';
+import FestDeco from '../../components/FestDeco.astro';
 import { LANGS, type Lang } from '../../config';
 import { t, quizPath } from '../../i18n/ui';
 
@@ -16,7 +17,8 @@ const q = t(lang).quiz;
 const other: Lang = lang === 'de' ? 'en' : 'de';
 ---
 <Base lang={lang} title={q.pageTitle} description={q.pageIntro} altUrl={quizPath(other)}>
-  <section class="sec sec--yellow qhero">
+  <section class="sec fest-sky qhero" data-fest="quiz">
+    <FestDeco deco={['question', 'hourglass', 'bulb', 'sparkle', 'question', 'star']} size="lg" />
     <div class="wrap">
       <span class="pill">{q.pageKicker}</span>
       <h1 class="mega word">{q.pageTitle}</h1>
@@ -32,12 +34,13 @@ const other: Lang = lang === 'de' ? 'en' : 'de';
 </Base>
 
 <style>
-  .qhero { padding: var(--space-10) 0 calc(var(--space-12) + var(--bleed)); overflow: clip; }
-  .pill { display: inline-block; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); background: var(--on-accent); color: var(--yellow); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lg); transform: rotate(-3deg); }
-  .word { margin: var(--space-5) calc(-1 * var(--space-4)) 0; font-size: var(--fs-huge); text-transform: uppercase; text-shadow: var(--shift-mega) var(--shift-mega) 0 var(--pink); transform: rotate(-2deg); }
+  .qhero > .wrap { position: relative; z-index: 1; }
+  .qhero { position: relative; padding: var(--space-10) 0 calc(var(--space-12) + var(--bleed)); overflow: clip; }
+  .pill { display: inline-block; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); background: var(--fest-a); color: var(--on-accent); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lg); transform: rotate(-3deg); }
+  .word { margin: var(--space-5) calc(-1 * var(--space-4)) 0; font-size: var(--fs-huge); text-transform: uppercase; text-shadow: var(--shift-mega) var(--shift-mega) 0 var(--fest-a); transform: rotate(-2deg); }
   .intro { max-width: 46ch; margin: var(--space-12) 0 0; font-size: var(--fs-xl); font-weight: 600; }
   .acts { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-7); }
-  .acts .btn { border-color: var(--on-accent); box-shadow: var(--shadow-accent-sm); }
+  .acts .btn { border-color: var(--on-accent); box-shadow: var(--shadow-night-sm); }
   .acts .btn--ghost { background: var(--surface); color: var(--ink); }
   /* Sprungziele der Knöpfe: Platz für Kopfzeile und die Quizkarte, die über den Abschnitt ragt */
   :global(#wof), :global(#first) { scroll-margin-top: calc(var(--space-12) + var(--bleed)); }

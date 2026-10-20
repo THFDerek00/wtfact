@@ -129,6 +129,12 @@ Seit 2026-10-20 (Wunsch von Eric) hat jede normale Kategorie ein eigenes Thema i
 (`src/data/holidays.ts`), die Grafiken dafür in `src/data/fest-art-categories.ts`. Karten im Labor, Kategorie-Kacheln und
 Faktseiten nutzen dieses Thema; Band und Schriftzug bleiben bei normalen Kategorien beim Slogan.
 
+Auch die übrigen Flächen sind seit 2026-10-20 dunkle Bühnen statt gelber, pinker oder limefarbener Abschnitte (Wunsch von Eric):
+Wochentag-Kopf in der „Farbe des Tages“ (jeden Tag die nächste Kategorie, keine bevorzugt), Sonderseite („nature“),
+Wahr oder Fake (eigenes Thema „wof“: Lime und Pink), Quiz-Kopf („quiz“), Kategorien-Kopf und Fuß („fest“, Logofarben),
+dazu in den WTF-Charts Top 10, Tippspiel, Verlauf und Rangliste in der Farbe der jeweiligen Kategorie. Liegt das Leuchten
+oben an einer schrägen Kante (`data-edge`), malt die Kante nur die Nachtfarbe; `--fest-glow-y` verschiebt das Leuchten nach unten.
+
 - Welcher Feiertag an welchem Tag welches Thema, welche Deko (`deco`), welches Riesenmotiv (`art`) und welchen Schriftzug (`look`)
   hat, steht in `src/data/holidays.ts` (`HOLIDAYS`, `THEMES`). Jeder Feiertag hat ein eigenes Thema; „fest“ ist nur die Notlösung.
 - Ein Thema sind drei Tokens in `:root` (`--fest-<thema>-night` für die Bühne, `-a` und `-b` für Akzentflächen) plus eine Zeile
