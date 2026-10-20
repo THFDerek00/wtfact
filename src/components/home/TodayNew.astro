@@ -195,7 +195,8 @@ const total = shown.length + upcoming.length;
   .arrow { cursor: pointer; padding: var(--space-2) var(--space-3); font-size: var(--fs-lg); }
   @media (max-width: 760px) {
     .track { grid-auto-columns: 88%; gap: var(--space-4); }
-    .slide { grid-template-columns: minmax(0, 1fr); padding: var(--space-10) var(--space-5) var(--space-6); gap: var(--space-4); }
+    /* Oben so viel Platz, dass die Riesenzahl über der Kategorie endet (lag am Handy auf dem Etikett, Eric 2026-10-16) */
+    .slide { grid-template-columns: minmax(0, 1fr); padding: var(--space-12) var(--space-5) var(--space-6); gap: var(--space-4); }
     .tile { width: var(--space-12); font-size: var(--fs-emoji-sm); position: absolute; right: var(--space-4); top: calc(-1 * var(--space-6)); }
     .num { font-size: var(--fs-emoji-xl); top: calc(-1 * var(--space-6)); left: var(--space-2); }
     .cd b { font-size: var(--fs-2xl); }
