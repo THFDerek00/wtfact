@@ -21,7 +21,7 @@ Stil: Neo-Brutalismus. Dicke Ränder, harte Schatten ohne Weichzeichner, knallig
 | Spiel | `--flask`, `--flask-glow`, `--book-*`, `--wood*`, `--metal`, `--brick*`, `--roof*`, `--smoke` | Reagenzgläser, Buch, Kisten, Fässer und Häuser im Science Jumper. Das Spiel liest alle Farben per `getComputedStyle` aus den Tokens |
 | Bühne | `--night`, `--on-night`, `--on-night-muted` | Dunkle Fläche für Hero, Footer, „Nächster Fakt“; in beiden Modi dunkel |
 | Hintergrund | `--sky-dot`, `--sky-spot`, `--sky-gap`, `--sky-spot-size`, `--sky-shape-opacity`, `--sky-glow-edge`, `--sky-stage`, `--dur-sky-drift` | Helle Werte in `:root`, dunkle in den Dark-Mode-Blöcken, siehe „Hintergrund“ unten |
-| Schrift | `--font-display`, `--font-body`, `--fs-xs` (13) bis `--fs-3xl` (30), `--fs-display-sm/md/lg`, `--fs-emoji-sm…xl` | |
+| Schrift | `--font-headline` (WTF Plakat), `--font-display` und `--font-body` (WTF Text Locker), `--font-logo` (Space Grotesk), `--headline-fill`, `--headline-palette`, `--headline-palette-card`, `--fs-xs` (13) bis `--fs-3xl` (30), `--fs-display-sm/md/lg`, `--fs-emoji-sm…xl` | Siehe „Hausschriften“ unten |
 | Abstände | `--space-1` (4px) bis `--space-12` (80px) | 4er-Raster |
 | Breite | `--content-width` (1280px), `--gutter`, `--measure` (72ch) | Eine Breite für alle Bereiche, siehe „Breite“ unten |
 | Icons | `--icon-size`, `--icon-size-lg`, `--icon-stroke` | Lucide-Icons über `Icon.astro`, siehe „Icons und Emojis“ unten |
@@ -94,6 +94,20 @@ Wunsch von Eric (2026-10-02). Abläufe und Einrichtung: `README.md`.
 - **Gold-Fakten** (Science Jumper): In der Sammlung nur eine kurze Vorschau wie die Faktenkarten. Ein Klick öffnet die eigene Seite `/[lang]/science-jumper/[id]/` mit dem ganzen Fakt und den Quellen; gesperrte Fakten zeigen dort nur, ab welchem Highscore sie aufgehen.
 - **Gold-Fakten als Schatzkarte** (Eric, 2026-10-09, „darf mutig sein“): Karten und Banner sind in beiden Modi dunkel (`--night`) mit Goldrahmen (`--gold`) und goldenem harten Schatten (`--shadow-gold`). Hinter dem Emoji leuchtet `--gold-glow`, darüber drehen sich langsam Strahlen (`--gold-rays`, `--dur-rays`); über die Bildfläche zieht ab und zu ein Glanz (`--gold-shine`). Oben links ein schräges Blattgold-Etikett „Gold-Fakt“, eine runde Medaille (`--gold-foil`) zeigt Reagenzglas und Highscore. Sterne mit goldenem Rand, innen weiter Kategoriefarbe. Auf der eigenen Seite steht der freigeschaltete Titel in Blattgold. Gesperrte Plätze: gestrichelter Rand `--gold-deep`, Schloss in einer Goldmünze.
 - **Gold-Fakt-Seite als Schatzkammer** (Eric, 2026-10-09, „durch und durch besonders und anders“): Die ganze Seite ist dunkel (`--night`) mit Goldstrahlen und Sternen, Kopf mittig mit schwebendem Emoji (`--dur-bob`) vor dem Lichthof, Medaille mit Highscore, Etikett „Gold-Fakt 7 von 16“. Gesperrt: Tresortür mit Goldfortschritt bis zur Stufe. Freigeschaltet: Titel in Blattgold, Funkenregen und der Fakt auf einer Pergament-Tafel (`--parchment`, `--parchment-muted`) mit doppeltem Goldrahmen, Eck-Ornamenten, goldener Initiale und „Die Beweisstücke“ als nummerierte Goldmünzen; die Tafel erscheint mit `--dur-reveal` und einem Glanz. Darunter eine ausgesuchte Werbung (Tabelle `gold_products`, ein hochwertiges Produkt pro Gold-Fakt und Sprache mit eigenem Emoji), erst nach dem Freischalten sichtbar, mit Etikett „Werbung“ und Provisionshinweis. Unten die Sammlung als Münzreihe (`--coin-size`): freigeschaltet in Blattgold, gesperrt gestrichelt mit Schloss, die aktuelle mit Ring.
+
+## Hausschriften
+
+Entschieden von Eric am 2026-10-20, Entwürfe und Erzeugung in `brand/schrift-entwuerfe/` im Projektordner. Dateien in `src/styles/fonts/` (SIL OFL 1.1).
+
+- **WTF Plakat** (`--font-headline`) nur für Überschriften: `h1`, `h2` und große Titel mit der Klasse `.headline` (Fakt des Tages, Kategorie-Kacheln).
+  Farbschrift aus Space Grotesk Bold: Füllung ist die CSS-Textfarbe, Kontur Tinte, harter Schatten aus der Palette
+  (`font-palette: light` = Tinte, `dark` = Papier). Die Füllung kommt aus `--headline-fill`: Kategoriefarbe (`--fest-a`) überall,
+  wo `data-fest` steht (Faktseite, Karten, Kacheln), sonst Gelb wie der Logo-Aufkleber, auf Akzentflächen Papier.
+  Die Palette kommt aus `--headline-palette` (dunkle Bühnen und Dunkelmodus `dark`, Karten folgen dem Modus über `--headline-palette-card`).
+  Kleine Überschriften (unter etwa 20 px) bekommen `.head-small` und bleiben in der Textschrift; `h3` ist immer Textschrift.
+- **WTF Text Locker** (`--font-display`, `--font-body`) für alles andere: Fließtext, Knöpfe, Etiketten, Menü, Zahlen.
+  Recursive Sans Casual; die Null hat einen Pinselstrich, damit sie sich vom O unterscheidet (Wunsch von Eric).
+- **Space Grotesk** (`--font-logo`) nur noch für den Logo-Schriftzug.
 
 ## Slogan
 

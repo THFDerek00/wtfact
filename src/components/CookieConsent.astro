@@ -13,7 +13,7 @@ const keys = Object.keys(services) as (keyof typeof SITE.consent)[];
 ---
 {keys.length > 0 && (
   <section class="consent card" role="dialog" aria-labelledby="consent-title" data-consent={JSON.stringify(services)} hidden>
-    <h2 id="consent-title">{ui.title}</h2>
+    <h2 id="consent-title" class="head-small">{ui.title}</h2>
     <p>{ui.text}</p>
     <ul>{keys.map((k) => <li>{ui.services[k]}</li>)}</ul>
     <p>{`${ui.after} `}<a href={`/${lang}/datenschutz/`}>{ui.more}</a>.</p>

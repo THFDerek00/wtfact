@@ -1,5 +1,10 @@
 @import '@fontsource-variable/space-grotesk';
-@import '@fontsource-variable/inter';
+/* Hausschriften (Eric, 2026-10-20), Entwürfe und Erzeugung in brand/schrift-entwuerfe/ im Projektordner, Lizenz SIL OFL 1.1.
+   WTF Plakat: Farbschrift nur für Überschriften. Füllung = CSS color, Schatten und Kontur aus der Palette (font-palette light/dark).
+   Gewichtsbereich angegeben, damit der Browser bei font-weight: 700 nichts künstlich fetter rechnet. */
+@font-face { font-family: 'WTF Plakat'; src: url('./fonts/WTFPlakat.woff2') format('woff2'); font-weight: 100 900; font-display: swap; }
+/* WTF Text Locker: alles außer Überschriften. Recursive Sans Casual, Null mit Pinselstrich (unterscheidbar vom O). */
+@font-face { font-family: 'WTF Text Locker'; src: url('./fonts/WTFTextLocker.woff2') format('woff2-variations'), url('./fonts/WTFTextLocker.woff2') format('woff2'); font-weight: 300 900; font-display: swap; }
 /* Schriften der Feiertags-Schriftzüge (FestWord.astro). Der Browser lädt eine Schrift erst, wenn sie auf der Seite vorkommt. */
 @import '@fontsource/creepster/latin-400.css';
 @import '@fontsource/unifrakturmaguntia/latin-400.css';
@@ -380,8 +385,16 @@
   --smoke: #8a8496;
 
   /* Schrift */
-  --font-display: 'Space Grotesk Variable', system-ui, sans-serif;
-  --font-body: 'Inter Variable', system-ui, sans-serif;
+  /* Überschriften (h1–h3) in WTF Plakat, alles andere in WTF Text Locker; Space Grotesk nur noch für den Logo-Schriftzug. */
+  --font-headline: 'WTF Plakat', var(--font-logo);
+  --font-display: 'WTF Text Locker', system-ui, sans-serif;
+  --font-body: 'WTF Text Locker', system-ui, sans-serif;
+  --font-logo: 'Space Grotesk Variable', system-ui, sans-serif;
+  /* Füllfarbe der Überschriften: Kategoriefarbe (--fest-a) wo eine Kategorie gilt, sonst Gelb wie der Aufkleber im Logo.
+     Auf Akzentflächen Papier. Palette: light = Schatten Tinte, dark = Schatten Papier (dunkle Bühne, Dunkelmodus). */
+  --headline-fill: var(--yellow);
+  --headline-palette: light;
+  --headline-palette-card: light; /* helle Karten (.card) auf dunkler Bühne */
   /* Schriften für die Riesenschriftzüge der Feiertage (FestWord.astro) */
   --font-fest-spooky: 'Creepster', var(--font-display);
   --font-fest-fraktur: 'UnifrakturMaguntia', var(--font-display);
@@ -534,6 +547,8 @@
     --sky-shape-opacity: 0.45;
     --sky-glow-edge: transparent;
     --sky-stage: color-mix(in srgb, var(--night) 30%, transparent); /* Hintergrund scheint durch */
+    --headline-palette: dark;
+    --headline-palette-card: dark;
     color-scheme: dark;
   }
 }
@@ -552,6 +567,8 @@
   --sky-shape-opacity: 0.45;
   --sky-glow-edge: transparent;
   --sky-stage: color-mix(in srgb, var(--night) 30%, transparent); /* Hintergrund scheint durch */
+  --headline-palette: dark;
+  --headline-palette-card: dark;
   color-scheme: dark;
 }
 
@@ -571,7 +588,21 @@ body {
 a { color: inherit; }
 img { max-width: 100%; height: auto; }
 [hidden] { display: none !important; }
-h1, h2, h3 { font-family: var(--font-display); line-height: 1.15; letter-spacing: -0.02em; }
+/* h1, h2 und große Titel (.headline) in WTF Plakat; h3 und kleine Titel bleiben in der Textschrift, Plakat wird unter ~20px matschig. */
+h1, h2, .headline {
+  font-family: var(--font-headline); font-weight: 400; font-synthesis: none; line-height: 1.15; letter-spacing: 0;
+  color: var(--headline-fill); font-palette: var(--headline-palette);
+}
+h3 { font-family: var(--font-display); line-height: 1.2; }
+/* Kleine Überschriften (Frage unter dem Fakt, Cookie-Hinweis): Textschrift statt Plakat. */
+.head-small { font-family: var(--font-display); font-weight: 800; color: inherit; font-palette: normal; }
+/* Überschriften in der Farbe der Kategorie (Eric, 2026-10-20): jede Karte und Faktseite mit data-fest bringt --fest-a mit. */
+[data-fest] { --headline-fill: var(--fest-a); }
+/* Helle Karten folgen dem Modus, dunkle Bühnen bekommen hellen Schatten, damit die Kontur nicht im Dunkel verschwindet. */
+.card { --headline-palette: var(--headline-palette-card); }
+.stage, .sec--night, .fest-sky { --headline-palette: dark; }
+/* Akzentflächen: Füllung Papier, sonst verschwindet sie in der gleichfarbigen Fläche. */
+.accent, .gold, .fest-a, .sec--yellow, .sec--pink, .sec--violet, .sec--lime, [class*='cat-'] { --headline-fill: var(--on-night); }
 
 /* Ein Fokus-Stil für alles, was man mit der Tastatur erreicht */
 :focus-visible {

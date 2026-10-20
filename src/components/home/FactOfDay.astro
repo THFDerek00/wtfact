@@ -5,7 +5,7 @@
 // Die Zahl ragt oben in den gelben Kopf und unten in den nächsten Abschnitt.
 import type { Lang } from '../../config';
 import { t } from '../../i18n/ui';
-import { postUrl, bigNumber, factInfo, type Post } from '../../lib';
+import { postUrl, bigNumber, factInfo, festFor, type Post } from '../../lib';
 import { berlinDay, addDays, postDay, pickFactOfDay } from '../../week';
 import Icon from '../Icon.astro';
 interface Props { lang: Lang; posts: Post[] }
@@ -33,7 +33,7 @@ const pick = pickFactOfDay(cands.map(factInfo), {}, today)?.key ?? cands[0]?.dat
           <a class="card fcard bleed" href={postUrl(p)}>
             <span class="sticker">WTF?!</span>
             <span class="chips"><span class:list={['chip', `cat-${d.category}`]}>{ui.categories[d.category]}</span></span>
-            <span class="title">{d.title}</span>
+            <span class="title headline" data-fest={festFor(p)?.theme}>{d.title}</span>
             <span class="hook">{d.hook}</span>
             <span class="cta"><span class="btn">{ui.home.readFull} <Icon name="chevron-right" /></span><span class="src"><Icon name="badge-check" /> {ui.sourcesCount(d.sources.length)}</span></span>
           </a>
@@ -94,7 +94,7 @@ const pick = pickFactOfDay(cands.map(factInfo), {}, today)?.key ?? cands[0]?.dat
   }
   .fcard:hover { transform: translate(-3px, -3px) rotate(-0.4deg); }
   .fcard .sticker { position: absolute; top: calc(-1 * var(--space-5)); left: var(--space-6); font-family: var(--font-display); font-weight: 800; font-size: var(--fs-xl); border: var(--bw-sm) solid var(--on-accent); }
-  .title { font-family: var(--font-display); font-size: var(--fs-display-sm); font-weight: 700; line-height: 1.08; letter-spacing: -0.03em; }
+  .title { font-size: var(--fs-display-sm); line-height: 1.12; }
   .hook { color: var(--muted); font-size: var(--fs-lg); }
   .cta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); margin-top: var(--space-2); }
   .src { display: inline-flex; align-items: center; gap: var(--space-1); font-weight: 700; font-size: var(--fs-sm); }
