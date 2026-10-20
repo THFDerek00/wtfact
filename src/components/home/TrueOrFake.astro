@@ -1,12 +1,13 @@
 ---
 // „Wahr oder Fake?“ (Design „E“, Wunsch von Eric, 2026-10-10): 10 Aussagen am Stück, nach jeder Antwort die Auflösung
 // mit Quelle und wie alle anderen getippt haben. Darunter drei Statistiken. Fragen: src/data/quiz.ts (jeden Samstag 5 neue),
-// Speichern und Zählen: src/scripts/quiz.ts.
+// Speichern und Zählen: src/scripts/quiz.ts. Dunkle Bühne im Thema „wof“: links pinkes, rechts lime Leuchten (2026-10-20).
 import type { Lang } from '../../config';
 import { t } from '../../i18n/ui';
 import { WOF, liveItems } from '../../data/quiz';
 import { berlinDay, addDays } from '../../week';
 import Icon from '../Icon.astro';
+import FestDeco from '../FestDeco.astro';
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const ui = t(lang);
@@ -24,12 +25,13 @@ const texts = {
 };
 ---
 {items.length > 0 && (
-  <section class="sec wof" id="wof" data-edge data-wof data-items={JSON.stringify(items)} data-texts={JSON.stringify(texts)} data-focus-day="3,6">
+  <section class="sec wof" id="wof" data-fest="wof" data-edge data-wof data-items={JSON.stringify(items)} data-texts={JSON.stringify(texts)} data-focus-day="3,6">
     <span class="focus-tag">{ui.home.dayFocus}</span>
+    <FestDeco deco={['question', 'sparkle', 'bolt', 'star']} size="lg" />
     <div class="wrap">
       <div class="in">
         <div class="head">
-          <h2>{q.wofTitle[0]}<br />{q.wofTitle[1]}<br />{q.wofTitle[2]}</h2>
+          <h2><span class="w-true">{q.wofTitle[0]}</span><br />{q.wofTitle[1]}<br /><span class="w-fake">{q.wofTitle[2]}</span></h2>
           <p class="sub">{q.wofIntro}</p>
           <span class="weekly"><Icon name="calendar" /> {q.newWeek}</span>
         </div>
@@ -186,16 +188,24 @@ const texts = {
   .wof > .focus-tag { right: auto; left: var(--gutter); transform: rotate(-3deg); }
   .wof {
     padding-block: var(--space-12);
-    background: var(--dots-strong), linear-gradient(100deg, var(--pink) 0 52%, var(--lime) 52% 100%);
-    background-size: var(--dots-size-md) var(--dots-size-md), auto; color: var(--on-accent); --line: var(--on-accent); --focus: var(--on-accent);
+    background:
+      radial-gradient(circle at 12% 28%, color-mix(in srgb, var(--fest-b) 55%, transparent) 0%, transparent var(--fest-glow-size)),
+      radial-gradient(circle at 88% 78%, color-mix(in srgb, var(--fest-a) 45%, transparent) 0%, transparent var(--fest-glow-size)),
+      var(--dots-night), var(--fest-night);
+    background-size: auto, auto, var(--dots-size-md) var(--dots-size-md), auto; color: var(--on-night); --line: var(--on-night); --focus: var(--fest-a);
+    --headline-palette: dark;
   }
+  .wof > .wrap { position: relative; z-index: 1; }
+  .wof h2 { color: var(--on-night); }
+  .w-true { color: var(--fest-a); }
+  .w-fake { color: var(--fest-b); }
   .in { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: var(--space-11); align-items: start; }
   h2 { margin: 0; font-size: var(--fs-display-2xl); line-height: 0.9; letter-spacing: -0.05em; text-transform: uppercase; }
   .sub { font-size: var(--fs-lg); font-weight: 600; max-width: 34ch; margin: var(--space-5) 0; }
-  .weekly { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); background: var(--on-accent); color: var(--yellow); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); }
+  .weekly { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); background: var(--fest-a); color: var(--on-accent); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); }
   .qcard {
     position: relative; display: flex; flex-direction: column; gap: var(--space-5); padding: var(--space-8);
-    background: var(--surface); color: var(--ink); border: var(--bw-strong) solid var(--on-accent); box-shadow: var(--shadow-2xl);
+    background: var(--surface); color: var(--ink); border: var(--bw-strong) solid var(--on-accent); box-shadow: var(--shadow-fest-2xl);
     margin-top: calc(-1 * var(--space-12) - var(--edge)); transform: rotate(0.6deg);
   }
   .k { display: flex; justify-content: space-between; font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); color: var(--muted); }
@@ -226,8 +236,9 @@ const texts = {
   .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-7); margin-top: var(--space-11); }
   .st {
     display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-6); background: var(--surface); color: var(--ink);
-    border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-lg); box-shadow: var(--shadow-accent);
+    border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-lg); box-shadow: var(--shadow-on-night);
   }
+  .st:nth-child(odd) { box-shadow: var(--shadow-night-pink); }
   .st:nth-child(1) { transform: rotate(-1.2deg); }
   .st:nth-child(3) { transform: rotate(1.2deg); }
   .lb { font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); }
@@ -235,7 +246,6 @@ const texts = {
   .v--pink { color: var(--pink-text); }
   .st p { margin: 0; font-size: var(--fs-md); }
   @media (max-width: 960px) {
-    .wof { background: var(--dots-strong), linear-gradient(170deg, var(--pink) 0 40%, var(--lime) 40% 100%); background-size: var(--dots-size-md) var(--dots-size-md), auto; }
     .in { grid-template-columns: minmax(0, 1fr); gap: var(--space-8); }
     .qcard { margin-top: 0; padding: var(--space-6) var(--space-5); }
     .stats { grid-template-columns: minmax(0, 1fr); gap: var(--space-5); margin-top: var(--space-9); }

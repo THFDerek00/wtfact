@@ -1,11 +1,12 @@
 ---
 // Quiz-Auswertung in den WTF-Charts (Wunsch von Eric, 2026-10-10): je Spiel die Trefferquote aller und die eigene,
-// dazu die 5 Fragen, bei denen die meisten danebenliegen. Zahlen: GET /api/index.php?r=quiz&game=… (src/scripts/quiz.ts).
+// dazu die 5 Fragen, bei denen die meisten danebenliegen. Je Spiel eine dunkle Bühne in seiner Farbwelt (wof, quiz). Zahlen: GET /api/index.php?r=quiz&game=… (src/scripts/quiz.ts).
 import type { Lang } from '../config';
 import { t } from '../i18n/ui';
 import { WOF, FIRST, liveItems } from '../data/quiz';
 import { berlinDay } from '../week';
 import Icon from './Icon.astro';
+import FestDeco from './FestDeco.astro';
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const ui = t(lang);
@@ -13,8 +14,8 @@ const f = ui.fame;
 const today = berlinDay();
 // Pro Frage: Text und die richtige Antwort (wof: 1 = wahr, first: 0 = a war zuerst)
 const games = [
-  { game: 'wof', title: ui.quiz.wofTitle.join(' '), href: `/${lang}/#wof`, items: liveItems(WOF, today).map((x) => ({ id: x.id, from: x.from, text: x[lang].q, right: x.answer ? 1 : 0 })) },
-  { game: 'first', title: ui.quiz.firstTitle, href: `/${lang}/#first`, items: liveItems(FIRST, today).map((x) => ({ id: x.id, from: x.from, text: `${x.a[lang]} / ${x.b[lang]}`, right: x.a.year < x.b.year ? 0 : 1 })) },
+  { game: 'wof', theme: 'wof', deco: ['question', 'sparkle', 'bolt', 'star'], title: ui.quiz.wofTitle.join(' '), href: `/${lang}/#wof`, items: liveItems(WOF, today).map((x) => ({ id: x.id, from: x.from, text: x[lang].q, right: x.answer ? 1 : 0 })) },
+  { game: 'first', theme: 'quiz', deco: ['hourglass', 'question', 'sparkle', 'star'], title: ui.quiz.firstTitle, href: `/${lang}/#first`, items: liveItems(FIRST, today).map((x) => ({ id: x.id, from: x.from, text: `${x.a[lang]} / ${x.b[lang]}`, right: x.a.year < x.b.year ? 0 : 1 })) },
 ];
 const texts = { pct: lang === 'de' ? '9001 %' : '9001%', right: f.quizRight(9001), answers: f.quizAnswers(9001), answersOne: f.quizAnswers(1) };
 ---
@@ -23,7 +24,8 @@ const texts = { pct: lang === 'de' ? '9001 %' : '9001%', right: f.quizRight(9001
   <p class="lead">{f.quizIntro}</p>
   <div class="games">
     {games.map((g) => (
-      <article class="card game" data-game={g.game}>
+      <article class="card game fest-sky" data-game={g.game} data-fest={g.theme}>
+        <FestDeco deco={g.deco} />
         <div class="g-head"><h3>{g.title}</h3><a class="btn btn--pink" href={g.href}>{f.quizPlay} <Icon name="chevron-right" /></a></div>
         <dl class="rates">
           <div><dt>{f.quizAll}</dt><dd data-all>–</dd><span class="n" data-all-n></span></div>
@@ -88,22 +90,24 @@ const texts = { pct: lang === 'de' ? '9001 %' : '9001%', right: f.quizRight(9001
   h2 { margin: 0 0 var(--space-3); font-size: var(--fs-display-sm); }
   .lead { color: var(--muted); max-width: 62ch; margin: 0 0 var(--space-7); }
   .games { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-8); }
-  .game { padding: var(--space-7); border-width: var(--bw-strong); box-shadow: var(--shadow-xl); }
-  .game:first-child { background: var(--dots-strong), var(--pink); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-accent); border-color: var(--on-accent); }
-  .game:last-child { background: var(--dots), var(--violet); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-accent); border-color: var(--on-accent); }
-  .game:first-child .btn { background: var(--yellow); }
+  .game { position: relative; overflow: hidden; padding: var(--space-7); border: var(--bw-strong) solid var(--fest-a); box-shadow: var(--space-3) var(--space-3) 0 var(--fest-b); }
+  .game > :not(.deco) { position: relative; z-index: 1; }
+  .game .note { color: var(--on-night); }
+  .game h4 { color: var(--fest-a); }
   .g-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--space-4); }
   h3 { margin: 0; font-size: var(--fs-display-sm); }
   .rates { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin: var(--space-6) 0; }
-  .rates div { padding: var(--space-4) var(--space-5); background: var(--surface); color: var(--ink); border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-md); box-shadow: var(--shadow-accent-sm); }
-  .rates dt { font-size: var(--fs-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
-  .rates dd { margin: 0; font-family: var(--font-display); font-size: var(--fs-display-md); font-weight: 800; line-height: 1.05; }
-  .n { font-size: var(--fs-sm); color: var(--muted); }
+  /* Große leuchtende Prozentzahlen direkt auf der Bühne (Entwurf B, Wunsch von Eric, 2026-10-20): alle in -a, du in -b */
+  .rates div { padding: var(--space-3) 0 0; border-top: var(--bw-strong) solid var(--fest-a); }
+  .rates dt { font-size: var(--fs-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.8; }
+  .rates dd { margin: 0; font-family: var(--font-display); font-size: var(--fs-display-xl); font-weight: 800; line-height: 1.05; color: var(--fest-a); text-shadow: 0 0 var(--space-6) color-mix(in srgb, var(--fest-a) 60%, transparent); }
+  .rates div + div dd { color: var(--fest-b); text-shadow: 0 0 var(--space-6) color-mix(in srgb, var(--fest-b) 60%, transparent); }
+  .n { font-size: var(--fs-sm); opacity: 0.8; }
   h4 { margin: 0 0 var(--space-3); font-family: var(--font-display); font-size: var(--fs-lg); }
   .hard { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
-  .hard :global(li) { display: grid; grid-template-columns: minmax(0, 1fr) 6rem auto; gap: var(--space-3); align-items: center; padding: var(--space-2) var(--space-3); background: var(--surface); color: var(--ink); border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-sm); font-size: var(--fs-sm); font-weight: 600; }
+  .hard :global(li) { display: grid; grid-template-columns: minmax(0, 1fr) 6rem auto; gap: var(--space-3); align-items: center; padding: var(--space-2) var(--space-3); background: color-mix(in srgb, var(--fest-night) 70%, transparent); border: var(--bw-sm) solid var(--fest-a); border-radius: var(--radius-sm); font-size: var(--fs-sm); font-weight: 600; }
   .hard :global(.h-bar) { height: var(--space-3); border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-pill); overflow: hidden; background: var(--bg); }
-  .hard :global(.h-bar i) { display: block; height: 100%; width: calc(var(--pct, 0) * 1%); background: var(--yellow); }
+  .hard :global(.h-bar i) { display: block; height: 100%; width: calc(var(--pct, 0) * 1%); background: var(--fest-a); }
   .hard :global(.h-pct) { font-family: var(--font-display); font-weight: 700; white-space: nowrap; }
   .note { margin: var(--space-3) 0 0; font-size: var(--fs-sm); font-weight: 600; }
   @media (max-width: 860px) {

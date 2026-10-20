@@ -9,9 +9,12 @@ import TopTen from '../../components/TopTen.astro';
 import QuizCharts from '../../components/QuizCharts.astro';
 import LiveCounter from '../../components/LiveCounter.astro';
 import Icon from '../../components/Icon.astro';
+import FestDeco from '../../components/FestDeco.astro';
 import { LANGS, CATEGORIES, SLOT_TIMES, type Lang } from '../../config';
 import { t, chartsPath } from '../../i18n/ui';
 import { postsFor, factInfo, categoryIcon } from '../../lib';
+// Farbwelt einer Kategorie (wie WeekBlock.astro)
+const themeOf = (cat: string) => (cat === 'horror' ? 'grusel' : cat === 'holiday' ? 'fest' : cat);
 
 export function getStaticPaths() {
   return LANGS.map((lang) => ({ params: { lang } }));
@@ -70,7 +73,8 @@ const texts = {
 
     <div class="wrap vote-wrap"><Vote lang={lang} posts={posts} /></div>
 
-    <section class="wrap tip card" data-tip>
+    <section class="wrap tip card fest-sky" data-fest="fest" data-tip>
+      <FestDeco deco={['star', 'trophy', 'question', 'sparkle']} size="lg" />
       <p class="kicker"><span class="chip accent"><Icon name="target" /> {f.tipKicker}</span></p>
       <h2>{f.tipTitle}</h2>
       <p class="lead">{f.tipIntro}</p>
@@ -93,7 +97,7 @@ const texts = {
           <button class="chip" type="button" aria-pressed="false" data-tab="weeks"><Icon name="trophy" /> {f.tabWeeks}</button>
         </div>
       </div>
-      <div class="album card">
+      <div class="album card fest-sky" data-fest="fest">
         <div>
           <h3>{f.albumTitle}</h3>
           <p class="note">{f.albumIntro}</p>
@@ -117,7 +121,7 @@ const texts = {
       <p class="lead">{f.catsIntro}</p>
       <ol class="rank" aria-label={f.catsLabel} data-ranks>
         {CATEGORIES.map((c) => (
-          <li class="rank-row" data-cat={c} hidden>
+          <li class="rank-row fest-sky" data-cat={c} data-fest={themeOf(c)} hidden>
             <span class="rank-no" data-no></span>
             <span class:list={['rank-icon', `cat-${c}`]}><img src={categoryIcon(c)} alt="" width="28" height="28" /></span>
             <span class="rank-text">
@@ -189,6 +193,7 @@ const texts = {
     el.textContent = fact.emoji;
     el.classList.add(`cat-${fact.cat}`);
   };
+  const themeOf = (cat: string) => (cat === 'horror' ? 'grusel' : cat === 'holiday' ? 'fest' : cat);
 
   function bigCard(fact: FactInfo, chip: string, accent: boolean, meta: string) {
     const card = tpl('big') as HTMLAnchorElement;
@@ -250,6 +255,7 @@ const texts = {
       const li = tpl('tip');
       const b = $<HTMLButtonElement>('button', li);
       b.dataset.key = fact.key;
+      b.dataset.fest = themeOf(fact.cat);
       emoji($('[data-emoji]', li), fact);
       $('[data-title]', li).textContent = fact.title;
       b.addEventListener('click', () => {
@@ -288,6 +294,7 @@ const texts = {
         $('[data-date]', li).textContent = e.date;
         const a = $<HTMLAnchorElement>('[data-link]', li);
         a.href = fact.url;
+        a.dataset.fest = themeOf(fact.cat);
         emoji($('[data-emoji]', li), fact);
         $('[data-title]', li).textContent = fact.title;
         $('[data-meta]', li).textContent = e.meta;
@@ -443,7 +450,11 @@ const texts = {
   .vote-wrap:has(> [hidden]) { display: none; }
 
   /* Tippspiel */
-  .tip { margin-top: var(--space-11); padding: var(--space-8); }
+  .tip { position: relative; margin-top: var(--space-11); padding: var(--space-8); overflow: hidden; border: var(--bw-strong) solid var(--fest-a); box-shadow: var(--shadow-fest-xl); --line: var(--on-night); }
+  .tip > :not(.deco) { position: relative; z-index: 1; }
+  .tip .lead, .tip .note, .tip-status { color: var(--on-night); }
+  .tip-stats div { border-color: var(--fest-a); background: color-mix(in srgb, var(--fest-night) 70%, transparent); }
+  .tip-stats dd { color: var(--fest-a); }
   .tip h2 { margin-bottom: var(--space-3); }
   .tip-result { margin: 0 0 var(--space-5); padding: var(--space-3) var(--space-4); border: var(--bw-sm) solid var(--line); border-radius: var(--radius-md); font-weight: 700; }
   .tip-result[data-hit] { background: var(--lime); color: var(--on-accent); }
@@ -455,6 +466,9 @@ const texts = {
     transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
   }
   .tip-option:hover { transform: translate(-2px, -2px); box-shadow: var(--shadow-lg); }
+  .tip-option[data-fest], .hist-card[data-fest] { background: var(--fest-sky); background-size: auto, var(--dots-size-md) var(--dots-size-md); color: var(--on-night); border: var(--bw) solid var(--fest-a); box-shadow: var(--space-1) var(--space-1) 0 var(--fest-a); }
+  .tip-option[data-fest][aria-pressed='true'] { outline-color: var(--fest-a); background-color: var(--fest-night); box-shadow: var(--space-2) var(--space-2) 0 var(--fest-b); }
+  .hist-card[data-fest] .hist-meta { color: var(--on-night); opacity: 0.8; }
   .tip-option[aria-pressed='true'] { outline: var(--bw-focus) solid var(--line); outline-offset: calc(-1 * var(--bw-focus)); }
   .tip-emoji {
     flex: 0 0 auto; display: grid; place-items: center; width: var(--space-10); aspect-ratio: 1;
@@ -476,7 +490,9 @@ const texts = {
   .tabs { display: flex; flex-wrap: wrap; gap: var(--space-2); }
   .tabs .chip { cursor: pointer; }
   .album { display: flex; flex-wrap: wrap; gap: var(--space-5); align-items: center; justify-content: space-between; padding: var(--space-5) var(--space-6); margin-bottom: var(--space-6); }
-  .album h3 { margin: 0; font-size: var(--fs-xl); }
+  .album h3 { margin: 0; font-size: var(--fs-xl); color: var(--fest-a); }
+  .album.fest-sky { border-color: var(--fest-a); box-shadow: var(--space-2) var(--space-2) 0 var(--fest-b); --line: var(--on-night); }
+  .album.fest-sky .note { color: var(--on-night); }
   .album .note { margin: var(--space-1) 0 0; }
   .meter-box { flex: 0 1 320px; min-width: 220px; }
   .meter-label { margin: 0 0 var(--space-2); font-weight: 700; }
@@ -501,7 +517,11 @@ const texts = {
   /* Kategorien */
   .cats { margin-top: var(--space-11); }
   .rank { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
-  .rank-row { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-3) var(--space-4); border: var(--bw) solid var(--line); border-radius: var(--radius-md); background: var(--surface); box-shadow: var(--shadow-sm); }
+  .rank-row { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-3) var(--space-4); border: var(--bw) solid var(--fest-a); border-radius: var(--radius-md); box-shadow: var(--space-1) var(--space-1) 0 var(--fest-a); --line: var(--on-night); }
+  .rank-row:first-child { border-width: var(--bw-strong); box-shadow: var(--space-2) var(--space-2) 0 var(--fest-b); }
+  .rank-row .rank-no, .rank-row .rank-score { color: var(--fest-a); }
+  .rank-row .rank-meta { color: var(--on-night); opacity: 0.8; }
+  .rank-row .rank-fill { background: var(--fest-a); }
   .rank-no { flex: 0 0 auto; min-width: 3ch; font-family: var(--font-display); font-weight: 700; font-size: var(--fs-xl); text-align: center; }
   .rank-icon { flex: 0 0 auto; display: grid; place-items: center; width: var(--space-10); aspect-ratio: 1; border: var(--bw-sm) solid var(--line); border-radius: var(--radius-sm); --dots-size: var(--dots-size-sm); }
   .rank-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--space-1); }

@@ -1,8 +1,9 @@
 ---
 // Übersicht aller Kategorien (Design „E“, Wunsch von Eric, 2026-10-10): /de/kategorien/ und /en/categories/.
-// Gelber Kopf mit Riesenwort, darunter große Kategorie-Kacheln mit Symbol in der Ecke und dem neuesten Fakt.
+// Kopf als dunkle Bühne im Thema „fest“ (Gelb/Pink, keine Kategorie bevorzugt) mit Riesenwort, darunter große Kategorie-Kacheln mit Symbol in der Ecke und dem neuesten Fakt.
 import Base from '../../layouts/Base.astro';
 import CatsGrid from '../../components/home/CatsGrid.astro';
+import FestDeco from '../../components/FestDeco.astro';
 import { LANGS, CATEGORIES, type Lang } from '../../config';
 import { t, catsSlug, catsPath } from '../../i18n/ui';
 import { postsFor } from '../../lib';
@@ -18,7 +19,8 @@ const posts = await postsFor(lang);
 const n = CATEGORIES.filter((c) => posts.some((p) => p.data.category === c)).length;
 ---
 <Base lang={lang} title={h.catsPageTitle} description={h.catsPageIntro} altUrl={catsPath(other)}>
-  <section class="sec sec--yellow chero">
+  <section class="sec fest-sky chero" data-fest="fest">
+    <FestDeco deco={['atom', 'gear', 'compass', 'ball', 'film', 'hourglass']} size="lg" />
     <div class="wrap">
       <span class="pill">{h.catsCount(n)}</span>
       <h1 class="mega word">{h.catsPageTitle}</h1>
@@ -31,9 +33,10 @@ const n = CATEGORIES.filter((c) => posts.some((p) => p.data.category === c)).len
 </Base>
 
 <style>
-  .chero { padding: var(--space-10) 0 calc(var(--space-12) + var(--bleed)); overflow: clip; }
-  .pill { display: inline-block; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); background: var(--on-accent); color: var(--yellow); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lg); transform: rotate(-3deg); }
-  .word { margin: var(--space-5) calc(-1 * var(--space-4)) 0; font-size: var(--fs-huge); text-transform: uppercase; text-shadow: var(--shift-mega) var(--shift-mega) 0 var(--pink); transform: rotate(-2deg); }
+  .chero > .wrap { position: relative; z-index: 1; }
+  .chero { position: relative; padding: var(--space-10) 0 calc(var(--space-12) + var(--bleed)); overflow: clip; }
+  .pill { display: inline-block; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); background: var(--fest-a); color: var(--on-accent); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lg); transform: rotate(-3deg); }
+  .word { margin: var(--space-5) calc(-1 * var(--space-4)) 0; font-size: var(--fs-huge); text-transform: uppercase; text-shadow: var(--shift-mega) var(--shift-mega) 0 var(--fest-b); transform: rotate(-2deg); }
   .intro { max-width: 40ch; margin: var(--space-8) 0 0; font-size: var(--fs-xl); font-weight: 600; }
   .list { padding-block: calc(var(--space-12) + var(--space-4)) calc(var(--space-12) + var(--space-8)); }
   @media (max-width: 760px) {
