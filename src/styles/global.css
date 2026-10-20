@@ -73,6 +73,53 @@
   --fest-grusel-night: #070d0b;
   --fest-grusel-a: #9cff57;
   --fest-grusel-b: #c7b9ff;
+  /* Ein Thema je Kategorie im Stil von Grusel (Wunsch von Eric, 2026-10-20): -a = Kategoriefarbe (wie --cat-<kategorie>),
+     -b = zweiter Akzent, -night = dunkle Bühne mit einem Hauch der Kategoriefarbe. */
+  --fest-science-night: #061a22;
+  --fest-science-a: #3ddcff;
+  --fest-science-b: #b6f23a;
+  --fest-history-night: #1f1006;
+  --fest-history-a: #ff8a3d;
+  --fest-history-b: #ffd23f;
+  --fest-tech-night: #130b2a;
+  --fest-tech-a: #9b6bff;
+  --fest-tech-b: #3ddcff;
+  --fest-nature-night: #0b1a06;
+  --fest-nature-a: #b6f23a;
+  --fest-nature-b: #ffd23f;
+  --fest-body-night: #24060f;
+  --fest-body-a: #ff3d7f;
+  --fest-body-b: #ffbe98;
+  --fest-weird-night: #1c1604;
+  --fest-weird-a: #ffd23f;
+  --fest-weird-b: #ff9ed2;
+  --fest-survival-night: #04190f;
+  --fest-survival-a: #3de0b0;
+  --fest-survival-b: #ff8a3d;
+  --fest-food-night: #240806;
+  --fest-food-a: #ff5947;
+  --fest-food-b: #ffd23f;
+  --fest-language-night: #1c0a24;
+  --fest-language-a: #e7a6ff;
+  --fest-language-b: #3de0b0;
+  --fest-sport-night: #07122b;
+  --fest-sport-a: #5c95ff;
+  --fest-sport-b: #ffd23f;
+  --fest-space-night: #0b0d2a;
+  --fest-space-a: #a5b4ff;
+  --fest-space-b: #ffe28a;
+  --fest-animals-night: #1c1406;
+  --fest-animals-a: #f2c46d;
+  --fest-animals-b: #3de0b0;
+  --fest-mind-night: #240a1a;
+  --fest-mind-a: #ff9ed2;
+  --fest-mind-b: #a5b4ff;
+  --fest-brands-night: #071c0d;
+  --fest-brands-a: #8ee59b;
+  --fest-brands-b: #ffd23f;
+  --fest-popculture-night: #241006;
+  --fest-popculture-a: #ffbe98;
+  --fest-popculture-b: #ff3d7f;
   --fest-halloween-night: #140c06;
   --fest-halloween-a: #ff7a1a;
   --fest-halloween-b: #b07cff;
@@ -672,6 +719,21 @@ html[data-sky] .stage { background: var(--sky-stage); }
 }
 [data-fest='fest'] { --fest-night: var(--fest-fest-night); --fest-a: var(--fest-fest-a); --fest-b: var(--fest-fest-b); }
 [data-fest='grusel'] { --fest-night: var(--fest-grusel-night); --fest-a: var(--fest-grusel-a); --fest-b: var(--fest-grusel-b); }
+[data-fest='science'] { --fest-night: var(--fest-science-night); --fest-a: var(--fest-science-a); --fest-b: var(--fest-science-b); }
+[data-fest='history'] { --fest-night: var(--fest-history-night); --fest-a: var(--fest-history-a); --fest-b: var(--fest-history-b); }
+[data-fest='tech'] { --fest-night: var(--fest-tech-night); --fest-a: var(--fest-tech-a); --fest-b: var(--fest-tech-b); }
+[data-fest='nature'] { --fest-night: var(--fest-nature-night); --fest-a: var(--fest-nature-a); --fest-b: var(--fest-nature-b); }
+[data-fest='body'] { --fest-night: var(--fest-body-night); --fest-a: var(--fest-body-a); --fest-b: var(--fest-body-b); }
+[data-fest='weird'] { --fest-night: var(--fest-weird-night); --fest-a: var(--fest-weird-a); --fest-b: var(--fest-weird-b); }
+[data-fest='survival'] { --fest-night: var(--fest-survival-night); --fest-a: var(--fest-survival-a); --fest-b: var(--fest-survival-b); }
+[data-fest='food'] { --fest-night: var(--fest-food-night); --fest-a: var(--fest-food-a); --fest-b: var(--fest-food-b); }
+[data-fest='language'] { --fest-night: var(--fest-language-night); --fest-a: var(--fest-language-a); --fest-b: var(--fest-language-b); }
+[data-fest='sport'] { --fest-night: var(--fest-sport-night); --fest-a: var(--fest-sport-a); --fest-b: var(--fest-sport-b); }
+[data-fest='space'] { --fest-night: var(--fest-space-night); --fest-a: var(--fest-space-a); --fest-b: var(--fest-space-b); }
+[data-fest='animals'] { --fest-night: var(--fest-animals-night); --fest-a: var(--fest-animals-a); --fest-b: var(--fest-animals-b); }
+[data-fest='mind'] { --fest-night: var(--fest-mind-night); --fest-a: var(--fest-mind-a); --fest-b: var(--fest-mind-b); }
+[data-fest='brands'] { --fest-night: var(--fest-brands-night); --fest-a: var(--fest-brands-a); --fest-b: var(--fest-brands-b); }
+[data-fest='popculture'] { --fest-night: var(--fest-popculture-night); --fest-a: var(--fest-popculture-a); --fest-b: var(--fest-popculture-b); }
 [data-fest='halloween'] { --fest-night: var(--fest-halloween-night); --fest-a: var(--fest-halloween-a); --fest-b: var(--fest-halloween-b); }
 [data-fest='muertos'] { --fest-night: var(--fest-muertos-night); --fest-a: var(--fest-muertos-a); --fest-b: var(--fest-muertos-b); }
 [data-fest='diwali'] { --fest-night: var(--fest-diwali-night); --fest-a: var(--fest-diwali-a); --fest-b: var(--fest-diwali-b); }

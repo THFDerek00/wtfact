@@ -109,6 +109,11 @@ Wunsch von Eric (2026-10-02). Abläufe und Einrichtung: `README.md`.
 
 Wunsch von Eric, 2026-10-15: Feiertags-Fakten (Kategorie `holiday`) sehen aus wie ihr Fest, z. B. Halloween in Orange und Schwarz mit
 Kürbissen und Fledermäusen. Grusel-Fakten (`horror`) haben immer das Thema „grusel“ (Schwarz, Giftgrün, Geisterlila).
+Seit 2026-10-20 (Wunsch von Eric) hat jede normale Kategorie ein eigenes Thema im selben Stil, mit dem Namen der Kategorie
+(z. B. `[data-fest='sport']`): `-a` ist die Kategoriefarbe (gleicher Wert wie `--cat-<kategorie>`), `-b` ein zweiter Akzent,
+`-night` eine dunkle Bühne mit einem Hauch der Kategoriefarbe. Die Deko je Kategorie steht in `CATEGORY_DECO`
+(`src/data/holidays.ts`), die Grafiken dafür in `src/data/fest-art-categories.ts`. Karten im Labor, Kategorie-Kacheln und
+Faktseiten nutzen dieses Thema; Band und Schriftzug bleiben bei normalen Kategorien beim Slogan.
 
 - Welcher Feiertag an welchem Tag welches Thema, welche Deko (`deco`), welches Riesenmotiv (`art`) und welchen Schriftzug (`look`)
   hat, steht in `src/data/holidays.ts` (`HOLIDAYS`, `THEMES`). Jeder Feiertag hat ein eigenes Thema; „fest“ ist nur die Notlösung.

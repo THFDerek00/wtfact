@@ -91,18 +91,40 @@ export const HOLIDAYS: Holiday[] = [
 ];
 
 // Farbwelten mit eigenem Block in src/styles/global.css. `npm run check` prüft, dass es zu jedem einen Block gibt.
-// „fest“ = allgemeines Fest-Thema für Feiertage ohne eigenes Thema, „grusel“ = Kategorie Grusel.
-export const THEMES = ['fest', 'grusel', 'einheit', 'halloween', 'muertos', 'diwali', 'martin', 'thanksgiving', 'advent', 'nikolaus', 'wintersonne', 'weihnacht', 'silvester', 'neujahr', 'koenige', 'lunar', 'karneval', 'valentin', 'pi', 'patrick', 'holi', 'ostern', 'aprilscherz', 'erde', 'koningsdag', 'walpurgis', 'weltraum', 'cinco', 'vatertag', 'muttertag', 'drachenboot', 'sommer', 'mittsommer', 'july', 'bastille', 'perseiden', 'tomatina', 'mondfest', 'oktoberfest', 'pirat'] as const;
+// „fest“ = allgemeines Fest-Thema für Feiertage ohne eigenes Thema, „grusel“ = Kategorie Grusel,
+// dazu ein Thema je normaler Kategorie (gleicher Name wie die Kategorie, Wunsch von Eric, 2026-10-20).
+export const THEMES = ['fest', 'grusel', 'science', 'history', 'tech', 'nature', 'body', 'weird', 'survival', 'food', 'language', 'sport', 'space', 'animals', 'mind', 'brands', 'popculture', 'einheit', 'halloween', 'muertos', 'diwali', 'martin', 'thanksgiving', 'advent', 'nikolaus', 'wintersonne', 'weihnacht', 'silvester', 'neujahr', 'koenige', 'lunar', 'karneval', 'valentin', 'pi', 'patrick', 'holi', 'ostern', 'aprilscherz', 'erde', 'koningsdag', 'walpurgis', 'weltraum', 'cinco', 'vatertag', 'muttertag', 'drachenboot', 'sommer', 'mittsommer', 'july', 'bastille', 'perseiden', 'tomatina', 'mondfest', 'oktoberfest', 'pirat'] as const;
 export type Theme = (typeof THEMES)[number];
 
 const GRUSEL_DECO = ['web', 'bat', 'ghost', 'spider', 'moon'];
 
+// Alle Kategorien im Stil von Grusel (Wunsch von Eric, 2026-10-20): dunkle Bühne mit Leuchten in der Kategoriefarbe
+// und eigene kleine Grafiken (src/data/fest-art*.ts) verstreut über Karte und Kopf der Faktseite.
+const CATEGORY_DECO: Record<string, { deco: string[] }> = {
+  science: { deco: ['atom', 'flask', 'sparkle', 'telescope'] },
+  history: { deco: ['hourglass', 'crown', 'treasure-map', 'anchor'] },
+  tech: { deco: ['gear', 'bolt', 'rocket', 'sparkle'] },
+  nature: { deco: ['sprout', 'bee', 'maple-leaf', 'sunflower'] },
+  body: { deco: ['heart', 'bone', 'sparkle', 'bolt'] },
+  weird: { deco: ['question', 'sparkle', 'planet', 'star'] },
+  survival: { deco: ['compass', 'flame', 'tree', 'moon'] },
+  food: { deco: ['chili', 'strawberry', 'croissant', 'pie'] },
+  language: { deco: ['bubble', 'love-letter', 'sparkle', 'music-note'] },
+  sport: { deco: ['ball', 'trophy', 'star', 'bolt'] },
+  space: { deco: ['planet', 'rocket', 'star', 'meteor'] },
+  animals: { deco: ['fish', 'bee', 'parrot', 'rabbit'] },
+  mind: { deco: ['bulb', 'question', 'sparkle', 'star'] },
+  brands: { deco: ['bulb', 'gift', 'gold-coin', 'sparkle'] },
+  popculture: { deco: ['film', 'music-note', 'star', 'sparkle'] },
+};
+
 /** Feiertag an einem Tag ('JJJJ-MM-TT', deutsche Zeit) oder undefined. */
 export const holidayOn = (day: string) => HOLIDAYS.find((h) => h.dates.includes(day));
 
-/** Farbwelt und Deko eines Fakts: Feiertage nach ihrem Tag, Grusel immer gleich, sonst keine. */
+/** Farbwelt und Deko eines Fakts: Feiertage nach ihrem Tag, Grusel und alle anderen Kategorien immer gleich. */
 export function festOf(category: string, day: string): { theme: Theme; deco: string[]; holiday?: Holiday } | undefined {
   if (category === 'horror') return { theme: 'grusel', deco: GRUSEL_DECO };
+  if (category in CATEGORY_DECO) return { theme: category as Theme, deco: CATEGORY_DECO[category].deco };
   if (category !== 'holiday') return undefined;
   const holiday = holidayOn(day);
   return holiday ? festOfHoliday(holiday) : { theme: 'fest', deco: ['confetti', 'sparkle', 'party-popper'] };
