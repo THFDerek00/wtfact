@@ -92,8 +92,9 @@ export const HOLIDAYS: Holiday[] = [
 
 // Farbwelten mit eigenem Block in src/styles/global.css. `npm run check` prüft, dass es zu jedem einen Block gibt.
 // „fest“ = allgemeines Fest-Thema für Feiertage ohne eigenes Thema, „grusel“ = Kategorie Grusel,
-// dazu ein Thema je normaler Kategorie (gleicher Name wie die Kategorie, Wunsch von Eric, 2026-10-20).
-export const THEMES = ['fest', 'grusel', 'science', 'history', 'tech', 'nature', 'body', 'weird', 'survival', 'food', 'language', 'sport', 'space', 'animals', 'mind', 'brands', 'popculture', 'einheit', 'halloween', 'muertos', 'diwali', 'martin', 'thanksgiving', 'advent', 'nikolaus', 'wintersonne', 'weihnacht', 'silvester', 'neujahr', 'koenige', 'lunar', 'karneval', 'valentin', 'pi', 'patrick', 'holi', 'ostern', 'aprilscherz', 'erde', 'koningsdag', 'walpurgis', 'weltraum', 'cinco', 'vatertag', 'muttertag', 'drachenboot', 'sommer', 'mittsommer', 'july', 'bastille', 'perseiden', 'tomatina', 'mondfest', 'oktoberfest', 'pirat'] as const;
+// dazu ein Thema je normaler Kategorie (gleicher Name wie die Kategorie, Wunsch von Eric, 2026-10-20) und „quiz“
+// für den Abschnitt „Was war zuerst?“.
+export const THEMES = ['fest', 'grusel', 'quiz', 'science', 'history', 'tech', 'nature', 'body', 'weird', 'survival', 'food', 'language', 'sport', 'space', 'animals', 'mind', 'brands', 'popculture', 'einheit', 'halloween', 'muertos', 'diwali', 'martin', 'thanksgiving', 'advent', 'nikolaus', 'wintersonne', 'weihnacht', 'silvester', 'neujahr', 'koenige', 'lunar', 'karneval', 'valentin', 'pi', 'patrick', 'holi', 'ostern', 'aprilscherz', 'erde', 'koningsdag', 'walpurgis', 'weltraum', 'cinco', 'vatertag', 'muttertag', 'drachenboot', 'sommer', 'mittsommer', 'july', 'bastille', 'perseiden', 'tomatina', 'mondfest', 'oktoberfest', 'pirat'] as const;
 export type Theme = (typeof THEMES)[number];
 
 const GRUSEL_DECO = ['web', 'bat', 'ghost', 'spider', 'moon'];

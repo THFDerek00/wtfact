@@ -53,6 +53,8 @@ const texts = { pct: lang === 'de' ? '9001 %' : '9001%', dayOne: ui.fame.dayUnit
   import { addDays, berlinDay, likePct, mondayOf, dayStartUtc } from '../../week';
   import type { FactInfo } from '../../lib';
 
+  // Farbwelt eines Fakts wie in src/data/holidays.ts (festOf): Grusel und Feiertage haben eigene Namen
+  const themeOf = (cat: string) => (cat === 'horror' ? 'grusel' : cat === 'holiday' ? 'fest' : cat);
   const root = document.querySelector<HTMLElement>('[data-week]');
   if (root) {
     const facts: FactInfo[] = JSON.parse(root.dataset.facts ?? '[]');
@@ -76,6 +78,7 @@ const texts = { pct: lang === 'de' ? '9001 %' : '9001%', dayOne: ui.fame.dayUnit
         const em = li.querySelector<HTMLElement>('[data-emoji]')!;
         em.textContent = f.emoji;
         em.classList.add(`cat-${f.cat}`);
+        li.querySelector<HTMLElement>('[data-link]')!.dataset.fest = themeOf(f.cat);
         li.querySelector('[data-title]')!.textContent = f.title;
         li.querySelector('[data-val]')!.textContent = texts.pct.replace('9001', String(likePct(e)));
         ol.append(li);
@@ -89,6 +92,7 @@ const texts = { pct: lang === 'de' ? '9001 %' : '9001%', dayOne: ui.fame.dayUnit
         a.href = f.url;
         a.querySelector('[data-emoji]')!.textContent = f.emoji;
         a.querySelector('[data-art]')!.classList.add(`cat-${f.cat}`);
+        a.dataset.fest = themeOf(f.cat);
         a.querySelector('[data-title]')!.textContent = f.title;
         a.hidden = false;
       }
@@ -147,4 +151,9 @@ const texts = { pct: lang === 'de' ? '9001 %' : '9001%', dayOne: ui.fame.dayUnit
     .r-emoji { display: none; }
     .no { font-size: var(--fs-display-sm); }
   }
+  /* Seit 2026-10-20 (Wunsch von Eric, Entwurf A): Zeilen und Fakt der Woche in der Farbwelt ihrer Kategorie */
+  .row[data-fest] { background: var(--fest-sky); background-size: auto, var(--dots-size-md) var(--dots-size-md); color: var(--on-night); border-color: var(--fest-a); box-shadow: var(--space-1) var(--space-1) 0 var(--fest-a); }
+  .row[data-fest] .no { color: var(--fest-a); }
+  .fow[data-fest] .fow-art { background: var(--fest-sky); background-size: auto, var(--dots-size-md) var(--dots-size-md); border-color: var(--fest-a); }
+  .fow[data-fest] { border-color: var(--fest-a); box-shadow: var(--space-3) var(--space-3) 0 var(--fest-a); }
 </style>

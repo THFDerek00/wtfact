@@ -7,6 +7,8 @@ import { t } from '../../i18n/ui';
 import { postUrl, upcomingToday, type Post } from '../../lib';
 import { berlinDay, postDay } from '../../week';
 import Icon from '../Icon.astro';
+import FestDeco from '../FestDeco.astro';
+import { festOf } from '../../data/holidays';
 interface Props { lang: Lang; posts: Post[]; allUrl: string }
 const { lang, posts, allUrl } = Astro.props;
 const ui = t(lang);
@@ -28,8 +30,9 @@ const total = shown.length + upcoming.length;
       <a class="more-link" href={allUrl}>{h.allFacts} <Icon name="chevron-right" /></a>
     </div>
     <div class="track" data-track role="group" aria-label={h.slidesLabel} tabindex="0">
-      {shown.map((p, i) => (
-        <article class="slide" data-slide data-key={p.data.translationKey}>
+      {shown.map((p, i) => { const f = festOf(p.data.category, ''); return (
+        <article class="slide fest-sky" data-fest={f?.theme} data-slide data-key={p.data.translationKey}>
+          <FestDeco deco={f?.deco ?? []} />
           <span class="num mega" aria-hidden="true">{i + 1}</span>
           <a class:list={['tile', `cat-${p.data.category}`]} href={postUrl(p)} aria-hidden="true" tabindex="-1"><span>{p.data.emoji}</span></a>
           <div class="text">
@@ -43,7 +46,7 @@ const total = shown.length + upcoming.length;
             </div>
           </div>
         </article>
-      ))}
+      ); })}
       {upcoming.map((u, i) => (
         <article class="slide lock" data-slide data-lock={u.at}>
           <span class="num mega" aria-hidden="true">{shown.length + i + 1}</span>
@@ -201,4 +204,12 @@ const total = shown.length + upcoming.length;
     .num { font-size: var(--fs-emoji-xl); top: calc(-1 * var(--space-6)); left: var(--space-2); }
     .cd b { font-size: var(--fs-2xl); }
   }
+  /* Seit 2026-10-20 (Wunsch von Eric, Entwurf A): jede Folie in der Farbwelt ihrer Kategorie, mit Leuchten und Deko */
+  .slide[data-fest], .slide[data-fest]:nth-child(n) {
+    background: var(--fest-sky); background-size: auto, var(--dots-size-md) var(--dots-size-md); color: var(--on-night);
+    border-color: var(--fest-a); box-shadow: var(--space-2) var(--space-2) 0 var(--fest-a);
+  }
+  .slide[data-fest] .num { -webkit-text-stroke-color: var(--fest-a); z-index: 1; }
+  .slide[data-fest] .tile, .slide[data-fest] .text { position: relative; z-index: 1; }
+  .slide[data-fest] .text .chip { border-color: var(--on-accent); }
 </style>
