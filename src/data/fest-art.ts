@@ -24,6 +24,7 @@ function burst(rays: number, inner: number, outer: number) {
 import { ART as WINTER } from './fest-art-winter';
 import { ART as SPRING } from './fest-art-spring';
 import { ART as SUMMER } from './fest-art-summer';
+import { ART as CATEGORY } from './fest-art-categories';
 
 const BASE: Record<string, string> = {
   firework: `<g class="burst">${burst(14, 7, 23)}<circle class="fw" cx="32" cy="32" r="4"/></g>`,
@@ -115,7 +116,7 @@ const BASE: Record<string, string> = {
     <circle class="o fw" cx="32" cy="36" r="4"/>`,
 };
 
-export const FEST_ART: Record<string, string> = { ...BASE, ...WINTER, ...SPRING, ...SUMMER };
+export const FEST_ART: Record<string, string> = { ...BASE, ...WINTER, ...SPRING, ...SUMMER, ...CATEGORY };
 
 export const isFestArt = (name: string) => name in FEST_ART;
 

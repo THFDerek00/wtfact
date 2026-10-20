@@ -47,9 +47,10 @@ const guess = guessFor(post);
 const sideTile = (p: Post) => ({ p, big: bigNumber(p) });
 // Feiertags- und Grusel-Fakten: ganze Seite in der Farbwelt des Themas, Deko im Kopf, Band mit dem Feiertag.
 const fest = festFor(post);
-const festName = fest?.holiday ? fest.holiday[lang] : fest ? ui.fest.grusel : '';
+// Normale Kategorien haben seit 2026-10-20 auch ein Thema (Farbe und Deko), behalten aber den Slogan im Band.
+const festName = fest?.holiday ? fest.holiday[lang] : fest?.theme === 'grusel' ? ui.fest.grusel : '';
 // Das Band läuft über die ganze Breite: so oft wiederholen, dass es auch auf breiten Bildschirmen nicht abreißt (Eric, 2026-10-15).
-const tapeWord = fest ? festName : ui.slogan;
+const tapeWord = festName || ui.slogan;
 const tapeText = Array(Math.max(5, Math.ceil(400 / (tapeWord.length + 3)))).fill(tapeWord).join(' · ');
 ---
 <Base lang={lang} title={d.title} description={d.teaser} altUrl={alt ? postUrl(alt) : undefined} image={ogPath(post)} section="facts" fest={fest?.theme}>

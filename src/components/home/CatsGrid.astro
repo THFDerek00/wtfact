@@ -2,18 +2,22 @@
 // Kategorien-Kacheln (Design „E“, Stil aus Entwurf B): Kategoriefarbe mit Punktmuster, Symbol groß in der Ecke.
 // Auf der Startseite kompakt, auf der Kategorien-Seite (/[lang]/kategorien/) groß mit dem neuesten Fakt.
 // Ein Klick filtert „Frisch aus dem Labor“ (Startseite) bzw. führt dorthin (/?cat=…#facts).
+// Seit 2026-10-20 im Stil von Grusel (Wunsch von Eric): dunkle Bühne mit Leuchten und Deko der Kategorie (src/data/holidays.ts).
 import { CATEGORIES, type Lang } from '../../config';
 import { t } from '../../i18n/ui';
 import { categoryIcon, postUrl, type Post } from '../../lib';
+import { festOf } from '../../data/holidays';
+import FestDeco from '../FestDeco.astro';
 interface Props { lang: Lang; posts: Post[]; big?: boolean }
 const { lang, posts, big = false } = Astro.props;
 const ui = t(lang);
-const cats = CATEGORIES.map((c) => ({ c, list: posts.filter((p) => p.data.category === c) })).filter((x) => x.list.length > 0);
+const cats = CATEGORIES.map((c) => ({ c, list: posts.filter((p) => p.data.category === c), fest: festOf(c, '') })).filter((x) => x.list.length > 0);
 ---
 <ul class:list={['cats', big && 'cats--big']}>
-  {cats.map(({ c, list }, i) => (
+  {cats.map(({ c, list, fest }, i) => (
     <li>
-      <a class:list={['cat', `cat-${c}`, `tilt-${i % 4}`]} href={`/${lang}/?cat=${c}#facts`} data-jump={c}>
+      <a class:list={['cat', fest ? 'fest-sky' : `cat-${c}`, `tilt-${i % 4}`]} data-fest={fest?.theme} href={`/${lang}/?cat=${c}#facts`} data-jump={c}>
+        {fest && <span class="deco-clip"><FestDeco deco={fest.deco} /></span>}
         <img class="corner corner--big" src={categoryIcon(c)} alt="" width="120" height="120" loading="lazy" />
         <img class="corner corner--small" src={categoryIcon(c)} alt="" width="48" height="48" loading="lazy" />
         <span class="name">{ui.categories[c]}</span>
@@ -33,6 +37,9 @@ const cats = CATEGORIES.map((c) => ({ c, list: posts.filter((p) => p.data.catego
     padding: var(--space-5); border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-lg); box-shadow: var(--shadow-accent);
     text-decoration: none; overflow: visible; transition: transform var(--dur) var(--ease-pop), box-shadow var(--dur) var(--ease);
   }
+  .cat[data-fest] { border-color: var(--fest-a); box-shadow: var(--shadow-on-night); }
+  /* Deko bleibt in der Kachel, die Symbole in den Ecken dürfen weiter hinausragen */
+  .deco-clip { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; pointer-events: none; }
   .cats--big .cat { min-height: 16rem; padding: var(--space-7); justify-content: flex-start; }
   .tilt-0 { transform: rotate(-1deg); }
   .tilt-1 { transform: rotate(0.8deg); }
@@ -42,6 +49,8 @@ const cats = CATEGORIES.map((c) => ({ c, list: posts.filter((p) => p.data.catego
   .corner { position: absolute; pointer-events: none; filter: var(--emoji-shadow); }
   .corner--big { right: calc(-1 * var(--space-4)); bottom: calc(-1 * var(--space-5)); width: 42%; max-width: 8rem; height: auto; transform: rotate(-10deg); }
   .corner--small { right: 38%; top: calc(-1 * var(--space-5)); width: 16%; max-width: 3rem; height: auto; transform: rotate(14deg); opacity: 0.9; }
+  /* Die Symbole sind dunkle Linien: auf der dunklen Bühne hell zeichnen */
+  .cat[data-fest] .corner { filter: invert(1) var(--emoji-shadow); }
   .cat:hover .corner--big { transform: rotate(4deg) scale(1.08); }
   .name { position: relative; font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 800; line-height: 1.05; letter-spacing: -0.02em; max-width: 70%; }
   .cats--big .name { font-size: var(--fs-display-sm); }
