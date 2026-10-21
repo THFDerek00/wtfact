@@ -62,6 +62,8 @@ export const extras = {
       jumperText: 'Spring hoch, sammle Reagenzgläser, schalte Gold-Fakten frei.',
       chartsNote: 'Die Quiz-Auswertung aller Spieler steht in den WTF-Charts.',
       open: 'noch offen heute',
+      goldLink: 'Zu deinen Gold-Fakten',
+      jump: 'Springe zu',
     },
     me: {
       title: 'Ich',
@@ -81,6 +83,10 @@ export const extras = {
       gifts: 'Geschenkfinder', giftsText: 'Für Geburtstag, Weihnachten und mehr',
       hole: 'Kaninchenbau', holeText: (n: number) => (n ? `Rekord: ${n} Fakten tief` : 'Folge einem Fakt zum nächsten'),
       number: 'Tageszahl', numberText: (p: number, w: number) => (p ? `${w} von ${p} gelöst` : 'Noch nie gespielt'),
+      jumper: 'Science Jumper', jumperText: (n: number) => (n ? `Highscore ${n}` : 'Noch kein Lauf'),
+      nav: { streak: 'Serie', badges: 'Abzeichen', gold: 'Gold-Fakten', records: 'Rekorde', you: 'Du in Zahlen' },
+      records: 'Deine Rekorde',
+      recordsHint: 'Was du bisher geschafft hast. Ein Klick führt direkt zum Spiel.',
     },
     hole: {
       title: 'Noch tiefer?',
@@ -205,6 +211,8 @@ export const extras = {
       jumperText: 'Jump high, collect flasks, unlock golden facts.',
       chartsNote: 'Quiz results from all players are in the WTF charts.',
       open: 'not played today',
+      goldLink: 'To your golden facts',
+      jump: 'Jump to',
     },
     me: {
       title: 'Me',
@@ -224,6 +232,10 @@ export const extras = {
       gifts: 'Gift finder', giftsText: 'For birthdays, Christmas and more',
       hole: 'Rabbit hole', holeText: (n: number) => (n ? `Best: ${n} facts deep` : 'Follow one fact to the next'),
       number: 'Daily number', numberText: (p: number, w: number) => (p ? `${w} of ${p} solved` : 'Never played'),
+      jumper: 'Science Jumper', jumperText: (n: number) => (n ? `High score ${n}` : 'No run yet'),
+      nav: { streak: 'Streak', badges: 'Badges', gold: 'Golden facts', records: 'Records', you: 'You in numbers' },
+      records: 'Your records',
+      recordsHint: 'What you have managed so far. One click takes you to the game.',
     },
     hole: {
       title: 'Go deeper?',
@@ -298,6 +310,8 @@ export const x = (lang: Lang) => extras[lang];
 export const gamesPath = (lang: Lang) => (lang === 'de' ? '/de/spiele/' : '/en/games/');
 /** Seite „Ich“: Serie, Rang, Abzeichen und Links zu allem Persönlichen. */
 export const mePath = (lang: Lang) => (lang === 'de' ? '/de/ich/' : '/en/me/');
-export const numberPath = (lang: Lang) => (lang === 'de' ? '/de/tageszahl/' : '/en/daily-number/');
-export const youPath = (lang: Lang) => (lang === 'de' ? '/de/du-in-zahlen/' : '/en/you-in-numbers/');
+/** Tageszahl und Du in Zahlen sind seit 2026-10-21 Abschnitte von „Spiele“ bzw. „Ich“, die alten Adressen leiten weiter (astro.config.mjs). */
+export const numberPath = (lang: Lang) => `${gamesPath(lang)}#tageszahl`;
+export const youPath = (lang: Lang) => `${mePath(lang)}#zahlen`;
+export const jumperPath = (lang: Lang) => `${gamesPath(lang)}#jumper`;
 export const giftsPath = (lang: Lang) => (lang === 'de' ? '/de/geschenke/' : '/en/gifts/');

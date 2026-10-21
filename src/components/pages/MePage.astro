@@ -1,15 +1,19 @@
 ---
-// Seite „Ich“ (Wunsch von Eric, 2026-10-21): /de/ich/ und /en/me/. Serie (src/scripts/streak.ts), Rang nach gelesenen
-// Fakten, ein Abzeichen je Kategorie und Kacheln zu allem Persönlichen: Sammelalbum, Gold-Fakten, Du in Zahlen,
-// Geschenkfinder, Kaninchenbau-Rekord und Tageszahl. Alles liest der Browser aus seinem Speicher, kein Konto.
-// Weitere Kacheln: einen Eintrag in `tiles` ergänzen.
+// Seite „Ich“ (Wunsch von Eric, 2026-10-21): /de/ich/ und /en/me/. Seit dem zweiten Wunsch vom selben Tag eine Seite mit
+// Abschnitten und Sprungleiste statt Kacheln zu anderen Seiten: Serie und Rang (oben), Abzeichen je Kategorie, Gold-Fakten
+// aus dem Science Jumper (GoldShelf.astro), Rekorde (Tageszahl, Science Jumper, Kaninchenbau, Sammelalbum) und
+// Du in Zahlen (YouNumbers.astro). Alles liest der Browser aus seinem Speicher, kein Konto. Karten im Leuchtstil (.glow).
 import Base from '../../layouts/Base.astro';
 import FestDeco from '../FestDeco.astro';
 import Icon from '../Icon.astro';
+import JumpNav from '../JumpNav.astro';
+import GoldShelf from '../GoldShelf.astro';
+import YouNumbers from '../games/YouNumbers.astro';
 import { CATEGORIES, type Lang } from '../../config';
 import { t, chartsPath } from '../../i18n/ui';
-import { x, mePath, youPath, giftsPath, numberPath } from '../../i18n/extras';
+import { x, mePath, giftsPath, numberPath, jumperPath } from '../../i18n/extras';
 import { postsFor, categoryIcon } from '../../lib';
+import { festOf } from '../../data/holidays';
 import { BADGE_AT, RANK_AT } from '../../scripts/streak';
 interface Props { lang: Lang }
 const { lang } = Astro.props;
@@ -20,66 +24,87 @@ const other: Lang = lang === 'de' ? 'en' : 'de';
 const posts = await postsFor(lang);
 const cats = Object.fromEntries(posts.map((p) => [p.data.translationKey, p.data.category]));
 const badgeCats = CATEGORIES.filter((c) => c !== 'holiday');
+// Rekorde: je eine Leuchtkarte, die direkt zum Spiel führt. Weitere: Eintrag hier ergänzen (data-sub füllt das Skript).
 const tiles = [
-  { id: 'album', href: `${chartsPath(lang)}#album`, emoji: '📒', cls: 'cat-weird', name: m.album, text: m.albumText(0, posts.length) },
-  { id: 'gold', href: `/${lang}/science-jumper/`, emoji: '🏅', cls: 'cat-animals', name: m.gold, text: m.goldText },
-  { id: 'number', href: numberPath(lang), emoji: '🎯', cls: 'cat-nature', name: m.number, text: m.numberText(0, 0) },
-  { id: 'hole', href: `/${lang}/`, emoji: '🐇', cls: 'cat-space', name: m.hole, text: m.holeText(0) },
-  { id: 'you', href: youPath(lang), emoji: '🎂', cls: 'cat-body', name: m.you, text: m.youText },
-  { id: 'gifts', href: giftsPath(lang), emoji: '🎁', cls: 'cat-food', name: m.gifts, text: m.giftsText },
+  { id: 'number', href: numberPath(lang), emoji: '🎯', cat: 'nature', name: m.number, text: m.numberText(0, 0) },
+  { id: 'jumper', href: jumperPath(lang), emoji: '🧪', cat: 'science', name: m.jumper, text: m.jumperText(0) },
+  { id: 'hole', href: `/${lang}/`, emoji: '🐇', cat: 'space', name: m.hole, text: m.holeText(0) },
+  { id: 'album', href: `${chartsPath(lang)}#album`, emoji: '📒', cat: 'weird', name: m.album, text: m.albumText(0, posts.length) },
+  { id: 'gifts', href: giftsPath(lang), emoji: '🎁', cat: 'food', name: m.gifts, text: m.giftsText },
+];
+const nav = [
+  { id: 'serie', label: m.nav.streak, icon: 'flame' },
+  { id: 'abzeichen', label: m.nav.badges, icon: 'award' },
+  { id: 'gold', label: m.nav.gold, icon: 'sparkles' },
+  { id: 'rekorde', label: m.nav.records, icon: 'trophy' },
+  { id: 'zahlen', label: m.nav.you, icon: 'cake' },
 ];
 const texts = {
   days: [e.streak.days(1), e.streak.days(9001)], none: e.streak.none, alive: e.streak.alive, done: e.streak.done, best: e.streak.best(9001),
   ranks: e.ranks, rankOf: m.rankOf(9001, 9002), toNext: m.toNext(9001, '§'), top: m.top, read: m.read(9001),
   album: m.albumText(9001, posts.length), hole: [m.holeText(0), m.holeText(9001)], number: [m.numberText(0, 0), m.numberText(9001, 9002)],
-  badge: m.badgeOf('§', 9001, BADGE_AT),
+  jumper: [m.jumperText(0), m.jumperText(9001)], badge: m.badgeOf('§', 9001, BADGE_AT),
 };
 ---
 <Base lang={lang} title={m.title} description={m.intro} altUrl={mePath(other)}>
-  <section class="sec fest-sky mhero" data-fest="fest">
+  <section class="sec fest-sky mhero" id="serie" data-fest="history" data-me-hero>
     <FestDeco deco={['sparkle', 'star', 'bolt', 'question']} size="lg" />
-    <div class="wrap">
-      <span class="pill">{m.kicker}</span>
-      <div class="flame">
-        <span class="mega big" data-streak-no>0</span>
-        <div>
-          <h1 class="head" data-streak-text>{e.streak.none}</h1>
-          <p class="sub" data-streak-hint>{e.streak.alive}</p>
-          <p class="sub best" data-streak-best></p>
+    <div class="wrap hero-grid">
+      <div>
+        <span class="pill">{m.kicker}</span>
+        <div class="flame">
+          <span class="mega big" data-streak-no>0</span>
+          <div>
+            <h1 class="head" data-streak-text>{e.streak.none}</h1>
+            <p class="sub" data-streak-hint>{e.streak.alive}</p>
+            <p class="sub best" data-streak-best></p>
+          </div>
+        </div>
+        <ol class="week" aria-hidden="true">
+          {e.streak.week.map((d) => <li><i data-day></i>{d}</li>)}
+        </ol>
+      </div>
+      <div class="glow rank" data-fest="history">
+        <span class:list={['glow-tile', 'r-emoji', 'cat-history']} aria-hidden="true"><span>🏅</span></span>
+        <div class="r-body">
+          <span class="r-label">{m.rank}</span>
+          <span class="r-name" data-rank-name>{e.ranks[0]}</span>
+          <span class="r-of" data-rank-of></span>
+          <div class="xp" aria-hidden="true"><i data-xp></i></div>
+          <p class="r-next" data-rank-next></p>
         </div>
       </div>
-      <ol class="week" aria-hidden="true">
-        {e.streak.week.map((d) => <li><i data-day></i>{d}</li>)}
-      </ol>
     </div>
   </section>
+  <JumpNav label={e.games.jump} items={nav} />
 
-  <section class="sec sec--night mlist" data-edge data-me data-cats={JSON.stringify(cats)} data-texts={JSON.stringify(texts)} data-rank-at={JSON.stringify(RANK_AT)}>
+  <section class="sec sec--night badges-sec" id="abzeichen" data-edge data-me data-cats={JSON.stringify(cats)} data-texts={JSON.stringify(texts)} data-rank-at={JSON.stringify(RANK_AT)}>
     <div class="wrap">
-      <div class="card rank bleed">
-        <div class="r-top"><span class="r-name" data-rank-name>{e.ranks[0]}</span><span class="r-of" data-rank-of></span></div>
-        <div class="xp" aria-hidden="true"><i data-xp></i></div>
-        <p class="r-next" data-rank-next></p>
-      </div>
-
       <h2 class="mh">{m.badges}</h2>
       <p class="hint">{m.badgesHint(BADGE_AT)}</p>
       <ul class="badges">
         {badgeCats.map((c) => (
           <li class="badge" data-badge={c} title={ui.categories[c]}>
-            <span class:list={['b-coin', `cat-${c}`]} aria-hidden="true"><img src={categoryIcon(c)} alt="" width="40" height="40" /></span>
+            <span class="b-coin fest-sky" data-fest={festOf(c, '')?.theme} aria-hidden="true"><img src={categoryIcon(c)} alt="" width="40" height="40" /></span>
             <span class="b-name">{ui.categories[c]}</span>
             <span class="b-count" data-badge-count>0/{BADGE_AT}</span>
           </li>
         ))}
       </ul>
+    </div>
+  </section>
 
-      <h2 class="mh">{m.kicker}</h2>
+  <GoldShelf lang={lang} />
+
+  <section class="sec sec--night records" id="rekorde" data-edge="left">
+    <div class="wrap">
+      <h2 class="mh">{m.records}</h2>
+      <p class="hint">{m.recordsHint}</p>
       <ul class="tiles">
         {tiles.map((tl) => (
           <li>
-            <a class="tile" href={tl.href} data-tile={tl.id}>
-              <span class:list={['t-emoji', tl.cls]} aria-hidden="true">{tl.emoji}</span>
+            <a class="glow tile" href={tl.href} data-fest={festOf(tl.cat, '')?.theme} data-tile={tl.id}>
+              <span class:list={['glow-tile', 't-emoji', `cat-${tl.cat}`]} aria-hidden="true"><span>{tl.emoji}</span></span>
               <span class="t-text"><span class="t-name">{tl.name}</span><span class="t-sub" data-sub>{tl.text}</span></span>
               <Icon name="chevron-right" />
             </a>
@@ -89,6 +114,8 @@ const texts = {
       <p class="hint">{m.intro}</p>
     </div>
   </section>
+
+  <YouNumbers lang={lang} />
 </Base>
 
 <script>
@@ -101,7 +128,7 @@ const texts = {
   if (root) {
     const T = JSON.parse(root.dataset.texts!);
     const cats = JSON.parse(root.dataset.cats!) as Record<string, string>;
-    const hero = document.querySelector<HTMLElement>('.mhero')!;
+    const hero = document.querySelector<HTMLElement>('[data-me-hero]')!;
     const s = streakInfo();
     hero.querySelector('[data-streak-no]')!.textContent = String(s.current);
     hero.querySelector('[data-streak-text]')!.textContent = s.current ? (s.current === 1 ? T.days[0] : T.days[1].replace('9001', String(s.current))) : T.none;
@@ -116,10 +143,10 @@ const texts = {
 
     const read = [...readKeys()].filter((k) => cats[k]);
     const r = rankFor(read.length);
-    root.querySelector('[data-rank-name]')!.textContent = T.ranks[r.index];
-    root.querySelector('[data-rank-of]')!.textContent = `${T.rankOf.replace('9001', r.index + 1).replace('9002', T.ranks.length)} · ${T.read.replace('9001', read.length)}`;
-    root.querySelector<HTMLElement>('[data-xp]')!.style.setProperty('--fill', String(r.progress));
-    root.querySelector('[data-rank-next]')!.textContent = r.next ? T.toNext.replace('9001', r.toNext).replace('§', T.ranks[r.index + 1]) : T.top;
+    hero.querySelector('[data-rank-name]')!.textContent = T.ranks[r.index];
+    hero.querySelector('[data-rank-of]')!.textContent = `${T.rankOf.replace('9001', r.index + 1).replace('9002', T.ranks.length)} · ${T.read.replace('9001', read.length)}`;
+    hero.querySelector<HTMLElement>('[data-xp]')!.style.setProperty('--fill', String(r.progress));
+    hero.querySelector('[data-rank-next]')!.textContent = r.next ? T.toNext.replace('9001', r.toNext).replace('§', T.ranks[r.index + 1]) : T.top;
 
     const per: Record<string, number> = {};
     read.forEach((k) => (per[cats[k]] = (per[cats[k]] ?? 0) + 1));
@@ -130,7 +157,7 @@ const texts = {
       b.title = T.badge.replace('§', b.title).replace('9001', String(Math.min(n, BADGE_AT)));
     });
 
-    const sub = (id: string, text: string) => (root.querySelector(`[data-tile="${id}"] [data-sub]`)!.textContent = text);
+    const sub = (id: string, text: string) => (document.querySelector(`[data-tile="${id}"] [data-sub]`)!.textContent = text);
     sub('album', T.album.replace('9001', read.length));
     const st = stats();
     sub('number', st.played ? T.number[1].replace('9001', st.won).replace('9002', st.played) : T.number[0]);
@@ -138,16 +165,17 @@ const texts = {
     try { hole = Number(localStorage.getItem('wtfact:hole-best')) || 0; } catch { /* ohne Speicher */ }
     sub('hole', hole ? T.hole[1].replace('9001', hole) : T.hole[0]);
     const best = loadStore().best;
-    if (best) root.querySelector('[data-tile="gold"] [data-sub]')!.textContent += ` · 🏆 ${best}`;
+    sub('jumper', best ? T.jumper[1].replace('9001', best) : T.jumper[0]);
   }
 </script>
 
 <style>
   .mhero > .wrap { position: relative; z-index: 1; }
-  .mhero { position: relative; padding: var(--space-10) 0 calc(var(--space-12) + var(--bleed)); overflow: clip; }
+  .mhero { position: relative; padding: var(--space-10) 0 var(--space-12); overflow: clip; }
+  .hero-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 30rem); gap: var(--space-10); align-items: end; }
   .pill { display: inline-block; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); background: var(--fest-a); color: var(--on-accent); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lg); transform: rotate(-3deg); }
   .flame { display: flex; align-items: center; gap: var(--space-7); margin-top: var(--space-6); flex-wrap: wrap; }
-  .big { font-size: var(--fs-huge); text-shadow: var(--shift-mega) var(--shift-mega) 0 var(--orange); line-height: 0.9; }
+  .big { font-size: var(--fs-huge); text-shadow: var(--shift-mega) var(--shift-mega) 0 var(--fest-a); line-height: 0.9; }
   .head { margin: 0; font-size: var(--fs-display-md); }
   .sub { margin: var(--space-2) 0 0; font-weight: 600; max-width: 40ch; }
   .best { color: var(--fest-a); font-weight: 800; }
@@ -156,37 +184,50 @@ const texts = {
   .week li { display: grid; justify-items: center; gap: var(--space-1); font-size: var(--fs-sm); font-weight: 700; }
   .week i {
     display: grid; place-items: center; width: var(--space-11); height: var(--space-11); font-style: normal; font-size: var(--fs-lg);
-    border-radius: 50%; background: var(--night-3); border: var(--bw-sm) solid var(--night-3);
+    border-radius: 50%; background: var(--night); border: var(--bw-sm) solid var(--night-3);
   }
-  .week i[data-active] { background: var(--orange); border-color: var(--on-night); }
-  .week i[data-today] { background: var(--yellow); border-color: var(--on-night); }
-  .mlist { padding: 0 0 var(--space-12); }
-  .rank { position: relative; z-index: 2; margin-top: calc(-1 * var(--bleed)); max-width: 40rem; padding: var(--space-6); border: var(--bw-strong) solid var(--on-accent); box-shadow: var(--shadow-2xl); }
-  .r-top { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); flex-wrap: wrap; }
-  .r-name { font-family: var(--font-display); font-weight: 800; font-size: var(--fs-2xl); }
-  .r-of { color: var(--muted); font-weight: 700; }
-  .xp { height: var(--space-4); margin-top: var(--space-3); border: var(--bw-sm) solid var(--line); border-radius: var(--radius-pill); overflow: hidden; }
-  .xp i { display: block; height: 100%; width: calc(var(--fill, 0) * 100%); background: var(--yellow); }
-  .r-next { margin: var(--space-3) 0 0; font-weight: 700; }
-  .mh { margin: var(--space-11) 0 var(--space-2); font-size: var(--fs-display-sm); }
-  .hint { margin: 0 0 var(--space-5); color: var(--on-night-muted); }
-  .badges { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr)); gap: var(--space-4); }
-  .badge { display: grid; justify-items: center; gap: var(--space-1); text-align: center; font-size: var(--fs-sm); font-weight: 700; opacity: 0.55; }
-  .badge[data-earned] { opacity: 1; }
-  .b-coin { display: grid; place-items: center; width: var(--space-12); height: var(--space-12); border-radius: 50%; border: var(--bw-sm) dashed var(--on-night); filter: grayscale(1); }
-  .b-coin img { width: 60%; height: 60%; }
-  .badge[data-earned] .b-coin { border: var(--bw-strong) solid var(--on-accent); filter: none; box-shadow: var(--shadow-night-sm); }
+  .week i[data-active] { background: var(--fest-a); border-color: var(--on-night); }
+  .week i[data-today] { border-color: var(--fest-a); }
+  .rank { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-5); align-items: center; padding: var(--space-6); }
+  .r-emoji { width: var(--space-12); height: var(--space-12); font-size: var(--fs-emoji-sm); }
+  .r-body { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
+  .r-label { font-size: var(--fs-xs); font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--on-night-muted); }
+  .r-name { font-family: var(--font-display); font-weight: 900; font-size: var(--fs-2xl); color: var(--fest-a); line-height: 1.1; }
+  .r-of { color: var(--on-night-muted); font-weight: 700; font-size: var(--fs-sm); }
+  .xp { height: var(--space-4); margin-top: var(--space-2); border: var(--bw-sm) solid var(--on-night); border-radius: var(--radius-pill); overflow: hidden; background: var(--night); }
+  .xp i { display: block; height: 100%; width: calc(var(--fill, 0) * 100%); background: var(--fest-a); }
+  .r-next { margin: var(--space-2) 0 0; font-weight: 700; font-size: var(--fs-sm); }
+  .mh { margin: 0 0 var(--space-2); font-size: var(--fs-display-sm); }
+  .hint { margin: 0 0 var(--space-7); color: var(--on-night-muted); }
+  .badges-sec, .records { padding: var(--space-12) 0; }
+  .badges { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr)); gap: var(--space-7) var(--space-4); }
+  .badge { display: grid; justify-items: center; gap: var(--space-1); text-align: center; font-size: var(--fs-sm); font-weight: 700; }
+  /* Münze: noch nicht verdient dunkel und gestrichelt, verdient leuchtet sie in der Farbwelt der Kategorie */
+  .b-coin { display: grid; place-items: center; width: var(--space-12); height: var(--space-12); border-radius: 50%; border: var(--bw-sm) dashed var(--night-3); }
+  .badge:not([data-earned]) .b-coin { background: var(--night-2); }
+  .b-coin img { width: 60%; height: 60%; filter: invert(1); opacity: 0.45; }
+  .badge[data-earned] .b-coin { border: var(--bw-strong) solid var(--fest-a); box-shadow: var(--space-1) var(--space-1) 0 var(--fest-a); transform: rotate(-6deg); }
+  .badge[data-earned] .b-coin img { opacity: 1; filter: invert(1) var(--emoji-shadow); }
+  .b-name { color: var(--on-night-muted); }
+  .badge[data-earned] .b-name { color: var(--on-night); }
   .b-count { color: var(--on-night-muted); }
-  .tiles { list-style: none; margin: 0 0 var(--space-6); padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); gap: var(--space-5); }
+  .badge[data-earned] .b-count { color: var(--yellow); }
+  .tiles { list-style: none; margin: 0 0 var(--space-8); padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); gap: var(--space-7) var(--space-6); }
   .tiles li { display: flex; }
-  .tile {
-    display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--space-4); align-items: center; width: 100%; padding: var(--space-4);
-    background: var(--surface); color: var(--ink); text-decoration: none; border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-md);
-    box-shadow: var(--shadow-night-lime); transition: transform var(--dur) var(--ease);
-  }
-  .tile:hover { transform: translate(calc(-1 * var(--space-1)), calc(-1 * var(--space-1))); }
-  .t-emoji { display: grid; place-items: center; width: var(--space-11); height: var(--space-11); font-size: var(--fs-emoji-sm); border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-sm); }
+  .tile { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--space-4); align-items: center; width: 100%; padding: var(--space-5); }
+  .t-emoji { width: var(--space-11); height: var(--space-11); font-size: var(--fs-emoji-sm); }
   .t-text { display: flex; flex-direction: column; min-width: 0; }
-  .t-name { font-family: var(--font-display); font-weight: 800; font-size: var(--fs-lg); }
-  .t-sub { color: var(--muted); font-size: var(--fs-sm); font-weight: 600; }
+  .t-name { font-family: var(--font-display); font-weight: 800; font-size: var(--fs-lg); color: var(--fest-a); }
+  .t-sub { color: var(--on-night); font-size: var(--fs-sm); font-weight: 600; }
+  @media (max-width: 1060px) {
+    .hero-grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-8); }
+    .rank { max-width: 32rem; }
+  }
+  @media (max-width: 520px) {
+    .badges { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-6) var(--space-2); }
+    .b-coin { width: var(--space-11); height: var(--space-11); }
+    .badge { font-size: var(--fs-xs); }
+    .week { gap: var(--space-2); }
+    .week i { width: var(--space-9); height: var(--space-9); font-size: var(--fs-md); }
+  }
 </style>

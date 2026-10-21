@@ -8,6 +8,7 @@ import { t } from '../i18n/ui';
 import { x } from '../i18n/extras';
 import { postUrl, type Post } from '../lib';
 import Icon from './Icon.astro';
+import { festOf } from '../data/holidays';
 interface Props { lang: Lang; post: Post; others: Post[] }
 const { lang, post, others } = Astro.props;
 const ui = t(lang);
@@ -53,8 +54,8 @@ for (const { p } of scored) {
       <ul class="doors">
         {doors.map((p, i) => (
           <li data-door-li hidden={i >= SHOWN}>
-            <a class="door" href={postUrl(p)} data-door data-door-emoji={p.data.emoji}>
-              <span class:list={['d-emoji', `cat-${p.data.category}`]} aria-hidden="true">{p.data.emoji}</span>
+            <a class="glow door" href={postUrl(p)} data-fest={festOf(p.data.category, '')?.theme ?? 'fest'} data-door data-door-emoji={p.data.emoji}>
+              <span class:list={['glow-tile', 'd-emoji', `cat-${p.data.category}`]} aria-hidden="true"><span>{p.data.emoji}</span></span>
               <span class="d-text">
                 <span class="d-cat">{ui.categories[p.data.category]}</span>
                 <span class="d-title">{p.data.title}</span>
@@ -122,17 +123,11 @@ for (const { p } of scored) {
   .meter { height: var(--space-3); border: var(--bw-sm) solid var(--on-night); border-radius: var(--radius-pill); overflow: hidden; }
   .meter i { display: block; height: 100%; width: calc(var(--fill, 0.1) * 100%); background: repeating-linear-gradient(-45deg, var(--cyan) 0 var(--space-2), var(--violet) var(--space-2) var(--space-4)); }
   .best { font-size: var(--fs-sm); color: var(--on-night-muted); }
-  .doors { list-style: none; margin: var(--space-7) 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-5); }
-  .door {
-    display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--space-4); align-items: center; height: 100%; padding: var(--space-4);
-    background: var(--surface); color: var(--ink); text-decoration: none; border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-md);
-    box-shadow: var(--shadow-night-lime); transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
-  }
-  .doors li:nth-child(2) .door { box-shadow: var(--shadow-night-pink); }
-  .door:hover { transform: translate(calc(-1 * var(--space-1)), calc(-1 * var(--space-1))); }
-  .d-emoji { display: grid; place-items: center; width: var(--space-12); height: var(--space-12); font-size: var(--fs-emoji-sm); border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-sm); }
+  .doors { list-style: none; margin: var(--space-7) 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-7) var(--space-6); }
+  .door { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--space-4); align-items: center; height: 100%; padding: var(--space-4); }
+  .d-emoji { width: var(--space-12); height: var(--space-12); font-size: var(--fs-emoji-sm); }
   .d-text { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
-  .d-cat { font-size: var(--fs-xs); font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  .d-cat { font-size: var(--fs-xs); font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--fest-a); }
   .d-title { font-family: var(--font-display); font-weight: 800; line-height: 1.25; }
   .trail-wrap { margin-top: var(--space-7); }
   .trail-h { margin: 0 0 var(--space-2); font-size: var(--fs-sm); font-weight: 700; color: var(--on-night-muted); }

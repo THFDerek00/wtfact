@@ -1,0 +1,52 @@
+---
+// Sprungnavigation für Seiten mit mehreren Abschnitten („Spiele“ und „Ich“, Wunsch von Eric, 2026-10-21).
+// Bleibt unter der Kopfzeile stehen und markiert den Abschnitt, der gerade zu sehen ist (aria-current).
+import Icon from './Icon.astro';
+interface Props { label: string; items: { id: string; label: string; icon: string }[] }
+const { label, items } = Astro.props;
+---
+<nav class="jump" aria-label={label} data-jump-nav>
+  <div class="wrap">
+    <ul>
+      {items.map((it) => <li><a class="chip" href={`#${it.id}`} data-jump-to={it.id}><Icon name={it.icon} /> {it.label}</a></li>)}
+    </ul>
+  </div>
+</nav>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-jump-nav]').forEach((nav) => {
+    const top = document.querySelector<HTMLElement>('header');
+    // Unter der (klebenden) Kopfzeile andocken, ihre Höhe ändert sich mit der Breite
+    const dock = () => document.documentElement.style.setProperty('--jump-top', `${top?.offsetHeight ?? 0}px`);
+    dock();
+    addEventListener('resize', dock);
+    const links = [...nav.querySelectorAll<HTMLAnchorElement>('[data-jump-to]')];
+    const secs = links.map((a) => document.getElementById(a.dataset.jumpTo!)).filter((s): s is HTMLElement => !!s);
+    const seen = new Map<Element, number>();
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => seen.set(e.target, e.isIntersecting ? e.intersectionRatio : 0));
+      const best = secs.reduce<HTMLElement | null>((b, s) => ((seen.get(s) ?? 0) > (b ? seen.get(b) ?? 0 : 0) ? s : b), null);
+      links.forEach((a) => (best && a.dataset.jumpTo === best.id ? a.setAttribute('aria-current', 'true') : a.removeAttribute('aria-current')));
+      // Aktiven Punkt in der waagerechten Leiste sichtbar halten (Handy), ohne die Seite zu verschieben
+      const on = links.find((a) => a.hasAttribute('aria-current'));
+      const ul = nav.querySelector('ul')!;
+      if (on) ul.scrollTo({ left: on.offsetLeft - ul.offsetLeft, behavior: 'smooth' });
+    }, { threshold: [0, 0.15, 0.3, 0.5, 0.7] });
+    secs.forEach((s) => io.observe(s));
+  });
+</script>
+
+<style>
+  /* Sprungziele landen unter Kopfzeile und Leiste */
+  :global(html) { scroll-padding-top: calc(var(--jump-top, var(--space-10)) + var(--space-12)); }
+  .jump {
+    position: sticky; top: var(--jump-top, 0); z-index: 4; padding-block: var(--space-3);
+    background: var(--night);
+    border-bottom: var(--bw) solid var(--night-3); color: var(--on-night);
+  }
+  ul { list-style: none; margin: 0; padding: 0; display: flex; gap: var(--space-2); overflow-x: auto; scrollbar-width: none; }
+  ul::-webkit-scrollbar { display: none; }
+  li { flex: none; }
+  .chip { display: inline-flex; align-items: center; gap: var(--space-2); text-decoration: none; white-space: nowrap; background: transparent; color: var(--on-night); border-color: var(--on-night); }
+  .chip[aria-current] { background: var(--yellow); color: var(--on-accent); border-color: var(--on-accent); }
+</style>

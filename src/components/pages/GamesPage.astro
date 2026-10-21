@@ -1,13 +1,19 @@
 ---
-// Seite „Spiele“ (Wunsch von Eric, 2026-10-21): /de/spiele/ und /en/games/, ersetzt im Menü den Punkt „Quiz“.
-// Sammelt Tageszahl, Wahr oder Fake, Was war zuerst und den Science Jumper. Die Quiz-Seite und der Science Jumper
-// behalten ihre Adressen. Stand (Tageszahl heute gespielt, Highscore) liest der Browser aus seinem Speicher.
+// Seite „Spiele“: /de/spiele/ und /en/games/. Seit 2026-10-21 (Wunsch von Eric) stehen alle Spiele auf dieser einen Seite:
+// Tageszahl, Wahr oder Fake, Was war zuerst und der Science Jumper, oben als Leuchtkarten zum Hinspringen und darunter
+// eine Sprungleiste, die beim Scrollen stehen bleibt. Die alten Adressen (/quiz/, /tageszahl/, /science-jumper/) leiten
+// auf den passenden Abschnitt weiter (astro.config.mjs). Stand (Tageszahl, Highscore) liest der Browser aus seinem Speicher.
 import Base from '../../layouts/Base.astro';
 import FestDeco from '../FestDeco.astro';
 import Icon from '../Icon.astro';
+import JumpNav from '../JumpNav.astro';
+import NumberGame from '../games/NumberGame.astro';
+import Jumper from '../games/Jumper.astro';
+import TrueOrFake from '../home/TrueOrFake.astro';
+import WhatFirst from '../home/WhatFirst.astro';
 import type { Lang } from '../../config';
-import { t, quizPath, chartsPath } from '../../i18n/ui';
-import { x, gamesPath, numberPath } from '../../i18n/extras';
+import { t, chartsPath } from '../../i18n/ui';
+import { x, gamesPath } from '../../i18n/extras';
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const ui = t(lang);
@@ -15,10 +21,10 @@ const e = x(lang);
 const gm = e.games;
 const other: Lang = lang === 'de' ? 'en' : 'de';
 const tiles = [
-  { id: 'number', href: numberPath(lang), emoji: '🎯', cls: 'cat-nature', name: e.number.name, text: gm.numberText },
-  { id: 'wof', href: `${quizPath(lang)}#wof`, emoji: '✅', cls: 'cat-body', name: e.game.tabs.wof, text: gm.wofText },
-  { id: 'first', href: `${quizPath(lang)}#first`, emoji: '⏳', cls: 'cat-tech', name: e.game.tabs.first, text: gm.firstText },
-  { id: 'jumper', href: `/${lang}/science-jumper/`, emoji: '🧪', cls: 'cat-science', name: ui.game.name, text: gm.jumperText },
+  { id: 'tageszahl', fest: 'nature', emoji: '🎯', cls: 'cat-nature', icon: 'target', name: e.number.name, text: gm.numberText },
+  { id: 'wof', fest: 'wof', emoji: '✅', cls: 'cat-body', icon: 'check', name: e.game.tabs.wof, text: gm.wofText },
+  { id: 'first', fest: 'quiz', emoji: '⏳', cls: 'cat-tech', icon: 'hourglass', name: e.game.tabs.first, text: gm.firstText },
+  { id: 'jumper', fest: 'science', emoji: '🧪', cls: 'cat-science', icon: 'flask-conical', name: ui.game.name, text: gm.jumperText },
 ];
 ---
 <Base lang={lang} title={gm.title} description={gm.intro} altUrl={gamesPath(other)}>
@@ -28,27 +34,30 @@ const tiles = [
       <span class="pill">{gm.kicker}</span>
       <h1 class="mega word">{gm.title}</h1>
       <p class="intro">{gm.intro}</p>
-    </div>
-  </section>
-  <section class="sec sec--night glist" data-edge data-games data-open={gm.open} data-won={e.strip.numberWon(9001)} data-lost={e.strip.numberLost}>
-    <div class="wrap">
-      <ul class="tiles bleed">
+      <ul class="tiles" data-games data-open={gm.open} data-won={e.strip.numberWon(9001)} data-lost={e.strip.numberLost}>
         {tiles.map((tl) => (
           <li>
-            <a class="tile" href={tl.href} data-tile={tl.id}>
-              <span class:list={['t-emoji', tl.cls]} aria-hidden="true">{tl.emoji}</span>
+            <a class="glow tile" href={`#${tl.id}`} data-fest={tl.fest} data-tile={tl.id}>
+              <span class:list={['glow-tile', 't-emoji', tl.cls]} aria-hidden="true"><span>{tl.emoji}</span></span>
               <span class="t-text">
                 <span class="t-name">{tl.name}</span>
                 <span class="t-sub">{tl.text}</span>
                 <span class="t-state" data-state></span>
               </span>
-              <Icon name="chevron-right" />
+              <Icon name="chevron-down" />
             </a>
           </li>
         ))}
       </ul>
-      <p class="note"><a href={chartsPath(lang)}>{gm.chartsNote}</a></p>
     </div>
+  </section>
+  <JumpNav label={gm.jump} items={tiles.map((tl) => ({ id: tl.id, label: tl.name, icon: tl.icon }))} />
+  <NumberGame lang={lang} />
+  <TrueOrFake lang={lang} />
+  <WhatFirst lang={lang} />
+  <Jumper lang={lang} />
+  <section class="sec sec--night gfoot" data-edge>
+    <div class="wrap"><p class="note"><a href={chartsPath(lang)}>{gm.chartsNote} <Icon name="chevron-right" /></a></p></div>
   </section>
 </Base>
 
@@ -57,41 +66,50 @@ const tiles = [
   import { loadStore } from '../../scripts/gold';
   const root = document.querySelector<HTMLElement>('[data-games]');
   if (root) {
-    const st = stateFor();
-    const num = root.querySelector<HTMLElement>('[data-tile="number"] [data-state]')!;
-    num.textContent = !st.done ? root.dataset.open! : st.won ? root.dataset.won!.replace('9001', String(st.guesses.length)) : root.dataset.lost!;
-    num.toggleAttribute('data-hot', !st.done);
-    const best = loadStore().best;
-    if (best) root.querySelector('[data-tile="jumper"] [data-state]')!.textContent = `🏆 ${best}`;
+    const paint = () => {
+      const st = stateFor();
+      const num = root.querySelector<HTMLElement>('[data-tile="tageszahl"] [data-state]')!;
+      num.textContent = !st.done ? root.dataset.open! : st.won ? root.dataset.won!.replace('9001', String(st.guesses.length)) : root.dataset.lost!;
+      num.toggleAttribute('data-hot', !st.done);
+      const best = loadStore().best;
+      if (best) root.querySelector('[data-tile="jumper"] [data-state]')!.textContent = `${best}`;
+    };
+    paint();
+    addEventListener('wtfact-streak', paint);
+    addEventListener('wtfact-gold', paint);
   }
 </script>
 
 <style>
   .ghero > .wrap { position: relative; z-index: 1; }
-  .ghero { position: relative; padding: var(--space-10) 0 calc(var(--space-12) + var(--bleed)); overflow: clip; }
+  .ghero { position: relative; padding: var(--space-10) 0 var(--space-12); overflow: clip; }
   .pill { display: inline-block; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); background: var(--fest-a); color: var(--on-accent); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lg); transform: rotate(-3deg); }
   .word { margin: var(--space-5) calc(-1 * var(--space-4)) 0; font-size: var(--fs-huge); text-transform: uppercase; text-shadow: var(--shift-mega) var(--shift-mega) 0 var(--fest-a); transform: rotate(-2deg); }
-  .intro { max-width: 52ch; margin: var(--space-12) 0 0; font-size: var(--fs-xl); font-weight: 600; }
-  .glist { padding: 0 0 var(--space-12); }
-  .tiles { list-style: none; margin: calc(-1 * var(--bleed)) 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-5); position: relative; z-index: 2; }
+  .intro { max-width: 52ch; margin: var(--space-10) 0 0; font-size: var(--fs-xl); font-weight: 600; }
+  .tiles { list-style: none; margin: var(--space-10) 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-6); }
   .tiles li { display: flex; }
-  .tile {
-    display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--space-4); align-items: center; width: 100%; padding: var(--space-5);
-    background: var(--surface); color: var(--ink); text-decoration: none; border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-md);
-    box-shadow: var(--shadow-night-lime); transition: transform var(--dur) var(--ease);
-  }
-  .tiles li:nth-child(2n) .tile { box-shadow: var(--shadow-night-pink); }
-  .tile:hover { transform: translate(calc(-1 * var(--space-1)), calc(-1 * var(--space-1))); }
-  .t-emoji { display: grid; place-items: center; width: var(--space-12); height: var(--space-12); font-size: var(--fs-emoji-sm); border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-sm); }
-  .t-text { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
-  .t-name { font-family: var(--font-display); font-weight: 800; font-size: var(--fs-xl); }
-  .t-sub { color: var(--muted); }
-  .t-state { font-size: var(--fs-sm); font-weight: 800; }
+  .tile { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto 1fr; gap: var(--space-4); width: 100%; padding: var(--space-5); }
+  .t-emoji { grid-column: 1; width: var(--space-12); height: var(--space-12); font-size: var(--fs-emoji-sm); }
+  .tile > :global(svg) { grid-column: 2; grid-row: 1; align-self: start; }
+  .t-text { grid-column: 1 / -1; display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
+  .t-name { font-family: var(--font-display); font-weight: 800; font-size: var(--fs-xl); color: var(--fest-a); }
+  .t-sub { color: var(--on-night-muted); font-weight: 600; }
+  .t-state { align-self: flex-start; margin-top: var(--space-2); padding: 0 var(--space-2); border-radius: var(--radius-pill); font-size: var(--fs-sm); font-weight: 800; background: var(--fest-a); color: var(--on-accent); }
   .t-state:empty { display: none; }
-  .t-state[data-hot] { align-self: flex-start; padding: 0 var(--space-2); border-radius: var(--radius-pill); background: var(--yellow); color: var(--on-accent); }
-  .note { margin: var(--space-8) 0 0; font-weight: 700; }
-  @media (max-width: 760px) {
-    .tiles { grid-template-columns: minmax(0, 1fr); }
+  .t-state[data-hot] { background: var(--yellow); }
+  [data-tile='jumper'] .t-state::before { content: '🏆 '; }
+  .gfoot { padding: var(--space-10) 0; }
+  .note { margin: 0; font-weight: 700; }
+  .note a { display: inline-flex; align-items: center; gap: var(--space-1); }
+  @media (max-width: 1060px) {
+    .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 520px) {
+    .tiles { gap: var(--space-5) var(--space-4); margin-top: var(--space-8); }
+    .tile { gap: var(--space-3); padding: var(--space-4); }
+    .t-emoji { width: var(--space-10); height: var(--space-10); }
+    .t-name { font-size: var(--fs-md); }
+    .t-sub { display: none; }
     .intro { margin-top: var(--space-8); font-size: var(--fs-lg); }
   }
 </style>

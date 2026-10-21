@@ -831,6 +831,20 @@ html[data-sky] .stage { background: var(--sky-stage); }
 /* Akzentfläche in Themenfarbe (z. B. der große Emoji-Block im Kopf der Faktseite) */
 .fest-a { background: var(--dots-strong), var(--fest-a); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
 .fest-sky { background: var(--fest-sky); background-size: auto, var(--dots-size-md) var(--dots-size-md); color: var(--on-night); }
+/* Leuchtkarte (Wunsch von Eric, 2026-10-21: neue Seiten im Stil von „Heute neu“ und den Kategorien): Themen-Bühne
+   mit Leuchten und Punkten, Rand und versetzter Schatten in der Themenfarbe. Braucht data-fest (Kategorie oder Thema). */
+.glow {
+  position: relative; background: var(--fest-sky); background-size: auto, var(--dots-size-md) var(--dots-size-md); color: var(--on-night);
+  border: var(--bw-strong) solid var(--fest-a); border-radius: var(--radius-lg); box-shadow: var(--space-2) var(--space-2) 0 var(--fest-a);
+  --line: var(--on-night); --muted: var(--on-night-muted); --focus: var(--yellow);
+}
+a.glow { text-decoration: none; transition: transform var(--dur) var(--ease-pop); }
+a.glow:hover { transform: translate(calc(-1 * var(--space-1)), calc(-1 * var(--space-1))) rotate(-0.5deg); }
+/* Kategorie-Symbol (dunkle Linien) hell auf der Leuchtkarte, ragt unten rechts heraus */
+.glow-icon { position: absolute; right: calc(-1 * var(--space-3)); bottom: calc(-1 * var(--space-4)); width: var(--space-12); height: auto; filter: invert(1) var(--emoji-shadow); transform: rotate(-10deg); pointer-events: none; }
+/* Emoji-Feld in Kategoriefarbe auf der Leuchtkarte (wie „Heute neu“) */
+.glow-tile { display: grid; place-items: center; flex: none; border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-md); box-shadow: var(--shadow-accent-sm); transform: rotate(-4deg); }
+.glow-tile > span { filter: var(--emoji-shadow); }
 @keyframes fest-wave { 0%, 100% { rotate: 0deg; } 50% { rotate: 2deg; } }
 @keyframes fest-burst { 0% { scale: 0.2; opacity: 0; } 25% { scale: 1; opacity: 1; } 70% { opacity: 1; } 100% { scale: 1.12; opacity: 0; } }
 @keyframes fest-float { 0%, 100% { translate: 0 0; } 50% { translate: 0 calc(-1 * var(--space-3)); } }

@@ -3,6 +3,7 @@
 // Erst der Anlass (je nach Monat vorausgewählt, im Browser, src/data/gifts.ts; ?occasion=birthday wählt ihn per Link), dann für wen, Interesse und Budget.
 // Alle Ideen stehen fertig im HTML, der Browser blendet nur aus und sortiert. Jede Idee hat einen WTF-Fakt als Aufhänger.
 // Werbung: Etikett, Provisionshinweis und rel="sponsored" wie bei ProductBox.astro.
+// Aussehen (2026-10-21, zweiter Wunsch): Filter und Ideen als Leuchtkarten (.glow) in der Farbwelt des Interesses.
 import Base from '../../layouts/Base.astro';
 import FestDeco from '../FestDeco.astro';
 import Icon from '../Icon.astro';
@@ -10,7 +11,8 @@ import type { Lang } from '../../config';
 import { SITE } from '../../config';
 import { t } from '../../i18n/ui';
 import { x, giftsPath } from '../../i18n/extras';
-import { postsFor, postUrl, amazonUrl } from '../../lib';
+import { postsFor, postUrl, amazonUrl, categoryIcon } from '../../lib';
+import { festOf } from '../../data/holidays';
 import { GIFTS, OCCASIONS, OCCASION_EMOJI, OCCASION_BY_MONTH, WHO, INTERESTS, INTEREST_EMOJI, type Interest } from '../../data/gifts';
 interface Props { lang: Lang }
 const { lang } = Astro.props;
@@ -35,7 +37,7 @@ const preset = OCCASION_BY_MONTH[new Date().getMonth()];
 
   <section class="sec sec--night gplay" data-edge data-gifts data-by-month={JSON.stringify(OCCASION_BY_MONTH)} data-count-text={JSON.stringify([g.results(1), g.results(9001)])}>
     <div class="wrap">
-      <div class="card filters bleed">
+      <div class="glow filters bleed" data-fest="fest">
         <fieldset>
           <legend>{g.occasion}</legend>
           <div class="pills" role="group" aria-label={g.occasion}>
@@ -75,8 +77,12 @@ const preset = OCCASION_BY_MONTH[new Date().getMonth()];
           const fact = gift.fact ? byKey.get(gift.fact) : undefined;
           return (
             <li data-gift data-who={gift.who.join(' ')} data-interest={gift.interest} data-budget={gift.budget} data-occasions={(gift.occasions ?? []).join(' ')}>
-              <article class="gift">
-                <span class:list={['art', `cat-${catOf[gift.interest]}`]} aria-hidden="true"><span class="emoji">{gift.emoji}</span><span class="host">{host}</span></span>
+              <article class="glow gift" data-fest={festOf(catOf[gift.interest], '')?.theme}>
+                <span class="art" aria-hidden="true">
+                  <span class:list={['glow-tile', 'emoji', `cat-${catOf[gift.interest]}`]}><span>{gift.emoji}</span></span>
+                  <img class="glow-icon" src={categoryIcon(catOf[gift.interest])} alt="" width="64" height="64" loading="lazy" />
+                  <span class="host">{host}</span>
+                </span>
                 <div class="body">
                   <h2 class="head-small name">{tx.name}</h2>
                   <p class="why">{tx.why}</p>
@@ -142,36 +148,32 @@ const preset = OCCASION_BY_MONTH[new Date().getMonth()];
   .word { margin: var(--space-5) calc(-1 * var(--space-4)) 0; font-size: var(--fs-display-2xl); text-transform: uppercase; text-shadow: var(--shift-mega) var(--shift-mega) 0 var(--fest-b); transform: rotate(-2deg); }
   .intro { max-width: 52ch; margin: var(--space-10) 0 0; font-size: var(--fs-xl); font-weight: 600; }
   .gplay { padding: 0 0 var(--space-12); }
-  .filters {
-    position: relative; z-index: 2; margin-top: calc(-1 * var(--bleed)); padding: var(--space-6); display: grid; gap: var(--space-5);
-    border: var(--bw-strong) solid var(--on-accent); box-shadow: var(--shadow-2xl);
-  }
+  .filters { z-index: 2; margin-top: calc(-1 * var(--bleed)); padding: var(--space-6); display: grid; gap: var(--space-5); }
+  .filters .chip { background: var(--night); color: var(--on-night); border-color: var(--on-night); }
   fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
-  legend { margin-bottom: var(--space-2); font-family: var(--font-display); font-weight: 800; font-size: var(--fs-lg); }
+  legend { margin-bottom: var(--space-2); font-family: var(--font-display); font-weight: 800; font-size: var(--fs-lg); color: var(--fest-a); }
   .pills { display: flex; flex-wrap: wrap; gap: var(--space-2); }
   .opt { cursor: pointer; }
-  .opt[aria-pressed='true'] { background: var(--lime); color: var(--on-accent); border-color: var(--on-accent); }
+  .filters .opt[aria-pressed='true'] { background: var(--fest-a); color: var(--on-accent); border-color: var(--on-accent); }
   .res-head { display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); margin: var(--space-9) 0 var(--space-4); }
   .count { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: var(--fs-xl); }
   .pick-label {
     padding: 0 var(--space-2); border: var(--bw-sm) solid var(--on-night); border-radius: var(--radius-sm); font-family: var(--font-display);
     font-size: var(--fs-sm); font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; transform: rotate(2deg);
   }
-  .gifts { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: var(--space-5); }
+  .gifts { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: var(--space-8) var(--space-6); }
   .gifts li { display: flex; }
-  .gift {
-    display: flex; flex-direction: column; width: 100%; overflow: hidden; background: var(--surface); color: var(--ink);
-    border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-md); box-shadow: var(--shadow-night-lime);
-  }
-  .gifts li:nth-child(3n + 2) .gift { box-shadow: var(--shadow-night-pink); }
-  .art { position: relative; display: grid; place-items: center; min-height: 8rem; border-bottom: var(--bw-strong) solid var(--on-accent); }
-  .emoji { font-size: var(--fs-emoji-lg); filter: var(--emoji-shadow); }
-  .host { position: absolute; right: var(--space-2); bottom: var(--space-2); font-size: var(--fs-xs); font-weight: 800; }
-  .body { display: flex; flex-direction: column; gap: var(--space-2); flex: 1; padding: var(--space-4); }
-  .name { margin: 0; font-size: var(--fs-lg); }
-  .why { margin: 0; color: var(--muted); font-size: var(--fs-md); }
-  .fact { font-size: var(--fs-sm); font-weight: 700; color: var(--pink-text); }
-  .cta { margin-top: auto; align-self: flex-start; }
+  .gift { display: flex; flex-direction: column; width: 100%; }
+  .art { position: relative; display: grid; place-items: center; min-height: 9rem; padding-top: var(--space-5); }
+  .emoji { width: var(--space-12); height: var(--space-12); font-size: var(--fs-emoji-md); }
+  .art .glow-icon { right: var(--space-3); bottom: auto; top: var(--space-3); width: var(--space-10); opacity: 0.7; }
+  .host { position: absolute; left: var(--space-4); top: var(--space-3); font-size: var(--fs-xs); font-weight: 800; color: var(--on-night-muted); }
+  .body { display: flex; flex-direction: column; gap: var(--space-2); flex: 1; padding: var(--space-4) var(--space-5) var(--space-5); }
+  .name { margin: 0; font-size: var(--fs-lg); color: var(--fest-a); }
+  .why { margin: 0; color: var(--on-night); font-size: var(--fs-md); }
+  .fact { font-size: var(--fs-sm); font-weight: 700; color: var(--on-night-muted); }
+  .fact:hover { color: var(--fest-a); }
+  .cta { margin-top: auto; align-self: flex-start; border-color: var(--on-accent); }
   .none { font-weight: 700; }
   .linkish { font: inherit; color: inherit; background: none; border: 0; padding: 0; text-decoration: underline; cursor: pointer; }
   .fine { margin: var(--space-6) 0 0; font-size: var(--fs-sm); color: var(--on-night-muted); }

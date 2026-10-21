@@ -1,0 +1,282 @@
+---
+// Gold-Fakten (Sammlung aus dem Science Jumper) als Abschnitt der Seite „Ich“ (Wunsch von Eric, 2026-10-21), vorher auf
+// /[lang]/science-jumper/. Freigeschaltet wird nach dem Highscore eines Laufs (src/components/games/Jumper.astro); der Inhalt
+// steht kodiert im HTML und wird erst nach dem Freischalten im Browser eingesetzt, damit er nicht im Quelltext steht.
+import Icon from './Icon.astro';
+import type { Lang } from '../config';
+import { t } from '../i18n/ui';
+import { open, readGold } from '../../scripts/facts-db.mjs';
+import { splitLead } from '../scripts/gold';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const ui = t(lang);
+const g = ui.game;
+const db = open();
+const facts = readGold(db);
+db.close();
+const payload = facts.map((f) => ({
+  id: f.id,
+  points: f.points,
+  category: f.category,
+  categoryName: ui.categories[f.category as keyof typeof ui.categories] ?? f.category,
+  emoji: f.emoji,
+  title: f[lang].title,
+  // Hier nur der erste Satz für die Vorschau; der ganze Text steht auf /[lang]/science-jumper/[id]/.
+  text: splitLead(f[lang].text)[0],
+  sources: [],
+}));
+const encoded = Buffer.from(JSON.stringify(payload), 'utf8').toString('base64');
+const staticTexts = Object.fromEntries(Object.entries({ ...g, sourcesLabel: ui.sources }).filter(([, v]) => typeof v === 'string'));
+const STARS = 9;
+---
+  <section class="sec fest-sky gold-wrap" id="gold" data-fest="fest" data-edge><div class="wrap gold-sec" data-gold={encoded} data-texts={JSON.stringify(staticTexts)} data-lang={lang}>
+    <div class="gold-head">
+      <div>
+        <h2>{g.goldTitle}</h2>
+        <p class="lead">{g.goldIntro}</p>
+      </div>
+      <div class="meter-box">
+        <p class="meter-label" data-progress-label>{g.progress(0, facts.length)}</p>
+        <div class="meter" role="progressbar" aria-label={g.goldTitle} aria-valuemin="0" aria-valuemax={facts.length} aria-valuenow="0" data-meter>
+          <span class="meter-fill" data-meter-fill></span>
+        </div>
+        <p class="next" data-next>{g.nextAt(facts[0]?.points ?? 0, facts[0]?.points ?? 0)}</p>
+      </div>
+    </div>
+
+    <ol class="slots">
+      {facts.map((f) => (
+        <li class="slot" data-slot={f.id}>
+          <div class="locked">
+            <span class="lock"><Icon name="lock" /></span>
+            <span class="pts">{f.points}</span>
+            <span class="sr-only">{g.locked},</span>
+            <span class="at">{g.lockedAt(f.points)}</span>
+            <span class:list={['chip', `cat-${f.category}`]}>{ui.categories[f.category as keyof typeof ui.categories] ?? f.category}</span>
+          </div>
+        </li>
+      ))}
+    </ol>
+
+    <div class="foot-note">
+      <p>{g.storageNote}</p>
+      <button class="btn btn--ghost" type="button" data-reset>{g.reset}</button>
+    </div>
+
+    <!-- Kurze Vorschau wie die Faktenkarten auf der Startseite; der ganze Fakt steht auf seiner eigenen Seite -->
+    <template data-card>
+      <a class="card goldcard">
+        <span class="gc-art" aria-hidden="true">
+          <span class="rays"></span>
+          <span class="stars">
+            {Array.from({ length: STARS }, () => <span class="star"><span class="star-core"></span></span>)}
+          </span>
+          <span class="gc-ribbon">{g.goldBadge}</span>
+          <span class="medal"><Icon name="flask-conical" /><span class="medal-pts" data-f="badge"></span></span>
+          <span class="gc-emoji" data-f="emoji"></span>
+          <span class="shine"></span>
+        </span>
+        <span class="gc-body">
+          <span class="gc-tags">
+            <span class="chip" data-f="cat"></span>
+            <span class="chip chip--new" data-f="new" hidden>{g.newBadge}</span>
+          </span>
+          <span class="gc-title" data-f="title"></span>
+          <span class="gc-teaser" data-f="text"></span>
+          <span class="more">{ui.readMore} <Icon name="chevron-right" /></span>
+        </span>
+      </a>
+    </template>
+  </div></section>
+
+<script>
+  import { loadStore, saveStore, decode, goldUrl, type GoldFact as Fact } from '../scripts/gold';
+
+  const sec = document.querySelector<HTMLElement>('[data-gold]');
+  if (sec) {
+    const T = JSON.parse(sec.dataset.texts ?? '{}') as Record<string, string>;
+    const de = sec.dataset.lang === 'de';
+    const lang = sec.dataset.lang ?? 'de';
+    const facts = decode<Fact[]>(sec.dataset.gold ?? '');
+    const fmt = {
+      progress: (have: number, all: number) => (de ? `${have} von ${all} freigeschaltet` : `${have} of ${all} unlocked`),
+      nextAt: (pts: number, missing: number) => (de ? `Nächster Gold-Fakt ab Highscore ${pts}. Dir fehlen noch ${missing}.` : `Next golden fact at a high score of ${pts}. ${missing} to go.`),
+    };
+    let store = loadStore();
+    // Highscore beim letzten Besuch: alles darüber bekommt das Neu-Etikett.
+    const seenAtLoad = store.seen;
+    const tpl = sec.querySelector<HTMLTemplateElement>('[data-card]')!;
+
+    function card(f: Fact, isNew: boolean) {
+      const node = tpl.content.firstElementChild!.cloneNode(true) as HTMLAnchorElement;
+      node.href = goldUrl(lang, f.id);
+      // Bildfläche leuchtet in der Farbwelt der Kategorie, Rahmen und Strahlen bleiben golden
+      node.dataset.fest = f.category === 'horror' ? 'grusel' : f.category === 'holiday' ? 'fest' : f.category;
+      const q = (k: string) => node.querySelector<HTMLElement>(`[data-f="${k}"]`)!;
+      q('badge').textContent = String(f.points);
+      q('cat').textContent = f.categoryName;
+      q('cat').classList.add(`cat-${f.category}`);
+      q('new').hidden = !isNew;
+      q('emoji').textContent = f.emoji;
+      q('title').textContent = f.title;
+      q('text').textContent = f.text;
+      node.querySelectorAll('.star-core').forEach((s) => s.classList.add(`cat-${f.category}`));
+      return node;
+    }
+
+    function render() {
+      let have = 0;
+      for (const f of facts) {
+        const slot = sec!.querySelector<HTMLElement>(`[data-slot="${f.id}"]`);
+        if (!slot) continue;
+        const open = store.best >= f.points;
+        if (open) have++;
+        if (open && !slot.dataset.open) {
+          slot.dataset.open = 'true';
+          slot.replaceChildren(card(f, f.points > seenAtLoad));
+        }
+      }
+      const next = facts.find((f) => f.points > store.best);
+      sec!.querySelector('[data-progress-label]')!.textContent = fmt.progress(have, facts.length);
+      sec!.querySelector('[data-next]')!.textContent = next ? fmt.nextAt(next.points, next.points - store.best) : T.allDone;
+      const meter = sec!.querySelector<HTMLElement>('[data-meter]')!;
+      meter.setAttribute('aria-valuenow', String(have));
+      const max = facts.at(-1)?.points ?? 1;
+      sec!.querySelector<HTMLElement>('[data-meter-fill]')!.style.setProperty('--fill', String(Math.min(1, store.best / max)));
+    }
+
+    sec.querySelector('[data-reset]')!.addEventListener('click', () => {
+      if (!confirm(T.resetConfirm)) return;
+      saveStore({ best: 0, seen: 0 });
+      location.reload();
+    });
+    // Neuer Highscore im Science Jumper (gleiche Seite oder anderer Tab)
+    const refresh = () => { store = loadStore(); render(); };
+    addEventListener('wtfact-gold', refresh);
+    addEventListener('storage', (e) => { if (e.key === 'wtfact-jumper-v1') refresh(); });
+    // Neu-Etiketten gelten bis zum nächsten Besuch: sobald die Sammlung zu sehen war, merken wir uns den Stand.
+    new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { store.seen = store.best; saveStore(store); }
+    }).observe(sec);
+    render();
+  }
+</script>
+
+<style>
+  .gold-wrap { padding-block: var(--space-12); --line: var(--on-night); --fest-glow-y: 8%; }
+  .gold-wrap .lead, .gold-wrap .next, .gold-wrap .foot-note { color: var(--on-night-muted); }
+  .gold-wrap .gold-head h2 { color: var(--fest-a); }
+  /* Sammlung */
+  .gold-sec { scroll-margin-top: var(--space-12); }
+  .gold-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: var(--space-6); margin-bottom: var(--space-8); }
+  .gold-head h2 { font-size: var(--fs-display-sm); margin: 0; }
+  .lead { color: var(--muted); margin: var(--space-2) 0 0; max-width: 52ch; }
+  .meter-box { flex: 0 1 360px; }
+  .meter-label, .next { margin: 0; font-size: var(--fs-sm); font-weight: 600; }
+  .next { color: var(--muted); }
+  .meter {
+    --fill: 0;
+    height: var(--space-4); margin: var(--space-2) 0;
+    border: var(--bw-sm) solid var(--line); border-radius: var(--radius-pill);
+    background: var(--surface); overflow: hidden;
+  }
+  .meter-fill { display: block; height: 100%; width: calc(var(--fill) * 100%); background: var(--gold-surface); transition: width var(--dur) var(--ease); }
+
+  .slots { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: var(--space-6); }
+  .locked {
+    height: 100%; min-height: 180px;
+    display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2);
+    padding: var(--space-5);
+    border: var(--bw) dashed var(--gold-deep); border-radius: var(--radius-md);
+    background: var(--night-2); color: var(--on-night);
+    font-family: var(--font-display);
+  }
+  .lock {
+    display: grid; place-items: center; width: var(--space-10); aspect-ratio: 1;
+    border: var(--bw-sm) solid var(--on-accent); border-radius: 50%;
+    background: var(--gold-foil); color: var(--on-accent); font-size: var(--fs-xl); line-height: 1;
+  }
+  .pts { font-size: var(--fs-display-sm); font-weight: 700; line-height: 1; }
+  .at { font-size: var(--fs-sm); font-weight: 600; margin-top: auto; }
+
+  /* Gold-Fakt als Schatzkarte (neu gestaltet auf Wunsch von Eric, 2026-10-09): dunkle Bühne mit Goldrahmen,
+     drehenden Strahlen, Medaille mit dem Highscore und einem Glanz, der über die Karte zieht.
+     In beiden Modi dunkel, damit das Gold leuchtet. */
+  .goldcard {
+    position: relative; overflow: hidden; height: 100%;
+    display: flex; flex-direction: column; text-decoration: none;
+    background: var(--night); color: var(--on-night); --focus: var(--yellow);
+    border-color: var(--gold); box-shadow: var(--shadow-gold);
+    transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  }
+  .goldcard:hover { transform: translate(-3px, -3px) rotate(-0.5deg); box-shadow: var(--shadow-gold-xl); }
+  .gc-art {
+    position: relative; display: grid; place-items: center; aspect-ratio: 16 / 9; overflow: hidden;
+    background: var(--gold-glow), var(--night);
+    border-bottom: var(--bw) solid var(--gold);
+  }
+  .goldcard[data-fest] .gc-art { background: var(--gold-glow), var(--fest-sky); background-size: auto, auto, var(--dots-size-md) var(--dots-size-md), auto; }
+  .rays { position: absolute; inset: -60%; background: var(--gold-rays); animation: spin var(--dur-rays) linear infinite; }
+  .gc-emoji { position: relative; font-size: var(--fs-emoji-lg); line-height: 1; transform: rotate(-8deg); filter: var(--emoji-shadow); transition: transform var(--dur) var(--ease-pop); }
+  .goldcard:hover .gc-emoji { transform: rotate(8deg) scale(1.15); }
+  .gc-ribbon {
+    position: absolute; top: var(--space-3); left: var(--space-3); z-index: 1;
+    padding: 0 var(--space-2); border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-sm);
+    background: var(--gold-foil); color: var(--on-accent); transform: rotate(-4deg);
+    font-family: var(--font-display); font-size: var(--fs-xs); font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  /* Medaille: Reagenzglas und Highscore, ab dem der Fakt aufgeht */
+  .medal {
+    position: absolute; right: var(--space-3); bottom: var(--space-3); z-index: 1;
+    display: grid; place-items: center; align-content: center; width: var(--medal-size); aspect-ratio: 1;
+    border: var(--bw) solid var(--on-accent); border-radius: 50%;
+    background: var(--gold-foil); color: var(--on-accent); box-shadow: var(--shadow-new);
+    font-family: var(--font-display); font-weight: 800; line-height: 1; transform: rotate(10deg);
+    --icon-size: 1em; font-size: var(--fs-sm);
+  }
+  .medal-pts { font-size: var(--fs-lg); letter-spacing: -0.02em; }
+  /* Glanz, der in Abständen über die Bildfläche zieht */
+  .shine { position: absolute; inset: 0; background: var(--gold-shine); transform: translateX(-120%); animation: shine var(--dur-shine) var(--ease) infinite; pointer-events: none; }
+  .goldcard:hover .shine { animation-duration: var(--dur-twinkle); }
+  @keyframes shine {
+    0%, 55% { transform: translateX(-120%); }
+    100% { transform: translateX(120%); }
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .gc-body { display: flex; flex-direction: column; gap: var(--space-2); flex: 1; padding: var(--space-4) var(--space-5) var(--space-5); }
+  .gc-tags { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .gc-tags .chip { border-color: var(--on-accent); }
+  .gc-title { margin-top: var(--space-1); font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 700; line-height: 1.15; letter-spacing: -0.02em; }
+  .gc-teaser { color: var(--on-night-muted); font-size: var(--fs-md); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }
+  .goldcard .more { display: inline-flex; align-items: center; gap: var(--space-1); margin-top: auto; padding-top: var(--space-2); font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; color: var(--gold-light); }
+
+  /* Funkelnde Sterne: dunkler Rand außen, Kategoriefarbe innen (über .cat-*) */
+  .stars { position: absolute; inset: 0; pointer-events: none; }
+  .star {
+    position: absolute; width: var(--star-size-md); aspect-ratio: 1;
+    background: var(--gold-light);
+    clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    animation: twinkle var(--dur-twinkle) ease-in-out infinite;
+  }
+  .star-core { position: absolute; inset: var(--bw-sm); clip-path: inherit; --dots-size: var(--dots-size-sm); }
+  .star:nth-child(1) { top: var(--space-3); right: var(--space-3); width: var(--star-size-lg); }
+  .star:nth-child(2) { top: var(--space-10); right: var(--space-10); width: var(--star-size-sm); animation-delay: calc(var(--dur-twinkle) * -0.3); }
+  .star:nth-child(3) { top: var(--space-2); right: var(--space-11); width: var(--star-size-sm); animation-delay: calc(var(--dur-twinkle) * -0.6); }
+  .star:nth-child(4) { bottom: var(--space-4); left: 30%; width: var(--star-size-md); animation-delay: calc(var(--dur-twinkle) * -0.15); }
+  .star:nth-child(5) { bottom: var(--space-4); left: var(--space-3); animation-delay: calc(var(--dur-twinkle) * -0.8); }
+  .star:nth-child(6) { top: 45%; left: var(--space-5); width: var(--star-size-sm); animation-delay: calc(var(--dur-twinkle) * -0.45); }
+  .star:nth-child(7) { top: 40%; right: var(--space-2); width: var(--star-size-sm); animation-delay: calc(var(--dur-twinkle) * -0.7); }
+  .star:nth-child(8) { top: var(--space-10); left: 22%; width: var(--star-size-sm); animation-delay: calc(var(--dur-twinkle) * -0.9); }
+  .star:nth-child(9) { top: var(--space-3); left: 62%; width: var(--star-size-sm); animation-delay: calc(var(--dur-twinkle) * -0.25); }
+  @keyframes twinkle {
+    0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    50% { transform: scale(0.55) rotate(25deg); opacity: 0.6; }
+  }
+
+  .foot-note { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-4); margin-top: var(--space-8); color: var(--muted); font-size: var(--fs-sm); }
+  .foot-note p { margin: 0; }
+
+  @media (max-width: 520px) {
+    .locked { min-height: 0; }
+  }
+</style>

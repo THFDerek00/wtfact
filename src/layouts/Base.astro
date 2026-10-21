@@ -5,7 +5,7 @@ import Icon from '../components/Icon.astro';
 import CookieConsent from '../components/CookieConsent.astro';
 import { SITE, type Lang } from '../config';
 import { t, catsPath, chartsPath, quizPath } from '../i18n/ui';
-import { x, gamesPath, mePath, numberPath, youPath, giftsPath } from '../i18n/extras';
+import { x, gamesPath, mePath, numberPath, youPath, giftsPath, jumperPath } from '../i18n/extras';
 import { postsFor, postUrl } from '../lib';
 import FestDeco from '../components/FestDeco.astro';
 import { holidayOn, festOfHoliday } from '../data/holidays';
@@ -122,11 +122,11 @@ const nav = [
         <nav>
           <a href={gamesPath(lang)}>{xt.nav.games}</a>
           <a href={numberPath(lang)}>{xt.footer.number}</a>
-          <a href={quizPath(lang)}>{ui.home.navQuiz}</a>
+          <a href={`${quizPath(lang)}#wof`}>{ui.home.navQuiz}</a>
           <a href={chartsPath(lang)}>{ui.fame.name}</a>
           <a href={catsPath(lang)}>{ui.home.catsAll}</a>
-          <a href={`/${lang}/science-jumper/`}>{ui.game.name}</a>
-          <a href={giftsPath(lang)}>🎁 {xt.footer.gifts}</a>
+          <a href={jumperPath(lang)}>{ui.game.name}</a>
+          <a href={giftsPath(lang)}>{xt.footer.gifts}</a>
           <a href={youPath(lang)}>{xt.footer.you}</a>
           <a href={`/${lang}/about/`}>{ui.about}</a>
           <a href={`/${lang}/korrekturen/`}>{ui.corrections}</a>
@@ -258,7 +258,8 @@ const nav = [
   /* Fuß im Design „E“: dunkle Bühne mit gelbem Leuchten (Logofarben Gelb/Pink), schräge Kante, Logo riesig */
   .foot { margin-top: calc(var(--space-12) + var(--edge)); padding: var(--space-12) 0 var(--space-10); font-size: var(--fs-sm); }
   /* Endet die Seite mit einem farbigen Abschnitt, schließt der Fuß direkt an (schräge Kante statt Lücke) */
-  main:has(> .sec:last-child) + .foot { margin-top: 0; }
+  /* Skripte von Komponenten (z. B. YouNumbers) stehen hinter dem letzten Abschnitt, sie zählen nicht */
+  main:has(> .sec:last-child) + .foot, main:has(> .sec:nth-last-child(1 of :not(script))) + .foot { margin-top: 0; }
   .foot { --line: var(--on-night); --focus: var(--fest-a); --fest-glow-y: 70%; }
   .foot > .wrap { position: relative; z-index: 1; }
   .foot .logo { font-size: var(--fs-display-2xl); }

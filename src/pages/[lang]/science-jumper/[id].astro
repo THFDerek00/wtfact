@@ -14,6 +14,7 @@ import { t } from '../../../i18n/ui';
 import { amazonUrl } from '../../../lib';
 import { open, readGold } from '../../../../scripts/facts-db.mjs';
 import { goldUrl } from '../../../scripts/gold';
+import { jumperPath, mePath } from '../../../i18n/extras';
 
 export function getStaticPaths() {
   const db = open();
@@ -46,7 +47,9 @@ const payload = {
 const encoded = Buffer.from(JSON.stringify(payload), 'utf8').toString('base64');
 const STARS = 12;
 const BURST = 10;
-const game = `/${lang}/science-jumper/`;
+// Spiel und Sammlung stehen seit 2026-10-21 auf „Spiele“ (#jumper) bzw. „Ich“ (#gold)
+const game = jumperPath(lang);
+const shelf = `${mePath(lang)}#gold`;
 ---
 <Base lang={lang} title={g.pageTitle(f.points)} description={g.pageDesc} altUrl={goldUrl(other, f.id)}>
   <div class="vault" data-gold-page data-gold={encoded} data-lang={lang} data-points={f.points} data-best-text={g.progressTo(9001, f.points)}>
@@ -56,7 +59,7 @@ const game = `/${lang}/science-jumper/`;
     </span>
 
     <div class="wrap inner">
-      <a class="back" href={`${game}#gold`}><Icon name="chevron-left" /> {g.backToGame}</a>
+      <a class="back" href={game}><Icon name="chevron-left" /> {g.backToGame}</a>
 
       <header class="hero">
         <p class="kicker"><span aria-hidden="true">✦</span> {g.vaultKicker} <span aria-hidden="true">✦</span></p>
@@ -139,7 +142,7 @@ const game = `/${lang}/science-jumper/`;
 
       <nav class="pager">
         {prev ? <a class="btn btn--ghost" href={goldUrl(lang, prev.id)}><Icon name="chevron-left" /> {g.prevGold}</a> : <span></span>}
-        <a class="btn btn--ghost" href={`${game}#gold`}>{g.allGold}</a>
+        <a class="btn btn--ghost" href={shelf}>{g.allGold}</a>
         {next ? <a class="btn btn--ghost" href={goldUrl(lang, next.id)}>{g.nextGold} <Icon name="chevron-right" /></a> : <span></span>}
       </nav>
     </div>
