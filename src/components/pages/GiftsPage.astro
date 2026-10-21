@@ -2,6 +2,7 @@
 // Geschenkfinder (Wunsch von Eric, 2026-10-21): /de/geschenke/ und /en/gifts/, das ganze Jahr erreichbar.
 // Erst der Anlass (je nach Monat vorausgewählt, im Browser, src/data/gifts.ts; ?occasion=birthday wählt ihn per Link), dann für wen, Interesse und Budget.
 // Alle Ideen stehen fertig im HTML, der Browser blendet nur aus und sortiert. Jede Idee hat einen WTF-Fakt als Aufhänger.
+// Der Anlass blendet nur Ideen mit `only` aus; jede Filterkombination zeigt mindestens 3 Ideen (scripts/check-gifts.mjs).
 // Werbung: Etikett, Provisionshinweis und rel="sponsored" wie bei ProductBox.astro.
 // Aussehen (2026-10-21, zweiter Wunsch): Filter und Ideen als Leuchtkarten (.glow) in der Farbwelt des Interesses.
 import Base from '../../layouts/Base.astro';
@@ -24,6 +25,13 @@ const byKey = new Map(posts.map((p) => [p.data.translationKey, p]));
 const catOf: Record<Interest, string> = { space: 'space', nature: 'nature', science: 'science', tech: 'tech', food: 'food', history: 'history', mind: 'mind', fun: 'weird', sport: 'sport', language: 'language' };
 const host = SITE.amazon[lang].host.replace(/^www\./, '');
 const preset = OCCASION_BY_MONTH[new Date().getMonth()];
+// Abwechselnd aus jedem Interesse, damit ohne Filter nicht erst alle Weltall-Ideen kommen
+const rank = new Map<string, number>();
+const order = GIFTS.map((gift) => {
+  const n = rank.get(gift.interest) ?? 0;
+  rank.set(gift.interest, n + 1);
+  return { gift, key: n * INTERESTS.length + INTERESTS.indexOf(gift.interest) };
+}).sort((a, b) => a.key - b.key).map((o) => o.gift);
 ---
 <Base lang={lang} title={g.title} description={g.intro} altUrl={giftsPath(other)}>
   <section class="sec fest-sky ghero" data-fest="fest">
@@ -72,11 +80,11 @@ const preset = OCCASION_BY_MONTH[new Date().getMonth()];
         <span class="pick-label">{ui.adLabel}</span>
       </div>
       <ul class="gifts" data-list>
-        {GIFTS.map((gift) => {
+        {order.map((gift) => {
           const tx = gift[lang];
           const fact = gift.fact ? byKey.get(gift.fact) : undefined;
           return (
-            <li data-gift data-who={gift.who.join(' ')} data-interest={gift.interest} data-budget={gift.budget} data-occasions={(gift.occasions ?? []).join(' ')}>
+            <li data-gift data-who={gift.who.join(' ')} data-interest={gift.interest} data-budget={gift.budget} data-occasions={(gift.occasions ?? []).join(' ')} data-only={(gift.only ?? []).join(' ')}>
               <article class="glow gift" data-fest={festOf(catOf[gift.interest], '')?.theme}>
                 <span class="art" aria-hidden="true">
                   <span class:list={['glow-tile', 'emoji', `cat-${catOf[gift.interest]}`]}><span>{gift.emoji}</span></span>
@@ -84,6 +92,7 @@ const preset = OCCASION_BY_MONTH[new Date().getMonth()];
                   <span class="host">{host}</span>
                 </span>
                 <div class="body">
+                  <span class="fit"><Icon name="sparkles" /> {g.fits}</span>
                   <h2 class="head-small name">{tx.name}</h2>
                   <p class="why">{tx.why}</p>
                   {fact && <a class="fact" href={postUrl(fact)}>{fact.data.emoji} {g.fact}: {fact.data.title}</a>}
@@ -117,14 +126,17 @@ const preset = OCCASION_BY_MONTH[new Date().getMonth()];
         root.querySelectorAll<HTMLButtonElement>(`[data-${k}]`).forEach((b) => b.tagName === 'BUTTON' && b.setAttribute('aria-pressed', String(b.dataset[k] === state[k]))),
       );
       const shown = items.filter((li) => {
-        const ok = (!state.who || li.dataset.who!.split(' ').includes(state.who))
+        const only = li.dataset.only!;
+        const ok = (!only || only.split(' ').includes(state.occasion))
+          && (!state.who || li.dataset.who!.split(' ').includes(state.who))
           && (!state.interest || li.dataset.interest === state.interest)
           && (!state.budget || li.dataset.budget === state.budget);
         li.hidden = !ok;
         return ok;
       });
-      // Ideen für den gewählten Anlass zuerst, dann der Rest in fester Reihenfolge
-      const fits = (li: HTMLElement) => li.dataset.occasions!.split(' ').includes(state.occasion);
+      // Ideen für den gewählten Anlass zuerst (mit Hinweis „Passt besonders gut“), dann der Rest in fester Reihenfolge
+      const fits = (li: HTMLElement) => `${li.dataset.occasions} ${li.dataset.only}`.split(' ').includes(state.occasion);
+      items.forEach((li) => li.toggleAttribute('data-fit', fits(li)));
       [...shown.filter(fits), ...shown.filter((li) => !fits(li)), ...items.filter((li) => li.hidden)].forEach((li) => list.append(li));
       root.querySelector('[data-count]')!.textContent = shown.length === 1 ? counts[0] : counts[1].replace('9001', String(shown.length));
       root.querySelector<HTMLElement>('[data-none]')!.hidden = shown.length > 0;
@@ -174,6 +186,11 @@ const preset = OCCASION_BY_MONTH[new Date().getMonth()];
   .fact { font-size: var(--fs-sm); font-weight: 700; color: var(--on-night-muted); }
   .fact:hover { color: var(--fest-a); }
   .cta { margin-top: auto; align-self: flex-start; border-color: var(--on-accent); }
+  .fit {
+    display: none; align-self: flex-start; align-items: center; gap: var(--space-1); padding: 0 var(--space-2); border-radius: var(--radius-pill);
+    background: var(--fest-a); color: var(--on-accent); font-family: var(--font-display); font-size: var(--fs-xs); font-weight: 800;
+  }
+  [data-fit] .fit { display: inline-flex; }
   .none { font-weight: 700; }
   .linkish { font: inherit; color: inherit; background: none; border: 0; padding: 0; text-decoration: underline; cursor: pointer; }
   .fine { margin: var(--space-6) 0 0; font-size: var(--fs-sm); color: var(--on-night-muted); }

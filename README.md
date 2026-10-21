@@ -197,6 +197,8 @@ Farben, Schrift, Abstände und Bausteine sind in `docs/design-system.md` beschri
   - Science Jumper (`src/components/games/Jumper.astro`): meldet einen neuen Highscore mit dem Ereignis `wtfact-gold`.
   - Geschenkfinder (`/de/geschenke/`, Ideen in `src/data/gifts.ts`): ganzjährig erreichbar, auf der Startseite nur
     November bis Dezember als Sonderteaser. Neue Idee: Eintrag in `GIFTS` mit Suchbegriff (`query`), keine festen Produkt-Links.
+    `occasions` = passt besonders (steht vorne mit Hinweis), `only` = erscheint nur bei diesen Anlässen. `npm run check`
+    (`scripts/check-gifts.mjs`) verlangt für jedes Alter × Interesse × Budget × Anlass mindestens 3 Ideen.
 - **Neu:** Fakten der letzten 7 Tage (heute eingeschlossen) tragen das Etikett „Neu“ (`src/components/NewBadge.astro`).
   Der Browser prüft das nach, damit es auch ohne neuen Build verschwindet.
 
