@@ -53,6 +53,18 @@ for (const ym of doorsSrc.matchAll(/(\d{4}): \{([\s\S]*?)\n  \}/g)) {
   for (let d = 1; d <= 24; d++) if (!doorsSeen.has(d)) failures.push(`src/data/advent.ts: ${ym[1]} fehlt Türchen ${d}`);
 }
 
+// Kürbisjagd in der Gruselwoche (src/data/halloween.ts): Jeder Kürbis sitzt auf einem Fakt, der an seinem Tag schon erschienen ist.
+const spookySrc = fs.readFileSync('src/data/halloween.ts', 'utf8');
+const pumpkinRows = [...spookySrc.matchAll(/\{ no: (\d+), from: '(\d\d-\d\d)', key: '([\w-]+)'/g)];
+if (!pumpkinRows.length) failures.push('src/data/halloween.ts: PUMPKINS fehlt');
+for (const [, no, from, key] of pumpkinRows) {
+  const f = byKey.get(key);
+  if (!f) { failures.push(`src/data/halloween.ts: Kürbis ${no} sitzt auf „${key}“, den Fakt gibt es nicht`); continue; }
+  if (f.draft) failures.push(`${FACTS_DIR}/${key}.sql: Fakt mit Kürbis ${no} ist ein Entwurf`);
+  const due = `${new Date().getFullYear()}-${from}`;
+  if (!f.date || berlinDay(f.date) > due) failures.push(`${FACTS_DIR}/${key}.sql: Kürbis ${no} versteckt sich ab ${due}, der Fakt erscheint aber erst ${f.date ? berlinDay(f.date) : 'nie (Pool)'}`);
+}
+
 // Höchstens ein Feiertag pro Tag, sonst ist unklar, welches Thema ein Feiertags-Fakt bekommt.
 for (const day of holidayDays) if (holidayDates.filter((d) => d === day).length > 1) failures.push(`src/data/holidays.ts: zwei Feiertage am ${day}`);
 

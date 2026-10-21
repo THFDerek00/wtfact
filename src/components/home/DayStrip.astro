@@ -7,19 +7,24 @@
 import type { Lang } from '../../config';
 import { x, mePath, numberPath } from '../../i18n/extras';
 import { at, adventPath } from '../../i18n/advent';
+import { ht } from '../../i18n/halloween';
+import { PUMPKIN_TOTAL } from '../../data/halloween';
 interface Props { lang: Lang }
 type Tile = { id: string; href: string; emoji: string; cls: string; fest: string; label: string; value: string; from?: string; to?: string };
 const { lang } = Astro.props;
 const s = x(lang).strip;
 const xa = at(lang).tile;
+const hw = ht(lang).tile;
 const tiles: Tile[] = [
   { id: 'streak', href: mePath(lang), emoji: '🔥', cls: 'cat-history', fest: 'history', label: s.streak, value: s.streakOff },
   { id: 'number', href: numberPath(lang), emoji: '🎯', cls: 'cat-nature', fest: 'nature', label: s.number, value: s.numberOpen },
   { id: 'fotd', href: '#fotd', emoji: '⭐', cls: 'cat-weird', fest: 'weird', label: s.fotd, value: s.fotdText },
   // Adventskalender (src/data/advent.ts): Türchen des Tages, vom 1. bis 24.12.
+  // Kürbisjagd in der Gruselwoche (src/data/halloween.ts), vom 24. bis 31.10.
+  { id: 'pumpkins', href: '#kuerbisse', emoji: '🎃', cls: 'cat-history', fest: 'halloween', label: hw.label, value: hw.value.replace('{n}', '0').replace('{total}', String(PUMPKIN_TOTAL)), from: '10-24', to: '10-31' },
   { id: 'advent', href: adventPath(lang), emoji: '🎁', cls: 'cat-food', fest: 'xmas', label: xa.label, value: xa.value.replace('{n}', '1'), from: '12-01', to: '12-24' },
 ];
-const texts = { advent: xa.value, adventDone: xa.done, streakOff: s.streakOff, streakDays: [s.streakDays(1), s.streakDays(9001)], open: s.numberOpen, won: s.numberWon(9001), wonOne: s.numberWon(1), lost: s.numberLost };
+const texts = { pumpkins: hw.value.replace('{total}', String(PUMPKIN_TOTAL)), advent: xa.value, adventDone: xa.done, streakOff: s.streakOff, streakDays: [s.streakDays(1), s.streakDays(9001)], open: s.numberOpen, won: s.numberWon(9001), wonOne: s.numberWon(1), lost: s.numberLost };
 ---
 <nav class="strip-sec" aria-label={s.label} data-strip data-texts={JSON.stringify(texts)}>
   <ul class="strip">
@@ -39,10 +44,12 @@ const texts = { advent: xa.value, adventDone: xa.done, streakOff: s.streakOff, s
   import { stateFor } from '../../scripts/tageszahl';
   import { berlinDay } from '../../week';
   import { adventState } from '../../scripts/advent';
+  import { foundPumpkins } from '../../scripts/halloween';
+  import { xmasToday } from '../../scripts/xmas';
   // Die Leiste kann zweimal auf der Seite stehen (Wochentag- und Feiertags-Kopf), beide füllen
   document.querySelectorAll<HTMLElement>('[data-strip]').forEach((root) => {
     const T = JSON.parse(root.dataset.texts!);
-    const md = berlinDay().slice(5);
+    const md = xmasToday().slice(5); // mit ?vorschau= auch ein anderer Tag
     root.querySelectorAll<HTMLElement>('[data-tile]').forEach((li) => {
       const { from, to } = li.dataset;
       if (from || to) li.hidden = !((!from || md >= from) && (!to || md <= to));
@@ -57,6 +64,8 @@ const texts = { advent: xa.value, adventDone: xa.done, streakOff: s.streakOff, s
       nv.textContent = !st.done ? T.open : st.won ? (st.guesses.length === 1 ? T.wonOne : T.won.replace('9001', String(st.guesses.length))) : T.lost;
       nv.closest('li')!.toggleAttribute('data-open', !st.done);
     }
+    const pv = val('pumpkins');
+    if (pv) pv.textContent = T.pumpkins.replace('{n}', String(foundPumpkins().length));
     const av = val('advent');
     if (av && !av.closest('li')!.hidden) {
       const day = berlinDay();

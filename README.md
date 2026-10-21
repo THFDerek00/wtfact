@@ -115,6 +115,23 @@ Wunsch von Eric, 2026-10-21. Vom 1. Advent bis 26.12. sieht die Seite weihnachtl
 - **Vorschau:** `?vorschau=2026-12-15` an eine Adresse hängen zeigt Look und Kalenderstand dieses Tages. Inhalte eines Türchens
   erscheinen erst, wenn sein Fakt veröffentlicht ist.
 
+## Gruselwoche und Kürbisjagd
+
+Wunsch von Eric, 2026-10-21 (Entwurf „A Kürbislicht“ im Projektordner `halloween-2026/entwuerfe/`). Vom 24. bis 31.10. sieht die
+Seite nach Halloween aus (Design: `docs/design-system.md`, „Gruselwoche“), und 13 Kürbisse verstecken sich zum Finden.
+
+- **Verstecke:** `src/data/halloween.ts`, `PUMPKINS`. Jeder Kürbis sitzt ab seinem Tag (MM-TT) bis Halloween auf der Faktseite
+  eines schon veröffentlichten Fakts und lugt über die Ecke der Faktkarte. Antippen = Bonbon fürs Glas, bei `trick: true` kippt
+  stattdessen kurz die Seite (zählt trotzdem). `npm run check` prüft, dass es die Fakten gibt und sie rechtzeitig erscheinen.
+  Hinweise je Kürbis stehen in `src/i18n/halloween.ts` (`hints`, gleiche Reihenfolge). Das Dashboard lässt diese Fakten nicht
+  umplanen (`fest.json` → `advent`), `fest.json` nennt auch die Tage der Gruselwoche, damit jeden Tag frisch gebaut wird.
+- **31.10. Spuknacht:** Die Seite ist dunkel, nur ein Lichtkegel folgt Maus oder Finger („Licht an“ beendet das). Der goldene
+  13. Kürbis sitzt im Kategorien-Abschnitt der Startseite und zeigt den geheimen Halloween-Fakt (Text in `src/i18n/halloween.ts`).
+- **Im Browser** (`src/scripts/halloween.ts`, localStorage `wtfact:pumpkins`, je Jahr): gefundene Kürbisse. Jeder Fund zählt
+  für die Serie.
+- **Vorschau:** `?vorschau=2026-10-27` (bzw. `2026-10-31` für die Spuknacht) an eine Adresse hängen.
+- **Nächstes Jahr:** Verstecke in `PUMPKINS` (und Hinweise) auf neue Fakten legen, die Tage gelten jedes Jahr.
+
 ## Fakten-Datenbank
 
 Alle Inhalte stehen in SQLite:

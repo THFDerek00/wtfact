@@ -1,0 +1,18 @@
+---
+// Kürbisstiel auf dem „?!“ im Logo in der Gruselwoche (Look A). Das „?!“ selbst wird dann orange (global.css).
+interface Props { big?: boolean }
+const { big } = Astro.props;
+---
+<svg class:list={['h-stem', 'halloween', big && 'h-stem--big']} viewBox="0 0 40 30" aria-hidden="true">
+  <path class="line" d="M14 28 C 12 18 16 8 24 4" />
+  <path class="green" d="M14 28 C 12 18 16 8 24 4" />
+  <path class="leaf" d="M22 10 c6 -8 14 -6 16 -2 c-6 0 -10 2 -16 2z" />
+</svg>
+
+<style>
+  .h-stem { position: absolute; width: var(--hw-stem-w); height: auto; top: calc(var(--hw-stem-w) * -0.62); left: calc(50% - var(--hw-stem-w) * 0.36); pointer-events: none; overflow: visible; }
+  .h-stem--big { width: var(--hw-stem-w-big); top: calc(var(--hw-stem-w-big) * -0.62); left: calc(50% - var(--hw-stem-w-big) * 0.36); }
+  .line { fill: none; stroke: var(--hw-ink); stroke-width: 7; stroke-linecap: round; }
+  .green { fill: none; stroke: var(--hw-stem); stroke-width: 4; stroke-linecap: round; }
+  .leaf { fill: var(--hw-leaf); stroke: var(--hw-ink); stroke-width: 2; }
+</style>

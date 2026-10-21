@@ -215,6 +215,33 @@
   --xmas-ribbon: 22px;
   --dur-snow: 40s; /* Schnee rieselt langsam */
   --dur-twinkle-xmas: 3.2s; /* Lichterkette funkelt */
+  /* Gruselwoche 24. bis 31.10. (src/data/halloween.ts), Look A „Kürbislicht“ (Eric, 2026-10-21). Bühnenfarben: Thema halloween */
+  --hw-pumpkin: #ff7a1a;
+  --hw-pumpkin-line: #b84a06;
+  --hw-face: #ffe08a;
+  --hw-stem: #2f8f4e;
+  --hw-leaf: #4caf50;
+  --hw-wire: #2a1608;
+  --hw-ink: #141414;
+  --hw-gold: #ffcf3f;
+  --hw-gold-line: #b88400;
+  --hw-glass: rgba(255, 255, 255, 0.1);
+  --hw-candy-1: #ff7a1a;
+  --hw-candy-2: #b07cff;
+  --hw-candy-3: #9cff57;
+  --hw-candy-4: #ff3d7f;
+  --hw-shade: rgba(6, 3, 0, 0.94); /* Dunkelheit in der Spuknacht */
+  --hw-shade-soft: rgba(6, 3, 0, 0.72);
+  --hw-lights-h: 46px; /* Kürbis-Lichterkette unter dem Kopf */
+  --hw-stem-w: 22px; /* Stiel auf dem „?!“ */
+  --hw-stem-w-big: 40px;
+  --hw-hidden: 52px; /* versteckter Kürbis auf der Faktseite */
+  --hw-gold-size: 76px; /* goldener Kürbis in der Spuknacht */
+  --hw-torch: 200px; /* Lichtkegel der Taschenlampe */
+  --hw-jar-w: 250px; /* Bonbonglas auf der Startseite */
+  --hw-jar-w-sm: 190px;
+  --dur-hw-flicker: 2.8s; /* Kürbislichter flackern */
+  --dur-hw-trick: 1.6s; /* Streich: die Seite kippt kurz */
   --fest-silvester-night: #0b0f2e;
   --fest-silvester-a: #ffd54a;
   --fest-silvester-b: #ff7ad9;
@@ -950,6 +977,11 @@ a.glow:hover { transform: translate(calc(-1 * var(--space-1)), calc(-1 * var(--s
    .halloween = nur dann sichtbar, .no-halloween = dann ausgeblendet. */
 :root:not([data-season='halloween']) .halloween { display: none !important; }
 [data-season='halloween'] .no-halloween { display: none !important; }
+[data-season='halloween'] :is(.foot, .day-hero)[data-fest] { --fest-night: var(--fest-halloween-night); --fest-a: var(--fest-halloween-a); --fest-b: var(--fest-halloween-b); }
+[data-season='halloween'] .logo .sticker { background: var(--hw-pumpkin); border-radius: 45% 45% 40% 40%; }
+/* Streich eines Kürbisses (src/scripts/halloween.ts): die Seite kippt einmal kurz und wackelt zurück */
+[data-trick] body { animation: hw-trick var(--dur-hw-trick) var(--ease) 1; transform-origin: 50% var(--trick-y, 50%); }
+@keyframes hw-trick { 0% { transform: none; } 35%, 60% { transform: rotate(180deg) scale(0.9); } 100% { transform: none; } }
 /* Schnee auf dunklen Bühnen: drei Lagen Flocken, rieseln langsam (Base.astro legt .x-snow in jede Bühne) */
 .x-snow {
   position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden;

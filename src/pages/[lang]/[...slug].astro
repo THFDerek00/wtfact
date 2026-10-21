@@ -14,6 +14,8 @@ import FestDeco from '../../components/FestDeco.astro';
 import FestArt from '../../components/FestArt.astro';
 import RabbitHole from '../../components/RabbitHole.astro';
 import Wichtel from '../../components/xmas/Wichtel.astro';
+import Pumpkin from '../../components/halloween/Pumpkin.astro';
+import { ht } from '../../i18n/halloween';
 import { giftsPath } from '../../i18n/extras';
 import { at, adventPath } from '../../i18n/advent';
 import { LANGS } from '../../config';
@@ -67,6 +69,8 @@ const tapeText = Array(Math.max(5, Math.ceil(400 / (tapeWord.length + 3)))).fill
         : <p class="big-emoji bleed" aria-hidden="true">{d.emoji}</p>}
       <div class="card hcard bleed">
         <span class="sticker">WTF?!</span>
+        <!-- Kürbisjagd in der Gruselwoche (src/data/halloween.ts): erscheint nur auf Fakten, bei denen gerade ein Kürbis sitzt -->
+        <button type="button" class="h-hid" data-h-hidden data-h-jar={`/${lang}/#kuerbisse`} data-h-texts={JSON.stringify(ht(lang).pumpkin)} aria-label={ht(lang).pumpkin.label} hidden><Pumpkin /></button>
         <div class="meta">
           <span class:list={['chip', `cat-${d.category}`]}>{ui.categories[d.category]}</span>
           <span class="chip">{ui.factNo} #{no}</span>
@@ -170,11 +174,14 @@ const tapeText = Array(Math.max(5, Math.ceil(400 / (tapeWord.length + 3)))).fill
   import { markActive } from '../../scripts/streak';
   import { openDoor, foundWichtel, adventState } from '../../scripts/advent';
   import { xmasToday } from '../../scripts/xmas';
+  import { placePumpkin } from '../../scripts/halloween';
   import { DOORS, doorDay, inSeason, wichtelKey } from '../../data/advent';
   import { answer, myAnswer, tallies, localTally, share, total, type Tally } from '../../scripts/quiz';
   // Für das Sammelalbum in den WTF-Charts: Dieser Fakt gilt als gelesen.
   const key = document.querySelector<HTMLElement>('[data-fact-key]')?.dataset.factKey;
   if (key) markRead(key);
+  // Gruselwoche: Sitzt hier ein Kürbis, lugt er über die Ecke der Faktkarte
+  if (key) placePumpkin(key);
   // Ein gelesener Fakt hält die Serie am Leben (Seite „Ich“)
   markActive();
 
@@ -276,6 +283,9 @@ const tapeText = Array(Math.max(5, Math.ceil(400 / (tapeWord.length + 3)))).fill
   /* Adventskalender: Wichtel lugt am Rand des Texts hervor, Hinweis auf den Geschenkfinder unter der Werbung */
   .x-wi { float: right; width: var(--space-12); margin: 0 calc(-1 * var(--space-4)) var(--space-2) var(--space-3); padding: 0; border: 0; background: none; cursor: pointer; rotate: 12deg; animation: fest-float var(--dur-fest-float) var(--ease) infinite; }
   .x-wi[hidden] { display: none; }
+  .h-hid { position: absolute; top: calc(-1 * var(--space-8)); right: calc(-1 * var(--space-4)); z-index: 4; width: var(--hw-hidden); padding: 0; border: 0; background: none; cursor: pointer; rotate: 14deg; animation: fest-float var(--dur-fest-float) var(--ease) infinite; }
+  .h-hid[hidden] { display: none; }
+  .h-hid:hover { rotate: -4deg; }
   .x-wi:hover { rotate: -6deg; }
   :global(.x-wi-note) { padding: var(--space-3) var(--space-4); border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-md); background: var(--gold-surface); color: var(--on-accent); }
   :global(.x-wi-note a) { color: inherit; font-weight: 700; }

@@ -1,0 +1,25 @@
+---
+// Kürbislaterne der Gruselwoche (Look A „Kürbislicht“): versteckter Kürbis, Kürbisse im Bonbonglas, goldener Kürbis.
+// gold = goldener 13. Kürbis der Spuknacht.
+interface Props { class?: string; gold?: boolean }
+const { class: cls, gold } = Astro.props;
+---
+<svg class:list={['h-pumpkin', gold && 'h-pumpkin--gold', cls]} viewBox="0 0 64 64" aria-hidden="true">
+  <path class="stem" d="M31 16 C 30 10 32 6 37 4" />
+  <path class="leaf" d="M35 9 c6 -7 14 -5 16 -1 c-6 0 -10 2 -16 1z" />
+  <path class="body" d="M32 15 c-10 -5 -25 0 -27 15 s7 26 27 26 29 -11 27 -26 -17 -20 -27 -15z" />
+  <path class="rib" d="M32 15 c-6 7 -6 34 0 41 M32 15 c6 7 6 34 0 41 M19 18 c-9 8 -9 31 1 37 M45 18 c9 8 9 31 -1 37" />
+  <path class="face" d="M17 30 l5 -7 l5 7z M37 30 l5 -7 l5 7z M15 39 c4 9 30 9 34 0 l-5 3 l-3 -3 l-4 4 l-3 -4 l-3 4 l-4 -4 l-3 3 l-4 -3 l-3 3z" />
+</svg>
+
+<style>
+  .h-pumpkin { display: block; width: 100%; height: auto; overflow: visible; }
+  .stem { fill: none; stroke: var(--hw-stem); stroke-width: 5; stroke-linecap: round; }
+  .leaf { fill: var(--hw-leaf); stroke: var(--hw-ink); stroke-width: 2; }
+  .body { fill: var(--hw-pumpkin); stroke: var(--hw-ink); stroke-width: 3; }
+  .rib { fill: none; stroke: var(--hw-pumpkin-line); stroke-width: 2; }
+  .face { fill: var(--hw-face); stroke: var(--hw-ink); stroke-width: 1.5; stroke-linejoin: round; }
+  .h-pumpkin--gold .body { fill: var(--hw-gold); }
+  .h-pumpkin--gold .rib { stroke: var(--hw-gold-line); }
+  .h-pumpkin--gold .face { fill: var(--surface); }
+</style>

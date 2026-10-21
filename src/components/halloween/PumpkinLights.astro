@@ -1,0 +1,40 @@
+---
+// Kürbis-Lichterkette unter dem Kopf in der Gruselwoche (Look A „Kürbislicht“, Wunsch von Eric, 2026-10-21). Nur sichtbar
+// mit data-season='halloween' auf <html> (Klasse .halloween). Breite Bildschirme sehen mehr Kürbisse.
+const W = 2600, SEG = 70;
+const n = Math.floor(W / SEG);
+let wire = 'M0 3';
+for (let i = 0; i < n; i++) wire += ` Q${i * SEG + SEG / 2} 18 ${(i + 1) * SEG} 3`;
+const lamps = Array.from({ length: n }, (_, i) => ({ x: i * SEG + SEG / 2, r: i % 2 ? 7 : -7, s: i % 3 ? 1 : 1.15, d: (i * 7) % 5 }));
+---
+<div class="h-lights halloween" aria-hidden="true">
+  <svg viewBox={`0 0 ${W} 46`} preserveAspectRatio="xMinYMin slice">
+    <defs>
+      <symbol id="h-lamp" viewBox="-20 -6 40 46" overflow="visible">
+        <circle class="glow" cy="20" r="16" />
+        <path class="cord" d="M0 -4 V8" />
+        <ellipse class="body" cy="20" rx="13" ry="11" />
+        <path class="rib" d="M0 9 v22 M-6 10 c-4 4 -4 17 0 20 M6 10 c4 4 4 17 0 20" />
+        <path class="face" d="M-7 17 l3 -4 l3 4z M7 17 l-3 -4 l-3 4z M-7 23 c4 4 10 4 14 0 l-2 2 l-2 -1 l-2 1 l-2 -1 l-2 1 l-2 -1z" />
+      </symbol>
+    </defs>
+    <path class="wire" d={wire} />
+    {lamps.map((l) => <use href="#h-lamp" x={l.x - 20} y="4" width="40" height="46" class={`l t${l.d}`} transform={`rotate(${l.r} ${l.x} 10) translate(${l.x} 10) scale(${l.s}) translate(${-l.x} -10)`} />)}
+  </svg>
+</div>
+
+<style>
+  .h-lights { position: absolute; left: 0; right: 0; top: 100%; height: var(--hw-lights-h); pointer-events: none; z-index: 1; overflow: hidden; }
+  svg { display: block; width: 100%; height: 100%; overflow: visible; }
+  .wire { fill: none; stroke: var(--hw-wire); stroke-width: 3; }
+  symbol .glow { fill: var(--hw-face); opacity: 0.1; animation: h-flicker var(--dur-hw-flicker) var(--ease) infinite; }
+  symbol .cord { stroke: var(--hw-wire); stroke-width: 3; }
+  symbol .body { fill: var(--hw-pumpkin); stroke: var(--hw-ink); stroke-width: 2.5; }
+  symbol .rib { fill: none; stroke: var(--hw-pumpkin-line); stroke-width: 1.5; }
+  symbol .face { fill: var(--hw-face); }
+  .t1 { animation-delay: calc(var(--dur-hw-flicker) / -5); }
+  .t2 { animation-delay: calc(var(--dur-hw-flicker) / -2.5); }
+  .t3 { animation-delay: calc(var(--dur-hw-flicker) / -1.6); }
+  .t4 { animation-delay: calc(var(--dur-hw-flicker) / -1.2); }
+  @keyframes h-flicker { 40% { opacity: 0.3; } 45% { opacity: 0.06; } 55% { opacity: 0.25; } }
+</style>
