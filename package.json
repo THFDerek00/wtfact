@@ -8,8 +8,8 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "check": "node --disable-warning=ExperimentalWarning scripts/facts-db.mjs build && node --disable-warning=ExperimentalWarning scripts/check-posts.mjs && node --disable-warning=ExperimentalWarning scripts/check-golden.mjs && node scripts/check-design.mjs && node scripts/check-slots.mjs && node scripts/check-quiz.mjs",
-    "prebuild": "node --disable-warning=ExperimentalWarning scripts/facts-db.mjs build && node --disable-warning=ExperimentalWarning scripts/check-posts.mjs && node --disable-warning=ExperimentalWarning scripts/check-golden.mjs && node scripts/check-design.mjs && node scripts/check-slots.mjs && node scripts/check-quiz.mjs",
+    "check": "node --disable-warning=ExperimentalWarning scripts/facts-db.mjs build && node --disable-warning=ExperimentalWarning scripts/check-posts.mjs && node --disable-warning=ExperimentalWarning scripts/check-golden.mjs && node scripts/check-design.mjs && node scripts/check-slots.mjs && node scripts/check-quiz.mjs && node scripts/check-gifts.mjs",
+    "prebuild": "node --disable-warning=ExperimentalWarning scripts/facts-db.mjs build && node --disable-warning=ExperimentalWarning scripts/check-posts.mjs && node --disable-warning=ExperimentalWarning scripts/check-golden.mjs && node scripts/check-design.mjs && node scripts/check-slots.mjs && node scripts/check-quiz.mjs && node scripts/check-gifts.mjs",
     "build": "astro build && node scripts/bundle-steuerung.mjs",
     "preview": "astro preview",
     "post": "node --disable-warning=ExperimentalWarning scripts/generate-post.mjs",
