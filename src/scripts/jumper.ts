@@ -23,7 +23,9 @@ export interface JumperOptions {
 
 // Logische Spielfeldgröße. Das Canvas wird auf die echte Breite skaliert.
 // Auf schmalen Bildschirmen ist das Spielfeld kürzer, damit Buch und Flammen groß genug bleiben.
-const WIDE = 800;
+// Über die volle Breite (Wunsch von Eric, 2026-10-21) sieht man auf großen Bildschirmen weiter voraus.
+const WIDE = 1200;
+const MID = 800;
 const NARROW = 480;
 let W = WIDE;
 const H = 260;
@@ -39,6 +41,13 @@ const TAU = Math.PI * 2;
 const FLASK_W = 14;
 const FLASK_H = 30;
 const FLASK_GAP = 2;
+// Tag und Nacht hängen an der gelaufenen Strecke: ein ganzer Tag dauert DAY_LEN, los geht es nachts.
+const DAY_LEN = 24000;
+// Landschaften wechseln unabhängig davon alle BIOME_LEN, mit weichem Übergang über BLEND.
+const BIOME_LEN = 15000;
+const BLEND = 1800;
+const BIOMES = ['city', 'desert', 'forest', 'mountains'] as const;
+type Biome = (typeof BIOMES)[number];
 
 type Kind = 'flame-s' | 'flame-l' | 'flame-2' | 'crate' | 'barrel' | 'house';
 interface Obstacle { kind: Kind; x: number; w: number; h: number; seed: number }
@@ -64,8 +73,25 @@ const TOKENS = {
   cover: '--book-cover', spine: '--book-spine', page: '--book-page', pageLine: '--book-page-line',
   wood: '--wood', woodDark: '--wood-dark', woodLight: '--wood-light', metal: '--metal',
   brick: '--brick', brickDark: '--brick-dark', roof: '--roof', roofLight: '--roof-light', smoke: '--smoke',
+  skyDay: '--sky-day', skyDayLow: '--sky-day-low', skyDusk: '--sky-dusk', sun: '--sun',
+  sand: '--biome-sand', sandDark: '--biome-sand-dark', cactus: '--biome-cactus', forest: '--biome-forest',
+  forestDark: '--biome-forest-dark', grass: '--biome-grass', rock: '--biome-rock', snow: '--biome-snow', city: '--biome-city',
 } as const;
 type Palette = Record<keyof typeof TOKENS, string>;
+
+// Zwei Hex-Farben mischen (t = 0: a, t = 1: b), für die Übergänge zwischen Tag und Nacht.
+function mix(a: string, b: string, t: number) {
+  const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16);
+  const ch = (v: number, sh: number) => (v >> sh) & 255;
+  const c = (sh: number) => Math.round(ch(pa, sh) + (ch(pb, sh) - ch(pa, sh)) * t);
+  return `rgb(${c(16)}, ${c(8)}, ${c(0)})`;
+}
+const smooth = (e0: number, e1: number, x: number) => {
+  const t = Math.min(1, Math.max(0, (x - e0) / (e1 - e0)));
+  return t * t * (3 - 2 * t);
+};
+// Fester Zufall je Index, damit Bäume und Berge beim Scrollen gleich bleiben.
+const hash = (i: number, salt: number) => { const v = Math.sin(i * 127.1 + salt * 311.7) * 43758.5453; return v - Math.floor(v); };
 
 function readPalette(): Palette {
   const css = getComputedStyle(document.documentElement);
@@ -87,6 +113,7 @@ export function createJumper({ canvas, text, best, onCollect, onGameOver }: Jump
   let raf = 0;
   let overAt = 0;
   let landed = -1; // Zeitpunkt der letzten Landung, für den kleinen Stauch-Effekt (-1 = noch keine)
+  let biomeStart = 0; // Mit welcher Landschaft der Lauf beginnt, jedes Mal eine andere
 
   const book = { x: 90, y: GROUND, vy: 0, w: 36, h: 46, holding: false, fast: false };
   let obstacles: Obstacle[] = [];
@@ -97,7 +124,7 @@ export function createJumper({ canvas, text, best, onCollect, onGameOver }: Jump
   let nextObstacle = 0;
   let nextFlask = 0;
   // Hintergrund: Sterne und Häuserzeile mit erleuchteten Fenstern, einmal pro Spiel gewürfelt.
-  const stars = Array.from({ length: 46 }, () => ({ x: Math.random() * WIDE, y: Math.random() * (GROUND - 100), r: Math.random() < 0.2 ? 1.6 : 1, tw: Math.random() * TAU }));
+  const stars = Array.from({ length: 70 }, () => ({ x: Math.random() * WIDE, y: Math.random() * (GROUND - 100), r: Math.random() < 0.2 ? 1.6 : 1, tw: Math.random() * TAU }));
   const SKY_SPAN = 16 * 64;
   const skyline = Array.from({ length: 16 }, (_, i) => {
     const w = 38 + Math.random() * 26, h = 34 + Math.random() * 70;
@@ -123,6 +150,7 @@ export function createJumper({ canvas, text, best, onCollect, onGameOver }: Jump
     book.fast = false;
     // Sonst hängt die Landezeit vom letzten Lauf nach und das Buch wird beim Start verzerrt.
     landed = -1;
+    biomeStart = Math.floor(Math.random() * BIOMES.length);
     nextObstacle = W + 120;
     nextFlask = W * 0.5;
   }
@@ -130,7 +158,7 @@ export function createJumper({ canvas, text, best, onCollect, onGameOver }: Jump
   function resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const cssW = canvas.clientWidth || W;
-    W = cssW < 600 ? NARROW : WIDE;
+    W = cssW < 600 ? NARROW : cssW < 1000 ? MID : WIDE;
     canvas.style.aspectRatio = `${W} / ${H}`;
     canvas.width = Math.round(cssW * dpr);
     canvas.height = Math.round((cssW * H) / W * dpr);
@@ -737,44 +765,199 @@ export function createJumper({ canvas, text, best, onCollect, onGameOver }: Jump
     ctx.fillStyle = pal.onNight;
     lines.forEach((l, i) => {
       ctx.font = `700 ${i === 0 ? 30 : 16}px ${font}`;
-      ctx.fillText(l, W / 2, y + i * 30);
+      outlinedText(l, W / 2, y + i * 30);
     });
+  }
+
+  // --- Zeichnen: Himmel, Landschaften, Boden -------------------------------------------
+
+  /** 0 = tiefe Nacht, 1 = heller Tag. Lange Plateaus, kurze Dämmerung. */
+  function dayness() {
+    const raw = 0.5 - 0.5 * Math.cos((TAU * distance) / DAY_LEN);
+    return smooth(0.3, 0.7, raw);
+  }
+
+  /** Nachtfarbe über eine Landschaftsfarbe legen: nachts dunkel, tagsüber kräftig. */
+  const shade = (hex: string, day: number) => mix(pal.night, hex, 0.28 + 0.72 * day);
+
+  function outlinedText(str: string, x: number, y: number) {
+    ctx.save();
+    ctx.lineWidth = 4;
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = pal.ink;
+    ctx.globalAlpha = Math.max(ctx.globalAlpha, 0.001) * smooth(0, 0.4, dayness());
+    ctx.strokeText(str, x, y);
+    ctx.restore();
+    ctx.fillText(str, x, y);
+  }
+
+  function drawSky(day: number) {
+    const dusk = 1 - Math.abs(day - 0.5) * 2; // 1 mitten in der Dämmerung
+    const top = mix(pal.night, pal.skyDay, day);
+    const g = ctx.createLinearGradient(0, 0, 0, GROUND);
+    g.addColorStop(0, top);
+    g.addColorStop(1, mix(pal.night, pal.skyDayLow, day));
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+    if (dusk > 0) {
+      const d = ctx.createLinearGradient(0, GROUND - 120, 0, GROUND);
+      d.addColorStop(0, 'transparent');
+      d.addColorStop(1, pal.skyDusk);
+      ctx.globalAlpha = dusk * 0.7;
+      ctx.fillStyle = d;
+      ctx.fillRect(0, GROUND - 120, W, 120);
+      ctx.globalAlpha = 1;
+    }
+    // Sterne verblassen am Tag
+    ctx.fillStyle = pal.muted;
+    for (const s of stars) {
+      ctx.globalAlpha = (0.5 + Math.sin(time * 2 + s.tw) * 0.3) * (1 - day);
+      const sx = ((s.x - distance * 0.04) % W + W) % W;
+      ctx.fillRect(sx, s.y, s.r, s.r);
+    }
+    ctx.globalAlpha = 1;
+    // Mond geht unter, Sonne geht auf (beide wandern mit der Tageszeit über den Himmel)
+    const p = ((distance / DAY_LEN) % 1 + 1) % 1; // 0 = Mitternacht, 0.5 = Mittag
+    const arc = (phase: number) => ({ x: W * (0.1 + 0.8 * phase), y: GROUND - 40 - Math.sin(phase * Math.PI) * (GROUND - 80) });
+    const sunPhase = (p + 0.75) % 1 * 2; // 0..1 von Sonnenaufgang bis -untergang
+    if (sunPhase <= 1) {
+      const s = arc(sunPhase);
+      ctx.save();
+      ctx.fillStyle = pal.sun;
+      ctx.shadowColor = pal.sun;
+      ctx.shadowBlur = 30;
+      ctx.beginPath(); ctx.arc(s.x, s.y, 22, 0, TAU); ctx.fill();
+      ctx.restore();
+    }
+    const moonPhase = (p + 0.25) % 1 * 2;
+    if (moonPhase <= 1) {
+      const m = arc(moonPhase);
+      ctx.save();
+      ctx.globalAlpha = 0.85 * (1 - day * 0.7);
+      ctx.fillStyle = pal.goldLight;
+      ctx.beginPath(); ctx.arc(m.x, m.y, 16, 0, TAU); ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = top;
+      ctx.beginPath(); ctx.arc(m.x + 7, m.y - 5, 15, 0, TAU); ctx.fill();
+      ctx.restore();
+    }
+    return top;
+  }
+
+  function drawBiome(b: Biome, weight: number, day: number) {
+    if (weight <= 0) return;
+    ctx.save();
+    ctx.globalAlpha = weight;
+    const off = distance * 0.2;
+    if (b === 'city') {
+      // Ferne Stadt mit erleuchteten Fenstern (nachts), die Häuserzeile wiederholt sich über die ganze Breite
+      for (let k = 0; k * SKY_SPAN < W + 64; k++) {
+        for (const h of skyline) {
+          const bx = ((h.x - off) % SKY_SPAN + SKY_SPAN) % SKY_SPAN - 64 + k * SKY_SPAN;
+          if (bx > W) continue;
+          ctx.globalAlpha = weight;
+          ctx.fillStyle = shade(pal.city, day);
+          ctx.fillRect(bx, GROUND - h.h, h.w, h.h);
+          ctx.globalAlpha = weight * 0.6 * (1 - day);
+          ctx.fillStyle = pal.gold;
+          for (const l of h.lit) ctx.fillRect(bx + l.x, GROUND - h.h + l.y, 4, 5);
+        }
+      }
+    } else if (b === 'desert') {
+      // Dünen und Kakteen
+      ctx.fillStyle = shade(pal.sandDark, day);
+      ctx.beginPath(); ctx.moveTo(0, GROUND);
+      for (let x = 0; x <= W; x += 8) ctx.lineTo(x, GROUND - 34 - Math.sin((x + off * 0.6) / 140) * 16 - Math.sin((x + off * 0.6) / 57) * 6);
+      ctx.lineTo(W, GROUND); ctx.fill();
+      ctx.fillStyle = shade(pal.sand, day);
+      ctx.beginPath(); ctx.moveTo(0, GROUND);
+      for (let x = 0; x <= W; x += 8) ctx.lineTo(x, GROUND - 14 - Math.sin((x + off) / 90) * 9);
+      ctx.lineTo(W, GROUND); ctx.fill();
+      ctx.fillStyle = shade(pal.cactus, day);
+      const step = 230;
+      for (let i = Math.floor(off / step) - 1; i * step - off < W + step; i++) {
+        if (hash(i, 1) < 0.35) continue;
+        const x = i * step - off + hash(i, 2) * 120, h = 30 + hash(i, 3) * 30;
+        rrect(x, GROUND - 10 - h, 9, h, 4); ctx.fill();
+        rrect(x - 9, GROUND - 10 - h * 0.7, 6, h * 0.35, 3); ctx.fill();
+        rrect(x - 9, GROUND - 10 - h * 0.45, 12, 5, 2); ctx.fill();
+        rrect(x + 12, GROUND - 10 - h * 0.85, 6, h * 0.4, 3); ctx.fill();
+        rrect(x + 6, GROUND - 10 - h * 0.55, 12, 5, 2); ctx.fill();
+      }
+    } else if (b === 'forest') {
+      // Zwei Reihen Tannen, hinten langsamer
+      const row = (speed: number, color: string, base: number, salt: number, scale: number) => {
+        const o = distance * speed, step = 34;
+        ctx.fillStyle = shade(color, day);
+        for (let i = Math.floor(o / step) - 2; i * step - o < W + step; i++) {
+          const x = i * step - o, h = (44 + hash(i, salt) * 50) * scale, w = h * 0.5;
+          for (let t = 0; t < 3; t++) {
+            const ty = GROUND - base - h + t * h * 0.28;
+            ctx.beginPath(); ctx.moveTo(x, ty); ctx.lineTo(x + w / 2 + t * 3, ty + h * 0.42); ctx.lineTo(x - w / 2 - t * 3, ty + h * 0.42); ctx.fill();
+          }
+          ctx.fillRect(x - 2, GROUND - base - h * 0.2, 4, h * 0.2 + base);
+        }
+      };
+      row(0.12, pal.forestDark, 6, 4, 1.2);
+      row(0.25, pal.forest, 0, 5, 0.9);
+    } else {
+      // Berge mit Schneekappen
+      const o = distance * 0.1, step = 230;
+      for (let i = Math.floor(o / step) - 2; i * step - o < W + step * 2; i++) {
+        const x = i * step - o, h = 90 + hash(i, 6) * 80, w = 200 + hash(i, 7) * 120;
+        ctx.fillStyle = shade(pal.rock, day);
+        ctx.beginPath(); ctx.moveTo(x - w / 2, GROUND); ctx.lineTo(x, GROUND - h); ctx.lineTo(x + w / 2, GROUND); ctx.fill();
+        ctx.fillStyle = shade(pal.snow, day);
+        const c = 0.3;
+        ctx.beginPath(); ctx.moveTo(x, GROUND - h); ctx.lineTo(x + (w / 2) * c, GROUND - h * (1 - c)); ctx.lineTo(x + 4, GROUND - h * (1 - c) + 8);
+        ctx.lineTo(x - 8, GROUND - h * (1 - c) + 2); ctx.lineTo(x - (w / 2) * c, GROUND - h * (1 - c)); ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+
+  function drawGround(b: Biome, weight: number, day: number) {
+    if (weight <= 0) return;
+    const edge = { city: pal.onNight, desert: pal.sand, forest: pal.grass, mountains: pal.snow }[b];
+    ctx.save();
+    ctx.globalAlpha = weight;
+    ctx.fillStyle = b === 'city' ? edge : shade(edge, day);
+    ctx.fillRect(0, GROUND + 6, W, 3);
+    ctx.globalAlpha = weight * (b === 'city' ? 0.08 : 0.3);
+    ctx.fillRect(0, GROUND + 9, W, H - GROUND);
+    ctx.globalAlpha = weight;
+    if (b === 'city') {
+      // Straße mit Mittelstreifen
+      ctx.fillStyle = pal.muted;
+      for (let i = 0; i < Math.ceil(W / 60) + 1; i++) {
+        const gx = ((i * 60 - distance) % (W + 60) + W + 60) % (W + 60) - 30;
+        ctx.fillRect(gx, GROUND + 26, 26, 3);
+      }
+    } else {
+      // Steine, Grasbüschel oder Schneeflecken
+      ctx.fillStyle = shade(edge, day);
+      const step = 47;
+      for (let i = Math.floor(distance / step) - 1; i * step - distance < W + step; i++) {
+        const x = i * step - distance, y = GROUND + 16 + hash(i, 8) * 22;
+        ctx.fillRect(x, y, 3 + hash(i, 9) * 6, 2);
+      }
+    }
+    ctx.restore();
   }
 
   function draw() {
     const scale = canvas.width / W;
     ctx.setTransform(scale, 0, 0, scale, 0, 0);
-    // Himmel
-    ctx.fillStyle = pal.night;
-    ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = pal.muted;
-    for (const s of stars) {
-      ctx.globalAlpha = 0.5 + Math.sin(time * 2 + s.tw) * 0.3;
-      const sx = ((s.x - distance * 0.04) % W + W) % W;
-      ctx.fillRect(sx, s.y, s.r, s.r);
-    }
-    ctx.globalAlpha = 1;
-    // Mondsichel
-    ctx.save();
-    ctx.fillStyle = pal.goldLight;
-    ctx.globalAlpha = 0.85;
-    ctx.beginPath(); ctx.arc(W * 0.16, 44, 16, 0, TAU); ctx.fill();
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = pal.night;
-    ctx.beginPath(); ctx.arc(W * 0.16 + 7, 39, 15, 0, TAU); ctx.fill();
-    ctx.restore();
-    // Ferne Stadt mit erleuchteten Fenstern (Parallaxe)
-    for (const b of skyline) {
-      const bx = ((b.x - distance * 0.2) % SKY_SPAN + SKY_SPAN) % SKY_SPAN - 64;
-      if (bx > W) continue;
-      ctx.globalAlpha = 0.12;
-      ctx.fillStyle = pal.muted;
-      ctx.fillRect(bx, GROUND - b.h, b.w, b.h);
-      ctx.globalAlpha = 0.25;
-      ctx.fillStyle = pal.gold;
-      for (const l of b.lit) ctx.fillRect(bx + l.x, GROUND - b.h + l.y, 4, 5);
-    }
-    ctx.globalAlpha = 1;
+    const day = dayness();
+    drawSky(day);
+    // Landschaft: aktuelle und (im Übergang) nächste übereinander
+    const pos = distance;
+    const idx = Math.floor(pos / BIOME_LEN);
+    const blend = smooth(BIOME_LEN - BLEND, BIOME_LEN, pos - idx * BIOME_LEN);
+    const now = BIOMES[(biomeStart + idx) % BIOMES.length];
+    const next = BIOMES[(biomeStart + idx + 1) % BIOMES.length];
+    drawBiome(now, 1 - blend, day);
+    if (blend > 0) drawBiome(next, blend, day);
     // Rauch hinter den Hindernissen
     for (const p of puffs) {
       ctx.globalAlpha = Math.max(0, p.life) * 0.35;
@@ -782,17 +965,8 @@ export function createJumper({ canvas, text, best, onCollect, onGameOver }: Jump
       ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, TAU); ctx.fill();
     }
     ctx.globalAlpha = 1;
-    // Boden: Straße mit Kante und Mittelstreifen
-    ctx.fillStyle = pal.onNight;
-    ctx.fillRect(0, GROUND + 6, W, 3);
-    ctx.globalAlpha = 0.08;
-    ctx.fillRect(0, GROUND + 9, W, H - GROUND);
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = pal.muted;
-    for (let i = 0; i < Math.ceil(W / 60) + 1; i++) {
-      const gx = ((i * 60 - distance) % (W + 60) + W + 60) % (W + 60) - 30;
-      ctx.fillRect(gx, GROUND + 26, 26, 3);
-    }
+    drawGround(now, 1 - blend, day);
+    if (blend > 0) drawGround(next, blend, day);
 
     for (const o of obstacles) drawObstacle(o);
     for (const e of embers) {
@@ -816,12 +990,12 @@ export function createJumper({ canvas, text, best, onCollect, onGameOver }: Jump
     ctx.textAlign = 'right';
     ctx.fillStyle = pal.muted;
     ctx.font = `700 14px ${font}`;
-    ctx.fillText(`${text.best} ${Math.max(best(), score)}`, W - 72, 36);
+    outlinedText(`${text.best} ${Math.max(best(), score)}`, W - 72, 36);
     drawFlask({ x: W - 62, y: 14, taken: false, t: 0 });
     ctx.fillStyle = pal.onNight;
     ctx.font = `700 24px ${font}`;
     ctx.textAlign = 'left';
-    ctx.fillText(String(score), W - 42, 40);
+    outlinedText(String(score), W - 42, 40);
 
     if (state === 'ready') centerText(['Science Jumper', text.tapToStart], 100);
     if (state === 'paused') centerText(['II', text.paused], 100);

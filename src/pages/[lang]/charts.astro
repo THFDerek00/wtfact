@@ -13,6 +13,7 @@ import FestDeco from '../../components/FestDeco.astro';
 import { LANGS, CATEGORIES, SLOT_TIMES, type Lang } from '../../config';
 import { t, chartsPath } from '../../i18n/ui';
 import { postsFor, factInfo, categoryIcon } from '../../lib';
+import { festOf } from '../../data/holidays';
 // Farbwelt einer Kategorie (wie WeekBlock.astro)
 const themeOf = (cat: string) => (cat === 'horror' ? 'grusel' : cat === 'holiday' ? 'fest' : cat);
 
@@ -39,7 +40,8 @@ const texts = {
 ---
 <Base lang={lang} title={f.title} description={f.intro} altUrl={chartsPath(other)}>
   <div data-fame data-slots={JSON.stringify(SLOT_TIMES)} data-facts={JSON.stringify(facts)} data-texts={JSON.stringify(texts)} data-lang={lang}>
-    <section class="stage fame-hero">
+    <section class="sec fest-sky fame-hero" data-fest="fest">
+      <FestDeco deco={['trophy', 'star', 'crown', 'sparkle']} />
       <div class="wrap hero-grid">
       <div>
         <p class="kicker"><span class="sticker"><Icon name="trophy" /> {f.name}</span></p>
@@ -137,9 +139,11 @@ const texts = {
       <p class="note storage">{f.storageNote}</p>
     </section>
 
+    <!-- Deko je Kategorie für die großen Karten unter „Gerade ganz oben“ (das Skript holt sich die passende) -->
+    {CATEGORIES.map((c) => <template data-deco={themeOf(c)}><FestDeco deco={festOf(c, '')?.deco ?? ['sparkle', 'star', 'gift', 'sparkle']} /></template>)}
     <template data-tpl="big">
       <a class="card big">
-        <span class="big-art" data-art aria-hidden="true"><span class="big-emoji" data-emoji></span></span>
+        <span class="big-art fest-sky" data-art aria-hidden="true"><span class="big-emoji" data-emoji></span></span>
         <span class="big-body">
           <span class="chip" data-chip></span>
           <span class="big-title" data-title></span>
@@ -198,7 +202,9 @@ const texts = {
   function bigCard(fact: FactInfo, chip: string, accent: boolean, meta: string) {
     const card = tpl('big') as HTMLAnchorElement;
     card.href = fact.url;
-    $('[data-art]', card).classList.add(`cat-${fact.cat}`);
+    card.dataset.fest = themeOf(fact.cat);
+    const deco = root.querySelector<HTMLTemplateElement>(`template[data-deco="${themeOf(fact.cat)}"]`);
+    if (deco) $('[data-art]', card).prepend(deco.content.cloneNode(true));
     $('[data-emoji]', card).textContent = fact.emoji;
     const c = $('[data-chip]', card);
     c.textContent = chip;
@@ -410,7 +416,9 @@ const texts = {
 </script>
 
 <style>
-  .fame-hero { padding: var(--space-11) 0 var(--space-11); }
+  .fame-hero { position: relative; padding: var(--space-11) 0 var(--space-11); }
+  .fame-hero > .wrap { position: relative; z-index: 1; }
+  .fame-hero .clock { border-color: var(--fest-a); }
   /* Rechts neben der Überschrift: „Seit du hier bist …“, damit die Bühne die ganze Breite nutzt (Wunsch von Eric, 2026-10-09) */
   .hero-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(300px, 1fr); gap: var(--space-10); align-items: center; }
   @media (max-width: 960px) { .hero-grid { grid-template-columns: minmax(0, 1fr); } }
@@ -437,8 +445,11 @@ const texts = {
   .slot-empty { margin: 0; padding: var(--space-6); color: var(--muted); }
   .big { display: grid; grid-template-rows: auto 1fr; overflow: hidden; text-decoration: none; transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
   .big:hover { transform: translate(-3px, -3px) rotate(-0.4deg); box-shadow: var(--shadow-xl); }
-  .big-art { display: grid; place-items: center; aspect-ratio: 5 / 2; border-bottom: var(--bw) solid var(--line); --dots-size: var(--dots-size-lg); }
-  .big-emoji { font-size: var(--fs-emoji-lg); transform: rotate(-8deg); filter: var(--emoji-shadow); }
+  /* Bildfläche als Bühne in der Farbwelt der Kategorie, mit Leuchten hinter dem Emoji und verstreuter Deko */
+  .big[data-fest] { border-color: var(--fest-a); box-shadow: var(--space-2) var(--space-2) 0 var(--fest-a); }
+  .big-art { position: relative; display: grid; place-items: center; aspect-ratio: 5 / 2; overflow: hidden; border-bottom: var(--bw) solid var(--fest-a, var(--line)); }
+  .big-art::before { content: ''; position: absolute; width: 40%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle closest-side, color-mix(in srgb, var(--fest-a) 55%, transparent), transparent); }
+  .big-emoji { position: relative; font-size: var(--fs-emoji-lg); transform: rotate(-8deg); filter: var(--emoji-shadow); }
   .big-body { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-6); }
   .big-body .chip { align-self: flex-start; }
   .big-title { font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 700; line-height: 1.15; letter-spacing: -0.02em; }

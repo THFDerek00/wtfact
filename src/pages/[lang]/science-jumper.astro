@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import Icon from '../../components/Icon.astro';
+import FestDeco from '../../components/FestDeco.astro';
 import { LANGS, type Lang } from '../../config';
 import { t } from '../../i18n/ui';
 import { open, readGold } from '../../../scripts/facts-db.mjs';
@@ -38,14 +39,17 @@ const staticTexts = Object.fromEntries(Object.entries(texts).filter(([, v]) => t
 const STARS = 9;
 ---
 <Base lang={lang} title={g.title} description={g.intro} altUrl={`/${other}/science-jumper/`}>
-  <!-- Spiel eingebettet wie ein Abschnitt der Startseite (Wunsch von Eric, 2026-10-10): Text links, Spiel als
-       kleinere Konsole rechts mit gelbem Rahmen und Etikett, Hintergrund wie die Nacht-Abschnitte. -->
-  <section class="sec sec--night play">
+  <!-- Kopf als dunkle Bühne im Thema „science“ (Wunsch von Eric, 2026-10-21): oben Text und Zahlen,
+       darunter das Spiel über die volle Breite mit gelbem Rahmen und Etikett. -->
+  <section class="sec fest-sky play" data-fest="science">
+    <FestDeco deco={['flask', 'atom', 'sparkle', 'bolt', 'flask', 'star']} size="lg" />
     <div class="wrap play-grid">
       <div class="play-text">
         <p class="kicker"><span class="sticker"><Icon name="flask-conical" /> {g.name}</span></p>
         <h1>{g.title}</h1>
         <p class="intro">{g.intro}</p>
+      </div>
+      <div class="play-side">
         <div class="below">
           <dl class="stats">
             <div><dt>{g.run}</dt><dd data-stat="run">0</dd></div>
@@ -56,6 +60,8 @@ const STARS = 9;
         </div>
         <p class="controls" id="jumper-controls">{g.controls}</p>
       </div>
+    </div>
+    <div class="wrap">
       <div class="console bleed">
         <span class="console-tag" aria-hidden="true">{g.name}</span>
         <div class="frame">
@@ -78,7 +84,7 @@ const STARS = 9;
     </div>
   </section>
 
-  <section class="sec sec--paper gold-wrap" data-edge><div class="wrap gold-sec" id="gold" data-gold={encoded} data-texts={JSON.stringify(staticTexts)} data-lang={lang}>
+  <section class="sec fest-sky gold-wrap" data-fest="fest" data-edge><div class="wrap gold-sec" id="gold" data-gold={encoded} data-texts={JSON.stringify(staticTexts)} data-lang={lang}>
     <div class="gold-head">
       <div>
         <h2>{g.goldTitle}</h2>
@@ -173,6 +179,8 @@ const STARS = 9;
   function card(f: Fact, isNew: boolean) {
     const node = tpl.content.firstElementChild!.cloneNode(true) as HTMLAnchorElement;
     node.href = goldUrl(lang, f.id);
+    // Bildfläche leuchtet in der Farbwelt der Kategorie, Rahmen und Strahlen bleiben golden
+    node.dataset.fest = f.category === 'horror' ? 'grusel' : f.category === 'holiday' ? 'fest' : f.category;
     const q = (k: string) => node.querySelector<HTMLElement>(`[data-f="${k}"]`)!;
     q('badge').textContent = fmt.badge(f.points);
     q('cat').textContent = f.categoryName;
@@ -264,24 +272,29 @@ const STARS = 9;
 </script>
 
 <style>
-  .play { padding: var(--space-10) 0 calc(var(--space-12) + var(--space-6)); }
-  .play-grid { display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: var(--space-11); align-items: center; }
-  .console { position: relative; max-width: 56rem; justify-self: end; width: 100%; margin-bottom: calc(-1 * var(--space-12) - var(--edge)); }
+  .play { position: relative; padding: var(--space-10) 0 calc(var(--space-12) + var(--space-6)); --line: var(--on-night); }
+  .play > .wrap { position: relative; z-index: 1; }
+  .play > .wrap + .wrap { z-index: 2; }
+  .play-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: var(--space-6) var(--space-11); align-items: end; }
+  .play-side { padding-bottom: var(--space-8); }
+  .console { position: relative; width: 100%; margin-top: var(--space-6); margin-bottom: calc(-1 * var(--space-12) - var(--edge)); }
   .console-tag {
     position: absolute; top: calc(-1 * var(--space-5)); left: var(--space-6); z-index: 1; padding: var(--space-1) var(--space-4);
     border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-sm); background: var(--yellow); color: var(--on-accent);
     font-family: var(--font-display); font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; transform: rotate(-3deg);
   }
-  .gold-wrap { padding-block: calc(var(--space-12) + var(--space-10)) var(--space-12); }
+  .gold-wrap { padding-block: calc(var(--space-12) + var(--space-10)) var(--space-12); --line: var(--on-night); --fest-glow-y: 8%; }
+  .gold-wrap .lead, .gold-wrap .next, .gold-wrap .foot-note { color: var(--on-night-muted); }
+  .gold-wrap .gold-head h2 { color: var(--fest-a); }
   .kicker { margin: 0 0 var(--space-4); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-md); }
   h1 { font-size: var(--fs-display-md); margin: 0; max-width: 22ch; }
   .intro { color: var(--on-night-muted); font-size: var(--fs-lg); max-width: 62ch; margin: var(--space-4) 0 var(--space-8); }
 
   .frame {
     border: var(--bw-accent) solid var(--yellow); border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-night-pink); overflow: hidden; background: var(--night); transform: rotate(-0.6deg);
+    box-shadow: var(--shadow-night-pink); overflow: hidden; background: var(--night); transform: rotate(-0.3deg);
   }
-  canvas { display: block; width: 100%; height: auto; aspect-ratio: 800 / 260; touch-action: manipulation; cursor: pointer; }
+  canvas { display: block; width: 100%; height: auto; aspect-ratio: 1200 / 260; touch-action: manipulation; cursor: pointer; }
   canvas:focus-visible { outline-offset: calc(-1 * var(--bw-focus)); }
 
   .below { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-5); margin-top: var(--space-6); }
@@ -347,6 +360,7 @@ const STARS = 9;
     background: var(--gold-glow), var(--night);
     border-bottom: var(--bw) solid var(--gold);
   }
+  .goldcard[data-fest] .gc-art { background: var(--gold-glow), var(--fest-sky); background-size: auto, auto, var(--dots-size-md) var(--dots-size-md), auto; }
   .rays { position: absolute; inset: -60%; background: var(--gold-rays); animation: spin var(--dur-rays) linear infinite; }
   .gc-emoji { position: relative; font-size: var(--fs-emoji-lg); line-height: 1; transform: rotate(-8deg); filter: var(--emoji-shadow); transition: transform var(--dur) var(--ease-pop); }
   .goldcard:hover .gc-emoji { transform: rotate(8deg) scale(1.15); }
@@ -408,8 +422,8 @@ const STARS = 9;
   .foot-note p { margin: 0; }
 
   @media (max-width: 1060px) {
-    .play-grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-9); }
-    .console { justify-self: stretch; max-width: none; }
+    .play-grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-5); }
+    .play-side { padding-bottom: 0; }
   }
   @media (max-width: 520px) {
     .stats { gap: var(--space-5); }

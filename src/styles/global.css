@@ -391,6 +391,20 @@
   --roof: #3a3550;
   --roof-light: #5a5377;
   --smoke: #8a8496;
+  /* Spiel: Himmel am Tag und Landschaften (Wunsch von Eric, 2026-10-21: Tag und Nacht je nach Strecke, mehrere Biome) */
+  --sky-day: #3f86d9;
+  --sky-day-low: #9fd3f2;
+  --sky-dusk: #ff8a5c;
+  --sun: #ffd23f;
+  --biome-city: #5a5377;
+  --biome-sand: #e8b864;
+  --biome-sand-dark: #c48d4c;
+  --biome-cactus: #3f8f4a;
+  --biome-forest: #2f7a3e;
+  --biome-forest-dark: #1f5a2d;
+  --biome-grass: #6cc24a;
+  --biome-rock: #6b6f86;
+  --biome-snow: #eef4ff;
 
   /* Schrift */
   /* Überschriften (h1–h3) in WTF Plakat, alles andere in WTF Text Locker; Space Grotesk nur noch für den Logo-Schriftzug. */
