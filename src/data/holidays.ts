@@ -94,7 +94,7 @@ export const HOLIDAYS: Holiday[] = [
 // „fest“ = allgemeines Fest-Thema für Feiertage ohne eigenes Thema, „grusel“ = Kategorie Grusel,
 // dazu ein Thema je normaler Kategorie (gleicher Name wie die Kategorie, Wunsch von Eric, 2026-10-20) und „quiz“
 // für den Abschnitt „Was war zuerst?“.
-export const THEMES = ['fest', 'grusel', 'quiz', 'wof', 'science', 'history', 'tech', 'nature', 'body', 'weird', 'survival', 'food', 'language', 'sport', 'space', 'animals', 'mind', 'brands', 'popculture', 'einheit', 'halloween', 'muertos', 'diwali', 'martin', 'thanksgiving', 'advent', 'nikolaus', 'wintersonne', 'weihnacht', 'xmas', 'silvester', 'neujahr', 'koenige', 'lunar', 'karneval', 'valentin', 'pi', 'patrick', 'holi', 'ostern', 'aprilscherz', 'erde', 'koningsdag', 'walpurgis', 'weltraum', 'cinco', 'vatertag', 'muttertag', 'drachenboot', 'sommer', 'mittsommer', 'july', 'bastille', 'perseiden', 'tomatina', 'mondfest', 'oktoberfest', 'pirat'] as const;
+export const THEMES = ['fest', 'grusel', 'quiz', 'wof', 'science', 'history', 'tech', 'nature', 'body', 'weird', 'survival', 'food', 'language', 'sport', 'space', 'animals', 'mind', 'brands', 'popculture', 'myths', 'crime', 'money', 'places', 'ocean', 'records', 'art', 'einheit', 'halloween', 'muertos', 'diwali', 'martin', 'thanksgiving', 'advent', 'nikolaus', 'wintersonne', 'weihnacht', 'xmas', 'silvester', 'neujahr', 'koenige', 'lunar', 'karneval', 'valentin', 'pi', 'patrick', 'holi', 'ostern', 'aprilscherz', 'erde', 'koningsdag', 'walpurgis', 'weltraum', 'cinco', 'vatertag', 'muttertag', 'drachenboot', 'sommer', 'mittsommer', 'july', 'bastille', 'perseiden', 'tomatina', 'mondfest', 'oktoberfest', 'pirat'] as const;
 export type Theme = (typeof THEMES)[number];
 
 const GRUSEL_DECO = ['web', 'bat', 'ghost', 'spider', 'moon'];
@@ -117,6 +117,13 @@ const CATEGORY_DECO: Record<string, { deco: string[] }> = {
   mind: { deco: ['bulb', 'question', 'sparkle', 'star'] },
   brands: { deco: ['bulb', 'gift', 'gold-coin', 'sparkle'] },
   popculture: { deco: ['film', 'music-note', 'star', 'sparkle'] },
+  myths: { deco: ['cross', 'question', 'sparkle', 'star'] },
+  crime: { deco: ['magnifier', 'key', 'moon', 'black-cat'] },
+  money: { deco: ['gold-coin', 'banknote', 'diamond', 'sparkle'] },
+  places: { deco: ['globe', 'compass', 'treasure-map', 'sun'] },
+  ocean: { deco: ['fish', 'wave', 'anchor', 'splash'] },
+  records: { deco: ['trophy', 'medal', 'star', 'bolt'] },
+  art: { deco: ['palette', 'frame', 'star', 'sparkle'] },
 };
 
 /** Feiertag an einem Tag ('JJJJ-MM-TT', deutsche Zeit) oder undefined. */

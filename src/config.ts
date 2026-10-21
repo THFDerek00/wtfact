@@ -38,7 +38,7 @@ export const SITE = {
 export const LANGS = ['de', 'en'] as const;
 export type Lang = (typeof LANGS)[number];
 
-export const CATEGORIES = ['science', 'history', 'tech', 'nature', 'body', 'weird', 'survival', 'food', 'language', 'sport', 'space', 'animals', 'mind', 'brands', 'popculture', 'horror', 'holiday'] as const;
+export const CATEGORIES = ['science', 'history', 'tech', 'nature', 'body', 'weird', 'survival', 'food', 'language', 'sport', 'space', 'animals', 'mind', 'brands', 'popculture', 'myths', 'crime', 'money', 'places', 'ocean', 'records', 'art', 'horror', 'holiday'] as const;
 export type Category = (typeof CATEGORIES)[number];
 
 // Feiertage (Wunsch von Eric, 2026-10-15): bekommen nur an besonderen Tagen einen Fakt, je mit eigener Farbwelt.
