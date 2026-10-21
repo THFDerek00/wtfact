@@ -1,0 +1,198 @@
+---
+// Tageszahl (Wunsch von Eric, 2026-10-21): /de/tageszahl/ und /en/daily-number/ (Seiten in src/pages/de und src/pages/en). Ein Zahlenrätsel pro Tag,
+// Regeln und Speicher in src/scripts/tageszahl.ts. Welcher Fakt heute dran ist, entscheidet der Browser nach dem
+// deutschen Tag, die Seite bringt alle möglichen Fakten mit. Gespielt zählt für die Serie (src/scripts/streak.ts).
+import Base from '../../layouts/Base.astro';
+import FestDeco from '../../components/FestDeco.astro';
+import Icon from '../../components/Icon.astro';
+import type { Lang } from '../../config';
+import { postsFor, numberCandidate } from '../../lib';
+import { x, numberPath } from '../../i18n/extras';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const n = x(lang).number;
+const other: Lang = lang === 'de' ? 'en' : 'de';
+const cands = (await postsFor(lang)).map(numberCandidate).filter((c) => !!c);
+const texts = {
+  higher: n.higher, lower: n.lower, hot: n.hot, hit: n.hit, invalid: n.invalid, copied: n.copied, name: n.name,
+  won: [n.won(1), n.won(9001)], lost: n.lost('§'), tries: [n.tries(1), n.tries(9001)], no: n.no(9001), stats: n.stats(9001, 9002),
+};
+---
+<Base lang={lang} title={n.title} description={n.intro} altUrl={numberPath(other)}>
+  <section class="sec fest-sky nhero" data-fest="wof">
+    <FestDeco deco={['question', 'star', 'sparkle', 'bolt']} size="lg" />
+    <div class="wrap">
+      <span class="pill">{n.kicker}</span>
+      <h1 class="mega word">{n.title}</h1>
+      <p class="intro">{n.intro}</p>
+    </div>
+  </section>
+
+  <section class="sec sec--night nplay" data-edge data-number data-lang={lang} data-url={new URL(numberPath(lang), Astro.site).href}
+    data-cands={JSON.stringify(cands)} data-texts={JSON.stringify(texts)}>
+    <div class="wrap">
+      <div class="card ncard bleed">
+        <div class="ntop">
+          <span class="chip accent" data-no>{n.no(1)}</span>
+          <span class="tries" data-tries>{n.tries(6)}</span>
+        </div>
+        <p class="nprompt">{n.prompt}</p>
+        <p class="ngap" data-gap><span data-before></span><span class="hole" data-hole>___</span><span data-after></span></p>
+        <form class="nform" data-form>
+          <label class="sr-only" for="number-guess">{n.placeholder}</label>
+          <input id="number-guess" class="ninput" type="text" inputmode="decimal" autocomplete="off" placeholder={n.placeholder} data-input />
+          <button class="btn btn--pink" type="submit">{n.submit} <Icon name="target" /></button>
+        </form>
+        <p class="nerr" data-err aria-live="polite" hidden></p>
+        <ol class="rows" data-rows aria-live="polite"></ol>
+        <div class="nend" data-end hidden>
+          <p class="nres" data-res></p>
+          <pre class="nshare" data-share-text></pre>
+          <div class="nacts">
+            <button class="btn" type="button" data-share>{n.share}</button>
+            <a class="btn btn--ghost" href="#" data-fact>{n.readFact} <Icon name="chevron-right" /></a>
+          </div>
+          <p class="ncopied" data-copied aria-live="polite" hidden>{n.copied}</p>
+          <p class="nnext">{n.next} <span class="clock" data-clock>--:--:--</span></p>
+        </div>
+        <p class="nrule">{n.rule} <span data-stats></span></p>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<script>
+  import { pickFor, puzzleNo, parseGuess, judge, shareLine, stateFor, saveState, stats, MAX_TRIES, type Candidate } from '../../scripts/tageszahl';
+  import { markActive } from '../../scripts/streak';
+  import { berlinDay } from '../../week';
+
+  const root = document.querySelector<HTMLElement>('[data-number]');
+  if (root) {
+    const T = JSON.parse(root.dataset.texts!);
+    const lang = root.dataset.lang!;
+    const day = berlinDay();
+    const c = pickFor(JSON.parse(root.dataset.cands!) as Candidate[], day);
+    const $ = <E extends HTMLElement>(s: string) => root.querySelector<E>(s)!;
+    const no = puzzleNo(day);
+    const plural = (pair: string[], k: number) => (k === 1 ? pair[0] : pair[1].replace('9001', String(k)));
+    const fmt = (v: number) => v.toLocaleString(lang === 'de' ? 'de-DE' : 'en-US', { maximumFractionDigits: 3, useGrouping: !c?.year });
+    $('[data-no]').textContent = T.no.replace('9001', String(no));
+    if (!c) root.hidden = true;
+    else {
+      $('[data-before]').textContent = c.before;
+      $('[data-after]').textContent = c.after;
+      $<HTMLAnchorElement>('[data-fact]').href = c.url;
+      let st = stateFor(day);
+      const render = () => {
+        const rows = $('[data-rows]');
+        rows.replaceChildren(...st.guesses.map((g) => {
+          const { verdict, hot } = judge(g, c.value, c.year);
+          const li = document.createElement('li');
+          li.dataset.verdict = verdict;
+          const num = document.createElement('span');
+          num.textContent = verdict === 'hit' ? c.answer : fmt(g);
+          const tag = document.createElement('em');
+          tag.textContent = verdict === 'hit' ? `✓ ${T.hit}` : `${verdict === 'up' ? `${T.higher} ▲` : `${T.lower} ▼`}${hot ? ` · ${T.hot}` : ''}`;
+          li.append(num, tag);
+          return li;
+        }));
+        const left = MAX_TRIES - st.guesses.length;
+        $('[data-tries]').textContent = plural(T.tries, left);
+        $<HTMLFormElement>('[data-form]').hidden = st.done;
+        $('[data-end]').hidden = !st.done;
+        if (st.done) {
+          $('[data-hole]').textContent = c.answer;
+          $('[data-hole]').toggleAttribute('data-solved', true);
+          $('[data-res]').textContent = st.won ? plural(T.won, st.guesses.length) : T.lost.replace('§', c.answer);
+          $('[data-share-text]').textContent = shareLine(no, T.name, st.guesses, c.value, c.year, st.won, root.dataset.url!);
+        }
+        const s = stats();
+        $('[data-stats]').textContent = s.played ? T.stats.replace('9001', s.played).replace('9002', s.won) : '';
+      };
+      render();
+      $<HTMLFormElement>('[data-form]').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const input = $<HTMLInputElement>('[data-input]');
+        const g = parseGuess(input.value, lang);
+        const err = $('[data-err]');
+        err.hidden = g !== null;
+        err.textContent = g === null ? T.invalid : '';
+        if (g === null || st.done) return;
+        const won = judge(g, c.value, c.year).verdict === 'hit';
+        st = { guesses: [...st.guesses, g], won, done: won || st.guesses.length + 1 >= MAX_TRIES };
+        saveState(day, st);
+        markActive(day);
+        input.value = '';
+        render();
+        if (!st.done) input.focus();
+      });
+      $('[data-share]').addEventListener('click', async () => {
+        const text = $('[data-share-text]').textContent ?? '';
+        try {
+          if (navigator.share) await navigator.share({ text });
+          else { await navigator.clipboard.writeText(text); $('[data-copied]').hidden = false; }
+        } catch { /* abgebrochen */ }
+      });
+      // Countdown bis Mitternacht deutscher Zeit
+      const clock = $('[data-clock]');
+      const tick = () => {
+        const now = new Date();
+        const berlin = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Berlin' }));
+        const left = Math.max(0, Math.floor((new Date(berlin).setHours(24, 0, 0, 0) - berlin.getTime()) / 1000));
+        if (left === 0 && berlinDay() !== day) location.reload();
+        clock.textContent = [left / 3600, (left % 3600) / 60, left % 60].map((v) => String(Math.floor(v)).padStart(2, '0')).join(':');
+      };
+      tick();
+      setInterval(tick, 1000);
+    }
+  }
+</script>
+
+<style>
+  .nhero > .wrap { position: relative; z-index: 1; }
+  .nhero { position: relative; padding: var(--space-10) 0 calc(var(--space-12) + var(--bleed)); overflow: clip; }
+  .pill { display: inline-block; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); background: var(--fest-a); color: var(--on-accent); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lg); transform: rotate(-3deg); }
+  .word { margin: var(--space-5) calc(-1 * var(--space-4)) 0; font-size: var(--fs-huge); text-transform: uppercase; text-shadow: var(--shift-mega) var(--shift-mega) 0 var(--fest-b); transform: rotate(-2deg); }
+  .intro { max-width: 52ch; margin: var(--space-10) 0 0; font-size: var(--fs-xl); font-weight: 600; }
+  .nplay { padding: 0 0 var(--space-12); }
+  .ncard {
+    position: relative; z-index: 2; max-width: 46rem; margin: calc(-1 * var(--bleed)) auto 0; padding: var(--space-7);
+    display: flex; flex-direction: column; gap: var(--space-4); border: var(--bw-strong) solid var(--on-accent); box-shadow: var(--shadow-2xl);
+  }
+  .ntop { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+  .tries { font-family: var(--font-display); font-weight: 700; color: var(--muted); }
+  .nprompt { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: var(--fs-lg); }
+  .ngap { margin: 0; font-size: var(--fs-2xl); font-weight: 700; line-height: 1.35; }
+  .hole { display: inline-block; min-width: 3ch; margin: 0 var(--space-1); padding: 0 var(--space-2); text-align: center; border-radius: var(--radius-sm); background: var(--yellow); color: var(--on-accent); border: var(--bw-sm) solid var(--on-accent); }
+  .hole[data-solved] { background: var(--lime); }
+  .nform { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+  .ninput {
+    flex: 1 1 12rem; min-width: 0; padding: var(--space-3) var(--space-4); font: inherit; font-size: var(--fs-xl); font-weight: 700;
+    border: var(--bw-strong) solid var(--line); border-radius: var(--radius-md); background: var(--surface); color: var(--ink);
+  }
+  .nerr { margin: 0; color: var(--pink-text); font-weight: 700; }
+  .rows { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
+  .rows li {
+    display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-4);
+    border: var(--bw) solid var(--line); border-radius: var(--radius-md); font-family: var(--font-display); font-weight: 800; font-size: var(--fs-lg);
+  }
+  .rows em { font-style: normal; font-size: var(--fs-sm); padding: var(--space-1) var(--space-3); border-radius: var(--radius-pill); color: var(--on-accent); border: var(--bw-sm) solid var(--on-accent); }
+  .rows [data-verdict='up'] em { background: var(--cyan); }
+  .rows [data-verdict='down'] em { background: var(--pink); }
+  .rows [data-verdict='hit'] { background: var(--lime); color: var(--on-accent); border-color: var(--on-accent); box-shadow: var(--shadow-accent-sm); }
+  .rows [data-verdict='hit'] em { background: var(--surface); color: var(--ink); }
+  .nend { display: flex; flex-direction: column; gap: var(--space-3); }
+  .nres { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: var(--fs-xl); }
+  .nshare { margin: 0; padding: var(--space-3) var(--space-4); border: var(--bw-sm) dashed var(--line); border-radius: var(--radius-md); font-size: var(--fs-md); white-space: pre-wrap; }
+  .nacts { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  .ncopied { margin: 0; font-weight: 700; }
+  .nnext { margin: 0; font-weight: 700; }
+  .clock { font-variant-numeric: tabular-nums; padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); background: var(--yellow); color: var(--on-accent); }
+  .nrule { margin: 0; font-size: var(--fs-sm); color: var(--muted); }
+  @media (max-width: 760px) {
+    .ncard { padding: var(--space-5); }
+    .ngap { font-size: var(--fs-xl); }
+    .intro { margin-top: var(--space-8); font-size: var(--fs-lg); }
+  }
+</style>

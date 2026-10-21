@@ -1,0 +1,89 @@
+---
+// Spiel des Tages (Wunsch von Eric, 2026-10-21): ein Abschnitt mit drei Reitern statt zwei langer Quiz-Abschnitte.
+// Tageszahl als Vorschau mit der heutigen Lücke, Wahr oder Fake und Was war zuerst wie bisher (TrueOrFake.astro,
+// WhatFirst.astro). Vorausgewählt nach Wochentag wie der Fokus im Kopf: Mittwoch und Samstag Wahr oder Fake,
+// Donnerstag Was war zuerst, sonst die Tageszahl. Links auf #wof und #first öffnen den passenden Reiter.
+import type { Lang } from '../../config';
+import { x, numberPath } from '../../i18n/extras';
+import { numberCandidate, type Post } from '../../lib';
+import { pickFor, puzzleNo } from '../../scripts/tageszahl';
+import { berlinDay, addDays } from '../../week';
+import TrueOrFake from './TrueOrFake.astro';
+import WhatFirst from './WhatFirst.astro';
+import FestDeco from '../FestDeco.astro';
+import Icon from '../Icon.astro';
+interface Props { lang: Lang; posts: Post[] }
+const { lang, posts } = Astro.props;
+const e = x(lang);
+const cands = posts.map(numberCandidate).filter((c) => !!c);
+// Die Lücken der nächsten Tage mitliefern, der Browser zeigt die von heute (falls die Seite älter ist als ein Tag).
+const days = Array.from({ length: 7 }, (_, k) => addDays(berlinDay(), k));
+const picks = Object.fromEntries(days.map((d) => {
+  const c = pickFor(cands, d);
+  return [d, c ? { no: puzzleNo(d), before: c.before, after: c.after } : null];
+}));
+const today = picks[days[0]];
+---
+<div class="gotd" data-gotd data-picks={JSON.stringify(picks)} data-no={e.number.no(9001)}>
+  <section class="sec fest-sky g-head" data-fest="wof" data-edge>
+    <FestDeco deco={['question', 'star', 'sparkle']} size="lg" />
+    <div class="wrap">
+      <span class="g-kicker">🎮 {e.game.kicker}</span>
+      <div class="tabs" role="tablist" aria-label={e.game.title}>
+        <button class="chip tab" type="button" role="tab" aria-selected="true" aria-controls="gotd-number" data-tab="number">🎯 {e.game.tabs.number}</button>
+        <button class="chip tab" type="button" role="tab" aria-selected="false" aria-controls="wof" data-tab="wof">✅ {e.game.tabs.wof}</button>
+        <button class="chip tab" type="button" role="tab" aria-selected="false" aria-controls="first" data-tab="first">⏳ {e.game.tabs.first}</button>
+      </div>
+      <div class="card ncard" id="gotd-number" role="tabpanel" data-panel="number">
+        <span class="chip accent" data-no-text>{today ? e.number.no(today.no) : e.number.name}</span>
+        <p class="nprompt">{e.number.prompt}</p>
+        <p class="ngap"><span data-before>{today?.before}</span><span class="hole">___</span><span data-after>{today?.after}</span></p>
+        <a class="btn btn--pink" href={numberPath(lang)}>{e.number.play} <Icon name="chevron-right" /></a>
+      </div>
+    </div>
+  </section>
+  <div data-panel="wof" hidden><TrueOrFake lang={lang} /></div>
+  <div data-panel="first" hidden><WhatFirst lang={lang} /></div>
+</div>
+
+<script>
+  import { berlinDay } from '../../week';
+  const root = document.querySelector<HTMLElement>('[data-gotd]');
+  if (root) {
+    const pick = JSON.parse(root.dataset.picks!)[berlinDay()];
+    if (pick) {
+      root.querySelector('[data-before]')!.textContent = pick.before;
+      root.querySelector('[data-after]')!.textContent = pick.after;
+      root.querySelector('[data-no-text]')!.textContent = root.dataset.no!.replace('9001', String(pick.no));
+    }
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[data-tab]')];
+    const show = (id: string) => {
+      tabs.forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === id)));
+      root.querySelectorAll<HTMLElement>('[data-panel]').forEach((p) => (p.hidden = p.dataset.panel !== id));
+    };
+    tabs.forEach((b) => b.addEventListener('click', () => show(b.dataset.tab!)));
+    const wd = new Date(`${berlinDay()}T12:00:00Z`).getUTCDay();
+    const fromHash = () => {
+      const h = location.hash.slice(1);
+      if (h === 'wof' || h === 'first') { show(h); document.getElementById(h)?.scrollIntoView(); return true; }
+      return false;
+    };
+    if (!fromHash()) show(wd === 3 || wd === 6 ? 'wof' : wd === 4 ? 'first' : 'number');
+    addEventListener('hashchange', fromHash);
+  }
+</script>
+
+<style>
+  .g-head { position: relative; padding: var(--space-10) 0 var(--space-10); }
+  .g-head > .wrap { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-5); }
+  .g-kicker { display: inline-block; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); background: var(--fest-a); color: var(--on-accent); font-family: var(--font-display); font-weight: 800; font-size: var(--fs-lg); transform: rotate(-3deg); }
+  .tabs { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  .tab { cursor: pointer; font-size: var(--fs-md); padding: var(--space-2) var(--space-4); }
+  .tab[aria-selected='true'] { background: var(--fest-a); color: var(--on-accent); border-color: var(--on-accent); }
+  .ncard { width: 100%; max-width: 46rem; padding: var(--space-6); display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); border: var(--bw-strong) solid var(--on-accent); box-shadow: var(--shadow-night-pink); }
+  .ncard[hidden] { display: none; }
+  .nprompt { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: var(--fs-lg); }
+  .ngap { margin: 0; font-size: var(--fs-2xl); font-weight: 700; line-height: 1.35; }
+  .hole { display: inline-block; min-width: 3ch; margin: 0 var(--space-1); padding: 0 var(--space-2); text-align: center; border-radius: var(--radius-sm); background: var(--yellow); color: var(--on-accent); border: var(--bw-sm) solid var(--on-accent); }
+  @media (max-width: 760px) { .ngap { font-size: var(--fs-xl); } .ncard { padding: var(--space-5); } }
+</style>

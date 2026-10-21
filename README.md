@@ -165,6 +165,15 @@ Farben, Schrift, Abstände und Bausteine sind in `docs/design-system.md` beschri
   dieselbe Route speichert auch Schätzfrage (`guess`) und WTF-Barometer (`baro`) der Faktseiten.
   Die Statistik-Kacheln nutzen die Antworten aller Besucher: Ab 5 Antworten (`MIN_SINGLE` in `src/scripts/quiz.ts`)
   zeigt eine Kachel die auffälligste einzelne Frage, vorher alle Fragen zusammen. Ohne Antwort steht „?“ mit Hinweis.
+- **Spiele, Serie und Ich** (seit 2026-10-21): Alles läuft nur im Browser, nichts geht an die API.
+  - Tageszahl (`/de/tageszahl/`, Logik in `src/scripts/tageszahl.ts`): jeden Tag eine Zahl aus einem Fakt erraten, 6 Versuche.
+    Kandidaten liefert `numberCandidate()` in `src/lib.ts` (nur Fakten, die vor dem Tag erschienen sind). Rätsel Nr. 1 ist `START_DAY`.
+  - Serie und Ränge (`src/scripts/streak.ts`): `markActive()` zählt einen Tag als aktiv (Fakt gelesen, Tageszahl getippt,
+    Du in Zahlen). Wer etwas Neues anbinden will, ruft nur `markActive()` auf. Ränge nach gelesenen Fakten (`RANK_AT`).
+  - Seite „Ich“ (`src/components/pages/MePage.astro`): Serie, Rang, Abzeichen je Kategorie, darunter Kacheln (Liste `tiles`).
+  - Du in Zahlen (`/de/du-in-zahlen/`): rechnet aus dem Geburtsdatum, das Datum bleibt im Browser.
+  - Geschenkfinder (`/de/geschenke/`, Ideen in `src/data/gifts.ts`): ganzjährig erreichbar, auf der Startseite nur
+    November bis Dezember als Sonderteaser. Neue Idee: Eintrag in `GIFTS` mit Suchbegriff (`query`), keine festen Produkt-Links.
 - **Neu:** Fakten der letzten 7 Tage (heute eingeschlossen) tragen das Etikett „Neu“ (`src/components/NewBadge.astro`).
   Der Browser prüft das nach, damit es auch ohne neuen Build verschwindet.
 

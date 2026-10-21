@@ -1,0 +1,143 @@
+---
+// Kaninchenbau (Wunsch von Eric, 2026-10-21) am Ende jeder Faktseite, ersetzt „Noch ein WTF zum Schluss“:
+// drei Türen zu verwandten Fakten (gleiche Kategorie und gemeinsame Wörter, fest pro Fakt ausgewählt) und ein
+// Tiefenmesser. Die Tiefe zählt nur, wenn man über eine Tür kommt (sessionStorage), der Rekord bleibt (localStorage).
+// Der Messer erscheint erst ab dem 3. Fakt, damit er beim ersten Besuch nicht stört.
+import type { Lang } from '../config';
+import { t } from '../i18n/ui';
+import { x } from '../i18n/extras';
+import { postUrl, type Post } from '../lib';
+import Icon from './Icon.astro';
+interface Props { lang: Lang; post: Post; others: Post[] }
+const { lang, post, others } = Astro.props;
+const ui = t(lang);
+const h = x(lang).hole;
+const words = (p: Post) => new Set(`${p.data.title} ${p.data.hook}`.toLowerCase().match(/[\p{L}]{5,}/gu) ?? []);
+const mine = words(post);
+const seed = [...post.data.translationKey].reduce((s, c) => (s * 31 + c.charCodeAt(0)) >>> 0, 7);
+const scored = others
+  .map((p, k) => {
+    const shared = [...words(p)].filter((w) => mine.has(w)).length;
+    // Gleiche Kategorie zählt am meisten, gemeinsame Wörter danach; der Rest mischt fest pro Fakt.
+    const score = (p.data.category === post.data.category ? 3 : 0) + Math.min(shared, 3) + ((seed + k * 7919) % 97) / 100;
+    return { p, score };
+  })
+  .sort((a, b) => b.score - a.score);
+// Höchstens zwei Türen aus derselben Kategorie unter den ersten drei, damit der Bau auch woandershin führt.
+// Sechs Kandidaten stehen im HTML, drei sind sichtbar. Der Browser überspringt Fakten, die man im Bau schon gesehen hat.
+const SHOWN = 3;
+const doors: Post[] = [];
+for (const { p } of scored) {
+  if (doors.length === SHOWN * 2) break;
+  const same = doors.slice(-SHOWN).filter((d) => d.data.category === post.data.category).length;
+  if (p.data.category === post.data.category && same >= 2) continue;
+  doors.push(p);
+}
+---
+{doors.length > 0 && (
+  <section class="sec sec--night hole" data-edge aria-labelledby="hole-title" data-hole data-emoji={post.data.emoji} data-best-text={h.best(9001)} data-depth-text={h.depth(9001)}>
+    <div class="wrap">
+      <div class="h-head">
+        <div>
+          <span class="h-kicker">{h.label}</span>
+          <h2 id="hole-title">{h.title}</h2>
+          <p class="h-intro">{h.intro}</p>
+        </div>
+        <div class="depth" data-depth hidden>
+          <b data-depth-no>1</b>
+          <div class="meter" aria-hidden="true"><i data-meter></i></div>
+          <span data-depth-label></span>
+          <span class="best" data-best></span>
+        </div>
+      </div>
+      <ul class="doors">
+        {doors.map((p, i) => (
+          <li data-door-li hidden={i >= SHOWN}>
+            <a class="door" href={postUrl(p)} data-door data-door-emoji={p.data.emoji}>
+              <span class:list={['d-emoji', `cat-${p.data.category}`]} aria-hidden="true">{p.data.emoji}</span>
+              <span class="d-text">
+                <span class="d-cat">{ui.categories[p.data.category]}</span>
+                <span class="d-title">{p.data.title}</span>
+              </span>
+              <Icon name="chevron-right" />
+            </a>
+          </li>
+        ))}
+      </ul>
+      <div class="trail-wrap" data-trail-wrap hidden>
+        <p class="trail-h">{h.trail}</p>
+        <ol class="trail" data-trail></ol>
+      </div>
+    </div>
+  </section>
+)}
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-hole]');
+  if (root) {
+    const S = 'wtfact:hole';
+    const BEST = 'wtfact:hole-best';
+    type Hole = { depth: number; trail: string[]; seen?: string[]; next?: string };
+    let st: Hole = { depth: 0, trail: [] };
+    try { st = JSON.parse(sessionStorage.getItem(S) ?? '{}') as Hole; } catch { /* ohne Speicher immer Tiefe 1 */ }
+    // Über eine Tür gekommen? Dann eine Ebene tiefer, sonst fängt der Bau hier neu an.
+    const came = st.next === location.pathname;
+    const here = location.pathname;
+    st = came
+      ? { depth: (st.depth || 1) + 1, trail: [...(st.trail ?? []), root.dataset.emoji!].slice(-12), seen: [...(st.seen ?? []), here].slice(-50) }
+      : { depth: 1, trail: [root.dataset.emoji!], seen: [here] };
+    // Schon besuchte Fakten nicht noch einmal als Tür anbieten, dafür rückt der nächste Kandidat nach
+    const lis = [...root.querySelectorAll<HTMLElement>('[data-door-li]')];
+    const fresh = lis.filter((li) => !st.seen!.includes(new URL(li.querySelector('a')!.href).pathname));
+    const pick = (fresh.length >= 3 ? fresh : lis).slice(0, 3);
+    lis.forEach((li) => { li.hidden = !pick.includes(li); });
+    let best = 0;
+    try { best = Math.max(Number(localStorage.getItem(BEST)) || 0, st.depth); localStorage.setItem(BEST, String(best)); } catch { best = st.depth; }
+    const save = () => { try { sessionStorage.setItem(S, JSON.stringify(st)); } catch { /* privates Fenster */ } };
+    save();
+    if (st.depth >= 3) {
+      root.querySelector<HTMLElement>('[data-depth]')!.hidden = false;
+      root.querySelector('[data-depth-no]')!.textContent = String(st.depth);
+      root.querySelector('[data-depth-label]')!.textContent = root.dataset.depthText!.replace('9001', String(st.depth));
+      root.querySelector('[data-best]')!.textContent = root.dataset.bestText!.replace('9001', String(best));
+      root.querySelector<HTMLElement>('[data-meter]')!.style.setProperty('--fill', String(Math.min(1, st.depth / Math.max(best, 10))));
+      const trail = root.querySelector('[data-trail]')!;
+      trail.replaceChildren(...st.trail.map((e) => Object.assign(document.createElement('li'), { textContent: e })));
+      root.querySelector<HTMLElement>('[data-trail-wrap]')!.hidden = false;
+    }
+    root.querySelectorAll<HTMLAnchorElement>('[data-door]').forEach((a) =>
+      a.addEventListener('click', () => { st.next = new URL(a.href).pathname; save(); }),
+    );
+  }
+</script>
+
+<style>
+  .hole { position: relative; padding: var(--space-10) 0 calc(var(--space-10) + var(--edge)); }
+  .h-head { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--space-6); flex-wrap: wrap; }
+  .h-kicker { display: inline-block; padding: var(--space-1) var(--space-3); border-radius: var(--radius-pill); background: var(--yellow); color: var(--on-accent); font-family: var(--font-display); font-weight: 800; transform: rotate(-2deg); }
+  h2 { margin: var(--space-3) 0 var(--space-2); font-size: var(--fs-display-md); }
+  .h-intro { margin: 0; font-weight: 600; color: var(--on-night-muted); }
+  .depth { display: grid; grid-template-columns: auto minmax(8rem, 14rem); grid-template-rows: auto auto; column-gap: var(--space-3); align-items: center; font-family: var(--font-display); font-weight: 700; }
+  .depth b { grid-row: span 2; font-size: var(--fs-display-lg); line-height: 1; color: var(--cyan); }
+  .meter { height: var(--space-3); border: var(--bw-sm) solid var(--on-night); border-radius: var(--radius-pill); overflow: hidden; }
+  .meter i { display: block; height: 100%; width: calc(var(--fill, 0.1) * 100%); background: repeating-linear-gradient(-45deg, var(--cyan) 0 var(--space-2), var(--violet) var(--space-2) var(--space-4)); }
+  .best { font-size: var(--fs-sm); color: var(--on-night-muted); }
+  .doors { list-style: none; margin: var(--space-7) 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-5); }
+  .door {
+    display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--space-4); align-items: center; height: 100%; padding: var(--space-4);
+    background: var(--surface); color: var(--ink); text-decoration: none; border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-md);
+    box-shadow: var(--shadow-night-lime); transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  }
+  .doors li:nth-child(2) .door { box-shadow: var(--shadow-night-pink); }
+  .door:hover { transform: translate(calc(-1 * var(--space-1)), calc(-1 * var(--space-1))); }
+  .d-emoji { display: grid; place-items: center; width: var(--space-12); height: var(--space-12); font-size: var(--fs-emoji-sm); border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-sm); }
+  .d-text { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
+  .d-cat { font-size: var(--fs-xs); font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  .d-title { font-family: var(--font-display); font-weight: 800; line-height: 1.25; }
+  .trail-wrap { margin-top: var(--space-7); }
+  .trail-h { margin: 0 0 var(--space-2); font-size: var(--fs-sm); font-weight: 700; color: var(--on-night-muted); }
+  .trail { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .trail li { display: grid; place-items: center; width: var(--space-9); height: var(--space-9); border-radius: 50%; background: var(--night-3); font-size: var(--fs-lg); }
+  .trail li:last-child { background: var(--cyan); outline: var(--bw-sm) solid var(--on-night); }
+  @media (max-width: 900px) { .doors { grid-template-columns: minmax(0, 1fr); } }
+</style>

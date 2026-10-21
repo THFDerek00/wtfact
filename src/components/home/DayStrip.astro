@@ -1,0 +1,78 @@
+---
+// Tagesleiste (Wunsch von Eric, 2026-10-21) direkt unter dem Wochentag: drei Kacheln, jede führt direkt ins Ziel.
+// Serie (src/scripts/streak.ts), Tageszahl (offen oder gelöst) und Fakt des Tages. Den Stand füllt der Browser.
+// Weitere Kacheln: einen Eintrag in `tiles` ergänzen. Mit `from`/`to` (MM-TT, deutscher Tag) erscheint eine Kachel
+// nur in diesem Zeitraum, z. B. { from: '12-01', to: '12-24' } für einen Adventskalender. Geprüft wird im Browser.
+import type { Lang } from '../../config';
+import { x, mePath, numberPath } from '../../i18n/extras';
+interface Props { lang: Lang }
+type Tile = { id: string; href: string; emoji: string; cls: string; label: string; value: string; from?: string; to?: string };
+const { lang } = Astro.props;
+const s = x(lang).strip;
+const tiles: Tile[] = [
+  { id: 'streak', href: mePath(lang), emoji: '🔥', cls: 'cat-history', label: s.streak, value: s.streakOff },
+  { id: 'number', href: numberPath(lang), emoji: '🎯', cls: 'cat-nature', label: s.number, value: s.numberOpen },
+  { id: 'fotd', href: '#fotd', emoji: '⭐', cls: 'cat-weird', label: s.fotd, value: s.fotdText },
+];
+const texts = { streakOff: s.streakOff, streakDays: [s.streakDays(1), s.streakDays(9001)], open: s.numberOpen, won: s.numberWon(9001), wonOne: s.numberWon(1), lost: s.numberLost };
+---
+<nav class="strip-sec" aria-label={s.label} data-strip data-texts={JSON.stringify(texts)}>
+  <ul class="strip">
+    {tiles.map((tl) => (
+      <li data-tile={tl.id} data-from={tl.from} data-to={tl.to} hidden={!!(tl.from || tl.to)}>
+        <a class:list={['tile', tl.cls]} href={tl.href}>
+          <span class="t-emoji" aria-hidden="true">{tl.emoji}</span>
+          <span class="t-text"><span class="t-label">{tl.label}</span><span class="t-value" data-value>{tl.value}</span></span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<script>
+  import { streakInfo } from '../../scripts/streak';
+  import { stateFor } from '../../scripts/tageszahl';
+  import { berlinDay } from '../../week';
+  // Die Leiste kann zweimal auf der Seite stehen (Wochentag- und Feiertags-Kopf), beide füllen
+  document.querySelectorAll<HTMLElement>('[data-strip]').forEach((root) => {
+    const T = JSON.parse(root.dataset.texts!);
+    const md = berlinDay().slice(5);
+    root.querySelectorAll<HTMLElement>('[data-tile]').forEach((li) => {
+      const { from, to } = li.dataset;
+      if (from || to) li.hidden = !((!from || md >= from) && (!to || md <= to));
+    });
+    const val = (id: string) => root.querySelector<HTMLElement>(`[data-tile="${id}"] [data-value]`);
+    const n = streakInfo().current;
+    const sv = val('streak');
+    if (sv) sv.textContent = n ? (n === 1 ? T.streakDays[0] : `${T.streakDays[1].replace('9001', String(n))}`) : T.streakOff;
+    const st = stateFor();
+    const nv = val('number');
+    if (nv) {
+      nv.textContent = !st.done ? T.open : st.won ? (st.guesses.length === 1 ? T.wonOne : T.won.replace('9001', String(st.guesses.length))) : T.lost;
+      nv.closest('li')!.toggleAttribute('data-open', !st.done);
+    }
+  });
+</script>
+
+<style>
+  .strip { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: var(--space-4); }
+  .strip li { display: flex; }
+  .tile {
+    display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-3); align-items: center; width: 100%; padding: var(--space-3) var(--space-4);
+    text-decoration: none; border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-md); box-shadow: var(--shadow-night-sm);
+    transition: transform var(--dur) var(--ease);
+  }
+  .tile:hover { transform: translate(calc(-1 * var(--space-1)), calc(-1 * var(--space-1))); }
+  .t-emoji { font-size: var(--fs-2xl); line-height: 1; }
+  .t-text { display: flex; flex-direction: column; min-width: 0; }
+  .t-label { font-family: var(--font-display); font-weight: 800; font-size: var(--fs-md); line-height: 1.2; }
+  .t-value { font-size: var(--fs-sm); font-weight: 700; }
+  [data-open] .t-value::after { content: ' ●'; color: var(--pink-text); }
+  @media (max-width: 520px) {
+    .strip { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); }
+    .tile { grid-template-columns: minmax(0, 1fr); justify-items: start; gap: var(--space-1); padding: var(--space-2) var(--space-3); }
+    .t-emoji { font-size: var(--fs-xl); }
+    .t-label { font-size: var(--fs-sm); }
+    .t-value { font-size: var(--fs-xs); }
+  }
+</style>

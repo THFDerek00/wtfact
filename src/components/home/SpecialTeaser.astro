@@ -1,14 +1,33 @@
 ---
 // Hinweis auf die Sonderseite zum neuen Tesla Roadster (Wunsch von Eric, 2026-10-17), nur auf der deutschen Startseite.
-// Dunkle Bühne im Thema „nature“ (2026-10-20) zwischen „Heute neu“ und Labor; zum Entfernen die Zeile in src/pages/[lang]/index.astro löschen.
+// Dunkle Bühne im Thema „nature“ (2026-10-20) zwischen „Heute neu“ und Labor.
+// Im November und Dezember (Wunsch von Eric, 2026-10-21) steht hier stattdessen der Geschenkfinder, in beiden Sprachen.
+// Welcher Hinweis gilt, entscheidet der Browser nach dem deutschen Monat, damit es auch ohne neuen Build umschaltet.
 import Icon from '../Icon.astro';
 import FestDeco from '../FestDeco.astro';
 import type { Lang } from '../../config';
+import { x, giftsPath } from '../../i18n/extras';
+import { berlinDay } from '../../week';
 interface Props { lang: Lang }
 const { lang } = Astro.props;
+const g = x(lang).gifts;
+const giftMonths = ['11', '12'];
+const giftNow = giftMonths.includes(berlinDay().slice(5, 7));
 ---
+<section class="sec fest-sky special" data-fest="fest" data-edge data-season="gifts" data-months={giftMonths.join(',')} hidden={!giftNow}>
+  <FestDeco deco={['sparkle', 'star', 'question', 'bolt']} size="lg" />
+  <div class="wrap row">
+    <span class="emoji" aria-hidden="true">🎁</span>
+    <div class="text">
+      <span class="chip chip--new">{g.teaserKicker}</span>
+      <h2>{g.teaserTitle}</h2>
+      <p>{g.teaserText}</p>
+    </div>
+    <a class="btn btn--go" href={giftsPath(lang)}>{g.teaserCta} <Icon name="chevron-right" /></a>
+  </div>
+</section>
 {lang === 'de' && (
-  <section class="sec fest-sky special" data-fest="nature" data-edge>
+  <section class="sec fest-sky special" data-fest="nature" data-edge data-season="default" hidden={giftNow}>
     <FestDeco deco={['bolt', 'sprout', 'sparkle', 'question']} size="lg" />
     <div class="wrap row">
       <span class="emoji" aria-hidden="true">🐌</span>
@@ -21,7 +40,17 @@ const { lang } = Astro.props;
     </div>
   </section>
 )}
+<script>
+  import { berlinDay } from '../../week';
+  const gifts = document.querySelector<HTMLElement>('[data-season="gifts"]');
+  if (gifts) {
+    const on = gifts.dataset.months!.split(',').includes(berlinDay().slice(5, 7));
+    gifts.hidden = !on;
+    document.querySelectorAll<HTMLElement>('[data-season="default"]').forEach((s) => (s.hidden = on));
+  }
+</script>
 <style>
+  .special[hidden] { display: none; }
   .special { padding-block: var(--space-10) calc(var(--space-10) + var(--edge)); }
   .special { --fest-glow-y: 60%; }
   .special .row { position: relative; z-index: 1; }

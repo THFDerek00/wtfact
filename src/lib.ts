@@ -140,3 +140,20 @@ export async function upcomingToday(lang: Lang) {
     .sort((a, b) => a.data.date.getTime() - b.data.date.getTime())
     .map((p) => ({ at: p.data.date.getTime(), cat: p.data.category }));
 }
+
+/** Kandidat für die Tageszahl (src/scripts/tageszahl.ts): Satz mit Lücke, gesuchte Zahl und Link zum Fakt. */
+export function numberCandidate(p: Post) {
+  const g = guessFor(p);
+  const b = bigNumber(p);
+  if (!g || !b) return null;
+  const value = Number(b.value.replace(/[.,](?=\d{3}\b)/g, '').replace(',', '.'));
+  if (!Number.isFinite(value)) return null;
+  // Steht dieselbe Zahl noch einmal im Satz (z. B. „WD-40 … nach dem 40. Versuch“), wäre die Lösung verraten.
+  const again = new RegExp(`(?<![\\d.,])${b.value.replace(/[.,]/g, '[.,]')}(?![\\d])`);
+  if (again.test(g.before) || again.test(g.after)) return null;
+  return {
+    key: p.data.translationKey, day: postDay(p.data.date), before: g.before, after: g.after,
+    answer: g.options[g.correct], value, year: /^\d{4}$/.test(b.value) && value >= 1000 && value < 2100 && !b.unit,
+    url: postUrl(p), title: p.data.title, emoji: p.data.emoji,
+  };
+}

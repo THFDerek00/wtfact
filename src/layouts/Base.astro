@@ -5,6 +5,7 @@ import Icon from '../components/Icon.astro';
 import CookieConsent from '../components/CookieConsent.astro';
 import { SITE, type Lang } from '../config';
 import { t, catsPath, chartsPath, quizPath } from '../i18n/ui';
+import { x, gamesPath, mePath, numberPath, youPath, giftsPath } from '../i18n/extras';
 import { postsFor, postUrl } from '../lib';
 import FestDeco from '../components/FestDeco.astro';
 import { holidayOn, festOfHoliday } from '../data/holidays';
@@ -17,7 +18,7 @@ interface Props {
   altUrl?: string;
   image?: string;
   /** Aktiver Menüpunkt, falls er sich nicht aus der Adresse ergibt (z. B. „facts“ auf einer Fakt-Seite) */
-  section?: 'facts' | 'quiz' | 'cats' | 'charts' | 'game';
+  section?: 'facts' | 'games' | 'cats' | 'charts' | 'me';
   /** Farbwelt eines Feiertags- oder Grusel-Fakts (src/data/holidays.ts), färbt die ganze Seite um */
   fest?: string;
 }
@@ -38,13 +39,16 @@ const allUrls = (await postsFor(lang)).map(postUrl);
 // Hauptmenü: oben auf breiten Bildschirmen, als Leiste unten am Handy (gleiche Ziele, kurze Namen).
 // Jeder Punkt führt auf eine eigene Seite (kein Springen innerhalb der Startseite), der aktive Bereich ist markiert.
 const path = Astro.url.pathname;
+// Seit 2026-10-21 (Wunsch von Eric): „Spiele“ statt „Quiz“ (Tageszahl, Quiz, Science Jumper) und „Ich“ statt
+// „Science Jumper“ (Serie, Sammlung, Du in Zahlen, Geschenkfinder). `also` = weitere Seiten, die zum Punkt gehören.
+const xt = x(lang);
 const nav = [
-  { id: 'facts', href: `/${lang}/`, label: ui.home.navFacts, tab: ui.home.tabs.facts, icon: 'zap' },
-  { id: 'quiz', href: quizPath(lang), label: ui.home.navQuiz, tab: ui.home.tabs.quiz, icon: 'target' },
-  { id: 'cats', href: catsPath(lang), label: ui.home.catsAll, tab: ui.home.tabs.cats, icon: 'layout-grid' },
-  { id: 'charts', href: chartsPath(lang), label: ui.fame.name, tab: ui.home.tabs.charts, icon: 'trophy' },
-  { id: 'game', href: `/${lang}/science-jumper/`, label: ui.game.name, tab: ui.home.tabs.game, icon: 'flask-conical' },
-].map((n) => ({ ...n, current: section ? section === n.id : n.id === 'facts' ? path === n.href : path.startsWith(n.href) }));
+  { id: 'facts', href: `/${lang}/`, label: ui.home.navFacts, tab: ui.home.tabs.facts, icon: 'zap', also: [] as string[] },
+  { id: 'games', href: gamesPath(lang), label: xt.nav.games, tab: xt.nav.gamesTab, icon: 'gamepad-2', also: [quizPath(lang), numberPath(lang), `/${lang}/science-jumper/`] },
+  { id: 'cats', href: catsPath(lang), label: ui.home.catsAll, tab: ui.home.tabs.cats, icon: 'layout-grid', also: [] },
+  { id: 'charts', href: chartsPath(lang), label: ui.fame.name, tab: ui.home.tabs.charts, icon: 'trophy', also: [] },
+  { id: 'me', href: mePath(lang), label: xt.nav.me, tab: xt.nav.meTab, icon: 'flame', also: [youPath(lang), giftsPath(lang)] },
+].map((n) => ({ ...n, current: section ? section === n.id : n.id === 'facts' ? path === n.href : [n.href, ...n.also].some((h) => path.startsWith(h)) }));
 ---
 <!doctype html>
 <html lang={lang}>
@@ -91,7 +95,7 @@ const nav = [
         </a>
         <p class="slogan">{ui.slogan}</p>
         <nav class="mainnav" aria-label={ui.home.nav}>
-          {nav.map((n) => <a href={n.href} aria-current={n.current ? 'page' : undefined}>{n.label}</a>)}
+          {nav.map((n) => <a href={n.href} aria-current={n.current ? 'page' : undefined}>{n.label}{n.id === 'me' && <span class="streak" data-streak-badge hidden></span>}</a>)}
         </nav>
         <div class="actions">
           <button class="btn btn--pink surprise" type="button" data-surprise={JSON.stringify(allUrls)} aria-label={ui.surprise}>
@@ -116,10 +120,14 @@ const nav = [
         <p class="note">{ui.tagline}</p>
         <p class="note">{ui.affiliateFooter} {ui.madeWith}</p>
         <nav>
+          <a href={gamesPath(lang)}>{xt.nav.games}</a>
+          <a href={numberPath(lang)}>{xt.footer.number}</a>
           <a href={quizPath(lang)}>{ui.home.navQuiz}</a>
           <a href={chartsPath(lang)}>{ui.fame.name}</a>
           <a href={catsPath(lang)}>{ui.home.catsAll}</a>
           <a href={`/${lang}/science-jumper/`}>{ui.game.name}</a>
+          <a href={giftsPath(lang)}>🎁 {xt.footer.gifts}</a>
+          <a href={youPath(lang)}>{xt.footer.you}</a>
           <a href={`/${lang}/about/`}>{ui.about}</a>
           <a href={`/${lang}/korrekturen/`}>{ui.corrections}</a>
           <a href={`/${lang}/impressum/`}>{ui.imprint}</a>
@@ -131,12 +139,20 @@ const nav = [
     </footer>
     <nav class="tabbar" aria-label={ui.home.nav}>
       {nav.map((n) => (
-        <a href={n.href} aria-current={n.current ? 'page' : undefined}><Icon name={n.icon} /><span>{n.tab}</span></a>
+        <a href={n.href} aria-current={n.current ? 'page' : undefined}><Icon name={n.icon} /><span>{n.tab}{n.id === 'me' && <b class="streak" data-streak-badge hidden></b>}</span></a>
       ))}
     </nav>
     <CookieConsent lang={lang} />
     <script>
       import { isNew, berlinDay } from '../week';
+      import { streakInfo } from '../scripts/streak';
+      // Serien-Zahl am Menüpunkt „Ich“ (neben dem Flammen-Symbol), sobald eine Serie läuft
+      const showStreak = () => {
+        const n = streakInfo().current;
+        document.querySelectorAll<HTMLElement>('[data-streak-badge]').forEach((el) => { el.hidden = n < 1; el.textContent = String(n); });
+      };
+      showStreak();
+      addEventListener('wtfact-streak', showStreak);
       // Feiertags-Farben und -Deko nur am Feiertag selbst
       const festDay = document.body.dataset.festDay;
       if (festDay && festDay !== berlinDay()) delete document.body.dataset.fest;
@@ -196,6 +212,10 @@ const nav = [
   /* Hover nur angedeutet, damit der aktive Bereich (pink) eindeutig bleibt */
   .mainnav a:hover { border-color: color-mix(in srgb, var(--pink) 40%, transparent); }
   .mainnav a[aria-current='page'] { border-color: var(--pink); color: var(--pink-text); }
+  /* Serie am Menüpunkt „Ich“ */
+  .streak { display: inline-grid; place-items: center; min-width: 1.5em; margin-left: var(--space-1); padding: 0 var(--space-1); border-radius: var(--radius-pill); background: var(--pink); color: var(--on-accent); font-family: var(--font-display); font-size: var(--fs-xs); font-weight: 800; line-height: 1.5; }
+  .streak[hidden] { display: none; }
+  .tabbar .streak { margin: 0 0 0 var(--space-1); }
   @media (max-width: 1060px) { .mainnav { display: none; } }
   /* Leiste unten am Handy und Tablet: alle Bereiche immer mit einem Daumen erreichbar */
   .tabbar { display: none; }

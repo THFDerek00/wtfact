@@ -36,6 +36,8 @@ const dayCats = CATEGORIES.filter((c) => c !== 'holiday');
 const themeOf = (c: string) => (c === 'horror' ? 'grusel' : c);
 const dayNo = (day: string) => Math.floor(Date.parse(`${day}T12:00:00Z`) / 86400000) % dayCats.length;
 const di = dayNo(today);
+// Tagesleiste (Kind-Element) steht in beiden Köpfen, je nachdem welcher gerade gilt
+const strip = Astro.slots.has('default') ? await Astro.slots.render('default') : '';
 ---
 {fest && holiday && (
   <section class="sec fest-sky fest-hero" data-fest={fest.theme} data-fest-hero={today}>
@@ -66,6 +68,7 @@ const di = dayNo(today);
         )}
       </div>
     </div>
+    <div class="wrap slot"><Fragment set:html={strip} /></div>
   </section>
 )}
 <section class="sec fest-sky day-hero" data-day-hero data-weekday={wd} data-fest={themeOf(dayCats[di])} data-themes={dayCats.map(themeOf).join(',')} data-lang={lang} hidden={!!fest}>
@@ -86,6 +89,8 @@ const di = dayNo(today);
       </div>
     ))}
   </div>
+  <!-- Tagesleiste (DayStrip.astro), seit 2026-10-21 direkt unter dem Wochentag -->
+  <div class="wrap slot"><Fragment set:html={strip} /></div>
 </section>
 
 <script>
@@ -148,6 +153,7 @@ const di = dayNo(today);
   }
   .day-hero { position: relative; padding: var(--space-8) 0 calc(var(--space-12) + var(--bleed)); overflow: clip; border-bottom: none; }
   .day-hero .top-row, .day-hero .day-word, .day-hero .row { position: relative; z-index: 1; }
+  .slot { position: relative; z-index: 1; margin-top: var(--space-7); }
   .top-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
   .pill {
     display: inline-block; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill);
