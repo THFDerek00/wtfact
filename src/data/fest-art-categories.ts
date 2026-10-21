@@ -61,4 +61,32 @@ export const ART: Record<string, string> = {
   film: `<path class="o f-white" d="M8 26h48v30H8z"/>
     <path class="o f-white" d="M6 14l46-8 2 12-46 8z"/>
     <path class="fk" d="M14 13l7 10 6-1-7-10zM28 11l7 10 6-1-7-10zM42 8l7 10 4-1-6-10z"/>`,
+
+  // Kategorien vom 2026-10-21 (Mythen, Verbrechen, Geld, Länder, Ozean, Rekorde, Kunst)
+  cross: `<path class="o fa" d="M14 8l18 16L50 8l6 6-16 18 16 18-6 6-18-16-18 16-6-6 16-18L8 14z"/>`,
+
+  magnifier: `<path class="o f-wood" d="M38 40l6-6 14 14c2 2 2 4 0 6s-4 2-6 0z"/>
+    <circle class="o f-gray" cx="26" cy="26" r="19"/><circle class="o fw" cx="26" cy="26" r="13"/>
+    <path class="fhighlight" d="M18 20c2-4 5-6 9-6-2 2-4 4-5 8z"/>`,
+
+  key: `<circle class="o fgold" cx="18" cy="22" r="12"/><circle class="o fn" cx="18" cy="22" r="4"/>
+    <path class="o fgold" d="M27 29l27 27-4 4-5-5-4 4-4-4 4-4-4-4-4 4-4-4 4-4-10-10z"/>`,
+
+  banknote: `<g transform="rotate(-12 32 32)"><path class="o fa" d="M4 18h56v28H4z"/>
+    <circle class="o fw" cx="32" cy="32" r="8"/><path class="t-dark" d="M10 24v16M54 24v16"/></g>`,
+
+  diamond: `<path class="o fb" d="M18 10h28l12 14-26 32L6 24z"/>
+    <path class="t-dark" d="M6 24h52M24 10l-6 14 14 32 14-32-6-14"/>
+    <path class="fhighlight" d="M22 14h8l-4 8z"/>`,
+
+  medal: `<path class="o fa" d="M18 4h10l8 22h-10z"/><path class="o fb" d="M46 4H36l-8 22h10z"/>
+    <circle class="o fgold" cx="32" cy="42" r="17"/>
+    <path class="o f-white" d="M32 32l3 6 6 1-4 4 1 6-6-3-6 3 1-6-4-4 6-1z"/>`,
+
+  palette: `<path class="o f-white" d="M32 6C17 6 6 17 6 31s10 27 24 27c5 0 6-3 4-7-2-5 1-9 6-9h7c7 0 11-5 11-11C58 16 46 6 32 6z"/>
+    <circle class="o fa" cx="20" cy="26" r="5"/><circle class="o fb" cx="31" cy="17" r="5"/>
+    <circle class="o f-blue" cx="43" cy="21" r="5"/><circle class="o f-green" cx="18" cy="40" r="5"/>`,
+
+  frame: `<path class="o fgold" d="M6 8h52v48H6z"/><path class="o fn" d="M14 16h36v32H14z"/>
+    <path class="fa" d="M16 46l10-14 8 9 6-6 8 11z"/><circle class="fb" cx="40" cy="24" r="4"/>`,
 };

@@ -54,6 +54,17 @@ Build automatisch. Wer hier eine Zahl ändert, ändert sie auch dort.
   no advertising tone and no product comparisons.
 - Category "popculture" is about films, TV, music and video games: how they were made, records and odd backstories.
   No spoilers in the headline or hook, no gossip about private lives.
+- Category "myths" (Mythen & Irrtümer) debunks popular misconceptions. Name the myth, then show with sources what is
+  actually true. No health myths that could read as medical advice.
+- Category "crime" (Verbrechen & Rätsel) is about famous heists, cons, forgeries and unsolved mysteries. Focus on the
+  puzzle and the cleverness, not on violence: no murders, no victims as the hook, no instructions.
+- Category "money" (Geld & Wirtschaft) is about the history and oddities of money, prices and markets. No investment,
+  crypto or savings tips.
+- Category "places" (Länder & Orte) is about strange borders, time zones, place names and geography records.
+- Category "ocean" (Ozean & Tiefsee) is about the sea, the deep sea and its creatures. Land animals stay in "animals".
+- Category "records" (Rekorde & Extreme) is about verified records, ideally from Guinness World Records or official
+  bodies. No dangerous stunts to copy and no deaths as the hook.
+- Category "art" (Kunst & Fälschungen) is about famous artworks, their backstories, thefts and forgeries.
 - Category "horror" (Grusel) is about the creepy and uncanny: eerie animals and fungi, the science of fear and
   "hauntings", folklore and monster legends, the history of horror novels and films. Goosebumps, not gore: no graphic
   violence, no real crimes, murders, accidents or disasters with victims, and no deaths as the hook. Suitable for 16-year-olds.

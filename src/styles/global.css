@@ -67,6 +67,14 @@
   /* Zwei Akzente für Grusel und Feiertage (Wunsch von Eric, 2026-10-15) */
   --bone: #e8dcc0;
   --confetti: #ff6be6;
+  /* Sieben Akzente für die Kategorien vom 2026-10-21 (Wunsch von Eric) */
+  --magenta: #ff57d9;
+  --chartreuse: #e4ff3a;
+  --emerald: #2bff88;
+  --skyblue: #7fd4ff;
+  --aqua: #00f0d0;
+  --silver: #e9f0ff;
+  --crimson: #ff3355;
 
   /* Farbwelten (Wunsch von Eric, 2026-10-15): Feiertags-Fakten und Grusel-Fakten färben Karte und Seite um.
      Je Thema drei Farben: -night (dunkle Bühne), -a und -b (Akzentflächen, dunkle Schrift darauf).
@@ -125,6 +133,27 @@
   --fest-popculture-night: #241006;
   --fest-popculture-a: #ffbe98;
   --fest-popculture-b: #ff3d7f;
+  --fest-myths-night: #22061c;
+  --fest-myths-a: #ff57d9;
+  --fest-myths-b: #fff27a;
+  --fest-crime-night: #10120a;
+  --fest-crime-a: #e4ff3a;
+  --fest-crime-b: #5c95ff;
+  --fest-money-night: #04190c;
+  --fest-money-a: #2bff88;
+  --fest-money-b: #ffd23f;
+  --fest-places-night: #061624;
+  --fest-places-a: #7fd4ff;
+  --fest-places-b: #ff8a3d;
+  --fest-ocean-night: #021a1f;
+  --fest-ocean-a: #00f0d0;
+  --fest-ocean-b: #8a9bff;
+  --fest-records-night: #12141c;
+  --fest-records-a: #e9f0ff;
+  --fest-records-b: #ffc83d;
+  --fest-art-night: #240610;
+  --fest-art-a: #ff3355;
+  --fest-art-b: #ffd23f;
   /* Thema „quiz“ für „Was war zuerst?“ (2026-10-20): dunkles Violett mit violettem Leuchten */
   --fest-quiz-night: #130b2a;
   --fest-quiz-a: #9b6bff;
@@ -392,6 +421,13 @@
   --cat-mind: var(--bubblegum);
   --cat-brands: var(--mint);
   --cat-popculture: var(--peach);
+  --cat-myths: var(--magenta);
+  --cat-crime: var(--chartreuse);
+  --cat-money: var(--emerald);
+  --cat-places: var(--skyblue);
+  --cat-ocean: var(--aqua);
+  --cat-records: var(--silver);
+  --cat-art: var(--crimson);
   --cat-horror: var(--bone);
   --cat-holiday: var(--confetti);
 
@@ -807,6 +843,13 @@ html[data-sky] .stage { background: var(--sky-stage); }
 .cat-mind { background: var(--dots-strong), var(--cat-mind); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
 .cat-brands { background: var(--dots), var(--cat-brands); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
 .cat-popculture { background: var(--dots-strong), var(--cat-popculture); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
+.cat-myths { background: var(--dots-strong), var(--cat-myths); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
+.cat-crime { background: var(--dots), var(--cat-crime); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
+.cat-money { background: var(--dots), var(--cat-money); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
+.cat-places { background: var(--dots), var(--cat-places); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
+.cat-ocean { background: var(--dots), var(--cat-ocean); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
+.cat-records { background: var(--dots), var(--cat-records); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
+.cat-art { background: var(--dots-strong), var(--cat-art); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
 .cat-horror { background: var(--dots), var(--cat-horror); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
 .cat-holiday { background: var(--dots), var(--cat-holiday); background-size: var(--dots-size) var(--dots-size); color: var(--on-accent); }
 .accent { background: var(--yellow); color: var(--on-accent); }
@@ -851,6 +894,13 @@ html[data-sky] .stage { background: var(--sky-stage); }
 [data-fest='mind'] { --fest-night: var(--fest-mind-night); --fest-a: var(--fest-mind-a); --fest-b: var(--fest-mind-b); }
 [data-fest='brands'] { --fest-night: var(--fest-brands-night); --fest-a: var(--fest-brands-a); --fest-b: var(--fest-brands-b); }
 [data-fest='popculture'] { --fest-night: var(--fest-popculture-night); --fest-a: var(--fest-popculture-a); --fest-b: var(--fest-popculture-b); }
+[data-fest='myths'] { --fest-night: var(--fest-myths-night); --fest-a: var(--fest-myths-a); --fest-b: var(--fest-myths-b); }
+[data-fest='crime'] { --fest-night: var(--fest-crime-night); --fest-a: var(--fest-crime-a); --fest-b: var(--fest-crime-b); }
+[data-fest='money'] { --fest-night: var(--fest-money-night); --fest-a: var(--fest-money-a); --fest-b: var(--fest-money-b); }
+[data-fest='places'] { --fest-night: var(--fest-places-night); --fest-a: var(--fest-places-a); --fest-b: var(--fest-places-b); }
+[data-fest='ocean'] { --fest-night: var(--fest-ocean-night); --fest-a: var(--fest-ocean-a); --fest-b: var(--fest-ocean-b); }
+[data-fest='records'] { --fest-night: var(--fest-records-night); --fest-a: var(--fest-records-a); --fest-b: var(--fest-records-b); }
+[data-fest='art'] { --fest-night: var(--fest-art-night); --fest-a: var(--fest-art-a); --fest-b: var(--fest-art-b); }
 [data-fest='quiz'] { --fest-night: var(--fest-quiz-night); --fest-a: var(--fest-quiz-a); --fest-b: var(--fest-quiz-b); }
 [data-fest='wof'] { --fest-night: var(--fest-wof-night); --fest-a: var(--fest-wof-a); --fest-b: var(--fest-wof-b); }
 [data-fest='halloween'] { --fest-night: var(--fest-halloween-night); --fest-a: var(--fest-halloween-a); --fest-b: var(--fest-halloween-b); }

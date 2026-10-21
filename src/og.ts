@@ -17,12 +17,13 @@ const fonts = [
 const CAT_COLORS: Record<string, string> = {
   science: '#3ddcff', history: '#ff8a3d', tech: '#9b6bff', nature: '#b6f23a', body: '#ff3d7f', weird: '#ffd23f', survival: '#3de0b0', food: '#ff5947', language: '#e7a6ff', sport: '#5c95ff',
   space: '#a5b4ff', animals: '#f2c46d', mind: '#ff9ed2', brands: '#8ee59b', popculture: '#ffbe98',
+  myths: '#ff57d9', crime: '#e4ff3a', money: '#2bff88', places: '#7fd4ff', ocean: '#00f0d0', records: '#e9f0ff', art: '#ff3355',
   horror: '#e8dcc0', holiday: '#ff6be6',
 };
 
 // Punktmuster wie auf jeder Kategorie-Fläche der Seite (--dots / --dots-strong in global.css):
 // dunkle Punkte, auf warmen Farben (Körper, Geschichte, Essen) kräftiger (18 % statt 9 %), sonst sieht man sie nicht.
-const STRONG_DOTS = new Set(['history', 'body', 'food', 'animals', 'mind', 'popculture']);
+const STRONG_DOTS = new Set(['history', 'body', 'food', 'animals', 'mind', 'popculture', 'myths', 'art']);
 const dotsFor = (cat: string) => ({
   backgroundImage: `radial-gradient(circle, ${STRONG_DOTS.has(cat) ? 'rgba(20,20,20,0.18)' : 'rgba(20,20,20,0.09)'} 22%, transparent 25%)`,
   backgroundSize: '12px 12px',
