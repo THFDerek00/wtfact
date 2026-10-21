@@ -15,6 +15,9 @@ import { x, mePath, giftsPath, numberPath, jumperPath } from '../../i18n/extras'
 import { postsFor, categoryIcon } from '../../lib';
 import { festOf } from '../../data/holidays';
 import { BADGE_AT, RANK_AT } from '../../scripts/streak';
+import { at, adventPath } from '../../i18n/advent';
+import { calendarYear } from '../../data/advent';
+import { berlinDay } from '../../week';
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const ui = t(lang);
@@ -24,8 +27,12 @@ const other: Lang = lang === 'de' ? 'en' : 'de';
 const posts = await postsFor(lang);
 const cats = Object.fromEntries(posts.map((p) => [p.data.translationKey, p.data.category]));
 const badgeCats = CATEGORIES.filter((c) => c !== 'holiday');
+const xa = at(lang).me;
 // Rekorde: je eine Leuchtkarte, die direkt zum Spiel führt. Weitere: Eintrag hier ergänzen (data-sub füllt das Skript).
-const tiles = [
+// `fest` überschreibt die Farbwelt der Kategorie, `xmas` zeigt die Kachel nur in der Weihnachtszeit.
+const tiles: { id: string; href: string; emoji: string; cat: string; fest?: string; xmas?: boolean; name: string; text: string }[] = [
+  // WTF-Baum aus dem Adventskalender (#102)
+  { id: 'tree', href: adventPath(lang), emoji: '🎄', cat: 'nature', fest: 'xmas', xmas: true, name: xa.name, text: xa.text.replace('{n}', '0') },
   { id: 'number', href: numberPath(lang), emoji: '🎯', cat: 'nature', name: m.number, text: m.numberText(0, 0) },
   { id: 'jumper', href: jumperPath(lang), emoji: '🧪', cat: 'science', name: m.jumper, text: m.jumperText(0) },
   { id: 'hole', href: `/${lang}/`, emoji: '🐇', cat: 'space', name: m.hole, text: m.holeText(0) },
@@ -43,7 +50,7 @@ const texts = {
   days: [e.streak.days(1), e.streak.days(9001)], none: e.streak.none, alive: e.streak.alive, done: e.streak.done, best: e.streak.best(9001),
   ranks: e.ranks, rankOf: m.rankOf(9001, 9002), toNext: m.toNext(9001, '§'), top: m.top, read: m.read(9001),
   album: m.albumText(9001, posts.length), hole: [m.holeText(0), m.holeText(9001)], number: [m.numberText(0, 0), m.numberText(9001, 9002)],
-  jumper: [m.jumperText(0), m.jumperText(9001)], badge: m.badgeOf('§', 9001, BADGE_AT),
+  jumper: [m.jumperText(0), m.jumperText(9001)], badge: m.badgeOf('§', 9001, BADGE_AT), tree: xa.text, year: calendarYear(berlinDay()),
 };
 ---
 <Base lang={lang} title={m.title} description={m.intro} altUrl={mePath(other)}>
@@ -102,8 +109,8 @@ const texts = {
       <p class="hint">{m.recordsHint}</p>
       <ul class="tiles">
         {tiles.map((tl) => (
-          <li>
-            <a class="glow tile" href={tl.href} data-fest={festOf(tl.cat, '')?.theme} data-tile={tl.id}>
+          <li class:list={[tl.xmas && 'xmas']}>
+            <a class="glow tile" href={tl.href} data-fest={tl.fest ?? festOf(tl.cat, '')?.theme} data-tile={tl.id}>
               <span class:list={['glow-tile', 't-emoji', `cat-${tl.cat}`]} aria-hidden="true"><span>{tl.emoji}</span></span>
               <span class="t-text"><span class="t-name">{tl.name}</span><span class="t-sub" data-sub>{tl.text}</span></span>
               <Icon name="chevron-right" />
@@ -123,6 +130,7 @@ const texts = {
   import { readKeys } from '../../scripts/fame';
   import { stats } from '../../scripts/tageszahl';
   import { loadStore } from '../../scripts/gold';
+  import { adventState } from '../../scripts/advent';
 
   const root = document.querySelector<HTMLElement>('[data-me]');
   if (root) {
@@ -166,6 +174,7 @@ const texts = {
     sub('hole', hole ? T.hole[1].replace('9001', hole) : T.hole[0]);
     const best = loadStore().best;
     sub('jumper', best ? T.jumper[1].replace('9001', best) : T.jumper[0]);
+    sub('tree', T.tree.replace('{n}', String(adventState(T.year).open.length)));
   }
 </script>
 

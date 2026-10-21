@@ -13,6 +13,9 @@ import Icon from '../../components/Icon.astro';
 import FestDeco from '../../components/FestDeco.astro';
 import FestArt from '../../components/FestArt.astro';
 import RabbitHole from '../../components/RabbitHole.astro';
+import Wichtel from '../../components/xmas/Wichtel.astro';
+import { giftsPath } from '../../i18n/extras';
+import { at, adventPath } from '../../i18n/advent';
 import { LANGS } from '../../config';
 import { t, dateFmt } from '../../i18n/ui';
 import { postsFor, langOf, slugOf, postUrl, translationOf, readingMinutes, factNumber, bigNumber, guessFor, festFor, type Post } from '../../lib';
@@ -46,6 +49,7 @@ const fest = festFor(post);
 const festName = fest?.holiday ? fest.holiday[lang] : fest?.theme === 'grusel' ? ui.fest.grusel : '';
 // Das Band läuft über die ganze Breite: so oft wiederholen, dass es auch auf breiten Bildschirmen nicht abreißt (Eric, 2026-10-15).
 const tapeWord = festName || ui.slogan;
+const xa = at(lang);
 const tapeText = Array(Math.max(5, Math.ceil(400 / (tapeWord.length + 3)))).fill(tapeWord).join(' · ');
 ---
 <Base lang={lang} title={d.title} description={d.teaser} altUrl={alt ? postUrl(alt) : undefined} image={ogPath(post)} section="facts" fest={fest?.theme}>
@@ -100,6 +104,10 @@ const tapeText = Array(Math.max(5, Math.ceil(400 / (tapeWord.length + 3)))).fill
           <Thumbs lang={lang} factKey={d.translationKey} place="inline" />
           {d.products[0] && <ProductTeaser lang={lang} product={d.products[0]} category={d.category} place="inline" factKey={d.translationKey} />}
           <div class="content"><Content /></div>
+          <!-- Wichtel des Tages (Adventskalender, src/data/advent.ts): erscheint nur auf der Seite, auf der er sich heute versteckt -->
+          <button type="button" class="x-wi" data-x-wichtel data-cal={adventPath(lang)} data-caught={xa.wichtel.caught} data-gift={xa.wichtel.gift} aria-label={xa.wichtel.label} hidden>
+            <Wichtel />
+          </button>
         </article>
         <aside class="aside">
           <Thumbs lang={lang} factKey={d.translationKey} place="side" />
@@ -123,7 +131,8 @@ const tapeText = Array(Math.max(5, Math.ceil(400 / (tapeWord.length + 3)))).fill
   {d.products.length > 0 && (
     <section class:list={['sec', 'pickband', fest?.holiday ? 'fest-sky' : 'sec--yellow']} data-edge>
       <div class="wrap"><ProductBox lang={lang} products={d.products} category={d.category} factKey={d.translationKey} wide
-        fest={fest?.holiday ? { name: festName, icon: fest.holiday.art ?? fest.holiday.emoji } : undefined} /></div>
+        fest={fest?.holiday ? { name: festName, icon: fest.holiday.art ?? fest.holiday.emoji } : undefined} />
+        <p class="x-gifts xmas"><a class="btn" href={giftsPath(lang)}>🎁 {xa.giftsLink} <Icon name="chevron-right" /></a></p></div>
     </section>
   )}
 
@@ -159,12 +168,45 @@ const tapeText = Array(Math.max(5, Math.ceil(400 / (tapeWord.length + 3)))).fill
 <script>
   import { markRead } from '../../scripts/fame';
   import { markActive } from '../../scripts/streak';
+  import { openDoor, foundWichtel, adventState } from '../../scripts/advent';
+  import { xmasToday } from '../../scripts/xmas';
+  import { DOORS, doorDay, inSeason, wichtelKey } from '../../data/advent';
   import { answer, myAnswer, tallies, localTally, share, total, type Tally } from '../../scripts/quiz';
   // Für das Sammelalbum in den WTF-Charts: Dieser Fakt gilt als gelesen.
   const key = document.querySelector<HTMLElement>('[data-fact-key]')?.dataset.factKey;
   if (key) markRead(key);
   // Ein gelesener Fakt hält die Serie am Leben (Seite „Ich“)
   markActive();
+
+  // ---------- Adventskalender ----------
+  // Ein Türchen-Fakt zählt als geöffnetes Türchen (Kugel am WTF-Baum), sobald sein Tag da ist.
+  // Der Wichtel des Tages sitzt auf genau einer Faktseite, wer ihn anklickt, bekommt eine goldene Kugel.
+  if (key) {
+    const day = xmasToday();
+    const y = Number(day.slice(0, 4));
+    const door = Object.entries(DOORS[y] ?? {}).find(([, keys]) => keys.includes(key))?.[0];
+    if (door && day >= doorDay(y, Number(door)) && day <= `${y}-12-26`) openDoor(y, Number(door));
+    const wi = document.querySelector<HTMLButtonElement>('[data-x-wichtel]');
+    if (wi && inSeason(day) && wichtelKey(day) === key && !adventState(y).wichtel.includes(day)) {
+      const ps = [...document.querySelectorAll('.content > p')];
+      const spot = ps[Math.min(ps.length - 1, 1 + (Number(day.slice(8)) % 3))];
+      if (spot) spot.after(wi);
+      wi.hidden = false;
+      wi.addEventListener('click', () => {
+        foundWichtel(y, day);
+        const note = document.createElement('p');
+        note.className = 'x-wi-note';
+        note.setAttribute('role', 'status');
+        const b = document.createElement('b');
+        b.textContent = wi.dataset.caught!;
+        const a = document.createElement('a');
+        a.href = wi.dataset.cal!;
+        a.textContent = wi.dataset.gift!;
+        note.append(b, ' ', a);
+        wi.replaceWith(note);
+      }, { once: true });
+    }
+  }
   const bar = document.querySelector<HTMLElement>('.progress span');
   const update = () => {
     const max = document.documentElement.scrollHeight - innerHeight;
@@ -231,6 +273,15 @@ const tapeText = Array(Math.max(5, Math.ceil(400 / (tapeWord.length + 3)))).fill
 </script>
 
 <style>
+  /* Adventskalender: Wichtel lugt am Rand des Texts hervor, Hinweis auf den Geschenkfinder unter der Werbung */
+  .x-wi { float: right; width: var(--space-12); margin: 0 calc(-1 * var(--space-4)) var(--space-2) var(--space-3); padding: 0; border: 0; background: none; cursor: pointer; rotate: 12deg; animation: fest-float var(--dur-fest-float) var(--ease) infinite; }
+  .x-wi[hidden] { display: none; }
+  .x-wi:hover { rotate: -6deg; }
+  :global(.x-wi-note) { padding: var(--space-3) var(--space-4); border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-md); background: var(--gold-surface); color: var(--on-accent); }
+  :global(.x-wi-note a) { color: inherit; font-weight: 700; }
+  .x-gifts { margin: var(--space-6) 0 0; text-align: center; }
+  .x-gifts .btn { background: var(--surface); color: var(--ink); }
+
   .progress { position: fixed; top: 0; left: 0; right: 0; height: var(--space-1); z-index: 6; pointer-events: none; }
   .progress span { display: block; height: 100%; background: var(--pink); transform-origin: left; transform: scaleX(0); }
 

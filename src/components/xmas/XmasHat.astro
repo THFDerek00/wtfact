@@ -1,0 +1,17 @@
+---
+// Weihnachtsmütze auf dem „?!“ im Logo (Look A). Nur in der Weihnachtszeit sichtbar.
+interface Props { big?: boolean }
+const { big } = Astro.props;
+---
+<svg class:list={['x-hat', 'xmas', big && 'x-hat--big']} viewBox="0 0 68 60" aria-hidden="true">
+  <path class="red" d="M8 44 C 14 18 34 4 54 10 C 62 14 64 26 60 34 C 54 26 46 24 40 28 C 34 32 30 38 28 44Z" />
+  <rect class="fur" x="2" y="40" width="40" height="14" rx="7" />
+  <circle class="fur" cx="60" cy="38" r="8" />
+</svg>
+
+<style>
+  .x-hat { position: absolute; width: var(--xmas-hat); height: auto; top: calc(var(--xmas-hat) * -0.5); right: calc(var(--xmas-hat) * -0.35); transform: rotate(18deg); pointer-events: none; overflow: visible; }
+  .x-hat--big { width: var(--xmas-hat-big); top: calc(var(--xmas-hat-big) * -0.5); right: calc(var(--xmas-hat-big) * -0.35); }
+  .red { fill: var(--xmas-red); stroke: var(--xmas-ink); stroke-width: 3.5; stroke-linejoin: round; }
+  .fur { fill: var(--xmas-snow); stroke: var(--xmas-ink); stroke-width: 3.5; }
+</style>

@@ -178,6 +178,43 @@
   --fest-weihnacht-night: #0d2a17;
   --fest-weihnacht-a: #ffd34d;
   --fest-weihnacht-b: #ff7b72;
+  /* Weihnachtszeit vom 1. Advent bis 26.12. (src/data/advent.ts), Look A „Kerzenschein“ (Eric, 2026-10-21) */
+  --fest-xmas-night: #0c2717;
+  --fest-xmas-a: #ffd34d;
+  --fest-xmas-b: #ff6b6b;
+  --xmas-red: #e8233b;
+  --xmas-green: #2f8f4e;
+  --xmas-green-dark: #1f6b39;
+  --xmas-wire: #1f3a25;
+  --xmas-snow: #ffffff;
+  --xmas-ink: #141414;
+  --xmas-wood: #8a5a2b;
+  --xmas-skin: #ffd2b0;
+  --xmas-flame: #ffb02e;
+  --xmas-paper: #f6f1e7;
+  --xmas-bulb-1: #ffd34d;
+  --xmas-bulb-2: #ff6b6b;
+  --xmas-bulb-3: #7fe0a6;
+  --xmas-bulb-4: #7ec8ff;
+  --xmas-ball-pink: #ff9ad5;
+  --xmas-lights-h: 40px; /* Lichterkette unter dem Kopf */
+  --xmas-hat: 34px; /* Mütze auf dem „?!“ */
+  --xmas-hat-big: 64px;
+  --xmas-drift-h: 46px; /* Schneewehe über dem Fuß */
+  --xmas-cap-h: 26px; /* Schneehaube auf Karten */
+  --xmas-door-w: 230px; /* Türchen des Tages auf der Startseite */
+  --xmas-door-w-sm: 170px;
+  --xmas-door-num: 140px;
+  --xmas-door-num-sm: 104px;
+  --xmas-cell: 132px; /* Zeilenhöhe im Kalender */
+  --xmas-cell-sm: 104px;
+  --xmas-num: 54px; /* Nummer auf einem Türchen */
+  --xmas-num-sm: 40px;
+  --xmas-num-big: 96px;
+  --xmas-side: 300px; /* Seitenleiste im Kalender */
+  --xmas-ribbon: 22px;
+  --dur-snow: 40s; /* Schnee rieselt langsam */
+  --dur-twinkle-xmas: 3.2s; /* Lichterkette funkelt */
   --fest-silvester-night: #0b0f2e;
   --fest-silvester-a: #ffd54a;
   --fest-silvester-b: #ff7ad9;
@@ -804,6 +841,7 @@ html[data-sky] .stage { background: var(--sky-stage); }
 [data-fest='nikolaus'] { --fest-night: var(--fest-nikolaus-night); --fest-a: var(--fest-nikolaus-a); --fest-b: var(--fest-nikolaus-b); }
 [data-fest='wintersonne'] { --fest-night: var(--fest-wintersonne-night); --fest-a: var(--fest-wintersonne-a); --fest-b: var(--fest-wintersonne-b); }
 [data-fest='weihnacht'] { --fest-night: var(--fest-weihnacht-night); --fest-a: var(--fest-weihnacht-a); --fest-b: var(--fest-weihnacht-b); }
+[data-fest='xmas'] { --fest-night: var(--fest-xmas-night); --fest-a: var(--fest-xmas-a); --fest-b: var(--fest-xmas-b); }
 [data-fest='silvester'] { --fest-night: var(--fest-silvester-night); --fest-a: var(--fest-silvester-a); --fest-b: var(--fest-silvester-b); }
 [data-fest='neujahr'] { --fest-night: var(--fest-neujahr-night); --fest-a: var(--fest-neujahr-a); --fest-b: var(--fest-neujahr-b); }
 [data-fest='koenige'] { --fest-night: var(--fest-koenige-night); --fest-a: var(--fest-koenige-a); --fest-b: var(--fest-koenige-b); }
@@ -900,6 +938,25 @@ a.glow:hover { transform: translate(calc(-1 * var(--space-1)), calc(-1 * var(--s
   position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
   overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0;
 }
+
+/* Weihnachtszeit (src/data/advent.ts): vom 1. Advent bis 26.12. steht data-season='xmas' auf <html> (Base.astro setzt es
+   beim Bauen und prüft es im Browser vor dem ersten Zeichnen). .xmas = nur dann sichtbar, .no-xmas = dann ausgeblendet.
+   Fuß und Wochentag-Kopf tragen die Farben von Look A, Feiertage (Nikolaus, Heiligabend …) behalten ihr eigenes Thema. */
+:root:not([data-season='xmas']) .xmas { display: none !important; }
+[data-season='xmas'] .no-xmas { display: none !important; }
+[data-season='xmas'] :is(.foot, .day-hero)[data-fest] { --fest-night: var(--fest-xmas-night); --fest-a: var(--fest-xmas-a); --fest-b: var(--fest-xmas-b); }
+[data-season='xmas'] :is(.fest-sky, .sec--night) { isolation: isolate; }
+/* Schnee auf dunklen Bühnen: drei Lagen Flocken, rieseln langsam (Base.astro legt .x-snow in jede Bühne) */
+.x-snow {
+  position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden;
+  background-image:
+    radial-gradient(circle at 20% 30%, var(--xmas-snow) 0 2px, transparent 3px),
+    radial-gradient(circle at 70% 60%, color-mix(in srgb, var(--xmas-snow) 80%, transparent) 0 3px, transparent 4px),
+    radial-gradient(circle at 40% 80%, color-mix(in srgb, var(--xmas-snow) 55%, transparent) 0 1.5px, transparent 2.5px);
+  background-size: 180px 210px, 290px 330px, 120px 140px;
+  animation: x-snow var(--dur-snow) linear infinite;
+}
+@keyframes x-snow { to { background-position: 40px 630px, -60px 660px, 20px 560px; } }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
