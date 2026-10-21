@@ -1,6 +1,7 @@
 // Browser-Teil des Dashboards (steuerung.wtfact.xyz). Oberfläche: src/pages/steuerung/index.astro,
 // Server: steuerung/api.php. Alle Zeiten in deutscher Zeit (Europe/Berlin).
 import { berlinDay, addDays, mondayOf, berlinTime, TZ } from '../week';
+import { doorKeys } from '../data/advent';
 
 type Status = 'pool' | 'planned' | 'due' | 'live' | 'offline';
 type Fact = {
@@ -32,7 +33,7 @@ const ERRORS: Record<string, string> = {
   'signed-out': 'Du bist abgemeldet.',
   past: 'Dieser Zeitpunkt ist schon vorbei.',
   'already-live': 'Der Fakt ist schon veröffentlicht. Nimm ihn erst offline.',
-  'holiday-fixed': 'Feiertags-Fakten sind fest auf ihren Feiertag gelegt und lassen sich nicht verschieben.',
+  'holiday-fixed': 'Feiertags-Fakten und Türchen-Fakten des Adventskalenders sind fest auf ihren Tag gelegt und lassen sich nicht verschieben.',
   'not-deletable': 'Löschen geht nur bei Fakten im Pool oder offline.',
   conflict: 'Gleichzeitig hat sich etwas im Repository geändert. Bitte noch einmal versuchen.',
   'github-denied': 'GitHub lehnt den Zugriff ab. Ist der Token gültig und hat er die nötigen Rechte?',
@@ -135,7 +136,9 @@ function isoWeek(day: string) {
 // ---------- Karten ----------
 
 // Feiertags-Fakten sind fest auf ihren Feiertag gelegt (src/data/holidays.ts), die API lehnt Umplanen ab.
-const fixedHoliday = (f: Fact) => f.category === 'holiday';
+// Seit 2026-10-21 auch die Türchen-Fakten des Adventskalenders (src/data/advent.ts).
+const ADVENT_KEYS = new Set(doorKeys());
+const fixedHoliday = (f: Fact) => f.category === 'holiday' || ADVENT_KEYS.has(f.key);
 const movable = (f: Fact) => !fixedHoliday(f) && (f.status === 'pool' || f.status === 'planned' || f.status === 'offline');
 
 function factCard(f: Fact, opts: { removable?: boolean } = {}) {

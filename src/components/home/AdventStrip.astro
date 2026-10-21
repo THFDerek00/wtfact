@@ -1,0 +1,135 @@
+---
+// Türchen-Leiste auf der Startseite (Wunsch von Eric, 2026-10-21, Look A): steht in der Weihnachtszeit direkt unter dem Kopf.
+// Links das Türchen des Tages als Geschenk, rechts alle 24 Türchen im Kleinen (geöffnet = Bild, heute = leuchtet,
+// 24 = gestrichelt in Gold) und der WTF-Baum. Den Stand (Tag, geöffnete Türchen) setzt der Browser.
+import type { Lang } from '../../config';
+import Icon from '../Icon.astro';
+import FestIcon from '../FestIcon.astro';
+import Bow from '../xmas/Bow.astro';
+import XmasTree from '../xmas/XmasTree.astro';
+import { at, adventPath } from '../../i18n/advent';
+import { berlinDay } from '../../week';
+import { calendarYear, doorOf } from '../../data/advent';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const xa = at(lang);
+const s = xa.strip;
+const today = berlinDay();
+const door = doorOf(today) || 1;
+const year = calendarYear(today);
+const icons = ['fir', 'star', 'bell', 'snowflake', 'gift', 'candle', 'orange'];
+const cal = adventPath(lang);
+const texts = { title: s.title, before: s.before, after: s.after, open: s.open, balls: xa.balls };
+---
+<section class="sec fest-sky x-strip xmas" data-fest="xmas" data-edge data-x-strip data-year={year} data-texts={JSON.stringify(texts)}>
+  <div class="wrap">
+    <a class="today" href={`${cal}#t${door}`} data-x-today>
+      <span class="chip accent tag">{s.today}</span>
+      <span class="door">
+        <span class="ribbon-v"></span><span class="ribbon-h"></span>
+        <span class="num" data-x-door-no>{door}</span>
+        <span class="knob"></span>
+      </span>
+      <Bow class="bow" />
+    </a>
+    <div class="txt">
+      <span class="chip kick">{s.kicker}</span>
+      <h2 data-x-title>{s.title.replace('{n}', String(door))}</h2>
+      <p>{s.text}</p>
+      <ol class="mini" aria-label={xa.name}>
+        {Array.from({ length: 24 }, (_, k) => (
+          <li data-mini={k + 1} class:list={[k + 1 === 24 && 'last']}>
+            <a href={`${cal}#t${k + 1}`} aria-label={xa.door.replace('{n}', String(k + 1))}>
+              <span class="n">{k + 1}</span>
+              <span class="ic"><FestIcon name={icons[(k + 1) % icons.length]} /></span>
+            </a>
+          </li>
+        ))}
+      </ol>
+      <div class="acts">
+        <a class="btn go" href={`${cal}#t${door}`} data-x-open>{s.open.replace('{n}', String(door))} <Icon name="chevron-right" /></a>
+        <a class="btn btn--ghost" href={cal}>{s.cal}</a>
+        <span class="tree"><XmasTree class="t" /><span data-x-balls>{xa.balls.replace('{n}', '0')}</span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { xmasToday, fill } from '../../scripts/xmas';
+  import { paintTrees } from '../../scripts/advent';
+  import { doorOf, inSeason } from '../../data/advent';
+  const root = document.querySelector<HTMLElement>('[data-x-strip]');
+  if (root) {
+    const T = JSON.parse(root.dataset.texts!);
+    const year = Number(root.dataset.year);
+    const paint = () => {
+      const day = xmasToday();
+      const door = inSeason(day) ? doorOf(day) : 0;
+      const after = inSeason(day) && !door && day.slice(5, 7) === '12';
+      const v = paintTrees(year);
+      root.querySelector('[data-x-title]')!.textContent = door ? fill(T.title, { n: door }) : after ? T.after : T.before;
+      root.querySelector('[data-x-balls]')!.textContent = fill(T.balls, { n: v.open.length });
+      const shown = door || (after ? 24 : 1);
+      root.querySelectorAll('[data-x-door-no]').forEach((el) => (el.textContent = String(shown)));
+      root.querySelectorAll<HTMLAnchorElement>('[data-x-today], [data-x-open]').forEach((a) => (a.hash = `t${shown}`));
+      const open = root.querySelector<HTMLElement>('[data-x-open]')!;
+      open.firstChild!.textContent = `${fill(T.open, { n: shown })} `;
+      root.querySelectorAll<HTMLElement>('[data-mini]').forEach((li) => {
+        const n = Number(li.dataset.mini);
+        li.dataset.state = v.open.includes(n) ? 'open' : n === door ? 'today' : (door && n < door) || after ? 'ready' : '';
+      });
+    };
+    paint();
+    addEventListener('wtfact-advent', paint);
+  }
+</script>
+
+<style>
+  .x-strip { padding-block: var(--space-10) calc(var(--space-12) + var(--bleed)); overflow: clip; }
+  .x-strip > .wrap { position: relative; z-index: 2; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-8); align-items: center; }
+  h2 { margin: var(--space-3) 0 var(--space-2); font-size: var(--fs-display-md); color: var(--on-night); }
+  p { margin: 0 0 var(--space-4); color: var(--on-night-muted); max-width: 52ch; }
+  .kick { background: var(--fest-a); color: var(--on-accent); border-color: var(--on-accent); }
+  .today { position: relative; display: block; width: var(--xmas-door-w); aspect-ratio: 4 / 5; text-decoration: none; transition: transform var(--dur) var(--ease); }
+  .today:hover { transform: rotate(-2deg) scale(1.02); }
+  .door {
+    position: absolute; inset: 0; display: grid; place-items: center; overflow: hidden;
+    border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-md);
+    background: var(--dots-strong), var(--fest-b); background-size: var(--dots-size) var(--dots-size); box-shadow: var(--shadow-2xl);
+  }
+  .num { position: relative; z-index: 1; font-family: var(--font-headline); font-size: var(--xmas-door-num); line-height: 1; color: var(--fest-a); -webkit-text-stroke: var(--stroke-mega) var(--on-accent); paint-order: stroke fill; }
+  .knob { position: absolute; right: var(--space-3); top: 50%; width: var(--space-4); height: var(--space-4); border-radius: 50%; background: var(--fest-a); border: var(--bw) solid var(--on-accent); }
+  .ribbon-v { position: absolute; top: 0; bottom: 0; left: 62%; width: var(--xmas-ribbon); background: var(--fest-a); border-inline: var(--bw) solid var(--on-accent); }
+  .ribbon-h { position: absolute; left: 0; right: 0; top: 26%; height: var(--xmas-ribbon); background: var(--fest-a); border-block: var(--bw) solid var(--on-accent); }
+  .tag { position: absolute; top: calc(-1 * var(--space-5)); left: calc(-1 * var(--space-5)); z-index: 3; transform: rotate(-8deg); }
+  .today :global(.bow) { position: absolute; top: calc(-1 * var(--space-8)); right: calc(-1 * var(--space-6)); width: calc(var(--space-12) * 1.6); z-index: 3; }
+  .mini { list-style: none; margin: 0 0 var(--space-5); padding: 0; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--space-2); max-width: 40rem; }
+  .mini a {
+    position: relative; display: grid; place-items: center; aspect-ratio: 1; border-radius: var(--radius-sm); text-decoration: none;
+    border: var(--bw-sm) solid var(--on-night-faint); color: var(--on-night-muted); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm);
+  }
+  .mini .ic { display: none; font-size: var(--fs-md); }
+  .mini .ic :global(.fi) { filter: none; }
+  .last a { border-style: dashed; border-color: var(--fest-a); color: var(--fest-a); }
+  [data-state='ready'] a { border-color: var(--on-night); color: var(--on-night); }
+  [data-state='open'] a { background: var(--fest-a); border-color: var(--on-accent); }
+  [data-state='open'] .n { display: none; }
+  [data-state='open'] .ic { display: block; }
+  [data-state='today'] a {
+    background: var(--fest-b); border: var(--bw) solid var(--on-night); color: var(--on-accent); font-family: var(--font-headline); font-size: var(--fs-lg);
+    box-shadow: 0 0 0 var(--space-1) color-mix(in srgb, var(--fest-a) 60%, transparent), 0 0 var(--space-6) var(--fest-a);
+  }
+  .acts { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
+  .acts .btn { border-color: var(--on-accent); box-shadow: var(--shadow-night-sm); }
+  .go { background: var(--fest-a); color: var(--on-accent); }
+  .acts .btn--ghost { background: var(--surface); color: var(--ink); }
+  .tree { display: inline-flex; align-items: center; gap: var(--space-3); color: var(--on-night); font-weight: 700; font-size: var(--fs-sm); line-height: 1.2; max-width: 16ch; }
+  .tree :global(.t) { width: var(--space-12); flex: none; }
+  @media (max-width: 760px) {
+    .x-strip > .wrap { grid-template-columns: minmax(0, 1fr); }
+    .today { width: var(--xmas-door-w-sm); margin-inline: auto; }
+    .num { font-size: var(--xmas-door-num-sm); }
+    .mini { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+  }
+</style>

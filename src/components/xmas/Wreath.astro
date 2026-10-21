@@ -1,0 +1,43 @@
+---
+// Adventskranz mit 1 bis 4 brennenden Kerzen (Look A). Der Browser setzt data-lit jeden Tag neu (src/scripts/xmas.ts).
+interface Props { lit: number; label: string; /** Vorlage mit {n}, z. B. „{n}. Advent“ */ tpl: string }
+const { lit, label, tpl } = Astro.props;
+const colors = ['r', 'g', 'r', 'g'];
+---
+<span class="x-wreath" data-x-wreath data-lit={lit} data-x-tpl={tpl}>
+  <svg viewBox="0 0 64 40" aria-hidden="true">
+    <ellipse class="green" cx="32" cy="32" rx="28" ry="7" />
+    {[0, 1, 2, 3].map((i) => {
+      const x = 12 + i * 13.3;
+      return (
+        <g class={`c c${i + 1}`}>
+          <rect class={`candle ${colors[i]}`} x={x - 4} y="12" width="8" height="18" rx="1.5" />
+          <path class="flame" d={`M${x} 2 C ${x + 5} 7 ${x + 3} 11 ${x} 11 C ${x - 3} 11 ${x - 5} 7 ${x} 2Z`} />
+          <line class="wick" x1={x} y1="12" x2={x} y2="8" />
+        </g>
+      );
+    })}
+    <circle class="berry" cx="10" cy="33" r="2.6" />
+    <circle class="berry" cx="54" cy="33" r="2.6" />
+  </svg>
+  <span data-x-advent>{label}</span>
+</span>
+
+<style>
+  .x-wreath {
+    display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-1) var(--space-4) var(--space-1) var(--space-2);
+    background: var(--surface); color: var(--ink); border: var(--bw) solid var(--on-accent); border-radius: var(--radius-pill);
+    font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); line-height: 1; box-shadow: var(--shadow-on-night); transform: rotate(-2deg);
+  }
+  svg { width: var(--space-12); height: auto; }
+  .green { fill: var(--xmas-green); stroke: var(--xmas-ink); stroke-width: 2.5; }
+  .candle { stroke: var(--xmas-ink); stroke-width: 2; }
+  .r { fill: var(--xmas-red); }
+  .g { fill: var(--fest-xmas-a); }
+  .flame { fill: var(--xmas-flame); stroke: var(--xmas-ink); stroke-width: 1.6; }
+  .wick { stroke: var(--xmas-ink); stroke-width: 2; }
+  .berry { fill: var(--xmas-red); stroke: var(--xmas-ink); stroke-width: 1.2; }
+  /* Kerzen ohne Flamme: nur der Docht */
+  .flame, [data-lit='1'] .c1 .wick, [data-lit='2'] :is(.c1, .c2) .wick, [data-lit='3'] :is(.c1, .c2, .c3) .wick, [data-lit='4'] .wick { display: none; }
+  [data-lit='1'] .c1 .flame, [data-lit='2'] :is(.c1, .c2) .flame, [data-lit='3'] :is(.c1, .c2, .c3) .flame, [data-lit='4'] .flame { display: inline; }
+</style>

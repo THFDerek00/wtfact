@@ -1,6 +1,6 @@
 ---
 // Startseite im Design „E“ (Wunsch von Eric, 2026-10-10). Reihenfolge und Flächen:
-// Datum (DayHero) → Tagesleiste → montags Abstimmung → Fakt des Tages → Heute neu → Sonderseite (Nov./Dez. Geschenkfinder)
+// Datum (DayHero) → Tagesleiste → in der Weihnachtszeit Türchen-Leiste (AdventStrip) → montags Abstimmung → Fakt des Tages → Heute neu → Sonderseite (Nov./Dez. Geschenkfinder)
 // → Labor → Spiel des Tages (Tageszahl, Wahr oder Fake, Was war zuerst) → Woche → Kategorien. Regeln: docs/design-system.md.
 // Seit 2026-10-21 (Wunsch von Eric): Tagesleiste neu, die beiden Quiz-Abschnitte stecken im „Spiel des Tages“.
 import Base from '../../layouts/Base.astro';
@@ -9,6 +9,7 @@ import FactOfDay from '../../components/home/FactOfDay.astro';
 import TodayNew from '../../components/home/TodayNew.astro';
 import Labor from '../../components/home/Labor.astro';
 import DayStrip from '../../components/home/DayStrip.astro';
+import AdventStrip from '../../components/home/AdventStrip.astro';
 import GameOfDay from '../../components/home/GameOfDay.astro';
 import WeekBlock from '../../components/home/WeekBlock.astro';
 import CatsGrid from '../../components/home/CatsGrid.astro';
@@ -30,6 +31,7 @@ const chartsUrl = chartsPath(lang);
 ---
 <Base lang={lang}>
   <DayHero lang={lang} catsUrl={catsUrl} posts={posts}><DayStrip lang={lang} /></DayHero>
+  <AdventStrip lang={lang} />
   <section class="sec sec--pink monvote" data-edge data-focus-day="1">
     <span class="focus-tag">{ui.home.dayFocus}</span>
     <div class="wrap"><Vote lang={lang} posts={posts} /></div>

@@ -1,0 +1,18 @@
+---
+// Geschenkschleife (Look A) für das Türchen des Tages.
+interface Props { class?: string }
+const { class: cls } = Astro.props;
+---
+<svg class:list={['x-bow', cls]} viewBox="0 0 120 90" aria-hidden="true">
+  <path d="M60 46 C 30 10 6 18 12 40 C 16 58 40 56 60 46Z" />
+  <path d="M60 46 C 90 10 114 18 108 40 C 104 58 80 56 60 46Z" />
+  <path d="M54 50 L 36 86 L 48 80 L 56 88 L 60 54Z M66 50 L 84 86 L 72 80 L 64 88 L 60 54Z" />
+  <circle cx="60" cy="47" r="10" />
+  <path class="hi" d="M26 32 C 30 26 38 26 42 30" />
+</svg>
+
+<style>
+  .x-bow { display: block; overflow: visible; }
+  path, circle { fill: var(--fest-a); stroke: var(--xmas-ink); stroke-width: 4; stroke-linejoin: round; }
+  .hi { fill: none; stroke: var(--xmas-snow); stroke-width: 3; opacity: 0.6; stroke-linecap: round; }
+</style>

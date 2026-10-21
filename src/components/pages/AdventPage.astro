@@ -1,0 +1,514 @@
+---
+// Adventskalender (Wunsch von Eric, 2026-10-21, Entwurf „Look A, Kerzenschein“ im Projektordner advent-2026/).
+// 24 Türchen in gemischter Reihenfolge wie bei einem echten Kalender, jedes mit einem eigenen Fakt (src/data/advent.ts).
+// Besondere Türchen: Quiz (Wahr oder Fake), Schätzen, Geschenk-Tipp, Nikolaus-Stiefel mit zwei Fakten, Finale.
+// Daneben der WTF-Baum (eine Kugel je geöffnetes Türchen), die Legende und der Wichtel des Tages.
+// Ein Türchen geht um 0 Uhr (deutsche Zeit) seines Tages auf, verpasste lassen sich nachholen. Den Stand hält der Browser
+// (src/scripts/advent.ts). Mit #t15 in der Adresse geht Türchen 15 direkt auf.
+import Base from '../../layouts/Base.astro';
+import Icon from '../Icon.astro';
+import FestIcon from '../FestIcon.astro';
+import FestDeco from '../FestDeco.astro';
+import Wreath from '../xmas/Wreath.astro';
+import XmasTree from '../xmas/XmasTree.astro';
+import Wichtel from '../xmas/Wichtel.astro';
+import type { Lang } from '../../config';
+import { t } from '../../i18n/ui';
+import { giftsPath } from '../../i18n/extras';
+import { at, adventPath } from '../../i18n/advent';
+import { postsFor, postUrl, amazonUrl } from '../../lib';
+import { berlinDay } from '../../week';
+import { DOORS, QUIZ, GUESS, GUESS_TRIES, GUESS_HIT, calendarYear, kindOf, adventNo, firstAdvent } from '../../data/advent';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const ui = t(lang);
+const xa = at(lang);
+const other: Lang = lang === 'de' ? 'en' : 'de';
+const today = berlinDay();
+const year = calendarYear(today);
+const doors = DOORS[year] ?? {};
+const posts = await postsFor(lang);
+const byKey = new Map(posts.map((p) => [p.data.translationKey, p]));
+const firstUrl = (door: number) => { const p = byKey.get(doors[door]?.[0] ?? ''); return p ? postUrl(p) : null; };
+// Nur schon erschienene Fakten stehen in der Seite, alles andere bleibt bis zu seinem Tag geheim.
+const data = Object.fromEntries(
+  Array.from({ length: 24 }, (_, k) => k + 1).map((n) => {
+    const facts = (doors[n] ?? []).map((key) => byKey.get(key)).filter((p) => !!p).map((p) => ({
+      key: p.data.translationKey, title: p.data.title, hook: p.data.hook, url: postUrl(p), emoji: p.data.emoji,
+      cat: ui.categories[p.data.category], catCls: `cat-${p.data.category}`,
+      products: kindOf(n) === 'gift' ? p.data.products.map((pr) => ({ name: pr.name, why: pr.why, url: amazonUrl(lang, pr.query) })) : [],
+    }));
+    const quiz = (QUIZ[year]?.[n] ?? []).map((q) => ({ text: q.text[lang], ok: q.true, url: firstUrl(q.door) }));
+    const g = GUESS[year]?.[n];
+    return [n, { kind: kindOf(n), facts, quiz, guess: g ? { q: g.q[lang], answer: g.answer, unit: g.unit[lang] } : null }];
+  }).filter(([, d]) => (d as { facts: unknown[] }).facts.length),
+);
+const cats = Object.fromEntries(Object.values(data).flatMap((d) => d.facts.map((f) => [f.key, f.cat])));
+// Reihenfolge und Größen wie im Entwurf: gemischt, 6 (Stiefel) hoch, 24 groß, 15 breit, 18 hoch
+const ORDER = [7, 18, 3, 22, 11, 1, 15, 24, 9, 20, 5, 13, 16, 2, 6, 19, 12, 8, 23, 4, 17, 10, 21, 14];
+const SIZE: Record<number, string> = { 6: 'h2', 24: 'w2 h2', 15: 'w2', 18: 'h2' };
+const BIG: Record<number, string> = { 6: 'boot', 24: 'fir', 15: 'bell', 18: 'candle' };
+const ICONS = ['fir', 'star', 'bell', 'snowflake', 'gift', 'candle', 'orange'];
+const adv = Math.max(1, adventNo(today));
+const dateText = new Intl.DateTimeFormat(lang === 'de' ? 'de-DE' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${today}T12:00:00Z`));
+const texts = {
+  door: xa.door, next: xa.next, nextDone: xa.nextDone, preview: xa.preview, archive: xa.archive.replace('{y}', String(year)), units: xa.units,
+  locked: xa.locked, notYet: xa.notYet, read: xa.read, ball: xa.ball, ballFull: xa.ballFull, balls: xa.balls, gold: xa.gold,
+  share: xa.shareText, copied: xa.copied, quiz: xa.quiz, guess: xa.guess, gift: xa.gift, boot: xa.boot, finale: xa.finale, kinds: xa.kinds,
+  wichtel: xa.wichtel, ad: ui.adLabel, giftsUrl: giftsPath(lang),
+};
+---
+<Base lang={lang} title={xa.title} description={xa.description} altUrl={adventPath(other)}>
+  <dialog class="dlg" data-x-dlg data-fest="xmas" aria-labelledby="x-dlg-title">
+    <div class="open">
+      <span class="confetti" aria-hidden="true">{Array.from({ length: 18 }, (_, k) => <i class={`c${k % 5}`}></i>)}</span>
+      <div class="panel" aria-hidden="true"><span class="num" data-x-num></span></div>
+      <div class="inside">
+        <button type="button" class="close chip" data-x-close aria-label={xa.close}><Icon name="x" /></button>
+        <div class="art" aria-hidden="true"><FestIcon name="star" /></div>
+        <p class="chips"><span class="chip" data-x-kind></span></p>
+        <h2 id="x-dlg-title" data-x-head></h2>
+        <div data-x-body></div>
+        <div class="ball" data-x-ballbox><XmasTree class="tsmall" /><span data-x-ball></span></div>
+      </div>
+    </div>
+  </dialog>
+
+  <section class="sec fest-sky xhero" data-fest="xmas">
+    <FestDeco deco={['fir', 'star', 'snowflake', 'bell', 'gift', 'candle']} size="lg" />
+    <span class="heroart" aria-hidden="true"><FestIcon name="fir" /></span>
+    <div class="wrap">
+      <div class="pills"><span class="pill" data-x-date>{dateText}</span><span class="xmas"><Wreath lit={adv} label={xa.advent.replace('{n}', String(adv))} tpl={xa.advent} /></span></div>
+      <h1 class="word">{xa.word}</h1>
+      <p class="sub">{xa.sub}</p>
+      <p class="cd" data-x-cd aria-live="off"></p>
+    </div>
+  </section>
+
+  <section class="sec fest-sky wall" data-fest="xmas" data-edge data-x-cal data-year={year} data-first={firstAdvent(year)}
+    data-doors={JSON.stringify(data)} data-cats={JSON.stringify(cats)} data-texts={JSON.stringify(texts)} data-guess-tries={GUESS_TRIES} data-guess-hit={GUESS_HIT}>
+    <div class="wrap">
+      <ol class="grid" aria-label={xa.name}>
+        {ORDER.map((n, i) => (
+          <li class:list={['cell', SIZE[n]]}>
+            <button type="button" class:list={['d', `p${((i * 3 + n) % 4) + 1}`, n === 24 && 'gold']} data-door={n} id={`t${n}`} aria-label={xa.door.replace('{n}', String(n))}>
+              {kindOf(n) !== 'fact' && <span class="kind">{xa.kinds[kindOf(n)]}</span>}
+              <span class="n">{n}</span>
+              <span class="lock" aria-hidden="true">🔒</span>
+              <span class="go" aria-hidden="true">{xa.strip.open.replace('{n}', String(n))} ›</span>
+              {BIG[n] && <span class="big" aria-hidden="true"><FestIcon name={BIG[n]} /></span>}
+              <span class="ic" aria-hidden="true"><FestIcon name={ICONS[n % ICONS.length]} /></span>
+              <span class="tt" data-tt></span>
+              <span class="ck" aria-hidden="true">✓</span>
+            </button>
+          </li>
+        ))}
+      </ol>
+      <aside class="side">
+        <div class="box">
+          <h2>{xa.tree}</h2>
+          <p>{xa.treeText}</p>
+          <XmasTree class="treebig" label={xa.tree} />
+          <p class="count" data-x-balls>{xa.balls.replace('{n}', '0')}</p>
+          <p class="count gold-c" data-x-gold hidden></p>
+          <button type="button" class="btn btn--ghost wide" data-x-share>{xa.share}</button>
+          <p class="copied" data-x-copied hidden>{xa.copied}</p>
+        </div>
+        <div class="box">
+          <h2>{xa.legend}</h2>
+          <ul class="legend">
+            {(['fact', 'quiz', 'guess', 'gift', 'boot', 'finale'] as const).map((k) => <li><i>{xa.kinds[k]}</i> {xa.kindText[k]}</li>)}
+          </ul>
+        </div>
+        <div class="box wichtel">
+          <Wichtel class="wi" />
+          <div><h2>{xa.wichtel.title}</h2><p data-x-wichtel>{xa.wichtel.text}</p></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+</Base>
+
+<script>
+  import { xmasToday, fill } from '../../scripts/xmas';
+  import { adventState, openDoor, paintTrees, saveGame } from '../../scripts/advent';
+  import { doorDay, wichtelKey, inSeason } from '../../data/advent';
+  import { daysBetween, nextDayStart, addDays } from '../../week';
+
+  type Fact = { key: string; title: string; hook: string; url: string; emoji: string; cat: string; catCls: string; products: { name: string; why: string; url: string }[] };
+  type Door = { kind: string; facts: Fact[]; quiz: { text: string; ok: boolean; url: string | null }[]; guess: { q: string; answer: number; unit: string } | null };
+
+  const root = document.querySelector<HTMLElement>('[data-x-cal]');
+  const dlg = document.querySelector<HTMLDialogElement>('[data-x-dlg]');
+  if (root && dlg) {
+    const T = JSON.parse(root.dataset.texts!);
+    const DOORS: Record<string, Door> = JSON.parse(root.dataset.doors!);
+    const CATS: Record<string, string> = JSON.parse(root.dataset.cats!);
+    const year = Number(root.dataset.year);
+    const tries = Number(root.dataset.guessTries);
+    const hitShare = Number(root.dataset.guessHit);
+    const el = <K extends keyof HTMLElementTagNameMap>(tag: K, cls = '', text = '') => {
+      const e = document.createElement(tag);
+      if (cls) e.className = cls;
+      if (text) e.textContent = text;
+      return e;
+    };
+    const ready = (n: number) => xmasToday() >= doorDay(year, n);
+
+    // ---------- Türchen einfärben ----------
+    const paint = () => {
+      const day = xmasToday();
+      const v = paintTrees(year);
+      root.querySelectorAll<HTMLButtonElement>('[data-door]').forEach((b) => {
+        const n = Number(b.dataset.door);
+        const open = v.open.includes(n) && !!DOORS[n];
+        b.dataset.state = open ? 'open' : day === doorDay(year, n) ? 'today' : ready(n) ? 'ready' : 'locked';
+        b.querySelector('[data-tt]')!.textContent = open ? DOORS[n].facts.map((f) => f.title).join(' · ') : '';
+      });
+      root.querySelector('[data-x-balls]')!.textContent = fill(T.balls, { n: v.open.length });
+      const gold = root.querySelector<HTMLElement>('[data-x-gold]')!;
+      gold.hidden = !v.wichtel.length;
+      gold.textContent = fill(T.gold, { n: v.wichtel.length });
+      // Wichtel des Tages
+      const wk = wichtelKey(day);
+      const w = root.querySelector('[data-x-wichtel]')!;
+      if (v.wichtel.includes(day)) w.textContent = T.wichtel.found;
+      else if (wk) w.textContent = `${T.wichtel.text} ${fill(T.wichtel.hint, { cat: CATS[wk] ?? '' })}`;
+      else w.textContent = day < doorDay(year, 2) ? T.wichtel.soon : T.wichtel.gone;
+    };
+
+    // ---------- Countdown bis zum nächsten Türchen ----------
+    const cd = document.querySelector<HTMLElement>('[data-x-cd]')!;
+    const tick = () => {
+      const day = xmasToday();
+      const first = doorDay(year, 1);
+      let target = '';
+      if (day < first) target = first;
+      else if (day < doorDay(year, 24)) target = addDays(day, 1);
+      if (!target) { cd.textContent = day > `${year}-12-26` || !inSeason(day) ? T.archive : T.nextDone; return; }
+      const ms = Math.max(0, nextDayStart(addDays(target, -1)) - Date.now());
+      const parts = [Math.floor(ms / 864e5), Math.floor(ms / 36e5) % 24, Math.floor(ms / 6e4) % 60, Math.floor(ms / 1e3) % 60];
+      const n = Number(target.slice(8));
+      cd.textContent = `${fill(T.next, { n })} `;
+      const units = [T.units.d, T.units.h, T.units.m, T.units.s];
+      parts.forEach((p, k) => {
+        if (k === 0 && !p) return;
+        const b = el('b', '', String(p).padStart(k ? 2 : 1, '0'));
+        b.title = units[k];
+        cd.append(b, k < 3 ? (k === 0 ? ` ${units[0]} ` : ':') : '');
+      });
+      if (day < first && daysBetween(day, first) > 30) cd.textContent = T.preview;
+    };
+    tick();
+    setInterval(tick, 1000);
+
+    // ---------- Türchen öffnen ----------
+    const head = dlg.querySelector('[data-x-head]')!;
+    const body = dlg.querySelector<HTMLElement>('[data-x-body]')!;
+    const factBlock = (f: Fact, big: boolean) => {
+      const box = el('div', 'fact');
+      const chip = el('span', `chip ${f.catCls}`, f.cat);
+      const h = el(big ? 'p' : 'h3', big ? 'hook' : 'ft', big ? f.hook : f.title);
+      box.append(chip);
+      if (!big) box.append(h, el('p', 'hook', f.hook)); else box.append(h);
+      const a = el('a', 'btn go', `${T.read} ›`);
+      a.href = f.url;
+      box.append(a);
+      return box;
+    };
+    const quizBlock = (d: Door, n: number) => {
+      const box = el('div', 'game');
+      box.append(el('h3', '', T.quiz.title), el('p', 'small', T.quiz.intro));
+      const list = el('ol', 'quiz');
+      let answered = 0, right = 0;
+      const score = el('p', 'score');
+      d.quiz.forEach((q) => {
+        const li = el('li');
+        li.append(el('span', 'qt', q.text));
+        const row = el('span', 'qb');
+        const res = el('span', 'qr');
+        [true, false].forEach((val) => {
+          const b = el('button', 'chip', val ? T.quiz.yes : T.quiz.no);
+          b.type = 'button';
+          b.setAttribute('aria-pressed', 'false');
+          b.addEventListener('click', () => {
+            row.querySelectorAll('button').forEach((x) => ((x as HTMLButtonElement).disabled = true));
+            b.setAttribute('aria-pressed', 'true');
+            const ok = val === q.ok;
+            res.textContent = `${ok ? T.quiz.right : T.quiz.wrong} ${q.ok ? T.quiz.yes : T.quiz.no}. `;
+            res.dataset.ok = String(ok);
+            if (q.url) { const a = el('a', '', T.quiz.more); a.href = q.url; res.append(a); }
+            answered++; if (ok) right++;
+            if (answered === d.quiz.length) { score.textContent = fill(T.quiz.score, { n: right }); saveGame(year, n, right === d.quiz.length); }
+          });
+          row.append(b);
+        });
+        li.append(row, res);
+        list.append(li);
+      });
+      box.append(list, score);
+      return box;
+    };
+    const guessBlock = (d: Door, n: number) => {
+      const g = d.guess!;
+      const box = el('div', 'game');
+      box.append(el('h3', '', T.guess.title), el('p', 'qt', g.q));
+      const form = el('form', 'gform');
+      const input = el('input');
+      input.type = 'number'; input.inputMode = 'decimal'; input.placeholder = T.guess.placeholder; input.required = true; input.min = '0';
+      const unit = el('span', 'unit', g.unit);
+      const btn = el('button', 'btn go', T.guess.submit);
+      btn.type = 'submit';
+      const res = el('p', 'score');
+      res.setAttribute('aria-live', 'polite');
+      let left = tries;
+      form.append(input, unit, btn);
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const v = Number(input.value.replace(',', '.'));
+        if (!Number.isFinite(v)) return;
+        left--;
+        const hit = Math.abs(v - g.answer) <= g.answer * hitShare;
+        const done = hit || left <= 0;
+        res.textContent = hit ? T.guess.hit : `${v < g.answer ? T.guess.more : T.guess.less} ${done ? '' : left === 1 ? T.guess.triesOne : fill(T.guess.tries, { n: left })}`;
+        if (done) {
+          res.append(' ', fill(T.guess.answer, { n: `${g.answer.toLocaleString(document.documentElement.lang)} ${g.unit}` }));
+          input.disabled = true; btn.disabled = true;
+          saveGame(year, n, hit);
+        }
+        input.value = '';
+      });
+      box.append(form, res);
+      return box;
+    };
+    const giftBlock = (d: Door) => {
+      const box = el('div', 'game gift');
+      box.append(el('h3', '', T.gift.title));
+      const ul = el('ul', 'prods');
+      d.facts[0].products.forEach((p) => {
+        const li = el('li');
+        const a = el('a', '', p.name);
+        a.href = p.url; a.rel = 'sponsored noopener'; a.target = '_blank';
+        li.append(a, el('span', 'small', p.why));
+        ul.append(li);
+      });
+      const fin = el('a', 'more', `${T.gift.finder} ›`);
+      fin.href = T.giftsUrl;
+      box.append(ul, el('p', 'small ad', T.ad), fin);
+      return box;
+    };
+
+    const show = (n: number) => {
+      const d = DOORS[n];
+      dlg.querySelector('[data-x-num]')!.textContent = String(n);
+      dlg.querySelector('[data-x-kind]')!.textContent = `${fill(T.door, { n })}${d && d.kind !== 'fact' ? ` · ${T.kinds[d.kind]}` : ''}`;
+      body.textContent = '';
+      const ballBox = dlg.querySelector<HTMLElement>('[data-x-ballbox]')!;
+      if (!d) {
+        head.textContent = fill(T.door, { n });
+        body.append(el('p', 'hook', T.notYet));
+        ballBox.hidden = true;
+      } else {
+        const first = openDoor(year, n);
+        const v = adventState(year);
+        if (d.kind === 'boot') {
+          head.textContent = T.boot;
+          d.facts.forEach((f) => body.append(factBlock(f, false)));
+        } else {
+          head.textContent = d.kind === 'finale' ? `${T.finale} ${d.facts[0].title}` : d.facts[0].title;
+          if (d.kind === 'quiz' && d.quiz.length) body.append(quizBlock(d, n));
+          if (d.kind === 'guess' && d.guess) body.append(guessBlock(d, n));
+          body.prepend(factBlock(d.facts[0], true));
+          if (d.kind === 'gift' && d.facts[0].products.length) body.append(giftBlock(d));
+        }
+        const left = 24 - v.open.length;
+        dlg.querySelector('[data-x-ball]')!.textContent = fill(left ? T.ball : T.ballFull, { n: v.open.length, left });
+        ballBox.hidden = false;
+        dlg.toggleAttribute('data-first', first);
+        paint();
+      }
+      if (!dlg.open) dlg.showModal();
+      history.replaceState(null, '', `#t${n}`);
+    };
+    const wiggle = (b: HTMLElement, n: number) => {
+      const days = daysBetween(xmasToday(), doorDay(year, n));
+      b.dataset.msg = days === 1 ? T.locked.one : fill(T.locked.many, { n: days });
+      b.removeAttribute('data-wiggle');
+      void b.offsetWidth;
+      b.setAttribute('data-wiggle', '');
+    };
+    root.querySelectorAll<HTMLButtonElement>('[data-door]').forEach((b) =>
+      b.addEventListener('click', () => {
+        const n = Number(b.dataset.door);
+        if (ready(n)) show(n); else wiggle(b, n);
+      }),
+    );
+    dlg.querySelector('[data-x-close]')!.addEventListener('click', () => dlg.close());
+    dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+    dlg.addEventListener('close', () => history.replaceState(null, '', location.pathname + location.search));
+
+    // Baum teilen
+    root.querySelector('[data-x-share]')!.addEventListener('click', async () => {
+      const text = `${fill(T.share, { n: adventState(year).open.length })} 🎄 ${location.origin}${location.pathname}`;
+      try {
+        if (navigator.share) await navigator.share({ text });
+        else { await navigator.clipboard.writeText(text); root.querySelector<HTMLElement>('[data-x-copied]')!.hidden = false; }
+      } catch { /* abgebrochen */ }
+    });
+
+    paint();
+    addEventListener('wtfact-advent', paint);
+    const m = location.hash.match(/^#t(\d{1,2})$/);
+    if (m && ready(Number(m[1]))) show(Number(m[1]));
+  }
+</script>
+
+<style>
+  .xhero { position: relative; padding-block: calc(var(--space-6) + var(--xmas-lights-h)) var(--space-12); overflow: clip; }
+  .xhero .wrap { position: relative; z-index: 2; }
+  .heroart { position: absolute; right: 4%; top: 50%; translate: 0 -50%; z-index: 1; font-size: var(--fs-fest-art); line-height: 1; }
+  .heroart :global(.fi) { filter: var(--fest-art-shadow); }
+  .pills { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
+  .pill {
+    display: inline-block; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); border: var(--bw) solid var(--on-accent);
+    background: var(--surface); color: var(--ink); font-family: var(--font-display); font-weight: 700; box-shadow: var(--shadow-on-night); transform: rotate(-2deg);
+  }
+  .word { margin: var(--space-4) 0; font-family: var(--font-headline); font-weight: 400; font-size: var(--fs-huge); line-height: 0.9; color: var(--fest-a); max-width: 12ch; }
+  .sub { margin: 0 0 var(--space-6); font-size: var(--fs-xl); line-height: 1.4; max-width: 40ch; color: var(--on-night); }
+  .cd { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; margin: 0; font-weight: 700; font-size: var(--fs-sm); min-height: var(--space-10); }
+  .cd :global(b) {
+    background: var(--fest-a); color: var(--on-accent); border: var(--bw) solid var(--on-accent); border-radius: var(--radius-sm);
+    padding: var(--space-2) var(--space-3); font-family: var(--font-headline); font-weight: 400; font-size: var(--fs-2xl); line-height: 1; box-shadow: var(--shadow-night-pink);
+  }
+  .wall { padding-block: var(--space-10) var(--space-12); }
+  .wall > .wrap { position: relative; z-index: 2; display: grid; grid-template-columns: minmax(0, 1fr) var(--xmas-side); gap: var(--space-8); align-items: start; }
+  .grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); grid-auto-rows: var(--xmas-cell); gap: var(--space-4); grid-auto-flow: dense; }
+  .cell { display: flex; }
+  .w2 { grid-column: span 2; }
+  .h2 { grid-row: span 2; }
+  .d {
+    position: relative; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; width: 100%; overflow: hidden;
+    padding: var(--space-3); border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-md); color: var(--on-accent);
+    box-shadow: var(--shadow-accent-sm); cursor: pointer; text-align: left; font: inherit;
+    transition: transform var(--dur) var(--ease);
+  }
+  .d:hover { transform: translate(calc(-1 * var(--space-1)), calc(-1 * var(--space-1))); }
+  .n { font-family: var(--font-headline); font-size: var(--xmas-num); line-height: 0.9; color: var(--surface); -webkit-text-stroke: var(--bw-sm) var(--on-accent); paint-order: stroke fill; }
+  .p1 { background: var(--dots-strong), var(--fest-a); background-size: var(--dots-size) var(--dots-size); }
+  .p1 .n { color: var(--fest-b); }
+  .p2 { background: repeating-linear-gradient(45deg, transparent 0 14px, color-mix(in srgb, var(--surface) 28%, transparent) 14px 22px), var(--fest-b); }
+  .p2 .n { color: var(--fest-a); }
+  .p3 { background: radial-gradient(color-mix(in srgb, var(--fest-b) 70%, transparent) 18%, transparent 21%), var(--xmas-paper); background-size: 22px 22px; }
+  .p3 .n { color: var(--fest-a); }
+  .p4 { background: var(--dots-night), color-mix(in srgb, var(--fest-night) 70%, var(--xmas-green)); background-size: var(--dots-size) var(--dots-size); }
+  .p4 .n { color: var(--fest-b); }
+  .gold { background: var(--gold-surface); }
+  .gold .n { font-size: var(--xmas-num-big); }
+  .kind { position: absolute; left: var(--space-2); bottom: var(--space-2); z-index: 2; padding: 0 var(--space-2); background: var(--surface); color: var(--ink); border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-pill); font-size: var(--fs-xs); font-weight: 700; line-height: 1.5; white-space: nowrap; max-width: calc(100% - var(--space-4)); overflow: hidden; text-overflow: ellipsis; }
+  .lock { position: absolute; right: var(--space-2); bottom: var(--space-2); display: grid; place-items: center; width: var(--space-7); height: var(--space-7); border-radius: 50%; background: var(--surface); border: var(--bw-sm) solid var(--on-accent); font-size: var(--fs-sm); }
+  .big { position: absolute; right: calc(-1 * var(--space-2)); bottom: calc(-1 * var(--space-2)); font-size: var(--fs-emoji-lg); line-height: 1; opacity: 0.95; }
+  .go, .ic, .tt, .ck { display: none; }
+  /* Bereit (nachholen) und heute: ohne Schloss */
+  [data-state='ready'] .lock, [data-state='today'] .lock, [data-state='open'] .lock { display: none; }
+  [data-state='today'] { box-shadow: 0 0 0 var(--space-1) var(--fest-a), 0 0 var(--space-10) var(--space-2) color-mix(in srgb, var(--fest-a) 70%, transparent), var(--shadow-xl); transform: rotate(-2deg); z-index: 3; }
+  [data-state='today'] .go { display: inline-block; position: relative; z-index: 2; padding: var(--space-2) var(--space-3); background: var(--surface); color: var(--ink); border: var(--bw) solid var(--on-accent); border-radius: var(--radius-pill); font-weight: 700; font-size: var(--fs-sm); line-height: 1; box-shadow: var(--shadow-sm); }
+  [data-state='today'] .kind { display: none; }
+  [data-state='open'] { background: var(--surface); color: var(--ink); padding-left: calc(var(--bw-stripe) + var(--space-3)); justify-content: flex-start; gap: var(--space-1); }
+  [data-state='open']::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: var(--bw-stripe); background: var(--fest-b); border-right: var(--bw-sm) solid var(--on-accent); }
+  [data-state='open'] .n { font-size: var(--fs-xl); color: var(--fest-b); }
+  [data-state='open'] :is(.ic, .tt, .ck) { display: block; }
+  [data-state='open'] :is(.big, .kind) { display: none; }
+  .ic { font-size: var(--fs-lg); line-height: 1; }
+  .tt { font-size: var(--fs-xs); font-weight: 700; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .ck { position: absolute; right: var(--space-2); top: var(--space-2); width: var(--space-6); height: var(--space-6); border-radius: 50%; background: var(--fest-a); color: var(--on-accent); border: var(--bw-sm) solid var(--on-accent); font-size: var(--fs-xs); font-weight: 700; line-height: var(--space-5); text-align: center; }
+  /* Zu früh geklickt: Türchen wackelt und sagt, wie lange noch */
+  [data-wiggle] { animation: x-wiggle var(--dur-slide) var(--ease); }
+  [data-wiggle]::after {
+    content: attr(data-msg); position: absolute; inset: auto var(--space-2) var(--space-2); z-index: 4; padding: var(--space-1) var(--space-2);
+    background: var(--surface); color: var(--ink); border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-sm); font-size: var(--fs-xs); font-weight: 700; line-height: 1.3;
+  }
+  @keyframes x-wiggle { 25% { rotate: -3deg; } 50% { rotate: 3deg; } 75% { rotate: -2deg; } }
+  .side { position: sticky; top: calc(var(--space-12) + var(--space-6)); display: grid; gap: var(--space-5); }
+  .box { background: var(--surface); color: var(--ink); border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-md); padding: var(--space-5); box-shadow: var(--shadow-night-pink); }
+  .box h2 { margin: 0 0 var(--space-2); font-size: var(--fs-lg); line-height: 1.2; }
+  .box p { margin: 0 0 var(--space-3); font-size: var(--fs-sm); color: var(--muted); }
+  .box :global(.treebig) { width: 70%; max-width: 12rem; margin: var(--space-3) auto; }
+  .count { font-weight: 700; color: var(--ink); text-align: center; }
+  .wide { width: 100%; justify-content: center; }
+  .copied { text-align: center; margin-top: var(--space-2); }
+  .legend { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); font-size: var(--fs-sm); }
+  .legend i { font-style: normal; display: inline-block; padding: 0 var(--space-2); border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-pill); font-weight: 700; font-size: var(--fs-xs); }
+  .wichtel { display: flex; gap: var(--space-3); align-items: center; }
+  .wichtel :global(.wi) { width: var(--space-12); flex: none; }
+  .wichtel p { margin: 0; }
+  /* Geöffnetes Türchen */
+  .dlg { width: min(48rem, calc(100% - 2 * var(--gutter))); max-width: none; max-height: calc(100dvh - 2 * var(--space-6)); padding: 0; border: 0; background: transparent; color: var(--ink); overflow: visible; }
+  .dlg::backdrop { background: color-mix(in srgb, var(--fest-xmas-night) 82%, transparent); }
+  .open { position: relative; display: grid; grid-template-columns: 13rem minmax(0, 1fr); perspective: 1200px; }
+  .panel { min-height: 22rem; display: grid; place-items: center; border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-md); background: var(--fest-b); transform-origin: left center; transform: rotateY(-62deg); box-shadow: var(--shadow-xl); z-index: 2; }
+  [data-first] .panel { animation: x-swing var(--dur-reveal) var(--ease); }
+  @keyframes x-swing { from { transform: rotateY(0deg); } }
+  .panel .num { font-family: var(--font-headline); font-size: var(--xmas-door-num); line-height: 1; color: var(--fest-a); -webkit-text-stroke: var(--bw-sm) var(--on-accent); }
+  .inside { position: relative; margin-left: calc(-1 * var(--space-12) * 2); max-height: calc(100dvh - 2 * var(--space-6)); overflow: auto; padding: var(--space-6) var(--space-6) var(--space-6) calc(var(--space-12) * 2 + var(--space-6)); background: var(--surface); border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-md); box-shadow: var(--shadow-2xl); }
+  .inside h2 { margin: var(--space-3) 0; font-size: var(--fs-display-sm); line-height: 1.1; }
+  .close { position: absolute; top: var(--space-3); right: var(--space-3); padding: var(--space-1); cursor: pointer; background: var(--surface); }
+  .art { position: absolute; top: calc(-1 * var(--space-10)); right: var(--space-12); font-size: var(--fs-emoji-md); }
+  .art :global(.fi) { filter: var(--fest-art-shadow); }
+  .chips { margin: 0; }
+  .chips .chip { background: var(--fest-a); color: var(--on-accent); border-color: var(--on-accent); }
+  .inside :global(.fact) { display: grid; gap: var(--space-2); justify-items: start; margin-bottom: var(--space-4); }
+  .inside :global(.fact + .fact) { padding-top: var(--space-4); border-top: var(--bw-sm) dashed var(--line); }
+  .inside :global(.ft) { margin: 0; font-size: var(--fs-xl); line-height: 1.2; }
+  .inside :global(.hook) { margin: 0; font-size: var(--fs-md); }
+  .inside :global(.go) { background: var(--fest-a); color: var(--on-accent); }
+  .inside :global(.game) { margin: 0 0 var(--space-4); padding: var(--space-4); border: var(--bw) solid var(--on-accent); border-radius: var(--radius-md); background: color-mix(in srgb, var(--fest-a) 18%, var(--surface)); }
+  .inside :global(.game h3) { margin: 0 0 var(--space-1); font-size: var(--fs-lg); }
+  .inside :global(.small) { margin: 0 0 var(--space-2); font-size: var(--fs-sm); color: var(--muted); }
+  .inside :global(.quiz) { margin: 0; padding-left: var(--space-5); display: grid; gap: var(--space-3); }
+  .inside :global(.qt) { display: block; font-weight: 700; margin-bottom: var(--space-1); }
+  .inside :global(.qb) { display: inline-flex; gap: var(--space-2); }
+  .inside :global(.qb .chip) { cursor: pointer; background: var(--surface); }
+  .inside :global(.qr) { display: block; margin-top: var(--space-1); font-size: var(--fs-sm); font-weight: 700; }
+  .inside :global(.qr[data-ok='false']) { color: var(--pink-text); }
+  .inside :global(.score) { margin: var(--space-2) 0 0; font-weight: 700; }
+  .inside :global(.gform) { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+  .inside :global(.gform input) { width: 9rem; padding: var(--space-2) var(--space-3); border: var(--bw) solid var(--on-accent); border-radius: var(--radius-sm); font: inherit; background: var(--surface); color: var(--ink); }
+  .inside :global(.unit) { font-weight: 700; }
+  .inside :global(.prods) { margin: 0 0 var(--space-2); padding-left: var(--space-5); display: grid; gap: var(--space-2); }
+  .inside :global(.prods a) { font-weight: 700; display: block; }
+  .inside :global(.ad) { font-size: var(--fs-xs); }
+  .inside :global(.more) { font-weight: 700; }
+  .ball { display: flex; gap: var(--space-3); align-items: center; padding: var(--space-3); border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-md); background: color-mix(in srgb, var(--fest-a) 30%, var(--surface)); color: var(--on-accent); font-weight: 700; font-size: var(--fs-sm); line-height: 1.3; }
+  .ball[hidden] { display: none; }
+  .ball :global(.tsmall) { width: var(--space-10); flex: none; }
+  /* Konfetti beim ersten Öffnen */
+  .confetti { position: absolute; inset: calc(-1 * var(--space-12)); pointer-events: none; display: none; z-index: 4; }
+  [data-first] .confetti { display: block; }
+  .confetti i { position: absolute; top: 0; width: var(--space-2); height: var(--space-4); border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-sm); animation: x-fall var(--dur-reveal) var(--ease) forwards; opacity: 0; }
+  .confetti i:nth-child(3n) { animation-duration: calc(var(--dur-reveal) * 1.4); }
+  .confetti i:nth-child(1) { left: 6%; } .confetti i:nth-child(2) { left: 12%; } .confetti i:nth-child(3) { left: 19%; } .confetti i:nth-child(4) { left: 25%; }
+  .confetti i:nth-child(5) { left: 31%; } .confetti i:nth-child(6) { left: 37%; } .confetti i:nth-child(7) { left: 43%; } .confetti i:nth-child(8) { left: 49%; }
+  .confetti i:nth-child(9) { left: 55%; } .confetti i:nth-child(10) { left: 61%; } .confetti i:nth-child(11) { left: 67%; } .confetti i:nth-child(12) { left: 72%; }
+  .confetti i:nth-child(13) { left: 78%; } .confetti i:nth-child(14) { left: 83%; } .confetti i:nth-child(15) { left: 88%; } .confetti i:nth-child(16) { left: 92%; }
+  .confetti i:nth-child(17) { left: 96%; } .confetti i:nth-child(18) { left: 3%; }
+  .c0 { background: var(--fest-a); } .c1 { background: var(--fest-b); } .c2 { background: var(--xmas-bulb-4); } .c3 { background: var(--surface); } .c4 { background: var(--xmas-bulb-3); }
+  @keyframes x-fall { 0% { opacity: 1; translate: 0 0; rotate: 0deg; } 100% { opacity: 0; translate: 0 22rem; rotate: 300deg; } }
+  @media (max-width: 960px) {
+    .wall > .wrap { grid-template-columns: minmax(0, 1fr); }
+    .side { position: static; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
+  }
+  @media (max-width: 760px) {
+    .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: var(--xmas-cell-sm); gap: var(--space-3); }
+    .n { font-size: var(--xmas-num-sm); }
+    .gold .n { font-size: var(--xmas-num); }
+    [data-state='open'] .tt { display: none; }
+    .kind { font-size: var(--fs-xs); }
+    .d:not(.gold) .lock { display: none; }
+    .heroart { font-size: var(--fs-emoji-xl); top: auto; bottom: var(--space-3); translate: none; opacity: 0.5; }
+    .open { grid-template-columns: minmax(0, 1fr); }
+    .panel { display: none; }
+    .inside { margin: 0; padding: var(--space-5); }
+    .art { right: var(--space-6); top: calc(-1 * var(--space-8)); font-size: var(--fs-emoji-sm); }
+  }
+</style>

@@ -5,16 +5,20 @@
 // nur in diesem Zeitraum, z. B. { from: '12-01', to: '12-24' } für einen Adventskalender. Geprüft wird im Browser.
 import type { Lang } from '../../config';
 import { x, mePath, numberPath } from '../../i18n/extras';
+import { at, adventPath } from '../../i18n/advent';
 interface Props { lang: Lang }
 type Tile = { id: string; href: string; emoji: string; cls: string; label: string; value: string; from?: string; to?: string };
 const { lang } = Astro.props;
 const s = x(lang).strip;
+const xa = at(lang).tile;
 const tiles: Tile[] = [
   { id: 'streak', href: mePath(lang), emoji: '🔥', cls: 'cat-history', label: s.streak, value: s.streakOff },
   { id: 'number', href: numberPath(lang), emoji: '🎯', cls: 'cat-nature', label: s.number, value: s.numberOpen },
   { id: 'fotd', href: '#fotd', emoji: '⭐', cls: 'cat-weird', label: s.fotd, value: s.fotdText },
+  // Adventskalender (src/data/advent.ts): Türchen des Tages, vom 1. bis 24.12.
+  { id: 'advent', href: adventPath(lang), emoji: '🎁', cls: 'cat-food', label: xa.label, value: xa.value.replace('{n}', '1'), from: '12-01', to: '12-24' },
 ];
-const texts = { streakOff: s.streakOff, streakDays: [s.streakDays(1), s.streakDays(9001)], open: s.numberOpen, won: s.numberWon(9001), wonOne: s.numberWon(1), lost: s.numberLost };
+const texts = { advent: xa.value, adventDone: xa.done, streakOff: s.streakOff, streakDays: [s.streakDays(1), s.streakDays(9001)], open: s.numberOpen, won: s.numberWon(9001), wonOne: s.numberWon(1), lost: s.numberLost };
 ---
 <nav class="strip-sec" aria-label={s.label} data-strip data-texts={JSON.stringify(texts)}>
   <ul class="strip">
@@ -33,6 +37,7 @@ const texts = { streakOff: s.streakOff, streakDays: [s.streakDays(1), s.streakDa
   import { streakInfo } from '../../scripts/streak';
   import { stateFor } from '../../scripts/tageszahl';
   import { berlinDay } from '../../week';
+  import { adventState } from '../../scripts/advent';
   // Die Leiste kann zweimal auf der Seite stehen (Wochentag- und Feiertags-Kopf), beide füllen
   document.querySelectorAll<HTMLElement>('[data-strip]').forEach((root) => {
     const T = JSON.parse(root.dataset.texts!);
@@ -51,12 +56,22 @@ const texts = { streakOff: s.streakOff, streakDays: [s.streakDays(1), s.streakDa
       nv.textContent = !st.done ? T.open : st.won ? (st.guesses.length === 1 ? T.wonOne : T.won.replace('9001', String(st.guesses.length))) : T.lost;
       nv.closest('li')!.toggleAttribute('data-open', !st.done);
     }
+    const av = val('advent');
+    if (av && !av.closest('li')!.hidden) {
+      const day = berlinDay();
+      const n = Number(day.slice(8));
+      const done = adventState(Number(day.slice(0, 4))).open.includes(n);
+      av.textContent = (done ? T.adventDone : T.advent).replace('{n}', String(n));
+      av.closest('li')!.toggleAttribute('data-open', !done);
+      av.closest('a')!.hash = `t${n}`;
+    }
   });
 </script>
 
 <style>
   .strip { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: var(--space-4); }
   .strip li { display: flex; }
+  .strip li[hidden] { display: none; }
   .tile {
     display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-3); align-items: center; width: 100%; padding: var(--space-3) var(--space-4);
     text-decoration: none; border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-md); box-shadow: var(--shadow-night-sm);
@@ -70,6 +85,8 @@ const texts = { streakOff: s.streakOff, streakDays: [s.streakDays(1), s.streakDa
   [data-open] .t-value::after { content: ' ●'; color: var(--pink-text); }
   @media (max-width: 520px) {
     .strip { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); }
+    /* Vier Kacheln (z. B. mit Adventskalender): zwei Reihen à zwei */
+    .strip:has(> li:not([hidden]):nth-child(4)) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .tile { grid-template-columns: minmax(0, 1fr); justify-items: start; gap: var(--space-1); padding: var(--space-2) var(--space-3); }
     .t-emoji { font-size: var(--fs-xl); }
     .t-label { font-size: var(--fs-sm); }
