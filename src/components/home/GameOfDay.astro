@@ -28,14 +28,14 @@ const today = picks[days[0]];
   <section class="sec fest-sky g-head" data-fest="wof" data-edge>
     <FestDeco deco={['question', 'star', 'sparkle']} size="lg" />
     <div class="wrap">
-      <span class="g-kicker">🎮 {e.game.kicker}</span>
+      <span class="g-kicker">{e.game.kicker}</span>
       <div class="tabs" role="tablist" aria-label={e.game.title}>
-        <button class="chip tab" type="button" role="tab" aria-selected="true" aria-controls="gotd-number" data-tab="number">🎯 {e.game.tabs.number}</button>
-        <button class="chip tab" type="button" role="tab" aria-selected="false" aria-controls="wof" data-tab="wof">✅ {e.game.tabs.wof}</button>
-        <button class="chip tab" type="button" role="tab" aria-selected="false" aria-controls="first" data-tab="first">⏳ {e.game.tabs.first}</button>
+        <button class="chip tab" type="button" role="tab" aria-selected="true" aria-controls="gotd-number" data-tab="number"><Icon name="target" /> {e.game.tabs.number}</button>
+        <button class="chip tab" type="button" role="tab" aria-selected="false" aria-controls="wof" data-tab="wof"><Icon name="check" /> {e.game.tabs.wof}</button>
+        <button class="chip tab" type="button" role="tab" aria-selected="false" aria-controls="first" data-tab="first"><Icon name="hourglass" /> {e.game.tabs.first}</button>
       </div>
-      <div class="card ncard" id="gotd-number" role="tabpanel" data-panel="number">
-        <span class="chip accent" data-no-text>{today ? e.number.no(today.no) : e.number.name}</span>
+      <div class="glow ncard" data-fest="nature" id="gotd-number" role="tabpanel" data-panel="number">
+        <span class="chip no" data-no-text>{today ? e.number.no(today.no) : e.number.name}</span>
         <p class="nprompt">{e.number.prompt}</p>
         <p class="ngap"><span data-before>{today?.before}</span><span class="hole">___</span><span data-after>{today?.after}</span></p>
         <a class="btn btn--pink" href={numberPath(lang)}>{e.number.play} <Icon name="chevron-right" /></a>
@@ -80,7 +80,9 @@ const today = picks[days[0]];
   .tabs { display: flex; flex-wrap: wrap; gap: var(--space-3); }
   .tab { cursor: pointer; font-size: var(--fs-md); padding: var(--space-2) var(--space-4); }
   .tab[aria-selected='true'] { background: var(--fest-a); color: var(--on-accent); border-color: var(--on-accent); }
-  .ncard { width: 100%; max-width: 46rem; padding: var(--space-6); display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); border: var(--bw-strong) solid var(--on-accent); box-shadow: var(--shadow-night-pink); }
+  .ncard { width: 100%; max-width: 46rem; padding: var(--space-6); display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); }
+  .ncard .no { background: var(--fest-a); color: var(--on-accent); border-color: var(--on-accent); }
+  .ncard .btn { border-color: var(--on-accent); }
   .ncard[hidden] { display: none; }
   .nprompt { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: var(--fs-lg); }
   .ngap { margin: 0; font-size: var(--fs-2xl); font-weight: 700; line-height: 1.35; }

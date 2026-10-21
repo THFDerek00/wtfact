@@ -1,0 +1,156 @@
+---
+// Science Jumper als Abschnitt der Seite „Spiele“ (Wunsch von Eric, 2026-10-21: alle Spiele auf einer Seite).
+// Bis dahin eigene Seite /[lang]/science-jumper/ (leitet jetzt hierher weiter). Die Gold-Fakten, die ein Lauf freischaltet,
+// stehen auf der Seite „Ich“ (GoldShelf.astro). Gespeichert wird nur im Browser (src/scripts/gold.ts); steigt der
+// Highscore, meldet der Abschnitt das mit dem Ereignis „wtfact-gold“.
+import Icon from '../Icon.astro';
+import FestDeco from '../FestDeco.astro';
+import type { Lang } from '../../config';
+import { t } from '../../i18n/ui';
+import { x, mePath } from '../../i18n/extras';
+import { open, readGold } from '../../../scripts/facts-db.mjs';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const g = t(lang).game;
+const db = open();
+const points = readGold(db).map((f: { points: number }) => f.points);
+db.close();
+const staticTexts = Object.fromEntries(Object.entries(g).filter(([, v]) => typeof v === 'string'));
+---
+<section class="sec fest-sky play" id="jumper" data-fest="science" data-edge data-jumper-sec data-points={JSON.stringify(points)} data-texts={JSON.stringify(staticTexts)} data-lang={lang}>
+  <FestDeco deco={['flask', 'atom', 'sparkle', 'bolt', 'flask', 'star']} size="lg" />
+  <div class="wrap play-grid">
+    <div class="play-text">
+      <span class="pill"><Icon name="flask-conical" /> {g.name}</span>
+      <h2>{g.title}</h2>
+      <p class="intro">{g.intro}</p>
+    </div>
+    <div class="play-side">
+      <div class="below">
+        <dl class="stats">
+          <div><dt>{g.run}</dt><dd data-stat="run">0</dd></div>
+          <div><dt>{g.best}</dt><dd data-stat="best">0</dd></div>
+          <div><dt>{g.total}</dt><dd data-stat="total">0/{points.length}</dd></div>
+        </dl>
+        <button class="btn" type="button" data-start><Icon name="play" /> {g.start}</button>
+      </div>
+      <p class="controls" id="jumper-controls">{g.controls}</p>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="console">
+      <span class="console-tag" aria-hidden="true">{g.name}</span>
+      <div class="frame">
+        <canvas width="800" height="260" tabindex="0" role="img" aria-label={g.canvasLabel} aria-describedby="jumper-controls" data-jumper></canvas>
+      </div>
+      <p class="sr-only" aria-live="polite" data-live></p>
+      <p class="toast" data-toast hidden>
+        <Icon name="trophy" /> <span data-toast-text></span>
+        <a href={`${mePath(lang)}#gold`}>{x(lang).games.goldLink} <Icon name="chevron-right" /></a>
+      </p>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { createJumper } from '../../scripts/jumper';
+  import { loadStore, saveStore } from '../../scripts/gold';
+  import { markActive } from '../../scripts/streak';
+
+  const sec = document.querySelector<HTMLElement>('[data-jumper-sec]');
+  if (sec) {
+    const T = JSON.parse(sec.dataset.texts ?? '{}') as Record<string, string>;
+    const de = sec.dataset.lang === 'de';
+    const points = JSON.parse(sec.dataset.points ?? '[]') as number[];
+    const fmt = {
+      runResult: (n: number, best: number) =>
+        de ? `Lauf vorbei: ${n} ${n === 1 ? 'Reagenzglas' : 'Reagenzgläser'}. Dein Highscore: ${best}.` : `Run over: ${n} test ${n === 1 ? 'tube' : 'tubes'}. Your high score: ${best}.`,
+      unlocked: (n: number) => (de ? (n === 1 ? 'Neuer Gold-Fakt freigeschaltet!' : `${n} neue Gold-Fakten freigeschaltet!`) : n === 1 ? 'New golden fact unlocked!' : `${n} new golden facts unlocked!`),
+    };
+    const store = loadStore();
+    const stat = (k: string) => sec.querySelector<HTMLElement>(`[data-stat="${k}"]`)!;
+    const live = sec.querySelector<HTMLElement>('[data-live]')!;
+    const toast = sec.querySelector<HTMLElement>('[data-toast]')!;
+    const render = () => {
+      stat('best').textContent = String(store.best);
+      stat('total').textContent = `${points.filter((p) => p <= store.best).length}/${points.length}`;
+    };
+    const startBtn = sec.querySelector<HTMLButtonElement>('[data-start]')!;
+    // Highscore vor diesem Lauf: daran misst sich, was neu freigeschaltet wurde.
+    let bestBefore = store.best;
+    const game = createJumper({
+      canvas: sec.querySelector<HTMLCanvasElement>('[data-jumper]')!,
+      text: { tapToStart: T.tapToStart, paused: T.paused, gameOver: T.gameOver, again: T.again, best: T.best },
+      best: () => store.best,
+      onCollect(run) {
+        if (run === 1) { bestBefore = store.best; toast.hidden = true; markActive(); }
+        stat('run').textContent = String(run);
+        if (run > store.best) {
+          // Den Stand frisch lesen, falls „Ich“ in einem anderen Tab etwas geändert hat
+          Object.assign(store, { ...loadStore(), best: run });
+          saveStore(store);
+          render();
+          dispatchEvent(new CustomEvent('wtfact-gold'));
+        }
+      },
+      onGameOver(run) {
+        stat('run').textContent = String(run);
+        const fresh = points.filter((p) => p > bestBefore && p <= store.best).length;
+        const record = run > bestBefore;
+        live.textContent = fmt.runResult(run, store.best) + (record ? ` ${T.newBest}` : '') + (fresh ? ` ${fmt.unlocked(fresh)}` : '');
+        if (fresh) {
+          sec.querySelector('[data-toast-text]')!.textContent = fmt.unlocked(fresh);
+          toast.hidden = false;
+        }
+        startBtn.lastChild!.textContent = ` ${T.again}`;
+        bestBefore = store.best;
+      },
+    });
+    startBtn.addEventListener('click', () => {
+      toast.hidden = true;
+      stat('run').textContent = '0';
+      bestBefore = store.best;
+      game.start();
+    });
+    render();
+  }
+</script>
+
+<style>
+  .play { position: relative; padding: var(--space-12) 0 calc(var(--space-12) + var(--edge)); --line: var(--on-night); scroll-margin-top: var(--space-12); }
+  .play > .wrap { position: relative; z-index: 1; }
+  .play-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: var(--space-6) var(--space-11); align-items: end; }
+  .pill { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); background: var(--fest-a); color: var(--on-accent); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lg); transform: rotate(-3deg); }
+  h2 { font-size: var(--fs-display-md); margin: var(--space-5) 0 0; max-width: 22ch; }
+  .intro { color: var(--on-night-muted); font-size: var(--fs-lg); max-width: 62ch; margin: var(--space-4) 0 0; }
+  .console { position: relative; width: 100%; margin-top: var(--space-9); }
+  .console-tag {
+    position: absolute; top: calc(-1 * var(--space-5)); left: var(--space-6); z-index: 1; padding: var(--space-1) var(--space-4);
+    border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-sm); background: var(--fest-a); color: var(--on-accent);
+    font-family: var(--font-display); font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; transform: rotate(-3deg);
+  }
+  .frame {
+    border: var(--bw-strong) solid var(--fest-a); border-radius: var(--radius-lg);
+    box-shadow: var(--space-2) var(--space-2) 0 var(--fest-a); overflow: hidden; background: var(--night); transform: rotate(-0.3deg);
+  }
+  canvas { display: block; width: 100%; height: auto; aspect-ratio: 1200 / 260; touch-action: manipulation; cursor: pointer; }
+  canvas:focus-visible { outline-offset: calc(-1 * var(--bw-focus)); }
+  .below { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-5); }
+  .stats { display: flex; flex-wrap: wrap; gap: var(--space-7); margin: 0; }
+  .stats dt { font-size: var(--fs-xs); color: var(--on-night-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .stats dd { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: var(--fs-3xl); line-height: 1.1; }
+  .controls { color: var(--on-night-muted); font-size: var(--fs-sm); margin: var(--space-4) 0 0; }
+  .toast {
+    display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin: var(--space-6) 0 0; padding: var(--space-3) var(--space-5);
+    border: var(--bw) solid var(--on-night); border-radius: var(--radius-pill); font-family: var(--font-display); font-weight: 700;
+  }
+  .toast:not([hidden]) { background: var(--gold-surface); color: var(--on-accent); }
+  .toast a { display: inline-flex; align-items: center; gap: var(--space-1); margin-left: auto; }
+  @media (max-width: 1060px) {
+    .play-grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-5); }
+  }
+  @media (max-width: 520px) {
+    .stats { gap: var(--space-5); }
+    .stats dd { font-size: var(--fs-2xl); }
+  }
+</style>

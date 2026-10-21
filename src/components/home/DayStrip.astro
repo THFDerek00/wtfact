@@ -1,5 +1,6 @@
 ---
 // Tagesleiste (Wunsch von Eric, 2026-10-21) direkt unter dem Wochentag: drei Kacheln, jede führt direkt ins Ziel.
+// Als Leuchtkarten (.glow) im Stil der Kategorien, damit sie nicht als bunte Flächen aus dem Kopf herausstechen.
 // Serie (src/scripts/streak.ts), Tageszahl (offen oder gelöst) und Fakt des Tages. Den Stand füllt der Browser.
 // Weitere Kacheln: einen Eintrag in `tiles` ergänzen. Mit `from`/`to` (MM-TT, deutscher Tag) erscheint eine Kachel
 // nur in diesem Zeitraum, z. B. { from: '12-01', to: '12-24' } für einen Adventskalender. Geprüft wird im Browser.
@@ -7,16 +8,16 @@ import type { Lang } from '../../config';
 import { x, mePath, numberPath } from '../../i18n/extras';
 import { at, adventPath } from '../../i18n/advent';
 interface Props { lang: Lang }
-type Tile = { id: string; href: string; emoji: string; cls: string; label: string; value: string; from?: string; to?: string };
+type Tile = { id: string; href: string; emoji: string; cls: string; fest: string; label: string; value: string; from?: string; to?: string };
 const { lang } = Astro.props;
 const s = x(lang).strip;
 const xa = at(lang).tile;
 const tiles: Tile[] = [
-  { id: 'streak', href: mePath(lang), emoji: '🔥', cls: 'cat-history', label: s.streak, value: s.streakOff },
-  { id: 'number', href: numberPath(lang), emoji: '🎯', cls: 'cat-nature', label: s.number, value: s.numberOpen },
-  { id: 'fotd', href: '#fotd', emoji: '⭐', cls: 'cat-weird', label: s.fotd, value: s.fotdText },
+  { id: 'streak', href: mePath(lang), emoji: '🔥', cls: 'cat-history', fest: 'history', label: s.streak, value: s.streakOff },
+  { id: 'number', href: numberPath(lang), emoji: '🎯', cls: 'cat-nature', fest: 'nature', label: s.number, value: s.numberOpen },
+  { id: 'fotd', href: '#fotd', emoji: '⭐', cls: 'cat-weird', fest: 'weird', label: s.fotd, value: s.fotdText },
   // Adventskalender (src/data/advent.ts): Türchen des Tages, vom 1. bis 24.12.
-  { id: 'advent', href: adventPath(lang), emoji: '🎁', cls: 'cat-food', label: xa.label, value: xa.value.replace('{n}', '1'), from: '12-01', to: '12-24' },
+  { id: 'advent', href: adventPath(lang), emoji: '🎁', cls: 'cat-food', fest: 'xmas', label: xa.label, value: xa.value.replace('{n}', '1'), from: '12-01', to: '12-24' },
 ];
 const texts = { advent: xa.value, adventDone: xa.done, streakOff: s.streakOff, streakDays: [s.streakDays(1), s.streakDays(9001)], open: s.numberOpen, won: s.numberWon(9001), wonOne: s.numberWon(1), lost: s.numberLost };
 ---
@@ -24,8 +25,8 @@ const texts = { advent: xa.value, adventDone: xa.done, streakOff: s.streakOff, s
   <ul class="strip">
     {tiles.map((tl) => (
       <li data-tile={tl.id} data-from={tl.from} data-to={tl.to} hidden={!!(tl.from || tl.to)}>
-        <a class:list={['tile', tl.cls]} href={tl.href}>
-          <span class="t-emoji" aria-hidden="true">{tl.emoji}</span>
+        <a class="glow tile" data-fest={tl.fest} href={tl.href}>
+          <span class:list={['glow-tile', 't-emoji', tl.cls]} aria-hidden="true"><span>{tl.emoji}</span></span>
           <span class="t-text"><span class="t-label">{tl.label}</span><span class="t-value" data-value>{tl.value}</span></span>
         </a>
       </li>
@@ -72,23 +73,18 @@ const texts = { advent: xa.value, adventDone: xa.done, streakOff: s.streakOff, s
   .strip { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: var(--space-4); }
   .strip li { display: flex; }
   .strip li[hidden] { display: none; }
-  .tile {
-    display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-3); align-items: center; width: 100%; padding: var(--space-3) var(--space-4);
-    text-decoration: none; border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-md); box-shadow: var(--shadow-night-sm);
-    transition: transform var(--dur) var(--ease);
-  }
-  .tile:hover { transform: translate(calc(-1 * var(--space-1)), calc(-1 * var(--space-1))); }
-  .t-emoji { font-size: var(--fs-2xl); line-height: 1; }
+  .tile { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-4); align-items: center; width: 100%; padding: var(--space-3) var(--space-4); }
+  .t-emoji { width: var(--space-10); height: var(--space-10); font-size: var(--fs-xl); }
   .t-text { display: flex; flex-direction: column; min-width: 0; }
-  .t-label { font-family: var(--font-display); font-weight: 800; font-size: var(--fs-md); line-height: 1.2; }
+  .t-label { font-family: var(--font-display); font-weight: 800; font-size: var(--fs-md); line-height: 1.2; color: var(--fest-a); }
   .t-value { font-size: var(--fs-sm); font-weight: 700; }
-  [data-open] .t-value::after { content: ' ●'; color: var(--pink-text); }
+  [data-open] .t-value::after { content: ' ●'; color: var(--fest-a); }
   @media (max-width: 520px) {
     .strip { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); }
     /* Vier Kacheln (z. B. mit Adventskalender): zwei Reihen à zwei */
     .strip:has(> li:not([hidden]):nth-child(4)) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .tile { grid-template-columns: minmax(0, 1fr); justify-items: start; gap: var(--space-1); padding: var(--space-2) var(--space-3); }
-    .t-emoji { font-size: var(--fs-xl); }
+    .tile { grid-template-columns: minmax(0, 1fr); justify-items: start; gap: var(--space-2); padding: var(--space-3); }
+    .t-emoji { width: var(--space-9); height: var(--space-9); font-size: var(--fs-lg); }
     .t-label { font-size: var(--fs-sm); }
     .t-value { font-size: var(--fs-xs); }
   }

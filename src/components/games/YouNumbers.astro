@@ -1,0 +1,241 @@
+---
+// Du in Zahlen (Wunsch von Eric, 2026-10-21) als Abschnitt der Seite „Ich“ (#zahlen, /de/du-in-zahlen/ leitet hierher).
+// Geburtstag eingeben, der Browser rechnet aus, was Körper und Erde seitdem geleistet haben. Nichts wird gesendet; das
+// Datum bleibt nur im Browser. Rechenwerte und Quellen: x(lang).you.sources. Jede Zahl ist eine Leuchtkarte in ihrer
+// Kategoriefarbe; „Als Bild speichern“ zeichnet dieselben Karten auf ein Canvas (Farben aus den Tokens).
+import FestDeco from '../FestDeco.astro';
+import Icon from '../Icon.astro';
+import type { Lang } from '../../config';
+import { x, youPath, giftsPath } from '../../i18n/extras';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const y = x(lang).you;
+const texts = { milestone: y.milestone('§', '¶'), birthday: [y.birthday(0), y.birthday(1), y.birthday(9001)], share: y.shareText('§1', '§2', '§3'), copied: y.copied, invalid: y.invalid, imageTitle: y.imageTitle, url: 'wtfact.xyz' };
+const stats = [
+  { key: 'days', emoji: '📅', cat: 'nature', label: y.days },
+  { key: 'beats', emoji: '🫀', cat: 'body', label: y.beats },
+  { key: 'breaths', emoji: '🌬️', cat: 'science', label: y.breaths },
+  { key: 'orbit', emoji: '🌍', cat: 'space', label: y.orbit },
+  { key: 'sleep', emoji: '😴', cat: 'mind', label: y.sleep },
+  { key: 'moons', emoji: '🌕', cat: 'weird', label: y.moons },
+];
+---
+<section class="sec fest-sky you" id="zahlen" data-fest="body" data-edge data-you data-lang={lang} data-url={new URL(youPath(lang), Astro.site).href} data-texts={JSON.stringify(texts)}>
+  <FestDeco deco={['sparkle', 'star', 'question', 'bolt']} size="lg" />
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <span class="pill">{y.kicker}</span>
+        <h2>{y.title}</h2>
+        <p class="intro">{y.intro}</p>
+      </div>
+      <form class="glow yform" data-fest="body" data-form>
+        <label for="you-birthday">{y.label}</label>
+        <div class="row">
+          <input id="you-birthday" type="date" required data-date />
+          <button class="btn btn--pink" type="submit">{y.show}</button>
+        </div>
+        <p class="err" data-err aria-live="polite" hidden></p>
+      </form>
+    </div>
+
+    <div class="out" data-out hidden>
+      <h3>{y.since}</h3>
+      <ul class="stats">
+        {stats.map((s) => (
+          <li class="glow stat" data-fest={s.cat} data-stat-card>
+            <span class:list={['glow-tile', 's-emoji', `cat-${s.cat}`]} aria-hidden="true"><span data-emoji>{s.emoji}</span></span>
+            <span><b data-stat={s.key}>0</b><small>{s.label}</small></span>
+          </li>
+        ))}
+      </ul>
+      <div class="facts">
+        <p class="next" data-milestone></p>
+        <p class="next" data-birthday></p>
+      </div>
+      <div class="acts">
+        <button class="btn" type="button" data-share>{y.share}</button>
+        <button class="btn btn--ghost" type="button" data-image>{y.image}</button>
+        <a class="btn btn--ghost" href={`${giftsPath(lang)}?occasion=birthday`}>{y.gift} <Icon name="chevron-right" /></a>
+      </div>
+      <p class="copied" data-copied aria-live="polite" hidden>{y.copied}</p>
+      <canvas class="sr-only" width="1080" height="1350" data-canvas aria-hidden="true"></canvas>
+    </div>
+    <p class="src">{y.sources}</p>
+  </div>
+</section>
+
+<script>
+  import { berlinDay, daysBetween, addDays } from '../../week';
+  import { markActive } from '../../scripts/streak';
+
+  const root = document.querySelector<HTMLElement>('[data-you]');
+  if (root) {
+    const T = JSON.parse(root.dataset.texts!);
+    const lang = root.dataset.lang!;
+    const locale = lang === 'de' ? 'de-DE' : 'en-US';
+    const KEY = 'wtfact:birthday';
+    const $ = <E extends HTMLElement>(s: string) => root.querySelector<E>(s)!;
+    const input = $<HTMLInputElement>('[data-date]');
+    const today = berlinDay();
+    input.max = today;
+    const big = (n: number) => {
+      // Große Zahlen lesbar: 1,1 Mrd. / 1.1 billion
+      return new Intl.NumberFormat(locale, { notation: n >= 1e6 ? 'compact' : 'standard', compactDisplay: 'long', maximumFractionDigits: n >= 1e6 ? 1 : 0 }).format(n);
+    };
+    let last: Record<string, string> = {};
+    const show = (birth: string) => {
+      const days = daysBetween(birth, today);
+      const err = $('[data-err]');
+      if (!(days > 0)) { err.hidden = false; err.textContent = T.invalid; $('[data-out]').hidden = true; return; }
+      err.hidden = true;
+      const years = days / 365.2425;
+      const v: Record<string, string> = {
+        days: days.toLocaleString(locale),
+        beats: big(days * 1440 * 80),
+        breaths: big(days * 1440 * 16),
+        orbit: big(years * 940e6),
+        sleep: (years / 3).toLocaleString(locale, { maximumFractionDigits: 1 }),
+        moons: Math.floor(days / 29.530589).toLocaleString(locale),
+      };
+      last = v;
+      Object.entries(v).forEach(([k, s]) => ($(`[data-stat="${k}"]`).textContent = s));
+      // Nächster runder Tag: 10.000, danach alle 5.000
+      const target = days < 10000 ? 10000 : Math.ceil((days + 1) / 5000) * 5000;
+      const when = new Date(`${addDays(birth, target)}T12:00:00Z`).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+      $('[data-milestone]').textContent = T.milestone.replace('§', target.toLocaleString(locale)).replace('¶', when);
+      const [, m, d] = birth.split('-');
+      let next = `${today.slice(0, 4)}-${m}-${d}`;
+      if (next < today) next = `${Number(today.slice(0, 4)) + 1}-${m}-${d}`;
+      const left = daysBetween(today, next);
+      $('[data-birthday]').textContent = left <= 1 ? T.birthday[left] : T.birthday[2].replace('9001', String(left));
+      $('[data-out]').hidden = false;
+      try { localStorage.setItem(KEY, birth); } catch { /* privates Fenster */ }
+      markActive();
+    };
+    try { const saved = localStorage.getItem(KEY); if (saved) { input.value = saved; show(saved); } } catch { /* ohne Speicher */ }
+    $<HTMLFormElement>('[data-form]').addEventListener('submit', (e) => { e.preventDefault(); if (input.value) show(input.value); });
+
+    const shareText = () => T.share.replace('§1', last.days).replace('§2', last.beats).replace('§3', last.orbit) + ` ${root.dataset.url}`;
+    $('[data-share]').addEventListener('click', async () => {
+      try {
+        if (navigator.share) await navigator.share({ text: shareText() });
+        else { await navigator.clipboard.writeText(shareText()); $('[data-copied]').hidden = false; }
+      } catch { /* abgebrochen */ }
+    });
+
+    // Karte zum Speichern im Stil der Seite: dunkle Bühne mit Leuchten und Punkten, jede Zahl als Leuchtkarte in
+    // ihrer Kategoriefarbe mit Emoji-Feld, Rand und versetztem Schatten. Farben und Schrift kommen aus den Tokens.
+    $('[data-image]').addEventListener('click', async () => {
+      const cv = $<HTMLCanvasElement>('[data-canvas]');
+      const ctx = cv.getContext('2d')!;
+      // Grundfarben vom Dokument, Themenfarben (--fest-*) vom Abschnitt, dort ist --yellow auf das Thema umgebogen
+      const base = getComputedStyle(document.documentElement);
+      const theme = getComputedStyle(root);
+      const tok = (n: string) => (n.startsWith('--fest') ? theme : base).getPropertyValue(n).trim();
+      const head = tok('--font-display') || 'sans-serif';
+      try { await document.fonts.ready; } catch { /* ohne Schrift-API */ }
+      const W = cv.width, H = cv.height;
+      const rr = (x: number, y: number, w: number, h: number, r: number) => { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); };
+      // Bühne
+      ctx.fillStyle = tok('--fest-night') || tok('--night');
+      ctx.fillRect(0, 0, W, H);
+      const glow = (x: number, y: number, r: number, color: string) => {
+        const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+        g.addColorStop(0, color + '99'); g.addColorStop(0.5, color + '22'); g.addColorStop(1, color + '00');
+        ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+      };
+      glow(W * 0.85, H * 0.08, W * 0.7, tok('--fest-a'));
+      glow(W * 0.05, H * 0.95, W * 0.6, tok('--fest-b'));
+      ctx.fillStyle = 'rgba(255,255,255,0.07)';
+      for (let y = 12; y < H; y += 24) for (let x = 12; x < W; x += 24) { ctx.beginPath(); ctx.arc(x, y, 2, 0, Math.PI * 2); ctx.fill(); }
+      // Überschrift mit Kontur und versetztem Schatten wie die Riesenwörter
+      ctx.save();
+      ctx.translate(72, 190); ctx.rotate(-0.035);
+      ctx.font = `900 112px ${head}`;
+      ctx.lineJoin = 'round';
+      ctx.fillStyle = tok('--fest-a'); ctx.fillText(T.imageTitle, 10, 10);
+      ctx.lineWidth = 14; ctx.strokeStyle = tok('--on-accent'); ctx.strokeText(T.imageTitle, 0, 0);
+      ctx.fillStyle = tok('--yellow'); ctx.fillText(T.imageTitle, 0, 0);
+      ctx.restore();
+      // Sechs Leuchtkarten
+      const items = [...root.querySelectorAll<HTMLElement>('[data-stat-card]')];
+      const top = 270, gap = 26, ch = (H - top - 150 - gap * (items.length - 1)) / items.length;
+      items.forEach((li, k) => {
+        const c = getComputedStyle(li).getPropertyValue('--fest-a').trim();
+        const y = top + k * (ch + gap), x = 72, w = W - 144 - 12;
+        rr(x + 12, y + 12, w, ch, 28); ctx.fillStyle = c; ctx.fill();
+        rr(x, y, w, ch, 28); ctx.fillStyle = tok('--night-2'); ctx.fill();
+        ctx.save(); rr(x, y, w, ch, 28); ctx.clip();
+        const g = ctx.createRadialGradient(x + w * 0.85, y, 0, x + w * 0.85, y, w * 0.6);
+        g.addColorStop(0, c + '88'); g.addColorStop(1, c + '00'); ctx.fillStyle = g; ctx.fillRect(x, y, w, ch);
+        ctx.restore();
+        rr(x, y, w, ch, 28); ctx.lineWidth = 6; ctx.strokeStyle = c; ctx.stroke();
+        // Emoji-Feld
+        const s = ch - 44;
+        ctx.save(); ctx.translate(x + 26 + s / 2, y + ch / 2); ctx.rotate(-0.07);
+        rr(-s / 2 + 6, -s / 2 + 6, s, s, 18); ctx.fillStyle = tok('--on-accent'); ctx.fill();
+        rr(-s / 2, -s / 2, s, s, 18); ctx.fillStyle = c; ctx.fill(); ctx.lineWidth = 5; ctx.strokeStyle = tok('--on-accent'); ctx.stroke();
+        ctx.font = `${Math.round(s * 0.6)}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(li.querySelector('[data-emoji]')!.textContent ?? '', 0, 4);
+        ctx.restore();
+        ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = c; ctx.font = `900 64px ${head}`;
+        ctx.fillText(li.querySelector('b')!.textContent ?? '', x + s + 64, y + ch / 2 + 8);
+        ctx.fillStyle = tok('--on-night'); ctx.font = `700 32px ${head}`;
+        ctx.fillText(li.querySelector('small')!.textContent ?? '', x + s + 64, y + ch / 2 + 50);
+      });
+      // Absender
+      ctx.font = `900 60px ${head}`; ctx.fillStyle = tok('--on-night'); ctx.fillText('WTFact', 72, H - 62);
+      ctx.fillStyle = tok('--yellow'); ctx.fillText('?!', 72 + ctx.measureText('WTFact ').width, H - 62);
+      ctx.textAlign = 'right'; ctx.font = `800 38px ${head}`; ctx.fillStyle = tok('--fest-a'); ctx.fillText(T.url, W - 72, H - 68);
+      ctx.textAlign = 'left';
+      cv.toBlob((blob) => {
+        if (!blob) return;
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'wtfact-du-in-zahlen.png';
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+      });
+    });
+  }
+</script>
+
+<style>
+  .you { padding: var(--space-12) 0 calc(var(--space-12) + var(--edge)); overflow: clip; }
+  .you > .wrap { position: relative; z-index: 1; }
+  .top { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 28rem); gap: var(--space-10); align-items: end; }
+  .pill { display: inline-block; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); background: var(--fest-a); color: var(--on-accent); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lg); transform: rotate(-3deg); }
+  h2 { margin: var(--space-5) 0 0; font-size: var(--fs-display-lg); }
+  .intro { margin: var(--space-4) 0 0; font-size: var(--fs-lg); font-weight: 600; max-width: 46ch; }
+  .yform { padding: var(--space-6); display: grid; gap: var(--space-3); }
+  label { font-family: var(--font-display); font-weight: 800; font-size: var(--fs-lg); color: var(--fest-a); }
+  .row { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+  input { flex: 1 1 12rem; min-width: 0; padding: var(--space-3) var(--space-4); font: inherit; font-size: var(--fs-lg); font-weight: 700; border: var(--bw-strong) solid var(--on-night); border-radius: var(--radius-md); background: var(--night); color: var(--on-night); color-scheme: dark; }
+  .row .btn { border-color: var(--on-accent); }
+  .err { margin: 0; color: var(--fest-b); font-weight: 700; }
+  .out { margin-top: var(--space-11); }
+  h3 { margin: 0 0 var(--space-7); font-size: var(--fs-display-md); color: var(--fest-a); }
+  .stats { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-7) var(--space-6); }
+  .stat { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-5); align-items: center; padding: var(--space-5); }
+  .s-emoji { width: var(--space-12); height: var(--space-12); font-size: var(--fs-emoji-sm); }
+  .stat b { display: block; font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 900; line-height: 1.1; color: var(--fest-a); }
+  .stat small { color: var(--on-night); font-size: var(--fs-sm); font-weight: 700; }
+  .facts { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-8); }
+  .next { margin: 0; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); background: var(--night); border: var(--bw-sm) solid var(--fest-a); font-weight: 700; }
+  .next:empty { display: none; }
+  .acts { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-6); }
+  .acts .btn { border-color: var(--on-accent); }
+  .acts .btn--ghost { background: var(--surface); color: var(--ink); }
+  .copied { font-weight: 700; }
+  .src { margin: var(--space-10) 0 0; max-width: var(--measure); font-size: var(--fs-sm); color: var(--on-night-muted); }
+  @media (max-width: 1060px) {
+    .top { grid-template-columns: minmax(0, 1fr); gap: var(--space-7); }
+    .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 620px) {
+    .stats { grid-template-columns: minmax(0, 1fr); gap: var(--space-5); }
+    h2 { font-size: var(--fs-display-md); }
+  }
+</style>

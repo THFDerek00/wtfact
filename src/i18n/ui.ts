@@ -758,7 +758,8 @@ export const catsPath = (lang: Lang) => `/${lang}/${catsSlug(lang)}/`;
 /** WTF-Charts, früher „Hall of Fame“ (Umbenennung auf Wunsch von Eric, 2026-10-10). Alte Adresse leitet weiter (astro.config.mjs). */
 export const chartsPath = (lang: Lang) => `/${lang}/charts/`;
 /** Quiz-Seite mit Wahr oder Fake und Was war zuerst, gleiche Adresse in beiden Sprachen */
-export const quizPath = (lang: Lang) => `/${lang}/quiz/`;
+// Die Quiz-Spiele stehen seit 2026-10-21 auf der Seite „Spiele“ (/de/quiz/ leitet weiter), Sprungziele #wof und #first.
+export const quizPath = (lang: Lang) => (lang === 'de' ? '/de/spiele/' : '/en/games/');
 
 export const categorySlug = (lang: Lang, c: Category) => t(lang).categories[c].toLowerCase();
 
