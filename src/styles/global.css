@@ -946,6 +946,10 @@ a.glow:hover { transform: translate(calc(-1 * var(--space-1)), calc(-1 * var(--s
 [data-season='xmas'] .no-xmas { display: none !important; }
 [data-season='xmas'] :is(.foot, .day-hero)[data-fest] { --fest-night: var(--fest-xmas-night); --fest-a: var(--fest-xmas-a); --fest-b: var(--fest-xmas-b); }
 [data-season='xmas'] :is(.fest-sky, .sec--night) { isolation: isolate; }
+/* Gruselwoche (src/data/halloween.ts): vom 24. bis 31.10. steht data-season='halloween' auf <html>.
+   .halloween = nur dann sichtbar, .no-halloween = dann ausgeblendet. */
+:root:not([data-season='halloween']) .halloween { display: none !important; }
+[data-season='halloween'] .no-halloween { display: none !important; }
 /* Schnee auf dunklen Bühnen: drei Lagen Flocken, rieseln langsam (Base.astro legt .x-snow in jede Bühne) */
 .x-snow {
   position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden;

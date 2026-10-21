@@ -14,6 +14,7 @@ import XmasLights from '../components/xmas/XmasLights.astro';
 import XmasHat from '../components/xmas/XmasHat.astro';
 import XmasDrift from '../components/xmas/XmasDrift.astro';
 import { inSeason, doorOf } from '../data/advent';
+import { inSpooky } from '../data/halloween';
 import { at, adventPath } from '../i18n/advent';
 
 interface Props {
@@ -36,6 +37,8 @@ const siteFest = holidayToday ? festOfHoliday(holidayToday) : undefined;
 // Weihnachtszeit vom 1. Advent bis 26.12. (Wunsch von Eric, 2026-10-21, src/data/advent.ts): data-season auf <html>.
 // Das Skript im <head> rechnet es vor dem ersten Zeichnen im Browser nach, src/scripts/xmas.ts stellt Zahlen und Kerzen ein.
 const season = inSeason(today);
+// Gruselwoche vom 24. bis 31.10. (Wunsch von Eric, 2026-10-21, src/data/halloween.ts): data-season='halloween'.
+const spooky = inSpooky(today);
 const door = season ? doorOf(today) : 0;
 const xa = at(lang);
 const ui = t(lang);
@@ -61,7 +64,7 @@ const nav = [
 ].map((n) => ({ ...n, current: section ? section === n.id : n.id === 'facts' ? path === n.href : [n.href, ...n.also].some((h) => path.startsWith(h)) }));
 ---
 <!doctype html>
-<html lang={lang} data-season={season ? 'xmas' : undefined} data-door={door || undefined}>
+<html lang={lang} data-season={season ? 'xmas' : spooky ? 'halloween' : undefined} data-door={door || undefined}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -77,7 +80,9 @@ const nav = [
         if (!/^\d{4}-\d\d-\d\d$/.test(d)) d = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
         const y = +d.slice(0, 4), e = Date.UTC(y, 11, 24), f = new Date(e - (new Date(e).getUTCDay() + 21) * 864e5).toISOString().slice(0, 10);
         const on = d >= f && d <= y + '-12-26', n = on && d.slice(5, 7) === '12' ? +d.slice(8) : 0;
-        if (on) r.dataset.season = 'xmas'; else delete r.dataset.season;
+        // Gruselwoche 24. bis 31.10., gleiche Rechnung wie src/data/halloween.ts
+        const md = d.slice(5), spooky = md >= '10-24' && md <= '10-31';
+        if (on) r.dataset.season = 'xmas'; else if (spooky) r.dataset.season = 'halloween'; else delete r.dataset.season;
         if (n && n <= 24) r.dataset.door = String(n); else delete r.dataset.door;
       } catch {}
     </script>
@@ -176,7 +181,7 @@ const nav = [
       import { isNew, berlinDay } from '../week';
       import { streakInfo } from '../scripts/streak';
       import { applySeason } from '../scripts/xmas';
-      // Weihnachtszeit: Advent, Kerzen, Türchen des Tages und Schnee (src/scripts/xmas.ts)
+      // Weihnachtszeit: Advent, Kerzen, Türchen des Tages und Schnee, Gruselwoche (src/scripts/xmas.ts)
       applySeason();
       // Serien-Zahl am Menüpunkt „Ich“ (neben dem Flammen-Symbol), sobald eine Serie läuft
       const showStreak = () => {
