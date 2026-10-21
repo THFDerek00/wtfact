@@ -95,6 +95,26 @@ Zwei Kategorien vom 2026-10-15 (Wunsch von Eric):
   So wechselt die Seite kurz nach 0 Uhr ins Design des Festes und am Tag danach zurück, auch ohne fälligen Fakt.
 - **Grusel** (`horror`): normale Kategorie mit eigener Farbwelt (Schwarz, Giftgrün, Geisterlila). Regeln: `docs/styleguide.md`.
 
+## Adventskalender und Weihnachtszeit
+
+Wunsch von Eric, 2026-10-21. Vom 1. Advent bis 26.12. sieht die Seite weihnachtlich aus (Design: `docs/design-system.md`,
+„Weihnachtszeit“). Vom 1. bis 24.12. öffnet um 0 Uhr jeden Tag ein Türchen unter `/de/advent/` bzw. `/en/advent/`.
+
+- **Inhalte:** `src/data/advent.ts`. `DOORS` nennt je Jahr und Türchen die Fakten (Türchen 6 = Nikolaus-Stiefel mit zwei).
+  Jeder Türchen-Fakt ist ein normaler Fakt mit `date` JJJJ-12-TT 00:00 (Berliner Zeit) und `slot` 0. `npm run check` prüft,
+  dass es alle gibt, dass ihr Datum stimmt und dass kein Türchen fehlt. `QUIZ` (Türchen 9 und 20, Wahr oder Fake über frühere
+  Türchen) und `GUESS` (13 und 22, Zahl schätzen) gehören zum Jahr, Geschenk-Türchen (3, 10, 17) zeigen die Werbung des Fakts
+  und verlinken den Geschenkfinder.
+- **Neues Jahr:** 24 (bzw. 25) neue Fakten schreiben, auf ihre Tage datieren und unter `DOORS`, `QUIZ` und `GUESS` einen Block
+  für das Jahr anlegen. Der 1. Advent rechnet sich selbst aus.
+- **Dashboard:** Türchen-Fakten lassen sich wie Feiertags-Fakten nicht umplanen (`fest.json` → `advent`). `fest.json` nennt
+  außerdem alle Tage der Weihnachtszeit, damit die Seite an jedem dieser Tage frisch gebaut wird.
+- **Im Browser** (`src/scripts/advent.ts`, localStorage `wtfact:advent`): geöffnete Türchen (eine Kugel am WTF-Baum, auch beim
+  Lesen der Faktseite), gefundene Wichtel (goldene Kugel) und Quiz-Ergebnisse. Jedes Öffnen zählt für die Serie.
+- **Wichtel:** versteckt sich ab dem 2.12. jeden Tag auf der Seite eines Fakts aus einem schon offenen Türchen (`wichtelKey`).
+- **Vorschau:** `?vorschau=2026-12-15` an eine Adresse hängen zeigt Look und Kalenderstand dieses Tages. Inhalte eines Türchens
+  erscheinen erst, wenn sein Fakt veröffentlicht ist.
+
 ## Fakten-Datenbank
 
 Alle Inhalte stehen in SQLite:

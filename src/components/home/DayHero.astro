@@ -18,6 +18,10 @@ import FestDeco from '../FestDeco.astro';
 import FestArt from '../FestArt.astro';
 import FestWord from '../FestWord.astro';
 import FestIcon from '../FestIcon.astro';
+import Wreath from '../xmas/Wreath.astro';
+import XmasCap from '../xmas/XmasCap.astro';
+import { adventNo, daysToEve } from '../../data/advent';
+import { at } from '../../i18n/advent';
 interface Props { lang: Lang; catsUrl: string; posts: Post[] }
 const { lang, catsUrl, posts } = Astro.props;
 const ui = t(lang);
@@ -38,6 +42,12 @@ const dayNo = (day: string) => Math.floor(Date.parse(`${day}T12:00:00Z`) / 86400
 const di = dayNo(today);
 // Tagesleiste (Kind-Element) steht in beiden Köpfen, je nachdem welcher gerade gilt
 const strip = Astro.slots.has('default') ? await Astro.slots.render('default') : '';
+// Weihnachtszeit (Wunsch von Eric, 2026-10-21, Look A): Kopf in Tannengrün und Gold, Adventskranz statt Farbe des Tages,
+// „Noch X Tage bis Heiligabend“, Schneehaube auf der Karte. Sichtbar über .xmas/.no-xmas (global.css), Zahlen: src/scripts/xmas.ts.
+const xa = at(lang);
+const adv = Math.max(1, adventNo(today));
+const left = daysToEve(today);
+const countText = left > 1 ? xa.count.many.replace('{n}', String(left)) : left === 1 ? xa.count.one : left === 0 ? xa.count.eve : xa.count.after;
 ---
 {fest && holiday && (
   <section class="sec fest-sky fest-hero" data-fest={fest.theme} data-fest-hero={today}>
@@ -72,16 +82,19 @@ const strip = Astro.slots.has('default') ? await Astro.slots.render('default') :
   </section>
 )}
 <section class="sec fest-sky day-hero" data-day-hero data-weekday={wd} data-fest={themeOf(dayCats[di])} data-themes={dayCats.map(themeOf).join(',')} data-lang={lang} hidden={!!fest}>
-  {dayCats.map((c, i) => <span class="day-deco" data-deco={i} hidden={i !== di}><FestDeco deco={festOf(c, '')?.deco ?? []} size="lg" /></span>)}
+  {dayCats.map((c, i) => <span class="day-deco no-xmas" data-deco={i} hidden={i !== di}><FestDeco deco={festOf(c, '')?.deco ?? []} size="lg" /></span>)}
+  <span class="day-deco xmas"><FestDeco deco={['fir', 'gift', 'star', 'snowflake', 'bell', 'candle']} size="lg" /></span>
   <div class="wrap top-row">
     <span class="pill" data-date>{dateText}</span>
-    {dayCats.map((c, i) => <span class="cat-pill" data-deco={i} hidden={i !== di}>{h.dayColour}: {ui.categories[c]}</span>)}
+    {dayCats.map((c, i) => <span class="cat-pill no-xmas" data-deco={i} hidden={i !== di}>{h.dayColour}: {ui.categories[c]}</span>)}
+    <span class="xmas"><Wreath lit={adv} label={xa.advent.replace('{n}', String(adv))} tpl={xa.advent} /></span>
+    <span class="x-count xmas" data-x-count={JSON.stringify(xa.count)}>{countText}</span>
   </div>
   <p class="mega day-word" aria-hidden="true" data-day-word data-len={h.days[wd].length}>{h.days[wd]}</p>
   <div class="wrap row">
     {h.dayTitles.map((title, i) => (
       <div class="variant" data-variant={i} hidden={i !== wd}>
-        <h1>{title}</h1>
+        <h1><XmasCap />{title}</h1>
         <div class="acts">
           <a class="btn btn--ghost" href={hrefs[i]}>{h.dayCtas[i]} <Icon name="chevron-right" /></a>
           <a class="btn btn--pink" href="#today">{h.go} <Icon name="chevron-down" /></a>
@@ -180,6 +193,15 @@ const strip = Astro.slots.has('default') ? await Astro.slots.render('default') :
     border-radius: var(--radius-md); box-shadow: var(--shadow-on-night); transform: rotate(-1deg);
   }
   .acts { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  .day-hero h1 { position: relative; }
+  /* Platz für die Lichterkette unter dem Kopf */
+  :global([data-season='xmas']) .day-hero { padding-top: calc(var(--space-6) + var(--xmas-lights-h)); }
+  .x-count {
+    padding: var(--space-2) var(--space-4); border: var(--bw) solid var(--on-accent); border-radius: var(--radius-pill);
+    background: var(--fest-a); color: var(--on-accent); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); line-height: 1;
+    box-shadow: var(--shadow-night-pink); transform: rotate(1.5deg);
+  }
+  .x-count :global(b) { font-size: var(--fs-lg); }
   .acts .btn { border-color: var(--on-accent); box-shadow: var(--shadow-night-sm); }
   .acts .btn--pink { background: var(--fest-a); color: var(--on-accent); }
   .acts .btn--ghost { background: var(--surface); color: var(--ink); }

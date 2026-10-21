@@ -159,7 +159,31 @@ oben an einer schrägen Kante (`data-edge`), malt die Kante nur die Nachtfarbe; 
 - Das schräge Band auf der Faktseite wiederholt sein Wort so oft, dass es auch auf breiten Bildschirmen bis zum Rand reicht.
 - Der Build prüft: jedes Thema aus `THEMES` hat seine drei Tokens und seinen Block, dunkle Schrift auf `-a`/`-b` und helle auf `-night` mit mindestens 4.5:1.
 
-## Punktmuster auf Kategorie-Flächen
+## Weihnachtszeit und Adventskalender
+
+Wunsch von Eric, 2026-10-21 (Entwurf „Look A, Kerzenschein“ im Projektordner `advent-2026/`): Vom 1. Advent bis zum 26.12. sieht
+die ganze Seite weihnachtlich aus. Termine und Inhalte stehen in `src/data/advent.ts` (1. Advent = vierter Sonntag vor dem 25.12.,
+jedes Jahr neu gerechnet).
+
+- Schalter: `data-season='xmas'` auf `<html>` (Base.astro beim Bauen, das Skript im `<head>` rechnet vor dem ersten Zeichnen nach).
+  `.xmas` ist nur dann sichtbar, `.no-xmas` wird dann ausgeblendet. `data-door` (1 bis 24) steht dazu, solange Türchen aufgehen.
+  Vorschau: `?vorschau=2026-12-15` an eine Adresse hängen (gilt bis der Tab zu ist, `?vorschau=` beendet sie).
+- Farben: Thema `xmas` (`--fest-xmas-night` Tannengrün, `-a` Gold, `-b` Rot) für Wochentag-Kopf, Fuß, Türchen-Leiste und Kalender.
+  Feiertage in der Zeit (1. Advent, Nikolaus, Sonnenwende, Heiligabend) behalten ihr eigenes Thema.
+  Zeichnungsfarben als `--xmas-*`-Tokens, Größen als `--xmas-*` (Lichterkette, Mütze, Türchen, Kalenderraster).
+- Bausteine in `src/components/xmas/`: `XmasLights` (Lichterkette unter dem Kopf, funkelt), `XmasHat` (Mütze auf dem „?!“),
+  `XmasDrift` (Schneewehe über dem Fuß), `XmasCap` (Schneehaube auf der Wochentag-Karte), `Wreath` (Adventskranz, Kerzen per
+  `data-lit`), `XmasTree` (WTF-Baum mit 24 Kugeln, goldenen Wichtel-Kugeln und Stern), `Wichtel`, `Bow`.
+- Schnee: `.x-snow` (global.css), legt `src/scripts/xmas.ts` in jede dunkle Bühne; rieselt langsam (`--dur-snow`), bei
+  „Bewegung reduzieren“ still.
+- Kopf: Statt „Überrasch mich“ führt vom 1. bis 24.12. der goldene Knopf „Türchen N“ zum Kalender.
+- Startseite: `AdventStrip` unter dem Kopf (Türchen des Tages als Geschenk, 24 Mini-Türchen, Baum). Tagesleiste: Kachel „Türchen“
+  (1. bis 24.12.). Seite „Ich“: Kachel „WTF-Baum“.
+- Kalender `/de/advent/`, `/en/advent/` (`AdventPage.astro`): 24 Türchen gemischt, besondere Größen für 6, 15, 18 und 24,
+  vier Muster (`p1` bis `p4`). Zustände per `data-state`: `locked` (Schloss, wackelt beim Klick), `ready` (verpasst, nachholbar),
+  `today` (leuchtet), `open` (weiß mit rotem Streifen, Titel). Das geöffnete Türchen ist ein `<dialog>` mit aufschwingender Tür.
+
+
 
 Wunsch von Eric (2026-10-02): Überall, wo eine Kategoriefarbe als Fläche auftaucht, liegt das Punktmuster der Faktenkarten darüber. Das gilt für alles, was es heute gibt (Kartenbild, Kacheln, Filter- und Etikett-Chips, Beitrags-Banner, Begrüßungskarte, Sterne der Gold-Fakten, Teilen-Vorschaubild, Social-Grafiken) und für jede künftige Kategorie und Funktion.
 

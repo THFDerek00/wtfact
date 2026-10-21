@@ -1,0 +1,49 @@
+---
+// WTF-Baum (Look A): 24 Plätze für Kugeln, eine je geöffnetes Türchen, dazu goldene Kugeln für gefundene Wichtel
+// und oben der Stern, der bei 24 golden wird. Den Stand malt src/scripts/advent.ts (paintTrees).
+interface Props { class?: string; label?: string }
+const { class: cls, label } = Astro.props;
+const rows = [3, 4, 5, 6, 6];
+const balls: { x: number; y: number; n: number }[] = [];
+rows.forEach((c, r) => { for (let i = 0; i < c; i++) balls.push({ x: 50 + (i - (c - 1) / 2) * 13, y: 34 + r * 17, n: balls.length + 1 }); });
+// Reihenfolge der Kugeln gemischt, damit der Baum gleichmäßig voll wird (Türchen 1 nicht immer oben links)
+const order = [12, 3, 20, 7, 16, 1, 23, 10, 5, 18, 14, 2, 21, 8, 24, 11, 4, 17, 13, 6, 22, 9, 19, 15];
+const gold = [[22, 62], [78, 62], [30, 96], [70, 96], [16, 116], [84, 116], [40, 44], [60, 44]];
+const cols = ['c1', 'c2', 'c3', 'c4', 'c5'];
+---
+<svg class:list={['x-tree', cls]} viewBox="0 0 100 134" data-xtree role={label ? 'img' : undefined} aria-label={label} aria-hidden={label ? undefined : 'true'}>
+  <path class="fir" d="M50 8 L 92 120 L 8 120Z" />
+  <path class="fold" d="M50 8 L 30 50 M50 8 L 70 50" />
+  <rect class="trunk" x="43" y="120" width="14" height="12" />
+  {balls.map((b, i) => (
+    <g data-ball={order[i]}>
+      <circle class="slot" cx={b.x} cy={b.y} r="4.5" />
+      <circle class:list={['ball', cols[i % cols.length]]} cx={b.x} cy={b.y} r="5.5" />
+      <circle class="hi" cx={b.x - 1.6} cy={b.y - 1.8} r="1.4" />
+    </g>
+  ))}
+  {gold.map(([x, y]) => <circle class="gold" data-gold cx={x} cy={y} r="4" />)}
+  <path class="star" d="M50 -2 L53 6 L61 6 L55 11 L57 19 L50 14 L43 19 L45 11 L39 6 L47 6Z" />
+</svg>
+
+<style>
+  .x-tree { display: block; overflow: visible; }
+  .fir { fill: var(--xmas-green); stroke: var(--xmas-ink); stroke-width: 3; stroke-linejoin: round; }
+  .fold { fill: none; stroke: var(--xmas-green-dark); stroke-width: 2; opacity: 0.5; }
+  .trunk { fill: var(--xmas-wood); stroke: var(--xmas-ink); stroke-width: 3; }
+  .slot { fill: none; stroke: var(--xmas-ink); stroke-width: 1.6; stroke-dasharray: 2 2; opacity: 0.7; }
+  .ball, .hi { display: none; }
+  .ball { stroke: var(--xmas-ink); stroke-width: 2; }
+  .hi { fill: var(--xmas-snow); opacity: 0.8; }
+  [data-on] > .slot { display: none; }
+  [data-on] > .ball, [data-on] > .hi { display: inline; }
+  .c1 { fill: var(--fest-xmas-b); }
+  .c2 { fill: var(--fest-xmas-a); }
+  .c3 { fill: var(--xmas-bulb-4); }
+  .c4 { fill: var(--xmas-ball-pink); }
+  .c5 { fill: var(--xmas-bulb-3); }
+  .gold { display: none; fill: var(--gold); stroke: var(--xmas-ink); stroke-width: 1.6; }
+  .gold[data-on] { display: inline; }
+  .star { fill: var(--xmas-snow); stroke: var(--xmas-ink); stroke-width: 2; opacity: 0.5; }
+  [data-full] .star { fill: var(--fest-xmas-a); opacity: 1; }
+</style>

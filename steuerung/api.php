@@ -83,11 +83,19 @@ function current_status(PDO $db, string $key): array
     return [$f, fact_status($f, now(), live_keys())];
 }
 
-// Feiertags-Fakten (Kategorie „holiday“) sind fest auf ihren Feiertag gelegt (src/data/holidays.ts) und lassen sich
+// Feiertags-Fakten (Kategorie „holiday“) und Türchen-Fakten des Adventskalenders sind fest auf ihren Tag gelegt und lassen sich
 // nicht umplanen, in den Pool legen oder vorziehen. Offline nehmen und wieder online geht.
 function fixed_holiday(array $f): void
 {
-    if ($f['category'] === 'holiday') fail('holiday-fixed');
+    if ($f['category'] === 'holiday' || in_array($f['key'], advent_keys(), true)) fail('holiday-fixed');
+}
+
+/** Türchen-Fakten des Adventskalenders (src/data/advent.ts), aus fest.json vom letzten Upload. Sie stehen fest auf ihrem Tag. */
+function advent_keys(): array
+{
+    $raw = @file_get_contents(site_dir() . '/fest.json');
+    $fest = $raw === false ? null : json_decode($raw, true);
+    return is_array($fest) && isset($fest['advent']) && is_array($fest['advent']) ? $fest['advent'] : [];
 }
 
 if ($route === 'session' && $method === 'GET') {

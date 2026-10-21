@@ -1,0 +1,25 @@
+---
+// Der Wichtel (Look A): versteckt sich jeden Tag auf einer Faktseite (src/data/advent.ts, wichtelKey).
+interface Props { class?: string }
+const { class: cls } = Astro.props;
+---
+<svg class:list={['x-wichtel', cls]} viewBox="0 0 64 64" aria-hidden="true">
+  <path class="red" d="M14 30 C 18 10 34 2 48 6 L 44 30Z" />
+  <circle class="fur" cx="48" cy="6" r="5" />
+  <circle class="skin" cx="31" cy="38" r="13" />
+  <rect class="fur" x="12" y="27" width="38" height="8" rx="4" />
+  <circle class="eye" cx="26" cy="38" r="2" />
+  <circle class="eye" cx="36" cy="38" r="2" />
+  <path class="mouth" d="M26 45 q5 4 10 0" />
+  <path class="coat" d="M20 52 q11 10 22 0 L 46 62 L 16 62Z" />
+</svg>
+
+<style>
+  .x-wichtel { display: block; overflow: visible; }
+  .red { fill: var(--xmas-red); stroke: var(--xmas-ink); stroke-width: 3; stroke-linejoin: round; }
+  .fur { fill: var(--xmas-snow); stroke: var(--xmas-ink); stroke-width: 3; }
+  .skin { fill: var(--xmas-skin); stroke: var(--xmas-ink); stroke-width: 3; }
+  .eye { fill: var(--xmas-ink); }
+  .mouth { fill: none; stroke: var(--xmas-ink); stroke-width: 2.5; stroke-linecap: round; }
+  .coat { fill: var(--xmas-green); stroke: var(--xmas-ink); stroke-width: 3; stroke-linejoin: round; }
+</style>

@@ -11,6 +11,9 @@ import { t, chartsPath } from '../../i18n/ui';
 import { x, mePath, youPath, giftsPath, numberPath } from '../../i18n/extras';
 import { postsFor, categoryIcon } from '../../lib';
 import { BADGE_AT, RANK_AT } from '../../scripts/streak';
+import { at, adventPath } from '../../i18n/advent';
+import { calendarYear } from '../../data/advent';
+import { berlinDay } from '../../week';
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const ui = t(lang);
@@ -20,7 +23,10 @@ const other: Lang = lang === 'de' ? 'en' : 'de';
 const posts = await postsFor(lang);
 const cats = Object.fromEntries(posts.map((p) => [p.data.translationKey, p.data.category]));
 const badgeCats = CATEGORIES.filter((c) => c !== 'holiday');
+const xa = at(lang).me;
 const tiles = [
+  // WTF-Baum aus dem Adventskalender, nur in der Weihnachtszeit (Klasse xmas)
+  { id: 'tree', href: adventPath(lang), emoji: '🎄', cls: 'cat-nature', name: xa.name, text: xa.text.replace('{n}', '0') },
   { id: 'album', href: `${chartsPath(lang)}#album`, emoji: '📒', cls: 'cat-weird', name: m.album, text: m.albumText(0, posts.length) },
   { id: 'gold', href: `/${lang}/science-jumper/`, emoji: '🏅', cls: 'cat-animals', name: m.gold, text: m.goldText },
   { id: 'number', href: numberPath(lang), emoji: '🎯', cls: 'cat-nature', name: m.number, text: m.numberText(0, 0) },
@@ -32,7 +38,7 @@ const texts = {
   days: [e.streak.days(1), e.streak.days(9001)], none: e.streak.none, alive: e.streak.alive, done: e.streak.done, best: e.streak.best(9001),
   ranks: e.ranks, rankOf: m.rankOf(9001, 9002), toNext: m.toNext(9001, '§'), top: m.top, read: m.read(9001),
   album: m.albumText(9001, posts.length), hole: [m.holeText(0), m.holeText(9001)], number: [m.numberText(0, 0), m.numberText(9001, 9002)],
-  badge: m.badgeOf('§', 9001, BADGE_AT),
+  badge: m.badgeOf('§', 9001, BADGE_AT), tree: xa.text, year: calendarYear(berlinDay()),
 };
 ---
 <Base lang={lang} title={m.title} description={m.intro} altUrl={mePath(other)}>
@@ -77,7 +83,7 @@ const texts = {
       <h2 class="mh">{m.kicker}</h2>
       <ul class="tiles">
         {tiles.map((tl) => (
-          <li>
+          <li class:list={[tl.id === 'tree' && 'xmas']}>
             <a class="tile" href={tl.href} data-tile={tl.id}>
               <span class:list={['t-emoji', tl.cls]} aria-hidden="true">{tl.emoji}</span>
               <span class="t-text"><span class="t-name">{tl.name}</span><span class="t-sub" data-sub>{tl.text}</span></span>
@@ -96,6 +102,7 @@ const texts = {
   import { readKeys } from '../../scripts/fame';
   import { stats } from '../../scripts/tageszahl';
   import { loadStore } from '../../scripts/gold';
+  import { adventState } from '../../scripts/advent';
 
   const root = document.querySelector<HTMLElement>('[data-me]');
   if (root) {
@@ -139,6 +146,7 @@ const texts = {
     sub('hole', hole ? T.hole[1].replace('9001', hole) : T.hole[0]);
     const best = loadStore().best;
     if (best) root.querySelector('[data-tile="gold"] [data-sub]')!.textContent += ` · 🏆 ${best}`;
+    sub('tree', T.tree.replace('{n}', String(adventState(T.year).open.length)));
   }
 </script>
 
