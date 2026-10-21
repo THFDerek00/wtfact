@@ -14,6 +14,10 @@ import XmasLights from '../components/xmas/XmasLights.astro';
 import XmasHat from '../components/xmas/XmasHat.astro';
 import XmasDrift from '../components/xmas/XmasDrift.astro';
 import { inSeason, doorOf } from '../data/advent';
+import { inSpooky, PUMPKIN_TOTAL } from '../data/halloween';
+import { ht } from '../i18n/halloween';
+import PumpkinLights from '../components/halloween/PumpkinLights.astro';
+import PumpkinStem from '../components/halloween/PumpkinStem.astro';
 import { at, adventPath } from '../i18n/advent';
 
 interface Props {
@@ -36,6 +40,9 @@ const siteFest = holidayToday ? festOfHoliday(holidayToday) : undefined;
 // Weihnachtszeit vom 1. Advent bis 26.12. (Wunsch von Eric, 2026-10-21, src/data/advent.ts): data-season auf <html>.
 // Das Skript im <head> rechnet es vor dem ersten Zeichnen im Browser nach, src/scripts/xmas.ts stellt Zahlen und Kerzen ein.
 const season = inSeason(today);
+// Gruselwoche vom 24. bis 31.10. (Wunsch von Eric, 2026-10-21, src/data/halloween.ts): data-season='halloween'.
+const spooky = inSpooky(today);
+const hw = ht(lang);
 const door = season ? doorOf(today) : 0;
 const xa = at(lang);
 const ui = t(lang);
@@ -61,7 +68,7 @@ const nav = [
 ].map((n) => ({ ...n, current: section ? section === n.id : n.id === 'facts' ? path === n.href : [n.href, ...n.also].some((h) => path.startsWith(h)) }));
 ---
 <!doctype html>
-<html lang={lang} data-season={season ? 'xmas' : undefined} data-door={door || undefined}>
+<html lang={lang} data-season={season ? 'xmas' : spooky ? 'halloween' : undefined} data-door={door || undefined}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -77,7 +84,9 @@ const nav = [
         if (!/^\d{4}-\d\d-\d\d$/.test(d)) d = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
         const y = +d.slice(0, 4), e = Date.UTC(y, 11, 24), f = new Date(e - (new Date(e).getUTCDay() + 21) * 864e5).toISOString().slice(0, 10);
         const on = d >= f && d <= y + '-12-26', n = on && d.slice(5, 7) === '12' ? +d.slice(8) : 0;
-        if (on) r.dataset.season = 'xmas'; else delete r.dataset.season;
+        // Gruselwoche 24. bis 31.10., gleiche Rechnung wie src/data/halloween.ts
+        const md = d.slice(5), spooky = md >= '10-24' && md <= '10-31';
+        if (on) r.dataset.season = 'xmas'; else if (spooky) r.dataset.season = 'halloween'; else delete r.dataset.season;
         if (n && n <= 24) r.dataset.door = String(n); else delete r.dataset.door;
       } catch {}
     </script>
@@ -112,15 +121,20 @@ const nav = [
     <a class="skip" href="#main">{ui.skip}</a>
     <header class="top">
       <XmasLights />
+      <PumpkinLights />
       <div class="wrap bar">
         <a href={`/${lang}/`} class="logo" aria-label={SITE.name}>
-          WTF<span>act</span><b class="sticker">?!<XmasHat /></b>
+          WTF<span>act</span><b class="sticker">?!<XmasHat /><PumpkinStem /></b>
         </a>
         <p class="slogan">{ui.slogan}</p>
         <nav class="mainnav" aria-label={ui.home.nav}>
           {nav.map((n) => <a href={n.href} aria-current={n.current ? 'page' : undefined}>{n.label}{n.id === 'me' && <span class="streak" data-streak-badge hidden></span>}</a>)}
         </nav>
         <div class="actions">
+          <a class="btn h-btn halloween" href={`/${lang}/#kuerbisse`}>
+            <span aria-hidden="true">🍬</span><span class="label" aria-hidden="true">{hw.candy}</span> <b aria-hidden="true"><span data-h-count>0</span>/{PUMPKIN_TOTAL}</b>
+            <span class="sr-only" data-h-count={hw.counter}>{hw.counter.replace('{n}', '0').replace('{total}', String(PUMPKIN_TOTAL))}</span>
+          </a>
           <a class="btn door-btn" href={adventPath(lang)} data-x-door-link aria-label={xa.name}>
             <span aria-hidden="true">🎁</span><span class="label">{xa.doorShort}</span> <b data-x-door-no>{door || 1}</b>
           </a>
@@ -140,10 +154,11 @@ const nav = [
     <main id="main"><slot /></main>
     <footer class="foot sec fest-sky" data-fest="fest" data-edge>
       <XmasDrift />
-      <span class="no-xmas"><FestDeco deco={['sparkle', 'star', 'question', 'bolt']} size="lg" /></span>
+      <span class="no-xmas no-halloween"><FestDeco deco={['sparkle', 'star', 'question', 'bolt']} size="lg" /></span>
+      <span class="halloween"><FestDeco deco={['pumpkin', 'bat', 'candy', 'ghost']} size="lg" /></span>
       <span class="xmas"><FestDeco deco={['snowflake', 'star', 'fir', 'bell']} size="lg" /></span>
       <div class="wrap">
-        <a href={`/${lang}/`} class="logo big" aria-label={SITE.name}>WTF<span>act</span><b class="sticker">?!<XmasHat big /></b></a>
+        <a href={`/${lang}/`} class="logo big" aria-label={SITE.name}>WTF<span>act</span><b class="sticker">?!<XmasHat big /><PumpkinStem big /></b></a>
         <p class="claim">{ui.slogan}</p>
         <p class="note">{ui.tagline}</p>
         <p class="note">{ui.affiliateFooter} {ui.madeWith}</p>
@@ -171,13 +186,40 @@ const nav = [
         <a href={n.href} aria-current={n.current ? 'page' : undefined}><Icon name={n.icon} /><span>{n.tab}{n.id === 'me' && <b class="streak" data-streak-badge hidden></b>}</span></a>
       ))}
     </nav>
+    <!-- Gruselwoche (src/scripts/halloween.ts): Meldung für gefundene Kürbisse, Spuknacht am 31.10. mit Taschenlampe und geheimem Fakt -->
+    <div class="h-toast" data-h-toast role="status" hidden>
+      <span class="h-toast-ic" aria-hidden="true">🍬</span>
+      <div><b data-h-toast-title></b><span data-h-toast-text></span> <a data-h-toast-link hidden></a></div>
+      <button type="button" class="h-toast-x" data-h-toast-close aria-label={hw.pumpkin.close}>×</button>
+    </div>
+    <div class="h-night" data-h-night hidden>
+      <div class="h-night-bar">
+        <span aria-hidden="true">🔦</span>
+        <div><b>{hw.night.title}</b> <span>{path === `/${lang}/` ? hw.night.text : hw.night.textAway}</span></div>
+        {path !== `/${lang}/` && <a class="btn" href={`/${lang}/#kuerbisse`}>{hw.night.home}</a>}
+        <button type="button" class="btn" data-h-light>{hw.night.light}</button>
+      </div>
+    </div>
+    <dialog class="h-secret" data-h-secret>
+      <form method="dialog">
+        <p class="h-secret-k">🎃 {hw.night.foundTitle}</p>
+        <p>{hw.night.secret}</p>
+        <p class="h-secret-src"><a href={hw.night.sourceUrl} rel="noopener" target="_blank">{hw.night.source}</a></p>
+        <button class="btn" type="submit">{hw.pumpkin.close}</button>
+      </form>
+    </dialog>
     <CookieConsent lang={lang} />
     <script>
       import { isNew, berlinDay } from '../week';
       import { streakInfo } from '../scripts/streak';
       import { applySeason } from '../scripts/xmas';
-      // Weihnachtszeit: Advent, Kerzen, Türchen des Tages und Schnee (src/scripts/xmas.ts)
+      import { applySpooky, spookNight } from '../scripts/halloween';
+      // Weihnachtszeit: Advent, Kerzen, Türchen des Tages und Schnee, Gruselwoche (src/scripts/xmas.ts)
       applySeason();
+      // Gruselwoche: Kürbis-Zähler, Nächte bis Halloween, am 31.10. die Spuknacht (src/scripts/halloween.ts)
+      applySpooky();
+      spookNight();
+      addEventListener('wtfact-pumpkins', () => applySpooky());
       // Serien-Zahl am Menüpunkt „Ich“ (neben dem Flammen-Symbol), sobald eine Serie läuft
       const showStreak = () => {
         const n = streakInfo().current;
@@ -283,7 +325,41 @@ const nav = [
   .door-btn { display: none; padding: var(--space-2) var(--space-4); font-size: var(--fs-sm); background: var(--fest-xmas-a); color: var(--on-accent); text-decoration: none; gap: var(--space-1); }
   :global([data-season='xmas'][data-door]) .door-btn { display: inline-flex; }
   :global([data-season='xmas'][data-door]) .surprise { display: none; }
-  .foot > .no-xmas, .foot > .xmas { position: absolute; inset: 0; pointer-events: none; }
+  .foot > .no-xmas, .foot > .xmas, .foot > .halloween { position: absolute; inset: 0; pointer-events: none; }
+  /* Gruselwoche: Kürbisstiel auf dem „?!“, der Knopf zählt gefundene Kürbisse und steht statt „Überrasch mich“ */
+  .h-btn { display: inline-flex; padding: var(--space-2) var(--space-4); font-size: var(--fs-sm); background: var(--hw-pumpkin); color: var(--on-accent); text-decoration: none; gap: var(--space-1); }
+  .h-btn b { font-family: var(--font-headline); font-weight: 400; }
+  :global([data-season='halloween']) .surprise { display: none; }
+  .h-toast {
+    position: fixed; left: 50%; bottom: var(--space-6); z-index: 30; translate: -50% 0; width: min(36rem, calc(100% - var(--space-8)));
+    display: flex; align-items: center; gap: var(--space-4); padding: var(--space-4) var(--space-5);
+    background: var(--fest-halloween-night); color: var(--on-night); border: var(--bw-strong) solid var(--hw-pumpkin); border-radius: var(--radius-md); box-shadow: var(--shadow-2xl);
+  }
+  .h-toast[hidden] { display: none; }
+  .h-toast-ic { font-size: var(--fs-emoji-sm); line-height: 1; }
+  .h-toast b { display: block; font-family: var(--font-headline); font-weight: 400; font-size: var(--fs-xl); color: var(--hw-pumpkin); }
+  .h-toast a { color: var(--hw-face); font-weight: 700; }
+  .h-toast-x { margin-left: auto; align-self: flex-start; padding: 0 var(--space-2); border: 0; background: none; color: var(--on-night); font-size: var(--fs-xl); cursor: pointer; }
+  /* Spuknacht: alles dunkel bis auf den Lichtkegel um Maus oder Finger (--hx/--hy setzt das Skript) */
+  .h-night {
+    position: fixed; inset: 0; z-index: 25; pointer-events: none;
+    background: radial-gradient(circle var(--hw-torch) at var(--hx, 50%) var(--hy, 45%), transparent 0 55%, var(--hw-shade-soft) 80%, var(--hw-shade) 100%);
+  }
+  .h-night[hidden] { display: none; }
+  .h-night-bar {
+    position: absolute; left: 50%; bottom: var(--space-6); translate: -50% 0; width: min(44rem, calc(100% - var(--space-8))); pointer-events: auto;
+    display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3) var(--space-4); padding: var(--space-4) var(--space-5);
+    background: var(--fest-halloween-night); color: var(--on-night); border: var(--bw-strong) solid var(--hw-pumpkin); border-radius: var(--radius-md);
+  }
+  .h-night-bar > span { font-size: var(--fs-emoji-sm); line-height: 1; }
+  .h-night-bar > div { flex: 1 1 18rem; }
+  .h-night-bar b { color: var(--hw-pumpkin); }
+  .h-night-bar .btn { background: var(--hw-pumpkin); color: var(--on-accent); }
+  .h-secret { max-width: min(36rem, calc(100% - var(--space-8))); padding: var(--space-6); border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-2xl); }
+  .h-secret::backdrop { background: var(--hw-shade-soft); }
+  .h-secret-k { font-family: var(--font-headline); font-size: var(--fs-xl); color: var(--hw-pumpkin-line); margin-top: 0; }
+  .h-secret-src { font-size: var(--fs-sm); }
+  .h-secret .btn { background: var(--hw-pumpkin); color: var(--on-accent); }
   .lang { padding: var(--space-1) var(--space-3); font-size: var(--fs-sm); }
   .theme { padding: var(--space-1) var(--space-2); cursor: pointer; }
   .theme svg { width: var(--fs-lg); height: var(--fs-lg); fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
@@ -315,6 +391,6 @@ const nav = [
   }
   @media (max-width: 520px) {
     .logo { font-size: var(--fs-2xl); }
-    .surprise .label, .door-btn .label { display: none; }
+    .surprise .label, .door-btn .label, .h-btn .label { display: none; }
   }
 </style>

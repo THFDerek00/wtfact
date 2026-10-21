@@ -1,0 +1,16 @@
+---
+// Goldener 13. Kürbis (Look A „Kürbislicht“): sitzt nur in der Spuknacht am 31.10. versteckt im Kategorien-Abschnitt der
+// Startseite. Wer ihn anklickt, macht das Licht wieder an und bekommt den geheimen Halloween-Fakt (src/scripts/halloween.ts).
+import type { Lang } from '../../config';
+import Pumpkin from './Pumpkin.astro';
+import { ht } from '../../i18n/halloween';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+---
+<button type="button" class="h-gold" data-h-gold aria-label={ht(lang).night.gold} hidden><Pumpkin gold /></button>
+
+<style>
+  .h-gold { position: absolute; right: 7%; top: var(--space-10); z-index: 3; width: var(--hw-gold-size); padding: 0; border: 0; background: none; cursor: pointer; rotate: 10deg; animation: fest-float var(--dur-fest-float) var(--ease) infinite; filter: drop-shadow(0 0 var(--space-4) var(--hw-gold)); }
+  .h-gold[hidden] { display: none; }
+  .h-gold:hover { rotate: -6deg; }
+</style>

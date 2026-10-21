@@ -22,6 +22,8 @@ import Wreath from '../xmas/Wreath.astro';
 import XmasCap from '../xmas/XmasCap.astro';
 import { adventNo, daysToEve } from '../../data/advent';
 import { at } from '../../i18n/advent';
+import { ht } from '../../i18n/halloween';
+import { nightsToHalloween } from '../../data/halloween';
 interface Props { lang: Lang; catsUrl: string; posts: Post[] }
 const { lang, catsUrl, posts } = Astro.props;
 const ui = t(lang);
@@ -47,6 +49,9 @@ const strip = Astro.slots.has('default') ? await Astro.slots.render('default') :
 const xa = at(lang);
 const adv = Math.max(1, adventNo(today));
 const left = daysToEve(today);
+const hw = ht(lang);
+const nights = Math.max(0, nightsToHalloween(today));
+const nightsText = nights > 1 ? hw.nights.many.replace('{n}', String(nights)) : nights === 1 ? hw.nights.one : hw.nights.zero;
 const countText = left > 1 ? xa.count.many.replace('{n}', String(left)) : left === 1 ? xa.count.one : left === 0 ? xa.count.eve : xa.count.after;
 ---
 {fest && holiday && (
@@ -82,13 +87,15 @@ const countText = left > 1 ? xa.count.many.replace('{n}', String(left)) : left =
   </section>
 )}
 <section class="sec fest-sky day-hero" data-day-hero data-weekday={wd} data-fest={themeOf(dayCats[di])} data-themes={dayCats.map(themeOf).join(',')} data-lang={lang} hidden={!!fest}>
-  {dayCats.map((c, i) => <span class="day-deco no-xmas" data-deco={i} hidden={i !== di}><FestDeco deco={festOf(c, '')?.deco ?? []} size="lg" /></span>)}
+  {dayCats.map((c, i) => <span class="day-deco no-xmas no-halloween" data-deco={i} hidden={i !== di}><FestDeco deco={festOf(c, '')?.deco ?? []} size="lg" /></span>)}
   <span class="day-deco xmas"><FestDeco deco={['fir', 'gift', 'star', 'snowflake', 'bell', 'candle']} size="lg" /></span>
+  <span class="day-deco halloween"><FestDeco deco={['pumpkin', 'bat', 'candy', 'black-cat', 'moon', 'pumpkin']} size="lg" /></span>
   <div class="wrap top-row">
     <span class="pill" data-date>{dateText}</span>
-    {dayCats.map((c, i) => <span class="cat-pill no-xmas" data-deco={i} hidden={i !== di}>{h.dayColour}: {ui.categories[c]}</span>)}
+    {dayCats.map((c, i) => <span class="cat-pill no-xmas no-halloween" data-deco={i} hidden={i !== di}>{h.dayColour}: {ui.categories[c]}</span>)}
     <span class="xmas"><Wreath lit={adv} label={xa.advent.replace('{n}', String(adv))} tpl={xa.advent} /></span>
     <span class="x-count xmas" data-x-count={JSON.stringify(xa.count)}>{countText}</span>
+    <span class="x-count h-count halloween" data-h-nights={JSON.stringify(hw.nights)}>🕯️ {nightsText}</span>
   </div>
   <p class="mega day-word" aria-hidden="true" data-day-word data-len={h.days[wd].length}>{h.days[wd]}</p>
   <div class="wrap row">
@@ -196,6 +203,8 @@ const countText = left > 1 ? xa.count.many.replace('{n}', String(left)) : left =
   .day-hero h1 { position: relative; }
   /* Platz für die Lichterkette unter dem Kopf */
   :global([data-season='xmas']) .day-hero { padding-top: calc(var(--space-6) + var(--xmas-lights-h)); }
+  :global([data-season='halloween']) .day-hero { padding-top: calc(var(--space-6) + var(--hw-lights-h)); }
+  .x-count.h-count { background: var(--fest-b); }
   .x-count {
     padding: var(--space-2) var(--space-4); border: var(--bw) solid var(--on-accent); border-radius: var(--radius-pill);
     background: var(--fest-a); color: var(--on-accent); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); line-height: 1;

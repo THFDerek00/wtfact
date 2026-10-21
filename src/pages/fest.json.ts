@@ -4,12 +4,15 @@
 // Ist heute oder am Bautag ein Feiertag und der Bautag nicht heute, wird neu hochgeladen.
 // Seit 2026-10-21 zählen auch alle Tage der Weihnachtszeit dazu (src/data/advent.ts), damit Kalender und Look jeden Tag
 // frisch sind. `advent` nennt die Türchen-Fakten, die das Dashboard nicht umplanen lässt (wie Feiertags-Fakten).
+// Seit 2026-10-21 auch die Gruselwoche (src/data/halloween.ts): ihre Tage und die Fakten mit versteckten Kürbissen.
 import { HOLIDAYS } from '../data/holidays';
 import { DOORS, seasonDays, doorKeys } from '../data/advent';
+import { PUMPKINS, spookyDays } from '../data/halloween';
 import { berlinDay } from '../week';
 
 export async function GET() {
-  const days = new Set([...HOLIDAYS.flatMap((h) => h.dates), ...Object.keys(DOORS).flatMap((y) => seasonDays(Number(y)))]);
-  const body = { built: berlinDay(), holidays: [...days].sort(), advent: doorKeys() };
+  const year = Number(berlinDay().slice(0, 4));
+  const days = new Set([...HOLIDAYS.flatMap((h) => h.dates), ...Object.keys(DOORS).flatMap((y) => seasonDays(Number(y))), ...spookyDays(year), ...spookyDays(year + 1)]);
+  const body = { built: berlinDay(), holidays: [...days].sort(), advent: [...doorKeys(), ...PUMPKINS.map((p) => p.key)] };
   return new Response(JSON.stringify(body), { headers: { 'content-type': 'application/json; charset=utf-8' } });
 }

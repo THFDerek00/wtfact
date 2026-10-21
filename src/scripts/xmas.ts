@@ -3,6 +3,7 @@
 // die dunklen Bühnen. Ob Weihnachtszeit ist, setzt schon das kleine Skript im <head> (Base.astro) auf <html>.
 import { berlinDay } from '../week';
 import { inSeason, adventNo, doorOf, daysToEve } from '../data/advent';
+import { inSpooky } from '../data/halloween';
 
 const PREVIEW = 'wtfact:today';
 
@@ -31,7 +32,7 @@ export function applySeason(root: ParentNode = document) {
   const day = xmasToday();
   const on = inSeason(day);
   const html = document.documentElement;
-  if (on) html.dataset.season = 'xmas'; else delete html.dataset.season;
+  if (on) html.dataset.season = 'xmas'; else if (inSpooky(day)) html.dataset.season = 'halloween'; else delete html.dataset.season;
   const door = on ? doorOf(day) : 0;
   if (door) html.dataset.door = String(door); else delete html.dataset.door;
   if (!on) return { day, on, door };

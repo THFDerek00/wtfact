@@ -258,3 +258,19 @@ Wunsch von Eric (2026-10-08). Abläufe: `README.md`, Abschnitt „Dashboard“.
 - **Werbung** (`ProductBox.astro`, neu gestaltet 2026-10-09): steht direkt nach dem Text. Jedes Produkt ist eine ganz anklickbare Kachel: Bildfläche in der Kategoriefarbe des Fakts (`.cat-*`, mit Etikett „amazon.de“) und einem Emoji, das zum Artikel passt (`src/product-art.ts` leitet es aus dem Produktnamen ab; Bücher und Filme zeigen 📚/🎬 groß und das Thema als runden Aufkleber; ohne Treffer 🛍️, dann dort eine Regel ergänzen), Name, warum es passt, oranger Knopf mit `external-link`-Icon. Kennzeichnung bleibt Pflicht: dunkles Etikett „Werbung“ / „Ad“ rechts neben der Überschrift und der Provisionshinweis unten, Links mit `rel="sponsored"`.
 - **Cookie-Banner** (`CookieConsent.astro`, Eric 2026-10-15): `.card` unten rechts (am Handy über der Leiste), nicht blockierend. „Nur notwendige“ und „Alle akzeptieren“ sind gleichwertig: gleiche `.btn`-Farbe, gleich breit, nebeneinander (unter 420px untereinander). Wieder öffnen über „Cookie-Einstellungen“ in der Fußzeile (`.linkish`, Knopf im Link-Look).
 - **Top 10** (`TopTen.astro`, WTF-Charts zwischen „Gerade ganz oben“ und Abstimmung): nummerierte Liste aus `.card`-Zeilen, Platz 1 mit Nummer in `--pink-text`, rechts 👍/👎-Zahlen.
+
+## Gruselwoche (Halloween)
+
+Wunsch von Eric, 2026-10-21 (Entwurf „A Kürbislicht“ im Projektordner `halloween-2026/entwuerfe/`): Vom 24. bis 31.10. sieht die
+Seite nach Halloween aus. Termine und Verstecke stehen in `src/data/halloween.ts`.
+
+- Schalter: `data-season='halloween'` auf `<html>` (wie die Weihnachtszeit, Vorschau mit `?vorschau=JJJJ-MM-TT`).
+  `.halloween` ist nur dann sichtbar, `.no-halloween` wird dann ausgeblendet.
+- Farben: Thema `halloween` (`--fest-halloween-night`, `-a` Orange, `-b` Lila) für Wochentag-Kopf, Fuß und Kürbis-Leiste.
+  Das „?!“ im Logo wird orange und bekommt einen Stiel. Zeichnungsfarben und Größen als `--hw-*`-Tokens.
+- Bausteine in `src/components/halloween/`: `PumpkinLights` (Kürbis-Lichterkette unter dem Kopf, flackert), `PumpkinStem`
+  (Stiel auf dem „?!“), `Pumpkin` (Kürbislaterne, auch golden), `SpookyStrip` (Startseite: 13 Plätze, Hinweis, Bonbonglas),
+  `GoldPumpkin` (goldener Kürbis der Spuknacht).
+- Kopf: Statt „Überrasch mich“ zählt der orange Knopf „Süßes n/13“ die gefundenen Kürbisse. Tagesleiste: Kachel „Kürbisjagd“.
+- Meldungen (`.h-toast`) und die Spuknacht (`.h-night`, Lichtkegel `--hw-torch`, Dunkelheit `--hw-shade`) stehen in Base.astro.
+  Der Streich (`[data-trick]`) dreht die Seite einmal kurz, bei „Bewegung reduzieren“ nicht.
