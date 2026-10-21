@@ -1,0 +1,192 @@
+---
+// Seite „Ich“ (Wunsch von Eric, 2026-10-21): /de/ich/ und /en/me/. Serie (src/scripts/streak.ts), Rang nach gelesenen
+// Fakten, ein Abzeichen je Kategorie und Kacheln zu allem Persönlichen: Sammelalbum, Gold-Fakten, Du in Zahlen,
+// Geschenkfinder, Kaninchenbau-Rekord und Tageszahl. Alles liest der Browser aus seinem Speicher, kein Konto.
+// Weitere Kacheln: einen Eintrag in `tiles` ergänzen.
+import Base from '../../layouts/Base.astro';
+import FestDeco from '../FestDeco.astro';
+import Icon from '../Icon.astro';
+import { CATEGORIES, type Lang } from '../../config';
+import { t, chartsPath } from '../../i18n/ui';
+import { x, mePath, youPath, giftsPath, numberPath } from '../../i18n/extras';
+import { postsFor, categoryIcon } from '../../lib';
+import { BADGE_AT, RANK_AT } from '../../scripts/streak';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const ui = t(lang);
+const e = x(lang);
+const m = e.me;
+const other: Lang = lang === 'de' ? 'en' : 'de';
+const posts = await postsFor(lang);
+const cats = Object.fromEntries(posts.map((p) => [p.data.translationKey, p.data.category]));
+const badgeCats = CATEGORIES.filter((c) => c !== 'holiday');
+const tiles = [
+  { id: 'album', href: `${chartsPath(lang)}#album`, emoji: '📒', cls: 'cat-weird', name: m.album, text: m.albumText(0, posts.length) },
+  { id: 'gold', href: `/${lang}/science-jumper/`, emoji: '🏅', cls: 'cat-animals', name: m.gold, text: m.goldText },
+  { id: 'number', href: numberPath(lang), emoji: '🎯', cls: 'cat-nature', name: m.number, text: m.numberText(0, 0) },
+  { id: 'hole', href: `/${lang}/`, emoji: '🐇', cls: 'cat-space', name: m.hole, text: m.holeText(0) },
+  { id: 'you', href: youPath(lang), emoji: '🎂', cls: 'cat-body', name: m.you, text: m.youText },
+  { id: 'gifts', href: giftsPath(lang), emoji: '🎁', cls: 'cat-food', name: m.gifts, text: m.giftsText },
+];
+const texts = {
+  days: [e.streak.days(1), e.streak.days(9001)], none: e.streak.none, alive: e.streak.alive, done: e.streak.done, best: e.streak.best(9001),
+  ranks: e.ranks, rankOf: m.rankOf(9001, 9002), toNext: m.toNext(9001, '§'), top: m.top, read: m.read(9001),
+  album: m.albumText(9001, posts.length), hole: [m.holeText(0), m.holeText(9001)], number: [m.numberText(0, 0), m.numberText(9001, 9002)],
+  badge: m.badgeOf('§', 9001, BADGE_AT),
+};
+---
+<Base lang={lang} title={m.title} description={m.intro} altUrl={mePath(other)}>
+  <section class="sec fest-sky mhero" data-fest="fest">
+    <FestDeco deco={['sparkle', 'star', 'bolt', 'question']} size="lg" />
+    <div class="wrap">
+      <span class="pill">{m.kicker}</span>
+      <div class="flame">
+        <span class="mega big" data-streak-no>0</span>
+        <div>
+          <h1 class="head" data-streak-text>{e.streak.none}</h1>
+          <p class="sub" data-streak-hint>{e.streak.alive}</p>
+          <p class="sub best" data-streak-best></p>
+        </div>
+      </div>
+      <ol class="week" aria-hidden="true">
+        {e.streak.week.map((d) => <li><i data-day></i>{d}</li>)}
+      </ol>
+    </div>
+  </section>
+
+  <section class="sec sec--night mlist" data-edge data-me data-cats={JSON.stringify(cats)} data-texts={JSON.stringify(texts)} data-rank-at={JSON.stringify(RANK_AT)}>
+    <div class="wrap">
+      <div class="card rank bleed">
+        <div class="r-top"><span class="r-name" data-rank-name>{e.ranks[0]}</span><span class="r-of" data-rank-of></span></div>
+        <div class="xp" aria-hidden="true"><i data-xp></i></div>
+        <p class="r-next" data-rank-next></p>
+      </div>
+
+      <h2 class="mh">{m.badges}</h2>
+      <p class="hint">{m.badgesHint(BADGE_AT)}</p>
+      <ul class="badges">
+        {badgeCats.map((c) => (
+          <li class="badge" data-badge={c} title={ui.categories[c]}>
+            <span class:list={['b-coin', `cat-${c}`]} aria-hidden="true"><img src={categoryIcon(c)} alt="" width="40" height="40" /></span>
+            <span class="b-name">{ui.categories[c]}</span>
+            <span class="b-count" data-badge-count>0/{BADGE_AT}</span>
+          </li>
+        ))}
+      </ul>
+
+      <h2 class="mh">{m.kicker}</h2>
+      <ul class="tiles">
+        {tiles.map((tl) => (
+          <li>
+            <a class="tile" href={tl.href} data-tile={tl.id}>
+              <span class:list={['t-emoji', tl.cls]} aria-hidden="true">{tl.emoji}</span>
+              <span class="t-text"><span class="t-name">{tl.name}</span><span class="t-sub" data-sub>{tl.text}</span></span>
+              <Icon name="chevron-right" />
+            </a>
+          </li>
+        ))}
+      </ul>
+      <p class="hint">{m.intro}</p>
+    </div>
+  </section>
+</Base>
+
+<script>
+  import { streakInfo, rankFor, BADGE_AT } from '../../scripts/streak';
+  import { readKeys } from '../../scripts/fame';
+  import { stats } from '../../scripts/tageszahl';
+  import { loadStore } from '../../scripts/gold';
+
+  const root = document.querySelector<HTMLElement>('[data-me]');
+  if (root) {
+    const T = JSON.parse(root.dataset.texts!);
+    const cats = JSON.parse(root.dataset.cats!) as Record<string, string>;
+    const hero = document.querySelector<HTMLElement>('.mhero')!;
+    const s = streakInfo();
+    hero.querySelector('[data-streak-no]')!.textContent = String(s.current);
+    hero.querySelector('[data-streak-text]')!.textContent = s.current ? (s.current === 1 ? T.days[0] : T.days[1].replace('9001', String(s.current))) : T.none;
+    hero.querySelector('[data-streak-hint]')!.textContent = s.activeToday ? T.done : T.alive;
+    if (s.best > 1) hero.querySelector('[data-streak-best]')!.textContent = T.best.replace('9001', String(s.best));
+    hero.querySelectorAll<HTMLElement>('[data-day]').forEach((el, k) => {
+      const d = s.week[k];
+      el.textContent = d.active ? '🔥' : d.today ? '⭐' : '·';
+      el.toggleAttribute('data-active', d.active);
+      el.toggleAttribute('data-today', d.today);
+    });
+
+    const read = [...readKeys()].filter((k) => cats[k]);
+    const r = rankFor(read.length);
+    root.querySelector('[data-rank-name]')!.textContent = T.ranks[r.index];
+    root.querySelector('[data-rank-of]')!.textContent = `${T.rankOf.replace('9001', r.index + 1).replace('9002', T.ranks.length)} · ${T.read.replace('9001', read.length)}`;
+    root.querySelector<HTMLElement>('[data-xp]')!.style.setProperty('--fill', String(r.progress));
+    root.querySelector('[data-rank-next]')!.textContent = r.next ? T.toNext.replace('9001', r.toNext).replace('§', T.ranks[r.index + 1]) : T.top;
+
+    const per: Record<string, number> = {};
+    read.forEach((k) => (per[cats[k]] = (per[cats[k]] ?? 0) + 1));
+    root.querySelectorAll<HTMLElement>('[data-badge]').forEach((b) => {
+      const n = per[b.dataset.badge!] ?? 0;
+      b.toggleAttribute('data-earned', n >= BADGE_AT);
+      b.querySelector('[data-badge-count]')!.textContent = n >= BADGE_AT ? '✓' : `${n}/${BADGE_AT}`;
+      b.title = T.badge.replace('§', b.title).replace('9001', String(Math.min(n, BADGE_AT)));
+    });
+
+    const sub = (id: string, text: string) => (root.querySelector(`[data-tile="${id}"] [data-sub]`)!.textContent = text);
+    sub('album', T.album.replace('9001', read.length));
+    const st = stats();
+    sub('number', st.played ? T.number[1].replace('9001', st.won).replace('9002', st.played) : T.number[0]);
+    let hole = 0;
+    try { hole = Number(localStorage.getItem('wtfact:hole-best')) || 0; } catch { /* ohne Speicher */ }
+    sub('hole', hole ? T.hole[1].replace('9001', hole) : T.hole[0]);
+    const best = loadStore().best;
+    if (best) root.querySelector('[data-tile="gold"] [data-sub]')!.textContent += ` · 🏆 ${best}`;
+  }
+</script>
+
+<style>
+  .mhero > .wrap { position: relative; z-index: 1; }
+  .mhero { position: relative; padding: var(--space-10) 0 calc(var(--space-12) + var(--bleed)); overflow: clip; }
+  .pill { display: inline-block; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); background: var(--fest-a); color: var(--on-accent); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lg); transform: rotate(-3deg); }
+  .flame { display: flex; align-items: center; gap: var(--space-7); margin-top: var(--space-6); flex-wrap: wrap; }
+  .big { font-size: var(--fs-huge); text-shadow: var(--shift-mega) var(--shift-mega) 0 var(--orange); line-height: 0.9; }
+  .head { margin: 0; font-size: var(--fs-display-md); }
+  .sub { margin: var(--space-2) 0 0; font-weight: 600; max-width: 40ch; }
+  .best { color: var(--fest-a); font-weight: 800; }
+  .best:empty { display: none; }
+  .week { list-style: none; margin: var(--space-8) 0 0; padding: 0; display: flex; gap: var(--space-3); flex-wrap: wrap; }
+  .week li { display: grid; justify-items: center; gap: var(--space-1); font-size: var(--fs-sm); font-weight: 700; }
+  .week i {
+    display: grid; place-items: center; width: var(--space-11); height: var(--space-11); font-style: normal; font-size: var(--fs-lg);
+    border-radius: 50%; background: var(--night-3); border: var(--bw-sm) solid var(--night-3);
+  }
+  .week i[data-active] { background: var(--orange); border-color: var(--on-night); }
+  .week i[data-today] { background: var(--yellow); border-color: var(--on-night); }
+  .mlist { padding: 0 0 var(--space-12); }
+  .rank { position: relative; z-index: 2; margin-top: calc(-1 * var(--bleed)); max-width: 40rem; padding: var(--space-6); border: var(--bw-strong) solid var(--on-accent); box-shadow: var(--shadow-2xl); }
+  .r-top { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); flex-wrap: wrap; }
+  .r-name { font-family: var(--font-display); font-weight: 800; font-size: var(--fs-2xl); }
+  .r-of { color: var(--muted); font-weight: 700; }
+  .xp { height: var(--space-4); margin-top: var(--space-3); border: var(--bw-sm) solid var(--line); border-radius: var(--radius-pill); overflow: hidden; }
+  .xp i { display: block; height: 100%; width: calc(var(--fill, 0) * 100%); background: var(--yellow); }
+  .r-next { margin: var(--space-3) 0 0; font-weight: 700; }
+  .mh { margin: var(--space-11) 0 var(--space-2); font-size: var(--fs-display-sm); }
+  .hint { margin: 0 0 var(--space-5); color: var(--on-night-muted); }
+  .badges { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr)); gap: var(--space-4); }
+  .badge { display: grid; justify-items: center; gap: var(--space-1); text-align: center; font-size: var(--fs-sm); font-weight: 700; opacity: 0.55; }
+  .badge[data-earned] { opacity: 1; }
+  .b-coin { display: grid; place-items: center; width: var(--space-12); height: var(--space-12); border-radius: 50%; border: var(--bw-sm) dashed var(--on-night); filter: grayscale(1); }
+  .b-coin img { width: 60%; height: 60%; }
+  .badge[data-earned] .b-coin { border: var(--bw-strong) solid var(--on-accent); filter: none; box-shadow: var(--shadow-night-sm); }
+  .b-count { color: var(--on-night-muted); }
+  .tiles { list-style: none; margin: 0 0 var(--space-6); padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); gap: var(--space-5); }
+  .tiles li { display: flex; }
+  .tile {
+    display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--space-4); align-items: center; width: 100%; padding: var(--space-4);
+    background: var(--surface); color: var(--ink); text-decoration: none; border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-md);
+    box-shadow: var(--shadow-night-lime); transition: transform var(--dur) var(--ease);
+  }
+  .tile:hover { transform: translate(calc(-1 * var(--space-1)), calc(-1 * var(--space-1))); }
+  .t-emoji { display: grid; place-items: center; width: var(--space-11); height: var(--space-11); font-size: var(--fs-emoji-sm); border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-sm); }
+  .t-text { display: flex; flex-direction: column; min-width: 0; }
+  .t-name { font-family: var(--font-display); font-weight: 800; font-size: var(--fs-lg); }
+  .t-sub { color: var(--muted); font-size: var(--fs-sm); font-weight: 600; }
+</style>

@@ -7,6 +7,7 @@
 import type { Lang, Category } from '../config';
 import { amazonUrl } from '../lib';
 import { t } from '../i18n/ui';
+import { x, giftsPath } from '../i18n/extras';
 import { SITE } from '../config';
 import Icon from './Icon.astro';
 import { productArt } from '../product-art';
@@ -46,6 +47,7 @@ const host = SITE.amazon[lang].host.replace(/^www\./, '');
         </li>
       ); })}
     </ul>
+    <p class="more"><a href={giftsPath(lang)}>🎁 {x(lang).gifts.moreLink}</a></p>
     <p class="fineprint">{ui.affiliateShort}</p>
   </aside>
 )}
@@ -62,6 +64,9 @@ const host = SITE.amazon[lang].host.replace(/^www\./, '');
   }
   h2 { display: flex; align-items: center; gap: var(--space-2); margin: 0; font-size: var(--fs-2xl); }
   .intro { margin: var(--space-1) 0 var(--space-5); font-size: var(--fs-md); color: var(--muted); }
+  /* Geschenkfinder unter jeder Werbebox (Wunsch von Eric, 2026-10-21) */
+  .more { margin: var(--space-5) 0 0; font-family: var(--font-display); font-weight: 800; }
+  .more a { text-decoration-thickness: var(--bw-sm); }
 
   .grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: var(--space-5); }
   .grid[data-count='1'] { grid-template-columns: minmax(0, 1fr); }

@@ -22,7 +22,7 @@ const pick = pickFactOfDay(cands.map(factInfo), {}, today)?.key ?? cands[0]?.dat
 const pf = festOf(cands.find((p) => p.data.translationKey === pick)?.data.category ?? '', '');
 ---
 {cands.length > 0 && (
-  <section class="sec sec--night fotd" data-fest={pf?.theme} data-edge data-fotd data-facts={JSON.stringify(cands.map(factInfo))} aria-label={ui.home.fotd}>
+  <section class="sec sec--night fotd" id="fotd" data-fest={pf?.theme} data-edge data-fotd data-facts={JSON.stringify(cands.map(factInfo))} aria-label={ui.home.fotd}>
     {cands.map((p) => {
       const d = p.data;
       const big = bigNumber(p);

@@ -1,0 +1,97 @@
+---
+// Seite „Spiele“ (Wunsch von Eric, 2026-10-21): /de/spiele/ und /en/games/, ersetzt im Menü den Punkt „Quiz“.
+// Sammelt Tageszahl, Wahr oder Fake, Was war zuerst und den Science Jumper. Die Quiz-Seite und der Science Jumper
+// behalten ihre Adressen. Stand (Tageszahl heute gespielt, Highscore) liest der Browser aus seinem Speicher.
+import Base from '../../layouts/Base.astro';
+import FestDeco from '../FestDeco.astro';
+import Icon from '../Icon.astro';
+import type { Lang } from '../../config';
+import { t, quizPath, chartsPath } from '../../i18n/ui';
+import { x, gamesPath, numberPath } from '../../i18n/extras';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const ui = t(lang);
+const e = x(lang);
+const gm = e.games;
+const other: Lang = lang === 'de' ? 'en' : 'de';
+const tiles = [
+  { id: 'number', href: numberPath(lang), emoji: '🎯', cls: 'cat-nature', name: e.number.name, text: gm.numberText },
+  { id: 'wof', href: `${quizPath(lang)}#wof`, emoji: '✅', cls: 'cat-body', name: e.game.tabs.wof, text: gm.wofText },
+  { id: 'first', href: `${quizPath(lang)}#first`, emoji: '⏳', cls: 'cat-tech', name: e.game.tabs.first, text: gm.firstText },
+  { id: 'jumper', href: `/${lang}/science-jumper/`, emoji: '🧪', cls: 'cat-science', name: ui.game.name, text: gm.jumperText },
+];
+---
+<Base lang={lang} title={gm.title} description={gm.intro} altUrl={gamesPath(other)}>
+  <section class="sec fest-sky ghero" data-fest="quiz">
+    <FestDeco deco={['question', 'hourglass', 'bulb', 'sparkle', 'question', 'star']} size="lg" />
+    <div class="wrap">
+      <span class="pill">{gm.kicker}</span>
+      <h1 class="mega word">{gm.title}</h1>
+      <p class="intro">{gm.intro}</p>
+    </div>
+  </section>
+  <section class="sec sec--night glist" data-edge data-games data-open={gm.open} data-won={e.strip.numberWon(9001)} data-lost={e.strip.numberLost}>
+    <div class="wrap">
+      <ul class="tiles bleed">
+        {tiles.map((tl) => (
+          <li>
+            <a class="tile" href={tl.href} data-tile={tl.id}>
+              <span class:list={['t-emoji', tl.cls]} aria-hidden="true">{tl.emoji}</span>
+              <span class="t-text">
+                <span class="t-name">{tl.name}</span>
+                <span class="t-sub">{tl.text}</span>
+                <span class="t-state" data-state></span>
+              </span>
+              <Icon name="chevron-right" />
+            </a>
+          </li>
+        ))}
+      </ul>
+      <p class="note"><a href={chartsPath(lang)}>{gm.chartsNote}</a></p>
+    </div>
+  </section>
+</Base>
+
+<script>
+  import { stateFor } from '../../scripts/tageszahl';
+  import { loadStore } from '../../scripts/gold';
+  const root = document.querySelector<HTMLElement>('[data-games]');
+  if (root) {
+    const st = stateFor();
+    const num = root.querySelector<HTMLElement>('[data-tile="number"] [data-state]')!;
+    num.textContent = !st.done ? root.dataset.open! : st.won ? root.dataset.won!.replace('9001', String(st.guesses.length)) : root.dataset.lost!;
+    num.toggleAttribute('data-hot', !st.done);
+    const best = loadStore().best;
+    if (best) root.querySelector('[data-tile="jumper"] [data-state]')!.textContent = `🏆 ${best}`;
+  }
+</script>
+
+<style>
+  .ghero > .wrap { position: relative; z-index: 1; }
+  .ghero { position: relative; padding: var(--space-10) 0 calc(var(--space-12) + var(--bleed)); overflow: clip; }
+  .pill { display: inline-block; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); background: var(--fest-a); color: var(--on-accent); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lg); transform: rotate(-3deg); }
+  .word { margin: var(--space-5) calc(-1 * var(--space-4)) 0; font-size: var(--fs-huge); text-transform: uppercase; text-shadow: var(--shift-mega) var(--shift-mega) 0 var(--fest-a); transform: rotate(-2deg); }
+  .intro { max-width: 52ch; margin: var(--space-12) 0 0; font-size: var(--fs-xl); font-weight: 600; }
+  .glist { padding: 0 0 var(--space-12); }
+  .tiles { list-style: none; margin: calc(-1 * var(--bleed)) 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-5); position: relative; z-index: 2; }
+  .tiles li { display: flex; }
+  .tile {
+    display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--space-4); align-items: center; width: 100%; padding: var(--space-5);
+    background: var(--surface); color: var(--ink); text-decoration: none; border: var(--bw-strong) solid var(--on-accent); border-radius: var(--radius-md);
+    box-shadow: var(--shadow-night-lime); transition: transform var(--dur) var(--ease);
+  }
+  .tiles li:nth-child(2n) .tile { box-shadow: var(--shadow-night-pink); }
+  .tile:hover { transform: translate(calc(-1 * var(--space-1)), calc(-1 * var(--space-1))); }
+  .t-emoji { display: grid; place-items: center; width: var(--space-12); height: var(--space-12); font-size: var(--fs-emoji-sm); border: var(--bw-sm) solid var(--on-accent); border-radius: var(--radius-sm); }
+  .t-text { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
+  .t-name { font-family: var(--font-display); font-weight: 800; font-size: var(--fs-xl); }
+  .t-sub { color: var(--muted); }
+  .t-state { font-size: var(--fs-sm); font-weight: 800; }
+  .t-state:empty { display: none; }
+  .t-state[data-hot] { align-self: flex-start; padding: 0 var(--space-2); border-radius: var(--radius-pill); background: var(--yellow); color: var(--on-accent); }
+  .note { margin: var(--space-8) 0 0; font-weight: 700; }
+  @media (max-width: 760px) {
+    .tiles { grid-template-columns: minmax(0, 1fr); }
+    .intro { margin-top: var(--space-8); font-size: var(--fs-lg); }
+  }
+</style>
