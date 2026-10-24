@@ -133,11 +133,13 @@ const total = shown.length + upcoming.length;
 </script>
 
 <style>
-  .today { padding-top: calc(var(--space-12) + var(--bleed)); }
+  /* Die Reihe läuft rechts bis an den Bildschirmrand weiter statt an der Inhaltskante abzuschneiden */
+  .today { padding-top: calc(var(--space-12) + var(--bleed)); overflow-x: clip; }
   .track {
+    --to-edge: calc((100vw - 100%) / 2);
     display: grid; grid-auto-flow: column; grid-auto-columns: min(78%, 60rem); gap: var(--space-7);
-    overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding: var(--space-11) var(--space-6) var(--space-8);
-    margin-inline: calc(-1 * var(--space-6)); scroll-padding-inline: var(--space-6);
+    overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding: var(--space-11) var(--to-edge) var(--space-8) var(--space-6);
+    margin-inline: calc(-1 * var(--space-6)) calc(-1 * var(--to-edge)); scroll-padding-inline: var(--space-6);
   }
   .track::-webkit-scrollbar { display: none; }
   .slide {

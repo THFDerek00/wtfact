@@ -22,7 +22,7 @@ const pick = pickFactOfDay(cands.map(factInfo), {}, today)?.key ?? cands[0]?.dat
 const pf = festOf(cands.find((p) => p.data.translationKey === pick)?.data.category ?? '', '');
 ---
 {cands.length > 0 && (
-  <section class="sec sec--night fotd" id="fotd" data-fest={pf?.theme} data-edge data-fotd data-facts={JSON.stringify(cands.map(factInfo))} aria-label={ui.home.fotd}>
+  <section class="sec sec--night fotd" id="fotd" data-fest={pf?.theme} data-stage data-edge data-fotd data-facts={JSON.stringify(cands.map(factInfo))} aria-label={ui.home.fotd}>
     {cands.map((p) => {
       const d = p.data;
       const big = bigNumber(p);
@@ -65,7 +65,7 @@ const pf = festOf(cands.find((p) => p.data.translationKey === pick)?.data.catego
 </script>
 
 <style>
-  .fotd { padding: 0 0 var(--space-12); background: var(--fest-sky); background-size: auto, var(--dots-size-md) var(--dots-size-md); }
+  .fotd { padding: 0 0 var(--space-12); }
   .fotd-deco { position: absolute; inset: 0 calc(-1 * var(--space-6)); }
   .slab[data-fest] { position: relative; border-color: var(--fest-a); box-shadow: var(--space-2) var(--space-2) 0 var(--fest-b); }
   .slab-emoji { position: relative; }
