@@ -562,8 +562,9 @@
   /* Inhaltsbreite: EINE Breite für alle Bereiche (Wunsch von Eric, 2026-10-02).
      .wrap nutzt sie; Fließtext bleibt mit --measure trotzdem gut lesbar.
      1600px statt 1280px (Wunsch von Eric, 2026-10-09): auf großen Bildschirmen blieb links und rechts zu viel leer.
-     Der Rand wächst mit dem Bildschirm, damit es auf Laptops nicht an den Kanten klebt. */
-  --content-width: 1600px;
+     Der Rand wächst mit dem Bildschirm, damit es auf Laptops nicht an den Kanten klebt.
+     Ab 1900px wächst die Breite mit (Wunsch von Eric, 2026-10-24): auf 2560px blieb sonst ein Drittel leer. */
+  --content-width: clamp(1600px, 84vw, 2200px);
   --gutter: clamp(16px, 4vw, 56px);
   --measure: 72ch;
 
@@ -616,6 +617,7 @@
      Akzentflächen bekommen immer einen Tinte-Rand plus harten Schatten, weil Gelb neben Lime (1,08:1) und
      Pink neben Violett (1,05:1) sonst nicht zu unterscheiden sind. Auf der Nacht sind die Schatten farbig. */
   --edge: clamp(28px, 4.5vw, 72px); /* Höhe der schrägen Kante zwischen zwei Abschnitten */
+  --stage-fade: clamp(96px, 12vw, 260px); /* Themen-Bühnen blenden oben und unten so weit in die Grundnacht über */
   --bleed: clamp(28px, 5vw, 88px); /* so weit ragen Zahlen und Karten in den Nachbarabschnitt */
   --fs-mega: clamp(96px, 21vw, 340px); /* Wochentag im Kopf, große Zahl beim Fakt des Tages */
   --fs-huge: clamp(72px, 13vw, 200px);
@@ -855,6 +857,8 @@ html[data-sky] .stage { background: var(--sky-stage); }
 .accent { background: var(--yellow); color: var(--on-accent); }
 .gold { background: var(--gold-surface); color: var(--on-accent); }
 
+:root { --night-base: var(--night); } /* Grundnacht der Seite, in die Themen-Bühnen überblenden */
+body[data-fest] { --night-base: var(--fest-night); }
 /* Farbwelten für Feiertags- und Grusel-Fakten (src/data/holidays.ts). data-fest steht auf <body> der Faktseite
    und auf einzelnen Karten. Die Bühne (--night) und die Akzentflächen (Gelb, Pink, Lime, Violett) nehmen die
    Farben des Themas an, Papier und Text bleiben, damit Lesbarkeit und Dunkelmodus gleich funktionieren.
@@ -875,7 +879,8 @@ html[data-sky] .stage { background: var(--sky-stage); }
   --shadow-fest-xl: var(--space-3) var(--space-3) 0 var(--fest-b);
   --shadow-fest-2xl: var(--space-4) var(--space-4) 0 var(--fest-a);
   --fest-rays: repeating-conic-gradient(from 0deg at 50% 50%, color-mix(in srgb, var(--fest-a) 22%, transparent) 0deg 9deg, transparent 9deg 18deg);
-  --fest-sky: radial-gradient(circle at 82% var(--fest-glow-y, 18%), color-mix(in srgb, var(--fest-a) 55%, transparent) 0%, color-mix(in srgb, var(--fest-b) 18%, transparent) calc(var(--fest-glow-size) / 2), transparent var(--fest-glow-size)), var(--dots-night), var(--fest-night);
+  --fest-glow: radial-gradient(circle at 82% var(--fest-glow-y, 18%), color-mix(in srgb, var(--fest-a) 55%, transparent) 0%, color-mix(in srgb, var(--fest-b) 18%, transparent) calc(var(--fest-glow-size) / 2), transparent var(--fest-glow-size));
+  --fest-sky: var(--fest-glow), var(--dots-night), var(--fest-night);
 }
 [data-fest='fest'] { --fest-night: var(--fest-fest-night); --fest-a: var(--fest-fest-a); --fest-b: var(--fest-fest-b); }
 [data-fest='grusel'] { --fest-night: var(--fest-grusel-night); --fest-a: var(--fest-grusel-a); --fest-b: var(--fest-grusel-b); }
@@ -974,8 +979,19 @@ a.glow:hover { transform: translate(calc(-1 * var(--space-1)), calc(-1 * var(--s
   clip-path: polygon(0 100%, 100% 0, 100% 100%);
 }
 .sec[data-edge='left']::before { clip-path: polygon(0 0, 100% 100%, 0 100%); }
-/* Dunkle Themen-Bühne: Kante nur in Nachtfarbe, sonst schneidet das Leuchten oben eine harte Linie */
-.fest-sky[data-edge]::before { background: var(--dots-night), var(--fest-night); background-size: var(--dots-size-md) var(--dots-size-md); }
+/* Themen-Bühne als Abschnitt (.fest-sky oder data-stage mit eigenem --stage-glow): Leuchten und Themenfarbe blenden
+   oben und unten in die Grundnacht (--night-base) über, unten schon vor der Kante des nächsten Abschnitts, und die
+   Kante darüber ist Grundnacht. Flache Abschnitte (Fakt des Tages) blenden höchstens je 30 % ihrer Höhe über. So gehen dunkle Abschnitte
+   nahtlos ineinander über, egal wie breit der Bildschirm ist und wie weit das Leuchten reicht (Eric, 2026-10-24). */
+.sec:is(.fest-sky, [data-stage]) {
+  background:
+    var(--dots-night),
+    linear-gradient(var(--night-base), transparent min(var(--stage-fade), 30%), transparent calc(100% - var(--edge) - min(var(--stage-fade), 30%)), var(--night-base) calc(100% - var(--edge))),
+    var(--stage-glow, var(--fest-glow)),
+    var(--fest-night);
+  background-size: var(--dots-size-md) var(--dots-size-md), auto, auto, auto;
+}
+.sec:is(.fest-sky, [data-stage])[data-edge]::before { background: var(--dots-night), var(--night-base); background-size: var(--dots-size-md) var(--dots-size-md); }
 .sec--night { background: var(--dots-night), var(--night); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-night); --focus: var(--yellow); --line: var(--on-night); }
 .sec--paper { background: var(--dots-paper), var(--bg); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--ink); }
 .sec--yellow { background: var(--dots), var(--yellow); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-accent); --line: var(--on-accent); --focus: var(--on-accent); }

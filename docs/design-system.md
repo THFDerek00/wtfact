@@ -23,7 +23,7 @@ Stil: Neo-Brutalismus. Dicke Ränder, harte Schatten ohne Weichzeichner, knallig
 | Hintergrund | `--sky-dot`, `--sky-spot`, `--sky-gap`, `--sky-spot-size`, `--sky-shape-opacity`, `--sky-glow-edge`, `--sky-stage`, `--dur-sky-drift` | Helle Werte in `:root`, dunkle in den Dark-Mode-Blöcken, siehe „Hintergrund“ unten |
 | Schrift | `--font-headline` (WTF Plakat), `--font-display` und `--font-body` (WTF Text Locker), `--font-logo` (Space Grotesk), `--headline-fill`, `--headline-palette`, `--headline-palette-card`, `--fs-xs` (13) bis `--fs-3xl` (30), `--fs-display-sm/md/lg`, `--fs-emoji-sm…xl` | Siehe „Hausschriften“ unten |
 | Abstände | `--space-1` (4px) bis `--space-12` (80px) | 4er-Raster |
-| Breite | `--content-width` (1280px), `--gutter`, `--measure` (72ch) | Eine Breite für alle Bereiche, siehe „Breite“ unten |
+| Breite | `--content-width` (1600px, ab 1900px Bildschirm mitwachsend bis 2200px), `--gutter`, `--measure` (72ch) | Eine Breite für alle Bereiche, siehe „Breite“ unten |
 | Icons | `--icon-size`, `--icon-size-lg`, `--icon-stroke` | Lucide-Icons über `Icon.astro`, siehe „Icons und Emojis“ unten |
 | Wisch-Karte | `--swipe-title-lines`, `--swipe-hook-lines` | Feste Zeilenzahl auf der Wisch-Karte |
 | Ränder | `--bw-xs` 1, `--bw-sm` 2, `--bw` 2.5, `--bw-accent` 6 | |
@@ -239,6 +239,10 @@ Layoutmaße wie `max-width` in Media Queries, `min-height` oder Spaltenbreiten i
 ## Breite
 
 Eine Breite für alle Bereiche (Eric, 2026-10-02): `.wrap` ist überall `--content-width` breit, auch auf Beitragsseiten, Textseiten und der 404. Die alte schmale `.narrow`-Spalte gibt es nicht mehr. Beitragsseiten nutzen die Breite zweispaltig (Fakt links, „Noch ein Fakt“ und Verwandtes rechts, unter 960px untereinander). Reine Textseiten (`Page.astro`) begrenzen ihre Zeilen auf `--measure`, bleiben aber links bündig mit allem anderen.
+
+Auf großen Bildschirmen wächst die Breite mit (Eric, 2026-10-24): `--content-width` ist mindestens 1600px und bis 2200px 84 % der Fensterbreite. Die Reihe „Heute neu“ läuft rechts bis an den Bildschirmrand.
+
+Dunkle Themen-Bühnen als Abschnitt (`.sec.fest-sky` oder `.sec[data-stage]` mit eigenem `--stage-glow`) blenden oben und unten über `--stage-fade` in die Grundnacht `--night-base` über, ihre schräge Kante ist Grundnacht. So gibt es zwischen dunklen Abschnitten keine harten Linien, auch wenn das Leuchten auf breiten Bildschirmen größer wird. Neue dunkle Abschnitte mit Leuchten bekommen deshalb `data-stage` statt eines eigenen `background`.
 
 ## Icons und Emojis
 
