@@ -985,6 +985,8 @@ html.flow { background: var(--night); }
 html.flow body { background: transparent; }
 html.flow main .sec, html.flow .foot.sec { background: transparent; }
 html.flow .sec[data-edge]::before { content: none; }
+/* Sprungleiste (Spiele, Ich): halb durchsichtig mit Unschärfe statt einer harten schwarzen Leiste mitten im Fluss */
+html.flow .jump { background: color-mix(in srgb, var(--night) 60%, transparent); border-bottom-color: transparent; backdrop-filter: blur(var(--space-3)); }
 .sec--night { background: var(--dots-night), var(--night); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-night); --focus: var(--yellow); --line: var(--on-night); }
 .sec--paper { background: var(--dots-paper), var(--bg); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--ink); }
 .sec--yellow { background: var(--dots), var(--yellow); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-accent); --line: var(--on-accent); --focus: var(--on-accent); }
