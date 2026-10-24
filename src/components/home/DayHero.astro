@@ -150,7 +150,7 @@ const countText = left > 1 ? xa.count.many.replace('{n}', String(left)) : left =
 <style>
   .day-hero[hidden] { display: none; }
   /* Feiertags-Kopf */
-  .fest-hero { position: relative; padding: var(--space-8) 0 calc(var(--space-12) + var(--bleed)); overflow: clip; }
+  .fest-hero { position: relative; padding: var(--space-8) 0 calc(var(--space-12) + var(--bleed)); overflow-x: clip; }
   .fest-hero .top-row, .fest-hero :global(.fest-word), .fest-row { position: relative; z-index: 1; }
   .fest-chip :global(.chip-art) { font-size: var(--fs-md); filter: none; }
   .fest-hero .pill { background: var(--fest-a); color: var(--on-accent); }
@@ -171,7 +171,7 @@ const countText = left > 1 ? xa.count.many.replace('{n}', String(left)) : left =
     .fest-row { grid-template-columns: minmax(0, 1fr); }
     .fest-art { max-width: 18rem; }
   }
-  .day-hero { position: relative; padding: var(--space-8) 0 calc(var(--space-12) + var(--bleed)); overflow: clip; border-bottom: none; }
+  .day-hero { position: relative; padding: var(--space-8) 0 calc(var(--space-12) + var(--bleed)); overflow-x: clip; border-bottom: none; }
   .day-hero .top-row, .day-hero .day-word, .day-hero .row { position: relative; z-index: 1; }
   .slot { position: relative; z-index: 1; margin-top: var(--space-7); }
   .top-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }

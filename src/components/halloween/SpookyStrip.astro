@@ -63,7 +63,7 @@ const candies = slots.map((k, i) => ({ k, x: 30 + ((i * 37) % 120), y: 236 - Mat
 </script>
 
 <style>
-  .h-strip { padding-block: var(--space-10) calc(var(--space-12) + var(--bleed)); overflow: clip; }
+  .h-strip { padding-block: var(--space-10) calc(var(--space-12) + var(--bleed)); overflow-x: clip; }
   .h-strip > .wrap { position: relative; z-index: 2; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-10); align-items: center; }
   h2 { margin: var(--space-3) 0 var(--space-2); font-size: var(--fs-display-md); color: var(--on-night); }
   p { margin: 0 0 var(--space-4); color: var(--on-night-muted); max-width: 52ch; }
@@ -79,7 +79,10 @@ const candies = slots.map((k, i) => ({ k, x: 30 + ((i * 37) % 120), y: 236 - Mat
   .slots [data-state='open'] { border-style: solid; border-color: var(--on-night); color: var(--on-night); }
   .slots [data-state='found'] { background: var(--fest-a); border: var(--bw-sm) solid var(--on-accent); box-shadow: var(--shadow-night-sm); }
   .slots [data-state='found'] .n { display: none; }
-  .slots [data-state='found'] .ic, .slots [data-state='found'] [data-label-found] { display: block; }
+  .slots [data-state='found'] [data-label-found] { display: block; }
+  /* Bonbon mittig im Feld: als Raster statt Inline, sonst sitzt es auf der Textzeile oben links */
+  .slots [data-state='found'] .ic { display: grid; place-items: center; inset: 0; position: absolute; font-size: var(--fs-xl); line-height: 0; }
+  .slots .ic :global(.fi) { display: block; }
   .slots .slot-gold { border-color: var(--hw-gold); color: var(--hw-gold); }
   .slots .slot-gold[data-state='found'] { background: var(--hw-gold); }
   .hint {
