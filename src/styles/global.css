@@ -618,10 +618,9 @@
      Akzentflächen bekommen immer einen Tinte-Rand plus harten Schatten, weil Gelb neben Lime (1,08:1) und
      Pink neben Violett (1,05:1) sonst nicht zu unterscheiden sind. Auf der Nacht sind die Schatten farbig. */
   --edge: clamp(28px, 4.5vw, 72px); /* Höhe der schrägen Kante zwischen zwei Abschnitten */
-  --stage-fade: clamp(48px, 6vw, 140px); /* Papier-Abschnitte blenden im Dunkelmodus oben und unten so weit in die Grundnacht über */
-  --stage-glow-w: clamp(700px, 70vw, 1800px); /* Leuchtfleck einer Themen-Bühne, ragt in die Nachbarabschnitte */
-  --stage-glow-h: clamp(560px, 48vw, 1200px);
-  --stage-glow-mix: 30%; /* Stärke des Leuchtflecks: zurückhaltend, damit nicht überall Farbe ist */
+  --stage-fade: clamp(48px, 6vw, 140px); /* Themen-Bühnen blenden oben und unten so weit in die Grundnacht über */
+  --stage-glow-w: clamp(520px, 62vw, 1600px); /* Leuchtfleck einer Themen-Bühne, ragt in die Nachbarabschnitte */
+  --stage-glow-h: clamp(420px, 38vw, 980px);
   --bleed: clamp(28px, 5vw, 88px); /* so weit ragen Zahlen und Karten in den Nachbarabschnitt */
   --fs-mega: clamp(96px, 21vw, 340px); /* Wochentag im Kopf, große Zahl beim Fakt des Tages */
   --fs-huge: clamp(72px, 13vw, 200px);
@@ -985,23 +984,36 @@ a.glow:hover { transform: translate(calc(-1 * var(--space-1)), calc(-1 * var(--s
   clip-path: polygon(0 100%, 100% 0, 100% 100%);
 }
 .sec[data-edge='left']::after { clip-path: polygon(0 0, 100% 100%, 0 100%); }
-/* Themen-Bühne als Abschnitt (.fest-sky oder data-stage). Wunsch von Eric, 2026-10-24: Übergänge einheitlich und nicht
-   erkennbar, wenig Farbe und Farben nicht ineinander gemischt. Jede Bühne steht deshalb auf derselben Grundnacht
-   (--night-base) wie ihre Nachbarn, es gibt keine Farbfläche, die an einer Kante enden könnte. Die Themenfarbe ist nur ein
-   einzelner, zurückhaltender Leuchtfleck in einer Farbe (::before), der weich ausläuft und über die Abschnittsgrenzen in
-   die Nachbarn ragt. Die schräge Kante (::after) ist ebenfalls Grundnacht und damit unsichtbar. */
+/* Themen-Bühne als Abschnitt (.fest-sky oder data-stage). Wunsch von Eric, 2026-10-24: Übergänge wild und natürlich
+   statt Bänder. Die Themenfarbe blendet oben und unten in die Grundnacht (--night-base) über, unten schon vor der
+   Kante des nächsten Abschnitts. Das Leuchten ist ein eigener, in sich weich auslaufender Fleck (::before), der über
+   die Abschnittsgrenzen in die Nachbarn hineinragt und dort unter deren Inhalt liegt. Flache Abschnitte (Fakt des
+   Tages) blenden höchstens je 20 % ihrer Höhe über. Die Farbfläche selbst (Themenfarbe plus großes Leuchten im
+   Abschnitt) bleibt so breit wie vor den Übergängen (Eric, 2026-10-24). Liegen zwei gleich gestaltete Bühnen übereinander (Wochentag-Kopf
+   und Kürbis-Leiste, Spiel des Tages und sein Spiel), setzen sie --fade-bottom/--fade-top auf transparent und
+   verzichten auf die Kante: dann ist es eine durchgehende Fläche. */
 .sec:is(.fest-sky, [data-stage]) {
-  background: var(--dots-night), var(--night-base);
-  background-size: var(--dots-size-md) var(--dots-size-md), auto;
+  background:
+    var(--dots-night),
+    linear-gradient(var(--fade-top, var(--night-base)), transparent min(var(--stage-fade), 20%), transparent calc(100% - var(--edge) - min(var(--stage-fade), 20%)), var(--fade-bottom, var(--night-base)) calc(100% - var(--edge))),
+    var(--stage-glow, var(--fest-glow)),
+    var(--fest-night);
+  background-size: var(--dots-size-md) var(--dots-size-md), auto, auto, auto, auto;
 }
 .sec:is(.fest-sky, [data-stage])::before {
   content: ''; position: absolute; z-index: 1; pointer-events: none;
   left: var(--fest-glow-x, 82%); top: var(--fest-glow-y, 18%); width: var(--stage-glow-w); height: var(--stage-glow-h); translate: -50% -50%;
-  background: radial-gradient(closest-side, color-mix(in srgb, var(--fest-a) var(--stage-glow-mix), transparent), color-mix(in srgb, var(--fest-a) calc(var(--stage-glow-mix) / 3), transparent) 55%, transparent);
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--fest-a) 50%, transparent), color-mix(in srgb, var(--fest-b) 20%, transparent) 55%, transparent);
 }
 /* Unterster Abschnitt (Fuß): Leuchten nur nach oben, sonst wird die Seite unter dem Fuß länger */
 .foot.sec::before { top: auto; bottom: 0; translate: -50% 0; }
 .sec:is(.fest-sky, [data-stage])[data-edge]::after { background: var(--dots-night), var(--night-base); background-size: var(--dots-size-md) var(--dots-size-md); }
+/* Gleiche Bühne über- und untereinander: Kopf der Saison (Halloween, Weihnachten) mit seiner Leiste, Spiel des Tages mit seinem Spiel */
+:is([data-season='halloween'], [data-season='xmas']) :is(.day-hero, .fest-hero) { --fade-bottom: transparent; }
+:is(.h-strip, .x-strip) { --fade-top: transparent; }
+/* Spiel des Tages: Kopf ohne Leuchten, das Spiel darunter blendet weich aus der Nacht ein (keine Kante dazwischen) */
+.sec:is(.h-strip, .x-strip)[data-edge]::after, .gotd .sec[data-edge]:not(.g-head)::after { content: none; }
+.gotd .sec[data-fest] { --fest-night: var(--fest-wof-night); }
 .sec--night { background: var(--dots-night), var(--night); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-night); --focus: var(--yellow); --line: var(--on-night); }
 .sec--paper { background: var(--dots-paper), var(--bg); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--ink); }
 /* Dunkelmodus: Papier ist dort fast so dunkel wie die Nacht, eine schräge Kante wirkt nur wie ein Schnitt (Eric, 2026-10-24).

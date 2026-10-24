@@ -75,7 +75,7 @@ const today = picks[days[0]];
 
 <style>
   /* Kopf ohne eigenes Leuchten: das Spiel darunter verteilt Pink und Lime gleichmäßig auf die ganze Fläche */
-  .g-head { position: relative; padding: var(--space-10) 0 var(--space-10); }
+  .g-head { position: relative; padding: var(--space-10) 0 var(--space-10); --stage-glow: linear-gradient(transparent, transparent); }
   .sec.g-head::before { content: none; }
   .g-head > .wrap { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-5); }
   .g-kicker { display: inline-block; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); background: var(--fest-a); color: var(--on-accent); font-family: var(--font-display); font-weight: 800; font-size: var(--fs-lg); transform: rotate(-3deg); }
