@@ -43,4 +43,8 @@ const items = Array.from({ length: spots }, (_, i) => deco[i % deco.length]);
   .deco--lg .d1 { left: 40%; top: 8%; }
   .deco--lg .d3 { right: 4%; top: 50%; }
   .deco--lg .d4 { left: 3%; bottom: 14%; }
+  /* In Abschnitten darf die Deko über die Kanten in die Nachbarn ragen (Eric, 2026-10-24: wilder, natürlicher Übergang) */
+  :global(.sec) > .deco { overflow: visible; z-index: 1; }
+  :global(.sec) > .deco .d0 { top: calc(-1 * var(--space-8)); }
+  :global(.sec) > .deco .d4 { bottom: calc(-1 * var(--space-10)); }
 </style>

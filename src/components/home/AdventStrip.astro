@@ -86,7 +86,7 @@ const texts = { title: s.title, before: s.before, after: s.after, open: s.open, 
 </script>
 
 <style>
-  .x-strip { padding-block: var(--space-10) calc(var(--space-12) + var(--bleed)); overflow: clip; }
+  .x-strip { padding-block: var(--space-10) calc(var(--space-12) + var(--bleed)); overflow-x: clip; }
   .x-strip > .wrap { position: relative; z-index: 2; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-8); align-items: center; }
   h2 { margin: var(--space-3) 0 var(--space-2); font-size: var(--fs-display-md); color: var(--on-night); }
   p { margin: 0 0 var(--space-4); color: var(--on-night-muted); max-width: 52ch; }
