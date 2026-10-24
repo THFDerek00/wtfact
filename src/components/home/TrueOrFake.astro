@@ -189,7 +189,10 @@ const texts = {
   .wof > .focus-tag { right: auto; left: var(--gutter); transform: rotate(-3deg); }
   .wof {
     padding-block: var(--space-12);
-    /* Zwei Leuchtflecken, die über die Kanten laufen: Lime rechts unten (::before der Bühne), Pink links oben (.wof-glow) */
+    --stage-glow:
+      radial-gradient(circle at 12% 28%, color-mix(in srgb, var(--fest-b) 55%, transparent) 0%, transparent var(--fest-glow-size)),
+      radial-gradient(circle at 88% 78%, color-mix(in srgb, var(--fest-a) 45%, transparent) 0%, transparent var(--fest-glow-size));
+    /* Dazu zwei Leuchtflecken, die über die Kanten laufen: Lime rechts unten (::before der Bühne), Pink links oben (.wof-glow) */
     --fest-glow-x: 88%; --fest-glow-y: 78%;
     color: var(--on-night); --line: var(--on-night); --focus: var(--fest-a);
     --headline-palette: dark;
