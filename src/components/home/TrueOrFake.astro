@@ -25,9 +25,8 @@ const texts = {
 };
 ---
 {items.length > 0 && (
-  <section class="sec wof" id="wof" data-fest="wof" data-stage data-edge data-wof data-items={JSON.stringify(items)} data-texts={JSON.stringify(texts)} data-focus-day="3,6">
+  <section class="sec wof" id="wof" data-fest="wof" data-edge data-wof data-items={JSON.stringify(items)} data-texts={JSON.stringify(texts)} data-focus-day="3,6">
     <span class="focus-tag">{ui.home.dayFocus}</span>
-    <span class="wof-glow" aria-hidden="true"></span>
     <FestDeco deco={['question', 'sparkle', 'bolt', 'star']} size="lg" />
     <div class="wrap">
       <div class="in">
@@ -188,20 +187,16 @@ const texts = {
   /* „Heute im Fokus“ links, rechts ragt die Quizkarte nach oben */
   .wof > .focus-tag { right: auto; left: var(--gutter); transform: rotate(-3deg); }
   .wof {
+    /* Pink und Lime gleich stark (Eric, 2026-10-24) */
     padding-block: var(--space-12);
-    --stage-glow:
-      radial-gradient(circle at 12% 28%, color-mix(in srgb, var(--fest-b) 55%, transparent) 0%, transparent var(--fest-glow-size)),
-      radial-gradient(circle at 88% 78%, color-mix(in srgb, var(--fest-a) 45%, transparent) 0%, transparent var(--fest-glow-size));
-    /* Dazu zwei Leuchtflecken, die über die Kanten laufen: Lime rechts unten (::before der Bühne), Pink links oben (.wof-glow) */
-    --fest-glow-x: 88%; --fest-glow-y: 78%;
-    color: var(--on-night); --line: var(--on-night); --focus: var(--fest-a);
+    background:
+      radial-gradient(circle at 12% 28%, color-mix(in srgb, var(--fest-b) 50%, transparent) 0%, transparent var(--fest-glow-size)),
+      radial-gradient(circle at 88% 78%, color-mix(in srgb, var(--fest-a) 50%, transparent) 0%, transparent var(--fest-glow-size)),
+      var(--dots-night), var(--fest-night);
+    background-size: auto, auto, var(--dots-size-md) var(--dots-size-md), auto; color: var(--on-night); --line: var(--on-night); --focus: var(--fest-a);
     --headline-palette: dark;
   }
   .wof > .wrap { position: relative; z-index: 1; }
-  .wof-glow {
-    position: absolute; z-index: 1; left: 12%; top: 28%; width: var(--stage-glow-w); height: var(--stage-glow-h); translate: -50% -50%; pointer-events: none;
-    background: radial-gradient(closest-side, color-mix(in srgb, var(--fest-b) 55%, transparent), transparent);
-  }
   .wof h2 { color: var(--on-night); }
   .w-true { color: var(--fest-a); }
   .w-fake { color: var(--fest-b); }

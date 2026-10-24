@@ -1,0 +1,78 @@
+---
+// Farbfluss (Wunsch von Eric, 2026-10-24): Im Dunkelmodus ist die Startseite ein einziger Hintergrund ohne Kanten.
+// Jeder Abschnitt gibt seine Farbe ab, zwischen den Mitten zweier Abschnitte läuft sie direkt in die nächste über
+// (nie erst über Schwarz), und die Leuchtflecken der Themen-Abschnitte liegen frei darüber und dürfen über die Grenzen
+// fließen. Die Abschnitte selbst werden dafür durchsichtig (html.flow, global.css). Ohne Skript oder im hellen Modus
+// bleibt der normale Look mit Flächen und schrägen Kanten.
+---
+<div class="flow-bg" data-flow-bg aria-hidden="true"></div>
+
+<script>
+  const bg = document.querySelector<HTMLElement>('[data-flow-bg]');
+  const root = document.documentElement;
+  const media = matchMedia('(prefers-color-scheme: dark)');
+  const isDark = () => root.dataset.theme === 'dark' || (root.dataset.theme !== 'light' && media.matches);
+
+  // Leuchten wie im normalen Look: Mittelpunkt in Prozent des Abschnitts, Radius = Anteil des Wegs zur fernsten Ecke.
+  // Im Fluss sind sie etwas größer (GROW), damit sie über die Grenzen laufen.
+  const REACH = 0.46, GROW = 1.2;
+  type Glow = { x: number; y: number; inner: string; mid: string };
+  const glowsOf = (s: HTMLElement, cs: CSSStyleDeclaration): Glow[] => {
+    const a = cs.getPropertyValue('--fest-a').trim(), b = cs.getPropertyValue('--fest-b').trim();
+    const mix = (c: string, p: number) => `color-mix(in srgb, ${c} ${p}%, transparent)`;
+    // Wahr oder Fake: Pink links oben, Lime rechts unten, gleich stark (TrueOrFake.astro)
+    if (s.matches('.wof')) return [
+      { x: 0.12, y: 0.28, inner: mix(b, 50), mid: 'transparent' },
+      { x: 0.88, y: 0.78, inner: mix(a, 50), mid: 'transparent' },
+    ];
+    if (s.matches('[data-fest]') && cs.backgroundImage.includes('radial-gradient')) {
+      const gy = parseFloat(cs.getPropertyValue('--fest-glow-y')) || 18;
+      return [{ x: 0.82, y: gy / 100, inner: mix(a, 55), mid: mix(b, 18) }];
+    }
+    return [];
+  };
+
+  let frame = 0;
+  const draw = () => {
+    frame = 0;
+    if (!bg) return;
+    root.classList.remove('flow');
+    if (!isDark()) { bg.removeAttribute('style'); return; }
+    const secs = [...document.querySelectorAll<HTMLElement>('main .sec, .foot.sec')].filter((s) => s.offsetHeight > 0);
+    if (!secs.length) return;
+    const W = root.clientWidth, H = root.scrollHeight;
+    const info = secs.map((s) => {
+      const cs = getComputedStyle(s), r = s.getBoundingClientRect();
+      return { top: r.top + scrollY, h: r.height, color: cs.backgroundColor, glows: glowsOf(s, cs) };
+    });
+    const layers: string[] = [], sizes: string[] = [], repeat: string[] = [];
+    const add = (img: string, size: string, rep = 'no-repeat') => { layers.push(img); sizes.push(size); repeat.push(rep); };
+    add('var(--dots-night)', 'var(--dots-size-md) var(--dots-size-md)', 'repeat');
+    for (const i of info) for (const g of i.glows) {
+      const x = g.x * W, y = g.y * i.h;
+      const far = Math.max(Math.hypot(x, y), Math.hypot(W - x, y), Math.hypot(x, i.h - y), Math.hypot(W - x, i.h - y));
+      const r = REACH * far * GROW;
+      add(`radial-gradient(circle ${r}px at ${x}px ${i.top + y}px, ${g.inner} 0, ${g.mid} ${r / 2}px, transparent ${r}px)`, `100% ${H}px`);
+    }
+    // Grundfarbe: in der Mitte jedes Abschnitts dessen Farbe, dazwischen ein gerader Verlauf
+    const stops = info.map((i, k) => `${i.color} ${k === 0 ? i.top : i.top + i.h / 2}px`);
+    stops.push(`${info[info.length - 1].color} ${H}px`);
+    add(`linear-gradient(${stops.join(', ')})`, `100% ${H}px`);
+    bg.style.height = `${H}px`;
+    bg.style.backgroundImage = layers.join(', ');
+    bg.style.backgroundSize = sizes.join(', ');
+    bg.style.backgroundRepeat = repeat.join(', ');
+    root.classList.add('flow');
+  };
+  const schedule = () => { if (!frame) frame = requestAnimationFrame(draw); };
+
+  schedule();
+  document.fonts?.ready.then(schedule);
+  addEventListener('load', schedule);
+  media.addEventListener('change', schedule);
+  new MutationObserver(schedule).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+  // Höhen ändern sich (Bilder, aufklappende Bereiche, „Weitere Fakten“): Hintergrund neu ausrichten
+  const ro = new ResizeObserver(schedule);
+  ro.observe(document.body);
+  document.querySelectorAll('main .sec, .foot.sec').forEach((s) => ro.observe(s));
+</script>

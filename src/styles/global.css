@@ -618,9 +618,6 @@
      Akzentflächen bekommen immer einen Tinte-Rand plus harten Schatten, weil Gelb neben Lime (1,08:1) und
      Pink neben Violett (1,05:1) sonst nicht zu unterscheiden sind. Auf der Nacht sind die Schatten farbig. */
   --edge: clamp(28px, 4.5vw, 72px); /* Höhe der schrägen Kante zwischen zwei Abschnitten */
-  --stage-fade: clamp(48px, 6vw, 140px); /* Themen-Bühnen blenden oben und unten so weit in die Grundnacht über */
-  --stage-glow-w: clamp(520px, 62vw, 1600px); /* Leuchtfleck einer Themen-Bühne, ragt in die Nachbarabschnitte */
-  --stage-glow-h: clamp(420px, 38vw, 980px);
   --bleed: clamp(28px, 5vw, 88px); /* so weit ragen Zahlen und Karten in den Nachbarabschnitt */
   --fs-mega: clamp(96px, 21vw, 340px); /* Wochentag im Kopf, große Zahl beim Fakt des Tages */
   --fs-huge: clamp(72px, 13vw, 200px);
@@ -860,8 +857,6 @@ html[data-sky] .stage { background: var(--sky-stage); }
 .accent { background: var(--yellow); color: var(--on-accent); }
 .gold { background: var(--gold-surface); color: var(--on-accent); }
 
-:root { --night-base: var(--night); } /* Grundnacht der Seite, in die Themen-Bühnen überblenden */
-body[data-fest] { --night-base: var(--fest-night); }
 /* Farbwelten für Feiertags- und Grusel-Fakten (src/data/holidays.ts). data-fest steht auf <body> der Faktseite
    und auf einzelnen Karten. Die Bühne (--night) und die Akzentflächen (Gelb, Pink, Lime, Violett) nehmen die
    Farben des Themas an, Papier und Text bleiben, damit Lesbarkeit und Dunkelmodus gleich funktionieren.
@@ -882,8 +877,7 @@ body[data-fest] { --night-base: var(--fest-night); }
   --shadow-fest-xl: var(--space-3) var(--space-3) 0 var(--fest-b);
   --shadow-fest-2xl: var(--space-4) var(--space-4) 0 var(--fest-a);
   --fest-rays: repeating-conic-gradient(from 0deg at 50% 50%, color-mix(in srgb, var(--fest-a) 22%, transparent) 0deg 9deg, transparent 9deg 18deg);
-  --fest-glow: radial-gradient(circle at 82% var(--fest-glow-y, 18%), color-mix(in srgb, var(--fest-a) 55%, transparent) 0%, color-mix(in srgb, var(--fest-b) 18%, transparent) calc(var(--fest-glow-size) / 2), transparent var(--fest-glow-size));
-  --fest-sky: var(--fest-glow), var(--dots-night), var(--fest-night);
+  --fest-sky: radial-gradient(circle at 82% var(--fest-glow-y, 18%), color-mix(in srgb, var(--fest-a) 55%, transparent) 0%, color-mix(in srgb, var(--fest-b) 18%, transparent) calc(var(--fest-glow-size) / 2), transparent var(--fest-glow-size)), var(--dots-night), var(--fest-night);
 }
 [data-fest='fest'] { --fest-night: var(--fest-fest-night); --fest-a: var(--fest-fest-a); --fest-b: var(--fest-fest-b); }
 [data-fest='grusel'] { --fest-night: var(--fest-grusel-night); --fest-a: var(--fest-grusel-a); --fest-b: var(--fest-grusel-b); }
@@ -973,57 +967,26 @@ a.glow:hover { transform: translate(calc(-1 * var(--space-1)), calc(-1 * var(--s
 @keyframes fest-float { 0%, 100% { translate: 0 0; } 50% { translate: 0 calc(-1 * var(--space-3)); } }
 
 /* Abschnitte im Design „E“ (docs/design-system.md, „Abschnitte und Überhänge“).
-   data-edge zeichnet oben eine schräge Kante in der Farbe des Abschnitts, die in den Abschnitt davor ragt (::after).
-   Bewusst ohne clip-path auf dem Abschnitt selbst, damit große Zahlen und Karten über die Kante ragen dürfen (.bleed).
-   Inhalt (.wrap) liegt auf Ebene 1, damit Leuchten und Deko aus dem Nachbarabschnitt darunter durchlaufen. */
+   data-edge zeichnet oben eine schräge Kante in der Farbe des Abschnitts, die in den Abschnitt davor ragt.
+   Bewusst ohne clip-path auf dem Abschnitt selbst, damit große Zahlen und Karten über die Kante ragen dürfen (.bleed). */
 .sec { position: relative; padding-block: var(--space-12); }
-.sec > .wrap { position: relative; z-index: 1; }
-.sec[data-edge]::after {
+.sec[data-edge]::before {
   content: ''; position: absolute; left: 0; right: 0; bottom: calc(100% - 1px); height: var(--edge);
   background: inherit; background-position: inherit; pointer-events: none;
   clip-path: polygon(0 100%, 100% 0, 100% 100%);
 }
-.sec[data-edge='left']::after { clip-path: polygon(0 0, 100% 100%, 0 100%); }
-/* Themen-Bühne als Abschnitt (.fest-sky oder data-stage). Wunsch von Eric, 2026-10-24: Übergänge wild und natürlich
-   statt Bänder. Die Themenfarbe blendet oben und unten in die Grundnacht (--night-base) über, unten schon vor der
-   Kante des nächsten Abschnitts. Das Leuchten ist ein eigener, in sich weich auslaufender Fleck (::before), der über
-   die Abschnittsgrenzen in die Nachbarn hineinragt und dort unter deren Inhalt liegt. Flache Abschnitte (Fakt des
-   Tages) blenden höchstens je 20 % ihrer Höhe über. Die Farbfläche selbst (Themenfarbe plus großes Leuchten im
-   Abschnitt) bleibt so breit wie vor den Übergängen (Eric, 2026-10-24). Liegen zwei gleich gestaltete Bühnen übereinander (Wochentag-Kopf
-   und Kürbis-Leiste, Spiel des Tages und sein Spiel), setzen sie --fade-bottom/--fade-top auf transparent und
-   verzichten auf die Kante: dann ist es eine durchgehende Fläche. */
-.sec:is(.fest-sky, [data-stage]) {
-  background:
-    var(--dots-night),
-    linear-gradient(var(--fade-top, var(--night-base)), transparent min(var(--stage-fade), 20%), transparent calc(100% - var(--edge) - min(var(--stage-fade), 20%)), var(--fade-bottom, var(--night-base)) calc(100% - var(--edge))),
-    var(--stage-glow, var(--fest-glow)),
-    var(--fest-night);
-  background-size: var(--dots-size-md) var(--dots-size-md), auto, auto, auto, auto;
-}
-.sec:is(.fest-sky, [data-stage])::before {
-  content: ''; position: absolute; z-index: 1; pointer-events: none;
-  left: var(--fest-glow-x, 82%); top: var(--fest-glow-y, 18%); width: var(--stage-glow-w); height: var(--stage-glow-h); translate: -50% -50%;
-  background: radial-gradient(closest-side, color-mix(in srgb, var(--fest-a) 50%, transparent), color-mix(in srgb, var(--fest-b) 20%, transparent) 55%, transparent);
-}
-/* Unterster Abschnitt (Fuß): Leuchten nur nach oben, sonst wird die Seite unter dem Fuß länger */
-.foot.sec::before { top: auto; bottom: 0; translate: -50% 0; }
-.sec:is(.fest-sky, [data-stage])[data-edge]::after { background: var(--dots-night), var(--night-base); background-size: var(--dots-size-md) var(--dots-size-md); }
-/* Gleiche Bühne über- und untereinander: Kopf der Saison (Halloween, Weihnachten) mit seiner Leiste, Spiel des Tages mit seinem Spiel */
-:is([data-season='halloween'], [data-season='xmas']) :is(.day-hero, .fest-hero), .g-head { --fade-bottom: transparent; }
-:is(.h-strip, .x-strip), .gotd .sec:not(.g-head) { --fade-top: transparent; }
-.sec:is(.h-strip, .x-strip)[data-edge]::after, .gotd .sec[data-edge]:not(.g-head)::after { content: none; }
-.gotd .sec[data-fest] { --fest-night: var(--fest-wof-night); }
+.sec[data-edge='left']::before { clip-path: polygon(0 0, 100% 100%, 0 100%); }
+/* Dunkle Themen-Bühne: Kante nur in Nachtfarbe, sonst schneidet das Leuchten oben eine harte Linie */
+.fest-sky[data-edge]::before { background: var(--dots-night), var(--fest-night); background-size: var(--dots-size-md) var(--dots-size-md); }
+/* Farbfluss der Startseite im Dunkelmodus (PageFlow.astro, Eric 2026-10-24): ein Hintergrund aus einem Stück.
+   Abschnitte sind durchsichtig und ohne schräge Kante, Farben und Leuchten liegen auf .flow-bg darunter. */
+.flow-bg { position: absolute; left: 0; top: 0; width: 100%; z-index: -1; pointer-events: none; }
+html.flow { background: var(--night); }
+html.flow body { background: transparent; }
+html.flow main .sec, html.flow .foot.sec { background: transparent; }
+html.flow .sec[data-edge]::before { content: none; }
 .sec--night { background: var(--dots-night), var(--night); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-night); --focus: var(--yellow); --line: var(--on-night); }
 .sec--paper { background: var(--dots-paper), var(--bg); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--ink); }
-/* Dunkelmodus: Papier ist dort fast so dunkel wie die Nacht, eine schräge Kante wirkt nur wie ein Schnitt (Eric, 2026-10-24).
-   Papier blendet oben und unten in die Grundnacht über, seine Kante ist Grundnacht, also unsichtbar. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .sec--paper { background: var(--dots-paper), var(--paper-fade), var(--bg); background-size: var(--dots-size-md) var(--dots-size-md), auto; }
-  :root:not([data-theme='light']) .sec--paper[data-edge]::after { background: var(--dots-night), var(--night-base); background-size: var(--dots-size-md) var(--dots-size-md); }
-}
-:root[data-theme='dark'] .sec--paper { background: var(--dots-paper), var(--paper-fade), var(--bg); background-size: var(--dots-size-md) var(--dots-size-md), auto; }
-:root[data-theme='dark'] .sec--paper[data-edge]::after { background: var(--dots-night), var(--night-base); background-size: var(--dots-size-md) var(--dots-size-md); }
-.sec--paper { --paper-fade: linear-gradient(var(--night-base), transparent min(var(--stage-fade), 20%), transparent calc(100% - var(--edge) - min(var(--stage-fade), 20%)), var(--night-base) calc(100% - var(--edge))); }
 .sec--yellow { background: var(--dots), var(--yellow); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-accent); --line: var(--on-accent); --focus: var(--on-accent); }
 .sec--pink { background: var(--dots-strong), var(--pink); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-accent); --line: var(--on-accent); --focus: var(--on-accent); }
 .sec--violet { background: var(--dots), var(--violet); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-accent); --line: var(--on-accent); --focus: var(--on-accent); }
