@@ -1016,6 +1016,15 @@ a.glow:hover { transform: translate(calc(-1 * var(--space-1)), calc(-1 * var(--s
 .gotd .sec[data-fest] { --fest-night: var(--fest-wof-night); }
 .sec--night { background: var(--dots-night), var(--night); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-night); --focus: var(--yellow); --line: var(--on-night); }
 .sec--paper { background: var(--dots-paper), var(--bg); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--ink); }
+/* Dunkelmodus: Papier ist dort fast so dunkel wie die Nacht, eine schräge Kante wirkt nur wie ein Schnitt (Eric, 2026-10-24).
+   Papier blendet oben und unten in die Grundnacht über, seine Kante ist Grundnacht, also unsichtbar. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .sec--paper { background: var(--dots-paper), var(--paper-fade), var(--bg); background-size: var(--dots-size-md) var(--dots-size-md), auto; }
+  :root:not([data-theme='light']) .sec--paper[data-edge]::after { background: var(--dots-night), var(--night-base); background-size: var(--dots-size-md) var(--dots-size-md); }
+}
+:root[data-theme='dark'] .sec--paper { background: var(--dots-paper), var(--paper-fade), var(--bg); background-size: var(--dots-size-md) var(--dots-size-md), auto; }
+:root[data-theme='dark'] .sec--paper[data-edge]::after { background: var(--dots-night), var(--night-base); background-size: var(--dots-size-md) var(--dots-size-md); }
+.sec--paper { --paper-fade: linear-gradient(var(--night-base), transparent min(var(--stage-fade), 30%), transparent calc(100% - var(--edge) - min(var(--stage-fade), 30%)), var(--night-base) calc(100% - var(--edge))); }
 .sec--yellow { background: var(--dots), var(--yellow); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-accent); --line: var(--on-accent); --focus: var(--on-accent); }
 .sec--pink { background: var(--dots-strong), var(--pink); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-accent); --line: var(--on-accent); --focus: var(--on-accent); }
 .sec--violet { background: var(--dots), var(--violet); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-accent); --line: var(--on-accent); --focus: var(--on-accent); }
