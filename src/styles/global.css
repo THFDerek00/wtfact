@@ -621,7 +621,7 @@
   --stage-fade: clamp(48px, 6vw, 140px); /* Papier-Abschnitte blenden im Dunkelmodus oben und unten so weit in die Grundnacht über */
   --stage-glow-w: clamp(700px, 70vw, 1800px); /* Leuchtfleck einer Themen-Bühne, ragt in die Nachbarabschnitte */
   --stage-glow-h: clamp(560px, 48vw, 1200px);
-  --stage-glow-mix: 80%; /* Stärke des Leuchtflecks (Eric, 2026-10-24: so kräftig wie das frühere Wahr oder Fake) */
+  --stage-glow-mix: 30%; /* Stärke des Leuchtflecks: zurückhaltend, damit nicht überall Farbe ist */
   --bleed: clamp(28px, 5vw, 88px); /* so weit ragen Zahlen und Karten in den Nachbarabschnitt */
   --fs-mega: clamp(96px, 21vw, 340px); /* Wochentag im Kopf, große Zahl beim Fakt des Tages */
   --fs-huge: clamp(72px, 13vw, 200px);
@@ -988,7 +988,7 @@ a.glow:hover { transform: translate(calc(-1 * var(--space-1)), calc(-1 * var(--s
 /* Themen-Bühne als Abschnitt (.fest-sky oder data-stage). Wunsch von Eric, 2026-10-24: Übergänge einheitlich und nicht
    erkennbar, wenig Farbe und Farben nicht ineinander gemischt. Jede Bühne steht deshalb auf derselben Grundnacht
    (--night-base) wie ihre Nachbarn, es gibt keine Farbfläche, die an einer Kante enden könnte. Die Themenfarbe ist nur ein
-   einzelner Leuchtfleck in einer Farbe (::before), der weich ausläuft und über die Abschnittsgrenzen in
+   einzelner, zurückhaltender Leuchtfleck in einer Farbe (::before), der weich ausläuft und über die Abschnittsgrenzen in
    die Nachbarn ragt. Die schräge Kante (::after) ist ebenfalls Grundnacht und damit unsichtbar. */
 .sec:is(.fest-sky, [data-stage]) {
   background: var(--dots-night), var(--night-base);
@@ -997,7 +997,7 @@ a.glow:hover { transform: translate(calc(-1 * var(--space-1)), calc(-1 * var(--s
 .sec:is(.fest-sky, [data-stage])::before {
   content: ''; position: absolute; z-index: 1; pointer-events: none;
   left: var(--fest-glow-x, 82%); top: var(--fest-glow-y, 18%); width: var(--stage-glow-w); height: var(--stage-glow-h); translate: -50% -50%;
-  background: radial-gradient(closest-side, color-mix(in srgb, var(--fest-a) var(--stage-glow-mix), transparent), color-mix(in srgb, var(--fest-a) calc(var(--stage-glow-mix) / 2), transparent) 55%, transparent);
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--fest-a) var(--stage-glow-mix), transparent), color-mix(in srgb, var(--fest-a) calc(var(--stage-glow-mix) / 3), transparent) 55%, transparent);
 }
 /* Unterster Abschnitt (Fuß): Leuchten nur nach oben, sonst wird die Seite unter dem Fuß länger */
 .foot.sec::before { top: auto; bottom: 0; translate: -50% 0; }
