@@ -3,6 +3,7 @@ import '../styles/global.css';
 import NightSky from '../components/NightSky.astro';
 import Icon from '../components/Icon.astro';
 import CookieConsent from '../components/CookieConsent.astro';
+import PageFlow from '../components/PageFlow.astro';
 import { SITE, type Lang } from '../config';
 import { t, catsPath, chartsPath, quizPath } from '../i18n/ui';
 import { x, gamesPath, mePath, numberPath, youPath, giftsPath, jumperPath } from '../i18n/extras';
@@ -152,6 +153,7 @@ const nav = [
       </div>
     </header>
     <main id="main"><slot /></main>
+    <PageFlow />
     <footer class="foot sec fest-sky" data-fest="fest" data-edge>
       <XmasDrift />
       <span class="no-xmas no-halloween"><FestDeco deco={['sparkle', 'star', 'question', 'bolt']} size="lg" /></span>
