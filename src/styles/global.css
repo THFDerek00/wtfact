@@ -978,6 +978,13 @@ a.glow:hover { transform: translate(calc(-1 * var(--space-1)), calc(-1 * var(--s
 .sec[data-edge='left']::before { clip-path: polygon(0 0, 100% 100%, 0 100%); }
 /* Dunkle Themen-Bühne: Kante nur in Nachtfarbe, sonst schneidet das Leuchten oben eine harte Linie */
 .fest-sky[data-edge]::before { background: var(--dots-night), var(--fest-night); background-size: var(--dots-size-md) var(--dots-size-md); }
+/* Farbfluss der Startseite im Dunkelmodus (PageFlow.astro, Eric 2026-10-24): ein Hintergrund aus einem Stück.
+   Abschnitte sind durchsichtig und ohne schräge Kante, Farben und Leuchten liegen auf .flow-bg darunter. */
+.flow-bg { position: absolute; left: 0; top: 0; width: 100%; z-index: -1; pointer-events: none; }
+html.flow { background: var(--night); }
+html.flow body { background: transparent; }
+html.flow main .sec, html.flow .foot.sec { background: transparent; }
+html.flow .sec[data-edge]::before { content: none; }
 .sec--night { background: var(--dots-night), var(--night); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-night); --focus: var(--yellow); --line: var(--on-night); }
 .sec--paper { background: var(--dots-paper), var(--bg); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--ink); }
 .sec--yellow { background: var(--dots), var(--yellow); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-accent); --line: var(--on-accent); --focus: var(--on-accent); }

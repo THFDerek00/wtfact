@@ -18,6 +18,7 @@ import CatsGrid from '../../components/home/CatsGrid.astro';
 import SpecialTeaser from '../../components/home/SpecialTeaser.astro';
 import Vote from '../../components/Vote.astro';
 import Icon from '../../components/Icon.astro';
+import PageFlow from '../../components/home/PageFlow.astro';
 import { LANGS, type Lang } from '../../config';
 import { t, catsPath, chartsPath } from '../../i18n/ui';
 import { postsFor } from '../../lib';
@@ -53,6 +54,7 @@ const chartsUrl = chartsPath(lang);
       <CatsGrid lang={lang} posts={posts} />
     </div>
   </section>
+  <PageFlow />
 </Base>
 
 <style>
