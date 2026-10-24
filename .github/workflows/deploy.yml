@@ -5,8 +5,8 @@ name: Hochladen zu IONOS
 # Dazu kommt das Dashboard (dist-steuerung/) in den Ordner der Subdomain steuerung.wtfact.xyz.
 #
 # Fällige Fakten (README „Dashboard“): Das Dashboard startet diesen Workflow selbst, sobald ein Termin erreicht
-# ist (über die geplante Aufgabe in Plesk, api.php?r=cron). Als Rückfallebene schaut GitHub zusätzlich jede Stunde
-# nach (Job „check“, scripts/due-check.mjs) und baut nur, wenn wirklich etwas fällig ist.
+# ist (über die geplante Aufgabe in Plesk, api.php?r=cron). Eine stündliche Prüfung auf GitHub gibt es nicht mehr:
+# Sie kostete jeden Monat rund 740 Actions-Minuten, und die Plesk-Aufgabe erledigt dasselbe alle 5 Minuten.
 #
 # Secrets (Settings > Secrets and variables > Actions > Secrets):
 #   DEPLOY_HOST      Server aus Plesk, z. B. die Domain oder die IP des Servers
@@ -26,8 +26,6 @@ name: Hochladen zu IONOS
 on:
   push:
     branches: [main]
-  schedule:
-    - cron: '3 * * * *'
   workflow_dispatch: {}
 
 permissions:
@@ -39,42 +37,13 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Nur beim stündlichen Lauf: Ist seit dem letzten Upload ein Fakt fällig geworden?
-  check:
-    if: github.event_name == 'schedule'
-    runs-on: ubuntu-latest
-    outputs:
-      due: ${{ steps.due.outputs.due }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-          sparse-checkout: |
-            db
-            scripts
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - id: due
-        env:
-          SITE: ${{ vars.SITE_URL || 'https://wtfact.xyz' }}
-        run: |
-          curl -fsS --max-time 20 "$SITE/facts.json" -o "$RUNNER_TEMP/live.json" || echo "facts.json nicht erreichbar."
-          curl -fsS --max-time 20 "$SITE/fest.json" -o "$RUNNER_TEMP/fest.json" || echo "fest.json nicht erreichbar."
-          node --disable-warning=ExperimentalWarning scripts/due-check.mjs "$RUNNER_TEMP/live.json" "$RUNNER_TEMP/fest.json"
-
   deploy:
-    needs: check
-    # Läuft nach jedem Commit und von Hand, stündlich nur wenn etwas fällig ist. Commits des Dashboards, die nur
-    # die Planung ändern (einplanen, zurück in den Pool), ändern nichts an der Seite und brauchen keinen Upload.
+    # Läuft nach jedem Commit und von Hand (auch vom Dashboard, wenn ein Fakt fällig ist). Commits des Dashboards,
+    # die nur die Planung ändern (einplanen, zurück in den Pool), ändern nichts an der Seite und brauchen keinen Upload.
     if: >-
-      always() && (
-        (github.event_name == 'schedule' && needs.check.outputs.due == 'true') ||
-        github.event_name == 'workflow_dispatch' ||
-        (github.event_name == 'push' &&
-          !startsWith(github.event.head_commit.message, 'Steuerung: Eingeplant') &&
-          !startsWith(github.event.head_commit.message, 'Steuerung: Zurück in den Pool'))
-      )
+      github.event_name == 'workflow_dispatch' || (
+        !startsWith(github.event.head_commit.message, 'Steuerung: Eingeplant') &&
+        !startsWith(github.event.head_commit.message, 'Steuerung: Zurück in den Pool'))
     runs-on: ubuntu-latest
     # Ein hängender Upload blockiert sonst bis zu 6 Stunden alle weiteren (concurrency: upload).
     timeout-minutes: 30
