@@ -29,13 +29,11 @@ So funktioniert es:
   `INSERT INTO facts` (Spalten `date`, `draft`, `slot`) und committet direkt auf `main` (Commit-Text „Steuerung: …“).
   `date` = NULL heißt „im Pool“, `slot` 1–3 = feste Zeit, 0 = Sonderveröffentlichung (`db/facts-schema.sql`).
 - Die Seite zeigt nur Fakten, deren `date` beim Bauen erreicht ist. Damit ein Fakt pünktlich erscheint, muss die Seite
-  zur Slotzeit neu gebaut werden. Das passiert auf zwei Wegen:
-  1. **Geplante Aufgabe in Plesk (empfohlen, pünktlich):** ruft alle 5 Minuten
-     `https://steuerung.wtfact.xyz/api.php?r=cron&token=<STEUERUNG_CRON_TOKEN>` auf. Ist ein Fakt fällig, startet das
-     Dashboard „Hochladen zu IONOS“. Der Fakt ist dann nach etwa 3 Minuten online.
-  2. **Rückfallebene:** `.github/workflows/deploy.yml` prüft zusätzlich jede Stunde (Minute 3) mit `scripts/due-check.mjs`,
-     ob etwas fällig ist, und baut nur dann.
-  Auch beim Öffnen des Dashboards wird ein fälliger Fakt angestoßen.
+  zur Slotzeit neu gebaut werden. Das macht die **geplante Aufgabe in Plesk**: Sie ruft alle 5 Minuten
+  `https://steuerung.wtfact.xyz/api.php?r=cron&token=<STEUERUNG_CRON_TOKEN>` auf. Ist ein Fakt fällig, startet das
+  Dashboard „Hochladen zu IONOS“. Der Fakt ist dann nach etwa 3 Minuten online. Auch beim Öffnen des Dashboards wird
+  ein fälliger Fakt angestoßen. Eine stündliche Prüfung auf GitHub gibt es seit dem 24.10.2026 nicht mehr (sie kostete
+  rund 740 Actions-Minuten im Monat), die Plesk-Aufgabe muss also eingerichtet sein.
 - Planungs-Commits („Eingeplant“, „Zurück in den Pool“) lösen keinen Build und keinen Upload aus, sie ändern nichts Sichtbares.
 - Code: `steuerung/` (PHP: `api.php`, `lib/`), Oberfläche `src/pages/steuerung/index.astro` + `src/scripts/steuerung.ts`.
   `npm run build` packt beides nach `dist-steuerung/` (`scripts/bundle-steuerung.mjs`), der Upload lädt es in den Ordner der Subdomain.
@@ -91,7 +89,7 @@ Zwei Kategorien vom 2026-10-15 (Wunsch von Eric):
   Sonderfakt, datiert auf 0 Uhr am Feiertag mit `slot` 0, zusätzlich zu den 21 Fakten im selben PR. Von Hand:
   `node scripts/generate-post.mjs --holiday` schreibt den Fakt für den nächsten Feiertag der kommenden 7 Tage ohne Fakt.
 - **Umstellung um 0 Uhr:** Die Seite schreibt bei jedem Bau `fest.json` (Bautag und alle Feiertage). Ist heute oder am Bautag
-  ein Feiertag und wurde nicht heute gebaut, lädt das Dashboard (geplante Aufgabe in Plesk) bzw. der stündliche Lauf neu hoch.
+  ein Feiertag und wurde nicht heute gebaut, lädt das Dashboard (geplante Aufgabe in Plesk) neu hoch.
   So wechselt die Seite kurz nach 0 Uhr ins Design des Festes und am Tag danach zurück, auch ohne fälligen Fakt.
 - **Grusel** (`horror`): normale Kategorie mit eigener Farbwelt (Schwarz, Giftgrün, Geisterlila). Regeln: `docs/styleguide.md`.
 
