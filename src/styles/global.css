@@ -1009,8 +1009,9 @@ a.glow:hover { transform: translate(calc(-1 * var(--space-1)), calc(-1 * var(--s
 .foot.sec::before { top: auto; bottom: 0; translate: -50% 0; }
 .sec:is(.fest-sky, [data-stage])[data-edge]::after { background: var(--dots-night), var(--night-base); background-size: var(--dots-size-md) var(--dots-size-md); }
 /* Gleiche Bühne über- und untereinander: Kopf der Saison (Halloween, Weihnachten) mit seiner Leiste, Spiel des Tages mit seinem Spiel */
-:is([data-season='halloween'], [data-season='xmas']) :is(.day-hero, .fest-hero), .g-head { --fade-bottom: transparent; }
-:is(.h-strip, .x-strip), .gotd .sec:not(.g-head) { --fade-top: transparent; }
+:is([data-season='halloween'], [data-season='xmas']) :is(.day-hero, .fest-hero) { --fade-bottom: transparent; }
+:is(.h-strip, .x-strip) { --fade-top: transparent; }
+/* Spiel des Tages: Kopf ohne Leuchten, das Spiel darunter blendet weich aus der Nacht ein (keine Kante dazwischen) */
 .sec:is(.h-strip, .x-strip)[data-edge]::after, .gotd .sec[data-edge]:not(.g-head)::after { content: none; }
 .gotd .sec[data-fest] { --fest-night: var(--fest-wof-night); }
 .sec--night { background: var(--dots-night), var(--night); background-size: var(--dots-size-md) var(--dots-size-md); color: var(--on-night); --focus: var(--yellow); --line: var(--on-night); }
