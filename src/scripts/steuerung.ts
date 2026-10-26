@@ -445,6 +445,38 @@ function columns(box: HTMLElement, items: { label: string; value: number; title:
   box.setAttribute('aria-label', items.map((i) => i.title).join('; '));
 }
 
+/** 3D-Teile der Übersicht (src/scripts/steuerung-3d.ts, erst bei Bedarf geladen): Fakten-Orbit in der Bühne, Säulen „Bewertungen pro Tag“.
+ *  Ohne WebGL oder wenn das Laden scheitert, bleibt die Bühne leer und das 2D-Diagramm stehen. */
+function scenes3d(st: State, today: string, nowMs: number, days: { label: string; title: string; day: string }[]) {
+  const when = (f: Fact) => `${dayLabel(dayOf(f)!)}, ${timeFmt.format(new Date(f.at!))} Uhr`;
+  const coming = st.facts
+    .filter((f) => f.status === 'planned' && f.at && Date.parse(f.at) > nowMs && dayOf(f)! < addDays(today, 7))
+    .sort((a, b) => a.at!.localeCompare(b.at!));
+  const moons = coming.map((f, i) => ({
+    ring: f.slot && f.slot > 0 ? f.slot - 1 : 3,
+    day: Math.round((noon(dayOf(f)!).getTime() - noon(today).getTime()) / 86_400_000),
+    category: f.category,
+    label: `${when(f)}: ${f.title}`,
+    next: i === 0,
+  }));
+  const pool = st.facts.filter((f) => f.status === 'pool').map((f) => ({ category: f.category, label: `Pool: ${f.title}` }));
+  const legend = `Bahnen von innen: ${st.slots.join(' · ')} Uhr · Sonder. Würfel = Pool, Sterne = live`;
+  const blocks = days.map((d) => ({ ...d, ...(st.stats?.days[d.day] ?? { like: 0, meh: 0 }) }));
+  import('./steuerung-3d')
+    .then((m) => {
+      const orbitBox = $('[data-orbit]');
+      orbitBox.hidden = !m.orbit(orbitBox, { moons, pool, live: st.facts.filter(isLive).length, legend }, () => showTab('plan'));
+      const box3d = $('[data-day-3d]');
+      const on = blocks.length > 0 && m.dayBlocks(box3d, blocks);
+      box3d.hidden = !on;
+      box3d.closest('.panel')!.classList.toggle('is-3d', on);
+      if (on) box3d.setAttribute('aria-label', $('[data-day-chart]').getAttribute('aria-label') ?? '');
+    })
+    .catch(() => {
+      /* 3D nicht ladbar: 2D bleibt */
+    });
+}
+
 let nextAt: number | null = null;
 function tick() {
   const c = $('[data-next-clock]');
@@ -551,13 +583,14 @@ function renderHome() {
   const dayItems = Array.from({ length: 14 }, (_, i) => addDays(today, i - 13)).map((d) => {
     const r = stats?.days[d] ?? { like: 0, meh: 0 };
     const total = r.like + r.meh;
-    return { label: d === today ? 'heute' : d.slice(8, 10) + '.', value: total, title: `${dayLabel(d)}: ${total} Bewertungen (👍 ${r.like} · 👎 ${r.meh})` };
+    return { day: d, label: d === today ? 'heute' : d.slice(8, 10) + '.', value: total, title: `${dayLabel(d)}: ${total} Bewertungen (👍 ${r.like} · 👎 ${r.meh})` };
   });
   const anyDay = dayItems.some((i) => i.value);
   dayBox.hidden = !anyDay;
   if (anyDay) columns(dayBox, dayItems);
   else dayBox.nextElementSibling?.classList.contains('axis') && dayBox.nextElementSibling.remove();
   $('[data-day-empty]').hidden = anyDay;
+  scenes3d(st, today, nowMs, anyDay ? dayItems : []);
 
   // Die nächsten 7 Tage
   $('[data-coming]').replaceChildren(

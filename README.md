@@ -21,6 +21,7 @@ Freischalten zur geplanten Uhrzeit, Offline-Nehmen und Löschen.
   Ziehen in einen belegten Slot tauscht die beiden Fakten. Vergangene Slots sind gesperrt.
 - **Reiter „Alle Fakten“:** Liste mit Zustand (Pool, Geplant, Live, Offline), Termin und Daumen hoch/runter,
   Suche, Filter, Sortierung nach Beliebtheit. Aktionen: sofort veröffentlichen, offline nehmen, wieder online, löschen.
+- **Übersicht in 3D** (Wunsch von Eric, 2026-10-26): Die Bühne zeigt die kommende Woche als „Fakten-Orbit“ (Mond = eingeplanter Fakt, Würfel = Pool, Sterne = live; Zeigen zeigt den Titel, Antippen öffnet die Wochenplanung), „Bewertungen pro Tag“ steht als 3D-Säulen da. Three.js wird erst nach dem Laden der Daten nachgeladen (`src/scripts/steuerung-3d.ts`); ohne WebGL bleibt das 2D-Diagramm.
 - **Neue Fakten:** Der Wochenlauf legt einen PR `woche/…` an. Das Dashboard zeigt ihn oben an, „In den Pool übernehmen“ mergt ihn (eingeplante Fakten bleiben eingeplant).
 
 So funktioniert es:
