@@ -20,9 +20,6 @@ export const DB_FILE = 'db/wtfact.sqlite';
 export const SCHEMA_FILE = 'db/facts-schema.sql';
 export const FACTS_DIR = 'db/facts';
 export const GOLD_DIR = 'db/gold';
-// Alte Beiträge als Markdown (vor der Umstellung). Werden beim Aufbau mit eingelesen, damit ein
-// liegengebliebener Beitrags-PR nicht verloren geht, und von db:dump in SQL umgewandelt.
-export const LEGACY_DIR = 'src/content/posts';
 export const LANGS = ['de', 'en'];
 
 const at = (root, p) => path.join(root, p);
@@ -160,64 +157,14 @@ export function dump(db, root = process.cwd()) {
       if (!fs.existsSync(file) || fs.readFileSync(file, 'utf8') !== sql) fs.writeFileSync(file, sql);
     }
   }
-  // Umgewandelte Markdown-Beiträge werden nicht mehr gebraucht.
-  const removed = legacyFiles(root).filter((l) => facts.some((f) => f.key === l.key));
-  for (const l of removed) fs.rmSync(at(root, l.rel));
   markSaved(db);
-  return { facts: facts.length, gold: gold.length, removedMarkdown: removed.length };
-}
-
-// ---------- Alte Markdown-Beiträge ----------
-
-const yamlValue = (raw) => {
-  const v = raw.trim();
-  return v.startsWith('"') ? JSON.parse(v) : v;
-};
-
-// Liest das Frontmatter in dem festen Format, das generate-post.mjs früher geschrieben hat.
-export function parseMarkdownPost(src) {
-  const m = src.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
-  if (!m) throw new Error('kein Frontmatter gefunden');
-  const data = { products: [], sources: [] };
-  let list = null;
-  for (const line of m[1].split('\n')) {
-    let f;
-    if ((f = line.match(/^(\w+):\s*$/))) list = data[f[1]] = [];
-    else if ((f = line.match(/^(\w+):\s*(.+)$/))) [list, data[f[1]]] = [null, yamlValue(f[2])];
-    else if ((f = line.match(/^\s+-\s+(\w+):\s*(.+)$/))) list.push({ [f[1]]: yamlValue(f[2]) });
-    else if ((f = line.match(/^\s+(\w+):\s*(.+)$/))) list.at(-1)[f[1]] = yamlValue(f[2]);
-  }
-  return { ...data, body: m[2].trim() };
-}
-
-function legacyFiles(root) {
-  const out = [];
-  for (const lang of LANGS) {
-    const dir = path.join(LEGACY_DIR, lang);
-    if (!fs.existsSync(at(root, dir))) continue;
-    for (const f of fs.readdirSync(at(root, dir)).filter((f) => f.endsWith('.md'))) {
-      const rel = path.join(dir, f);
-      const post = parseMarkdownPost(fs.readFileSync(at(root, rel), 'utf8'));
-      out.push({ rel, lang, key: post.translationKey, slug: f.replace(/\.md$/, ''), post });
-    }
-  }
-  return out;
-}
-
-function legacyFacts(root) {
-  const facts = new Map();
-  for (const { lang, key, slug, post } of legacyFiles(root)) {
-    const f = facts.get(key) ?? { key, date: String(post.date), category: post.category, emoji: post.emoji, draft: post.draft === 'true' };
-    f[lang] = { slug, title: post.title, teaser: post.teaser, hook: post.hook, body: post.body, products: post.products, sources: post.sources };
-    facts.set(key, f);
-  }
-  return [...facts.values()];
+  return { facts: facts.length, gold: gold.length };
 }
 
 // ---------- Aufbau ----------
 
 /**
- * Baut db/wtfact.sqlite neu aus Schema, db/facts/, db/gold/ und eventuell alten Markdown-Beiträgen.
+ * Baut db/wtfact.sqlite neu aus Schema, db/facts/, db/gold/.
  * Bricht ab, wenn die vorhandene Datenbank Änderungen hat, die noch nicht per db:dump gesichert sind.
  */
 export function build({ root = process.cwd(), force = false, quiet = false } = {}) {
@@ -253,14 +200,6 @@ export function build({ root = process.cwd(), force = false, quiet = false } = {
         errors.push(`${path.join(dir, f)}: ${e.message}`);
       }
     }
-  const legacy = legacyFacts(root);
-  for (const f of legacy) {
-    try {
-      db.exec(factSql(f));
-    } catch (e) {
-      errors.push(`${LEGACY_DIR} (${f.key}): ${e.message}`);
-    }
-  }
   if (errors.length) {
     db.exec('ROLLBACK');
     db.close();
@@ -274,7 +213,6 @@ export function build({ root = process.cwd(), force = false, quiet = false } = {
   if (!quiet) {
     const n = (t) => new DatabaseSync(file, { readOnly: true }).prepare(`SELECT count(*) AS n FROM ${t}`).get().n;
     console.log(`Datenbank gebaut: ${DB_FILE} mit ${n('facts')} Fakten und ${n('gold_facts')} Gold-Fakten.`);
-    if (legacy.length) console.warn(`Hinweis: ${legacy.length} Fakt(en) noch als Markdown in ${LEGACY_DIR}. „npm run db:dump“ wandelt sie in SQL um.`);
   }
   return file;
 }
@@ -298,7 +236,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
       const db = open({ readOnly: false });
       const r = dump(db);
       db.close();
-      console.log(`Gesichert: ${r.facts} Fakten in ${FACTS_DIR}/, ${r.gold} Gold-Fakten in ${GOLD_DIR}/.${r.removedMarkdown ? ` ${r.removedMarkdown} Markdown-Datei(en) umgewandelt und entfernt.` : ''}`);
+      console.log(`Gesichert: ${r.facts} Fakten in ${FACTS_DIR}/, ${r.gold} Gold-Fakten in ${GOLD_DIR}/.`);
     } else if (cmd === 'stats') {
       const db = open();
       console.table(db.prepare('SELECT category, count(*) AS fakten, max(date) AS neuester FROM facts GROUP BY category ORDER BY category').all());

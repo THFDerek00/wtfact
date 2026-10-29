@@ -1,8 +1,7 @@
 ---
-// Hinweis auf die Sonderseite zum neuen Tesla Roadster (Wunsch von Eric, 2026-10-17), nur auf der deutschen Startseite.
-// Dunkle Bühne im Thema „nature“ (2026-10-20) zwischen „Heute neu“ und Labor.
-// Im November und Dezember (Wunsch von Eric, 2026-10-21) steht hier stattdessen der Geschenkfinder, in beiden Sprachen.
-// Welcher Hinweis gilt, entscheidet der Browser nach dem deutschen Monat, damit es auch ohne neuen Build umschaltet.
+// Hinweis auf den Geschenkfinder im November und Dezember (Wunsch von Eric, 2026-10-21), in beiden Sprachen,
+// zwischen „Heute neu“ und Labor. Ob er sichtbar ist, entscheidet der Browser nach dem deutschen Monat,
+// damit es auch ohne neuen Build umschaltet.
 import Icon from '../Icon.astro';
 import FestDeco from '../FestDeco.astro';
 import type { Lang } from '../../config';
@@ -26,28 +25,10 @@ const giftNow = giftMonths.includes(berlinDay().slice(5, 7));
     <a class="btn btn--go" href={giftsPath(lang)}>{g.teaserCta} <Icon name="chevron-right" /></a>
   </div>
 </section>
-{lang === 'de' && (
-  <section class="sec fest-sky special" data-fest="nature" data-edge data-season="default" hidden={giftNow}>
-    <FestDeco deco={['bolt', 'sprout', 'sparkle', 'question']} size="lg" />
-    <div class="wrap row">
-      <span class="emoji" aria-hidden="true">🐌</span>
-      <div class="text">
-        <span class="chip chip--new">Sonderseite</span>
-        <h2>Kann ein Auto kopfüber fahren?</h2>
-        <p>Was der neue Tesla Roadster wirklich gezeigt hat, was nur behauptet ist, und warum eine Schnecke das schon immer kann.</p>
-      </div>
-      <a class="btn btn--go" href="/de/kopfueber/">Zum Faktencheck <Icon name="chevron-right" /></a>
-    </div>
-  </section>
-)}
 <script>
   import { berlinDay } from '../../week';
   const gifts = document.querySelector<HTMLElement>('[data-season="gifts"]');
-  if (gifts) {
-    const on = gifts.dataset.months!.split(',').includes(berlinDay().slice(5, 7));
-    gifts.hidden = !on;
-    document.querySelectorAll<HTMLElement>('[data-season="default"]').forEach((s) => (s.hidden = on));
-  }
+  if (gifts) gifts.hidden = !gifts.dataset.months!.split(',').includes(berlinDay().slice(5, 7));
 </script>
 <style>
   .special[hidden] { display: none; }

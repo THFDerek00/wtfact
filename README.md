@@ -153,8 +153,6 @@ Befehle:
 - `date` leer (NULL) = Fakt im Pool, erscheint erst, wenn er im Dashboard einen Termin bekommt.
 
 Braucht Node 22.13 oder neuer (eingebautes `node:sqlite`, kein Zusatzpaket).
-Alte Markdown-Beiträge in `src/content/posts/` (etwa aus einem PR von vor der Umstellung) werden beim Bauen noch mitgelesen;
-`npm run db:dump` wandelt sie in SQL-Dateien um.
 
 ## Stilregeln
 
