@@ -27,7 +27,7 @@ Neu erzeugen:
 ```sh
 npm i --no-save opentype.js @resvg/resvg-js @fontsource/space-grotesk @fontsource/inter
 node brand/build-brand.mjs
-node brand/build-social-kit.mjs   # Social-Kit; Titel, Hooks und Quellen kommen aus src/content/posts
+node brand/build-social-kit.mjs   # Social-Kit; Titel, Hooks und Quellen kommen aus der Fakten-Datenbank (scripts/facts-db.mjs)
 node brand/build-social-reichweite.mjs   # Reichweiten-Paket (15 Tage + Partner-Paket), Domain steht in DOMAIN
 npm i --no-save @iconify-json/fluent-emoji-flat   # Emojis für das Instagram-Paket (Fluent Emoji Flat, MIT)
 node brand/build-social-insta.mjs   # Instagram-Paket Oktober 2026: 50 Posts, 10 Stories, 25 Extras, PLAN.md
